@@ -1,0 +1,41 @@
+[
+    {
+      "name": "Blue Jazz",
+      "source": "Jazz Seeds",
+      "stages": [1, 2, 2, 2],
+      "totalHarvestTime": 7,
+      "oneTime": true,
+      "regrowthTime": null,
+      "baseSellPrice": 50,
+      "isEdible": true,
+      "energy": 45,
+      "season": "Spring",
+      "canBeGiant": false
+    },
+    {
+      "name": "Carrot",
+      "source": "Carrot Seeds",
+      "stages": [1, 1, 1],
+      "totalHarvestTime": 3,
+      "oneTime": true,
+      "regrowthTime": null,
+      "baseSellPrice": 35,
+      "isEdible": true,
+      "energy": 75,
+      "season": "Spring",
+      "canBeGiant": false
+    },
+    {
+      "name": "Cauliflower",
+      "source": "Cauliflower Seeds",
+      "stages": [1, 2, 4, 4, 1],
+      "totalHarvestTime": 12,
+      "oneTime": true,
+      "regrowthTime": null,
+      "baseSellPrice": 175,
+      "isEdible": true,
+      "energy": 75,
+      "season": "Spring",
+      "canBeGiant": true
+    }
+  ]
