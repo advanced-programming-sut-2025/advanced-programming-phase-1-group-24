@@ -1,8 +1,8 @@
 package org.example.Model.NPCManagement;
 
-import Model.MapManagement.Tile;
-import Model.Result;
-import Model.Things.Item;
+import org.example.Model.MapManagement.Tile;
+import org.example.Model.Result;
+import org.example.Model.Things.Item;
 
 import java.util.ArrayList;
 import java.util.Map;

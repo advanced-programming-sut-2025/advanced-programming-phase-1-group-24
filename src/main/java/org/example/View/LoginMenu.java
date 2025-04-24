@@ -1,6 +1,6 @@
 package org.example.View;
 
-import Controller.LoginMenuController;
+import org.example.Controller.LoginMenuController;
 
 import java.util.Scanner;
 

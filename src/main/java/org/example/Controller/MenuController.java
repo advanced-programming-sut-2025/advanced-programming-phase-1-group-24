@@ -1,6 +1,6 @@
 package org.example.Controller;
 
-import Model.Result;
+import org.example.Model.Result;
 
 public interface MenuController {
     Result enterMenu(String menuName);

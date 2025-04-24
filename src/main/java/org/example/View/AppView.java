@@ -1,8 +1,7 @@
 package org.example.View;
 
-import Model.App;
-import Model.Menus.Menu;
-
+import org.example.Model.App;
+import org.example.Model.Menus.Menu;
 import java.util.Scanner;
 
 public class AppView {

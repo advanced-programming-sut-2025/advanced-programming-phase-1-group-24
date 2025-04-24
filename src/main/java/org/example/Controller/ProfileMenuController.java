@@ -1,7 +1,7 @@
 package org.example.Controller;
 
-import Model.Menus.ProfileMenuCommands;
-import Model.Result;
+import org.example.Model.Menus.ProfileMenuCommands;
+import org.example.Model.Result;
 
 public class ProfileMenuController {
 

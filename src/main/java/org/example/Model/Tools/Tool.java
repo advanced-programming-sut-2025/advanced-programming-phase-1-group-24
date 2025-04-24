@@ -1,7 +1,7 @@
 package org.example.Model.Tools;
 
-import Model.Things.Item;
-import Model.Things.Material;
+import org.example.Model.Things.Item;
+import org.example.Model.Things.Material;
 
 public class Tool extends Item {
     ToolType type;

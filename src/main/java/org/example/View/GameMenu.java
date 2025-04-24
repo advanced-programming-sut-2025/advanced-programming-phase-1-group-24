@@ -1,6 +1,6 @@
 package org.example.View;
 
-import Controller.GameMenuController;
+import org.example.Controller.GameMenuController;
 
 import java.util.Scanner;
 

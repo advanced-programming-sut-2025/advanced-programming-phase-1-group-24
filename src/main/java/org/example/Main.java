@@ -1,6 +1,4 @@
 package org.example;
-
-
 import org.example.View.AppView;
 
 public class Main {

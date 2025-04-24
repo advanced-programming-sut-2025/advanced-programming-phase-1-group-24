@@ -8,6 +8,9 @@ public class Tile {
     private boolean isWalkable;
     private Item containedItem;
     private Growable containedGrowable;
+    private Growable productOfGrowable;  //when ever it is time for the giah to create a product we will check if this field is full we will not create another product
+    //also we wil check if the season is correct for giving product
+
 
     public TileType getType() {
         return type;
@@ -20,6 +23,9 @@ public class Tile {
     }
     public boolean getisWalkable(){
         return isWalkable;
+    }
+    public Growable getProductOfGrowable() {
+        return productOfGrowable;
     }
 
     public void setWalkable(boolean isWalkable) {
@@ -34,6 +40,12 @@ public class Tile {
     public void setContainedGrowable(Growable containedGrowable) {
         this.containedGrowable = containedGrowable;
     }
+    public void setProductOfGrowable(Growable productOfGrowable) {
+        this.productOfGrowable = productOfGrowable;
+    }
+
+
+    
     public void changeTile(){}
 
 }

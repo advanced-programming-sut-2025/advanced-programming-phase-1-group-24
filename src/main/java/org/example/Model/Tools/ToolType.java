@@ -1,6 +1,6 @@
 package org.example.Model.Tools;
 
-import Model.Skill;
+import org.example.Model.Skill;
 
 public enum ToolType {
     HOE(),

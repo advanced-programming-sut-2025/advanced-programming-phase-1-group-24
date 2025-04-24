@@ -16,4 +16,5 @@ public enum TileType {
     WALL,
     NPCLAND,
     TREE;
+    //Letter for printing the map
 }

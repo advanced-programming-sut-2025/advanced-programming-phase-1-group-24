@@ -10,6 +10,7 @@ public enum Season {
 
     ArrayList<WeatherType> weatherTypes;
     //ArrayList source (mixed seeds)
+    //َArrayList fish (or we keep season in fish)
     //product class
     Season(ArrayList<WeatherType> weatherTypes) {}
 

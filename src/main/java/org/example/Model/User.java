@@ -1,12 +1,12 @@
 package org.example.Model;
 
-import Model.MapManagement.Tile;
-import Model.Reccepies.Craft;
-import Model.Reccepies.Food;
-import Model.Things.Backpack;
-import Model.Things.Item;
-import Model.Tools.Tool;
-import Model.Tools.ToolType;
+import org.example.Model.MapManagement.Tile;
+import org.example.Model.Reccepies.Craft;
+import org.example.Model.Reccepies.Food;
+import org.example.Model.Things.Backpack;
+import org.example.Model.Things.Item;
+import org.example.Model.Tools.Tool;
+import org.example.Model.Tools.ToolType;
 
 import java.util.ArrayList;
 import java.util.Map;
