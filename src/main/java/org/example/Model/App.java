@@ -58,6 +58,14 @@ public class App {
         return instance;
     }
 
+    public User getUserByUsername(String username) {
+        for (User user : getUsers()) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
 
 
 

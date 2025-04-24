@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>C:/Users/Lenovo/Desktop/StardewValley/src</OriginalElement>
+  <nodes>
+    <node x="3386.0" y="2123.0">View.LoginMenu</node>
+    <node x="1270.0" y="-244.5">Model.Things.Item</node>
+    <node x="1330.0" y="251.0">Model.Places.ShopType</node>
+    <node x="1752.5" y="-441.0">Model.Things.ToolType</node>
+    <node x="125.5" y="2875.5">Model.Game</node>
+    <node x="1997.5" y="250.5">Model.Animals.Animal</node>
+    <node x="-93.0" y="566.0">Model.TimeManagement.Season</node>
+    <node x="2906.0" y="2123.0">View.ProfileMenu</node>
+    <node x="2669.5" y="251.0">Model.Menus.ProfileMenuCommands</node>
+    <node x="2516.0" y="-66.0">Model.Things.TrashCanType</node>
+    <node x="2669.5" y="555.0">Controller.ProfileMenuController</node>
+    <node x="1534.5" y="3523.0">View.AppView</node>
+    <node x="1267.0" y="1095.5">Model.Places.Shop</node>
+    <node x="3871.5" y="251.0">Model.Menus.GameMenuCommands</node>
+    <node x="1087.5" y="1095.5">Model.Places.Farm</node>
+    <node x="3146.0" y="1603.0">View.ExitMenu</node>
+    <node x="-113.5" y="154.0">Model.TimeManagement.WeatherType</node>
+    <node x="1749.5" y="1070.5">Model.Things.Backpack</node>
+    <node x="881.5" y="1095.5">Model.Places.Greenhouse</node>
+    <node x="1040.5" y="1726.0">Model.User</node>
+    <node x="3626.0" y="-387.0">Model.Menus.Commands</node>
+    <node x="3850.0" y="759.0">Controller.GameMenuController</node>
+    <node x="3832.5" y="1591.0">Model.Growables.TreeType</node>
+    <node x="3311.0" y="3251.0">Model.Things.RockType</node>
+    <node x="3396.5" y="-54.0">Model.Result</node>
+    <node x="1163.0" y="615.5">Model.Places.Quarry</node>
+    <node x="3226.0" y="615.5">View.AppMenu</node>
+    <node x="3414.5" y="2839.0">Model.Menus.Menu</node>
+    <node x="1977.0" y="1070.5">Model.Places.House</node>
+    <node x="3552.0" y="251.0">Model.Menus.LoginMenuCommands</node>
+    <node x="729.0" y="615.5">Model.Places.Lake</node>
+    <node x="3666.0" y="2123.0">View.GameMenu</node>
+    <node x="447.5" y="251.0">Model.NPCManagement.NPCnames</node>
+    <node x="3027.5" y="1071.5">Controller.MenuController</node>
+    <node x="1907.0" y="615.5">Model.Places.Cage</node>
+    <node x="1429.0" y="1059.0">Model.FriendshipLevels</node>
+    <node x="340.0" y="987.0">Model.MapManagement.Tile</node>
+    <node x="1985.5" y="-269.0">Model.Animals.AnimalType</node>
+    <node x="3119.5" y="3071.0">Model.Growables.NaturalElementType</node>
+    <node x="215.5" y="-29.0">Model.MapManagement.TileType</node>
+    <node x="3797.0" y="2851.0">Model.Growables.GrowableType</node>
+    <node x="-234.5" y="1071.0">Model.TimeManagement.DayOfWeek</node>
+    <node x="2426.0" y="2123.0">View.MainMenu</node>
+    <node x="199.5" y="2111.0">Model.MapManagement.MapOfGame</node>
+    <node x="2254.5" y="251.0">Model.Menus.MainMenuCommands</node>
+    <node x="571.5" y="1071.0">Model.NPCManagement.NPC</node>
+    <node x="1433.5" y="3202.5">Model.App</node>
+    <node x="3950.5" y="2111.0">Model.Growables.PlantType</node>
+    <node x="3378.0" y="1047.0">Controller.LoginMenuController</node>
+    <node x="2290.5" y="1095.5">Controller.MainMenuController</node>
+    <node x="2549.5" y="1070.5">Model.Things.Trashcan</node>
+    <node x="1576.0" y="226.0">Model.Things.BackpackType</node>
+    <node x="1766.0" y="-29.5">Model.Things.Tool</node>
+    <node x="1511.0" y="3723.0">Main</node>
+    <node x="727.0" y="275.5">Model.Places.Place</node>
+    <node x="2116.5" y="-41.0">Model.Things.MachineTypes</node>
+    <node x="3962.5" y="2691.0">Model.Growables.Seeds</node>
+    <node x="3706.5" y="3226.0">Model.Growables.Growable</node>
+    <node x="-207.0" y="2026.0">Model.TimeManagement.TimeAndDate</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="Model.Places.Shop" target="Model.Places.ShopType" relationship="TO_ONE">
+      <point x="24.0" y="-31.5" />
+      <point x="1339.0" y="1067.0" />
+      <point x="1335.0" y="1067.0" />
+      <point x="1335.0" y="387.0" />
+      <point x="1435.0" y="387.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.MapManagement.MapOfGame" target="Model.MapManagement.TileType" relationship="DEPENDENCY">
+      <point x="-67.75" y="-56.0" />
+      <point x="267.25" y="2087.0" />
+      <point x="275.0" y="2087.0" />
+      <point x="275.0" y="1107.0" />
+      <point x="265.25" y="1107.0" />
+      <point x="-49.75" y="56.0" />
+    </edge>
+    <edge source="Model.Places.Shop" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="-24.0" y="-31.5" />
+      <point x="1291.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="View.AppView" target="Model.App" relationship="DEPENDENCY">
+      <point x="0.0" y="-44.0" />
+      <point x="1595.0" y="3487.0" />
+      <point x="1602.6666666666667" y="3487.0" />
+      <point x="67.66666666666666" y="104.5" />
+    </edge>
+    <edge source="Controller.GameMenuController" target="Model.Menus.GameMenuCommands" relationship="TO_ONE">
+      <point x="82.5" y="-368.0" />
+      <point x="4097.5" y="707.0" />
+      <point x="4015.0" y="707.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.User" target="Model.Things.ToolType" relationship="TO_ONE">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1227.0" />
+      <point x="1055.0" y="1227.0" />
+      <point x="1055.0" y="-53.0" />
+      <point x="1795.0" y="-53.0" />
+      <point x="1795.0" y="-273.0" />
+      <point x="1803.75" y="-273.0" />
+      <point x="-51.25" y="68.0" />
+    </edge>
+    <edge source="Model.TimeManagement.TimeAndDate" target="Model.TimeManagement.DayOfWeek" relationship="TO_ONE">
+      <point x="0.0" y="-141.0" />
+      <point x="-25.0" y="1207.0" />
+      <point x="-125.0" y="1207.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.Growables.Growable" target="Model.Growables.GrowableType" relationship="TO_ONE">
+      <point x="0.0" y="-81.0" />
+      <point x="3775.0" y="2827.0" />
+      <point x="3915.0" y="2827.0" />
+      <point x="0.0" y="-56.0" />
+    </edge>
+    <edge source="Model.User" target="Model.Things.Backpack" relationship="TO_ONE">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1227.0" />
+      <point x="1715.0" y="1227.0" />
+      <point x="1715.0" y="1047.0" />
+      <point x="1835.0" y="1047.0" />
+      <point x="0.0" y="-56.5" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.MainMenu" relationship="CREATE">
+      <point x="-60.25" y="-68.0" />
+      <point x="3474.75" y="2807.0" />
+      <point x="3475.0" y="2807.0" />
+      <point x="3475.0" y="2227.0" />
+      <point x="2395.0" y="2227.0" />
+      <point x="2395.0" y="2087.0" />
+      <point x="2455.6666666666665" y="2087.0" />
+      <point x="-59.333333333333314" y="-44.0" />
+    </edge>
+    <edge source="Model.MapManagement.Tile" target="Model.Places.Place" relationship="TO_ONE">
+      <point x="0.0" y="-140.0" />
+      <point x="435.0" y="387.0" />
+      <point x="751.0" y="387.0" />
+      <point x="-24.0" y="31.5" />
+    </edge>
+    <edge source="Model.MapManagement.MapOfGame" target="Model.MapManagement.Tile" relationship="TO_MANY">
+      <point x="67.75" y="-56.0" />
+      <point x="402.75" y="2067.0" />
+      <point x="315.0" y="2067.0" />
+      <point x="315.0" y="967.0" />
+      <point x="435.0" y="967.0" />
+      <point x="0.0" y="-140.0" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.ExitMenu" relationship="CREATE">
+      <point x="-60.25" y="-68.0" />
+      <point x="3474.75" y="2807.0" />
+      <point x="3475.0" y="2807.0" />
+      <point x="3475.0" y="2227.0" />
+      <point x="3235.0" y="2227.0" />
+      <point x="0.0" y="44.0" />
+    </edge>
+    <edge source="Model.User" target="Model.Things.Trashcan" relationship="TO_ONE">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1227.0" />
+      <point x="2275.0" y="1227.0" />
+      <point x="2275.0" y="1047.0" />
+      <point x="2635.0" y="1047.0" />
+      <point x="0.0" y="-56.5" />
+    </edge>
+    <edge source="View.ProfileMenu" target="Controller.ProfileMenuController" relationship="CREATE">
+      <point x="-59.333333333333314" y="-44.0" />
+      <point x="2935.6666666666665" y="1547.0" />
+      <point x="2815.0" y="1547.0" />
+      <point x="0.0" y="92.0" />
+    </edge>
+    <edge source="View.AppView" target="Model.Menus.Menu" relationship="DEPENDENCY">
+      <point x="0.0" y="-44.0" />
+      <point x="1595.0" y="3487.0" />
+      <point x="3535.0" y="3487.0" />
+      <point x="0.0" y="68.0" />
+    </edge>
+    <edge source="Model.Animals.Animal" target="Model.Animals.AnimalType" relationship="TO_ONE">
+      <point x="0.0" y="-56.5" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="View.ProfileMenu" target="Controller.ProfileMenuController" relationship="TO_ONE">
+      <point x="0.0" y="-44.0" />
+      <point x="2995.0" y="527.0" />
+      <point x="2742.25" y="527.0" />
+      <point x="-72.75" y="-92.0" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.LoginMenu" relationship="CREATE">
+      <point x="-60.25" y="-68.0" />
+      <point x="3474.75" y="2807.0" />
+      <point x="3475.0" y="2807.0" />
+      <point x="3475.0" y="2227.0" />
+      <point x="3355.0" y="2227.0" />
+      <point x="3355.0" y="2087.0" />
+      <point x="3475.0" y="2087.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="Controller.LoginMenuController" target="Model.Menus.LoginMenuCommands" relationship="TO_ONE">
+      <point x="108.5" y="-80.0" />
+      <point x="3703.5" y="727.0" />
+      <point x="3695.0" y="727.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="View.LoginMenu" target="Controller.LoginMenuController" relationship="TO_ONE">
+      <point x="59.33333333333333" y="-44.0" />
+      <point x="3534.3333333333335" y="1507.0" />
+      <point x="3835.0" y="1507.0" />
+      <point x="3835.0" y="747.0" />
+      <point x="3703.5" y="747.0" />
+      <point x="108.5" y="-80.0" />
+    </edge>
+    <edge source="Controller.MainMenuController" target="Model.Menus.MainMenuCommands" relationship="TO_ONE">
+      <point x="0.0" y="-31.5" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.ProfileMenu" relationship="CREATE">
+      <point x="-60.25" y="-68.0" />
+      <point x="3474.75" y="2807.0" />
+      <point x="3475.0" y="2807.0" />
+      <point x="3475.0" y="2227.0" />
+      <point x="2875.0" y="2227.0" />
+      <point x="2875.0" y="2087.0" />
+      <point x="2935.6666666666665" y="2087.0" />
+      <point x="-59.333333333333314" y="-44.0" />
+    </edge>
+    <edge source="View.GameMenu" target="View.AppMenu" relationship="REALIZATION">
+      <point x="-59.333333333333314" y="-44.0" />
+      <point x="3695.6666666666665" y="1567.0" />
+      <point x="3275.0" y="1567.0" />
+      <point x="3275.0" y="707.0" />
+      <point x="3270.5" y="707.0" />
+      <point x="-44.5" y="31.5" />
+    </edge>
+    <edge source="Model.Places.Cage" target="Model.Animals.Animal" relationship="TO_MANY">
+      <point x="24.0" y="-31.5" />
+      <point x="1979.0" y="447.0" />
+      <point x="1975.0" y="447.0" />
+      <point x="1975.0" y="227.0" />
+      <point x="2095.0" y="227.0" />
+      <point x="0.0" y="-56.5" />
+    </edge>
+    <edge source="Model.Things.Tool" target="Model.Things.Item" relationship="GENERALIZATION">
+      <point x="34.5" y="-56.5" />
+      <point x="1869.5" y="-153.0" />
+      <point x="1345.0" y="-153.0" />
+      <point x="30.0" y="31.5" />
+    </edge>
+    <edge source="View.MainMenu" target="View.AppMenu" relationship="REALIZATION">
+      <point x="59.33333333333333" y="-44.0" />
+      <point x="2574.3333333333335" y="1567.0" />
+      <point x="3275.0" y="1567.0" />
+      <point x="3275.0" y="707.0" />
+      <point x="3270.5" y="707.0" />
+      <point x="-44.5" y="31.5" />
+    </edge>
+    <edge source="Model.App" target="Model.User" relationship="TO_MANY">
+      <point x="0.0" y="-104.5" />
+      <point x="1535.0" y="1667.0" />
+      <point x="1392.25" y="1667.0" />
+      <point x="117.25" y="-441.0" />
+    </edge>
+    <edge source="Controller.GameMenuController" target="Model.Result" relationship="DEPENDENCY">
+      <point x="-82.5" y="-368.0" />
+      <point x="3932.5" y="727.0" />
+      <point x="3855.0" y="727.0" />
+      <point x="3855.0" y="447.0" />
+      <point x="3495.0" y="447.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Model.Places.Lake" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="0.0" y="-31.5" />
+      <point x="775.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="Model.Places.House" target="Model.Things.MachineTypes" relationship="TO_MANY">
+      <point x="69.0" y="-56.5" />
+      <point x="2184.0" y="1047.0" />
+      <point x="2235.0" y="1047.0" />
+      <point x="0.0" y="68.0" />
+    </edge>
+    <edge source="Model.Growables.GrowableType" target="Model.Growables.PlantType" relationship="TO_ONE">
+      <point x="0.0" y="-56.0" />
+      <point x="3915.0" y="2807.0" />
+      <point x="3935.0" y="2807.0" />
+      <point x="3935.0" y="2667.0" />
+      <point x="4055.0" y="2667.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.Game" target="Model.TimeManagement.WeatherType" relationship="TO_ONE">
+      <point x="0.0" y="-31.5" />
+      <point x="175.0" y="2327.0" />
+      <point x="-265.0" y="2327.0" />
+      <point x="-265.0" y="507.0" />
+      <point x="55.0" y="507.0" />
+      <point x="0.0" y="153.0" />
+    </edge>
+    <edge source="Model.User" target="Model.FriendshipLevels" relationship="TO_MANY">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1227.0" />
+      <point x="1555.0" y="1227.0" />
+      <point x="0.0" y="68.0" />
+    </edge>
+    <edge source="Model.Things.Backpack" target="Model.Things.Tool" relationship="TO_MANY">
+      <point x="0.0" y="-56.5" />
+      <point x="1835.0" y="1027.0" />
+      <point x="1695.0" y="1027.0" />
+      <point x="1695.0" y="407.0" />
+      <point x="1935.0" y="407.0" />
+      <point x="1935.0" y="-73.0" />
+      <point x="1800.5" y="-73.0" />
+      <point x="-34.5" y="-56.5" />
+    </edge>
+    <edge source="Model.Game" target="Model.MapManagement.MapOfGame" relationship="TO_ONE">
+      <point x="0.0" y="-31.5" />
+      <point x="175.0" y="2327.0" />
+      <point x="495.0" y="2327.0" />
+      <point x="495.0" y="2087.0" />
+      <point x="402.75" y="2087.0" />
+      <point x="67.75" y="-56.0" />
+    </edge>
+    <edge source="View.ProfileMenu" target="View.AppMenu" relationship="REALIZATION">
+      <point x="59.33333333333333" y="-44.0" />
+      <point x="3054.3333333333335" y="1567.0" />
+      <point x="3275.0" y="1567.0" />
+      <point x="3275.0" y="707.0" />
+      <point x="3270.5" y="707.0" />
+      <point x="-44.5" y="31.5" />
+    </edge>
+    <edge source="View.ExitMenu" target="View.AppMenu" relationship="REALIZATION">
+      <point x="0.0" y="-44.0" />
+      <point x="3235.0" y="1567.0" />
+      <point x="3275.0" y="1567.0" />
+      <point x="3275.0" y="707.0" />
+      <point x="3270.5" y="707.0" />
+      <point x="-44.5" y="31.5" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.GameMenu" relationship="CREATE">
+      <point x="-60.25" y="-68.0" />
+      <point x="3474.75" y="2807.0" />
+      <point x="3475.0" y="2807.0" />
+      <point x="3475.0" y="2227.0" />
+      <point x="3635.0" y="2227.0" />
+      <point x="3635.0" y="2087.0" />
+      <point x="3755.0" y="2087.0" />
+      <point x="0.0" y="-44.0" />
+    </edge>
+    <edge source="Model.Things.Trashcan" target="Model.Things.TrashCanType" relationship="TO_ONE">
+      <point x="0.0" y="-56.5" />
+      <point x="0.0" y="93.0" />
+    </edge>
+    <edge source="View.LoginMenu" target="View.AppMenu" relationship="REALIZATION">
+      <point x="-59.333333333333314" y="-44.0" />
+      <point x="3415.6666666666665" y="1567.0" />
+      <point x="3275.0" y="1567.0" />
+      <point x="3275.0" y="707.0" />
+      <point x="3270.5" y="707.0" />
+      <point x="-44.5" y="31.5" />
+    </edge>
+    <edge source="Model.App" target="Model.App" relationship="CREATE">
+      <point x="-101.5" y="52.25" />
+      <point x="1395.0" y="3359.25" />
+      <point x="1395.0" y="3447.0" />
+      <point x="1467.3333333333335" y="3447.0" />
+      <point x="-67.66666666666663" y="104.5" />
+    </edge>
+    <edge source="Model.App" target="Model.Menus.Menu" relationship="TO_ONE">
+      <point x="0.0" y="-104.5" />
+      <point x="1535.0" y="2967.0" />
+      <point x="1575.0" y="2967.0" />
+      <point x="1575.0" y="2787.0" />
+      <point x="3595.25" y="2787.0" />
+      <point x="60.25" y="-68.0" />
+    </edge>
+    <edge source="Model.Menus.MainMenuCommands" target="Model.Menus.Commands" relationship="REALIZATION">
+      <point x="0.0" y="-56.0" />
+      <point x="2395.0" y="-93.0" />
+      <point x="3695.0" y="-93.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="Model.TimeManagement.Season" target="Model.TimeManagement.WeatherType" relationship="TO_MANY">
+      <point x="0.0" y="-81.0" />
+      <point x="0.0" y="153.0" />
+    </edge>
+    <edge source="Model.Menus.ProfileMenuCommands" target="Model.Menus.Commands" relationship="REALIZATION">
+      <point x="0.0" y="-56.0" />
+      <point x="2815.0" y="-93.0" />
+      <point x="3695.0" y="-93.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="Model.Places.Cage" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="-24.0" y="-31.5" />
+      <point x="1931.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="Model.Things.Backpack" target="Model.Things.BackpackType" relationship="TO_ONE">
+      <point x="0.0" y="-56.5" />
+      <point x="1835.0" y="1027.0" />
+      <point x="1695.0" y="1027.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Model.NPCManagement.NPC" target="Model.Result" relationship="DEPENDENCY">
+      <point x="41.75" y="-56.0" />
+      <point x="696.75" y="1047.0" />
+      <point x="695.0" y="1047.0" />
+      <point x="695.0" y="427.0" />
+      <point x="3495.0" y="427.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Main" target="View.AppView" relationship="CREATE">
+      <point x="0.0" y="-44.0" />
+      <point x="0.0" y="44.0" />
+    </edge>
+    <edge source="View.MainMenu" target="Controller.MainMenuController" relationship="CREATE">
+      <point x="-59.333333333333314" y="-44.0" />
+      <point x="2455.6666666666665" y="2067.0" />
+      <point x="2395.0" y="2067.0" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="Model.MapManagement.Tile" target="Model.MapManagement.TileType" relationship="TO_ONE">
+      <point x="0.0" y="-140.0" />
+      <point x="435.0" y="387.0" />
+      <point x="364.75" y="387.0" />
+      <point x="49.75" y="56.0" />
+    </edge>
+    <edge source="Model.User" target="Model.User" relationship="TO_MANY">
+      <point x="-234.5" y="-0.0" />
+      <point x="995.0" y="2167.0" />
+      <point x="995.0" y="2647.0" />
+      <point x="1275.0" y="2647.0" />
+      <point x="0.0" y="441.0" />
+    </edge>
+    <edge source="Model.Places.Farm" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="0.0" y="-31.5" />
+      <point x="1135.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="Controller.GameMenuController" target="Model.Things.ToolType" relationship="DEPENDENCY">
+      <point x="-82.5" y="-368.0" />
+      <point x="3932.5" y="727.0" />
+      <point x="3855.0" y="727.0" />
+      <point x="3855.0" y="-133.0" />
+      <point x="1906.25" y="-133.0" />
+      <point x="51.25" y="68.0" />
+    </edge>
+    <edge source="Model.User" target="Model.Things.Item" relationship="DEPENDENCY">
+      <point x="-117.25" y="-441.0" />
+      <point x="1157.75" y="1687.0" />
+      <point x="855.0" y="1687.0" />
+      <point x="855.0" y="-153.0" />
+      <point x="1285.0" y="-153.0" />
+      <point x="-30.0" y="31.5" />
+    </edge>
+    <edge source="Model.NPCManagement.NPC" target="Model.NPCManagement.NPCnames" relationship="TO_ONE">
+      <point x="-41.75" y="-56.0" />
+      <point x="613.25" y="407.0" />
+      <point x="555.0" y="407.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.App" target="Model.Game" relationship="TO_MANY">
+      <point x="0.0" y="-104.5" />
+      <point x="1535.0" y="2967.0" />
+      <point x="95.0" y="2967.0" />
+      <point x="95.0" y="2847.0" />
+      <point x="175.0" y="2847.0" />
+      <point x="0.0" y="-31.5" />
+    </edge>
+    <edge source="Model.TimeManagement.TimeAndDate" target="Model.TimeManagement.Season" relationship="TO_ONE">
+      <point x="0.0" y="-141.0" />
+      <point x="-25.0" y="1207.0" />
+      <point x="235.0" y="1207.0" />
+      <point x="235.0" y="527.0" />
+      <point x="55.0" y="527.0" />
+      <point x="0.0" y="-81.0" />
+    </edge>
+    <edge source="Model.Things.Backpack" target="Model.Things.Item" relationship="TO_MANY">
+      <point x="0.0" y="-56.5" />
+      <point x="1835.0" y="1027.0" />
+      <point x="1695.0" y="1027.0" />
+      <point x="1695.0" y="407.0" />
+      <point x="1555.0" y="407.0" />
+      <point x="1555.0" y="-73.0" />
+      <point x="1315.0" y="-73.0" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="Model.App" target="Model.App" relationship="TO_ONE">
+      <point x="-101.5" y="-52.25" />
+      <point x="1375.0" y="3254.75" />
+      <point x="1375.0" y="3467.0" />
+      <point x="1535.0" y="3467.0" />
+      <point x="0.0" y="104.5" />
+    </edge>
+    <edge source="View.GameMenu" target="Controller.GameMenuController" relationship="TO_ONE">
+      <point x="59.33333333333333" y="-44.0" />
+      <point x="3814.3333333333335" y="1567.0" />
+      <point x="4195.0" y="1567.0" />
+      <point x="4195.0" y="727.0" />
+      <point x="4097.5" y="727.0" />
+      <point x="82.5" y="-368.0" />
+    </edge>
+    <edge source="Model.Places.Shop" target="Model.Things.Item" relationship="TO_MANY">
+      <point x="24.0" y="-31.5" />
+      <point x="1339.0" y="1067.0" />
+      <point x="1335.0" y="1067.0" />
+      <point x="1335.0" y="387.0" />
+      <point x="1315.0" y="387.0" />
+      <point x="0.0" y="31.5" />
+    </edge>
+    <edge source="Model.Menus.LoginMenuCommands" target="Model.Menus.Commands" relationship="REALIZATION">
+      <point x="0.0" y="-56.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="Model.Places.Greenhouse" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="0.0" y="-31.5" />
+      <point x="955.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="Model.User" target="Model.MapManagement.Tile" relationship="TO_ONE">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1287.0" />
+      <point x="315.0" y="1287.0" />
+      <point x="315.0" y="967.0" />
+      <point x="435.0" y="967.0" />
+      <point x="0.0" y="-140.0" />
+    </edge>
+    <edge source="Model.Places.House" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="-69.0" y="-56.5" />
+      <point x="2046.0" y="587.0" />
+      <point x="1215.0" y="587.0" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="Controller.ProfileMenuController" target="Model.Menus.ProfileMenuCommands" relationship="TO_ONE">
+      <point x="-72.75" y="-92.0" />
+      <point x="2742.25" y="507.0" />
+      <point x="2815.0" y="507.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.Menus.Menu" target="View.AppMenu" relationship="TO_ONE">
+      <point x="60.25" y="-68.0" />
+      <point x="3595.25" y="2767.0" />
+      <point x="3595.0" y="2767.0" />
+      <point x="3595.0" y="1527.0" />
+      <point x="3359.5" y="1527.0" />
+      <point x="44.5" y="31.5" />
+    </edge>
+    <edge source="Controller.MenuController" target="Model.Result" relationship="DEPENDENCY">
+      <point x="0.0" y="-55.5" />
+      <point x="3135.0" y="507.0" />
+      <point x="3495.0" y="507.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Model.Things.Tool" target="Model.Things.ToolType" relationship="TO_ONE">
+      <point x="-34.5" y="-56.5" />
+      <point x="1800.5" y="-53.0" />
+      <point x="1795.0" y="-53.0" />
+      <point x="1795.0" y="-273.0" />
+      <point x="1803.75" y="-273.0" />
+      <point x="-51.25" y="68.0" />
+    </edge>
+    <edge source="View.LoginMenu" target="Controller.LoginMenuController" relationship="CREATE">
+      <point x="0.0" y="-44.0" />
+      <point x="3475.0" y="1227.0" />
+      <point x="3595.0" y="1227.0" />
+      <point x="0.0" y="80.0" />
+    </edge>
+    <edge source="Model.Game" target="Model.NPCManagement.NPC" relationship="TO_MANY">
+      <point x="0.0" y="-31.5" />
+      <point x="175.0" y="2327.0" />
+      <point x="555.0" y="2327.0" />
+      <point x="555.0" y="1047.0" />
+      <point x="613.25" y="1047.0" />
+      <point x="-41.75" y="-56.0" />
+    </edge>
+    <edge source="Model.Growables.GrowableType" target="Model.Growables.TreeType" relationship="TO_ONE">
+      <point x="0.0" y="-56.0" />
+      <point x="3915.0" y="2807.0" />
+      <point x="3935.0" y="2807.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="Model.Game" target="Model.User" relationship="TO_MANY">
+      <point x="0.0" y="-31.5" />
+      <point x="175.0" y="2827.0" />
+      <point x="1535.0" y="2827.0" />
+      <point x="1535.0" y="1667.0" />
+      <point x="1392.25" y="1667.0" />
+      <point x="117.25" y="-441.0" />
+    </edge>
+    <edge source="Model.Game" target="Model.TimeManagement.TimeAndDate" relationship="TO_ONE">
+      <point x="0.0" y="-31.5" />
+      <point x="175.0" y="1987.0" />
+      <point x="-25.0" y="1987.0" />
+      <point x="0.0" y="-141.0" />
+    </edge>
+    <edge source="Model.NPCManagement.NPC" target="Model.Things.Item" relationship="DEPENDENCY">
+      <point x="41.75" y="-56.0" />
+      <point x="696.75" y="1047.0" />
+      <point x="695.0" y="1047.0" />
+      <point x="695.0" y="247.0" />
+      <point x="855.0" y="247.0" />
+      <point x="855.0" y="-153.0" />
+      <point x="1285.0" y="-153.0" />
+      <point x="-30.0" y="31.5" />
+    </edge>
+    <edge source="Controller.LoginMenuController" target="Model.Result" relationship="DEPENDENCY">
+      <point x="-108.5" y="-80.0" />
+      <point x="3486.5" y="507.0" />
+      <point x="3495.0" y="507.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Model.Growables.Growable" target="Model.Growables.Seeds" relationship="TO_ONE">
+      <point x="0.0" y="-81.0" />
+      <point x="3775.0" y="3187.0" />
+      <point x="4055.0" y="3187.0" />
+      <point x="0.0" y="56.0" />
+    </edge>
+    <edge source="View.GameMenu" target="Controller.GameMenuController" relationship="CREATE">
+      <point x="0.0" y="-44.0" />
+      <point x="3755.0" y="1547.0" />
+      <point x="4015.0" y="1547.0" />
+      <point x="0.0" y="368.0" />
+    </edge>
+    <edge source="Model.Places.Quarry" target="Model.Places.Place" relationship="GENERALIZATION">
+      <point x="0.0" y="-31.5" />
+      <point x="1215.0" y="367.0" />
+      <point x="799.0" y="367.0" />
+      <point x="24.0" y="31.5" />
+    </edge>
+    <edge source="View.MainMenu" target="Controller.MainMenuController" relationship="TO_ONE">
+      <point x="0.0" y="-44.0" />
+      <point x="2515.0" y="1067.0" />
+      <point x="2395.0" y="1067.0" />
+      <point x="0.0" y="-31.5" />
+    </edge>
+    <edge source="Model.User" target="Model.Places.Shop" relationship="TO_ONE">
+      <point x="117.25" y="-441.0" />
+      <point x="1392.25" y="1687.0" />
+      <point x="1395.0" y="1687.0" />
+      <point x="1395.0" y="1047.0" />
+      <point x="1339.0" y="1047.0" />
+      <point x="24.0" y="-31.5" />
+    </edge>
+    <edge source="Controller.ProfileMenuController" target="Model.Result" relationship="DEPENDENCY">
+      <point x="72.75" y="-92.0" />
+      <point x="2887.75" y="507.0" />
+      <point x="3495.0" y="507.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="Model.Menus.GameMenuCommands" target="Model.Menus.Commands" relationship="REALIZATION">
+      <point x="0.0" y="-56.0" />
+      <point x="4015.0" y="-93.0" />
+      <point x="3695.0" y="-93.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="0.17267648552564763" showDependencies="true" x="2259.0792766117656" y="1595.9999999999989" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Fields</Category>
+    <Category>Inner Classes</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

@@ -4,6 +4,7 @@ package org.example.Controller;
 import com.google.gson.Gson;
 import org.example.Model.App;
 import org.example.Model.Menus.LoginMenuCommands;
+import org.example.Model.Menus.Menu;
 import org.example.Model.Result;
 import org.example.Model.User;
 import org.example.Model.UserDatabase;
@@ -41,7 +42,7 @@ public class LoginMenuController implements MenuController {
         }
 
         // Check username format
-        if (!username.matches("^[A-Za-z][A-Za-z0-9-]{3,9}$")) {
+        if (!isValidUsername(username)) {
             return new Result(false, "username format is invalid!");
         }
 
@@ -87,54 +88,7 @@ public class LoginMenuController implements MenuController {
     }
 
 
-    public static String hashSHA256(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : hash) {
-                hexString.append(String.format("%02x", b));
-            }
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    public static boolean isStrongPassword(String password) {
-        return password.length() >= 8 &&
-                password.matches(".*[a-z].*") &&
-                password.matches(".*[A-Z].*") &&
-                password.matches(".*\\d.*") &&
-                password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
-    }
-
-    public static boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9._-]+@[A-Za-z0-9-]+\\.[A-Za-z]{2,}$") &&
-                !email.contains("..") &&
-                !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
-    }
-    public static String generateStrongRandomPassword() {
-        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String lower = "abcdefghijklmnopqrstuvwxyz";
-        String digits = "0123456789";
-        String special = "!@#$%^&*()_+=[]{}|:<>?";
-        String all = upper + lower + digits + special;
-
-        SecureRandom rand = new SecureRandom();
-        StringBuilder password = new StringBuilder();
-
-        password.append(upper.charAt(rand.nextInt(upper.length())));
-        password.append(lower.charAt(rand.nextInt(lower.length())));
-        password.append(digits.charAt(rand.nextInt(digits.length())));
-        password.append(special.charAt(rand.nextInt(special.length())));
-
-        for (int i = 0; i < 8; i++) {
-            password.append(all.charAt(rand.nextInt(all.length())));
-        }
-
-        return password.toString();
-    }
 
     public Result login(Matcher matcher) {
         String username = matcher.group("username");
@@ -143,14 +97,7 @@ public class LoginMenuController implements MenuController {
 
         App app = App.getInstance();
         List<User> users = app.getUsers();
-        User matchedUser = null;
-
-        for (User user : users) {
-            if (user.getUsername().equals(username)) {
-                matchedUser = user;
-                break;
-            }
-        }
+        User matchedUser = app.getUserByUsername(username);
 
         if (matchedUser == null) {
             return new Result(false, "username does not exist!");
@@ -163,6 +110,7 @@ public class LoginMenuController implements MenuController {
 
         // Login successful
         app.setLoggedInUser(matchedUser);
+        app.setCurrentMenu(Menu.MainMenu);
         if (stayLoggedIn) {
             //app.setStayLoggedIn(true);
             saveLoggedInUserToFile(matchedUser); // ✅ save user
@@ -212,6 +160,7 @@ public class LoginMenuController implements MenuController {
 
         return new Result(true, "user registered successfully. you are now in login menu!");
     }
+
     public static void saveLoggedInUserToFile(User user) {
         File file = new File("data/logged_in_user.json");
         file.getParentFile().mkdirs(); // ensures the 'data' folder exists
@@ -229,10 +178,106 @@ public class LoginMenuController implements MenuController {
     }
 
     public Result forgetPassword(Matcher matcher, Scanner scanner) {
-         return new Result(true,"salam (:");
+        String username = matcher.group("username");
+        App app = App.getInstance();
+        User user = app.getUserByUsername(username);
+
+        if (user == null)
+            return new Result(false, "no user with this username exists!");
+
+        System.out.println("security question: " + user.getSecurityQuestion());
+        String input = scanner.nextLine().trim();
+        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
+        Matcher answerMatcher = answerPattern.matcher(input);
+
+        if (!answerMatcher.matches()) {
+            return new Result(false, "invalid format! expected: answer -a <answer>");
+        }
+
+        String answer = answerMatcher.group("answer").trim();
+        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+            return new Result(false, "incorrect answer! returning to main menu...");
+        }
+
+        System.out.print("do you want to choose your own password? (yes/no): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        String newPassword;
+        if (choice.equals("yes")) {
+            while (true) {
+                System.out.print("enter new password: ");
+                newPassword = scanner.nextLine().trim();
+                if (!isStrongPassword(newPassword)) {
+                    System.out.println("password format is invalid! try again.");
+                } else {
+                    break;
+                }
+            }
+        } else {
+            // generate a random password
+            newPassword = generateStrongRandomPassword();
+            System.out.println("your new password is: " + newPassword);
+        }
+        String hashedPassword = hashSHA256(newPassword);
+        user.setPassword(hashedPassword);
+        UserDatabase.saveUsers(app.getUsers());
+
+        return new Result(true, "password changed successfully! you can now log in.");
     }
 
+    public static String hashSHA256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    public static boolean isStrongPassword(String password) {
+        return password.length() >= 8 &&
+                password.matches(".*[a-z].*") &&
+                password.matches(".*[A-Z].*") &&
+                password.matches(".*\\d.*") &&
+                password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
+    }
+
+    public static boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9._-]+@[A-Za-z0-9-]+\\.[A-Za-z]{2,}$") &&
+                !email.contains("..") &&
+                !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
+    }
+
+    public static boolean isValidUsername(String username) {
+        return username.matches("^(?=[A-Za-z0-9])(?!.*\\.\\.)([A-Za-z0-9._-]{3,8})(?<!\\.)$");
+    }
+
+    public static String generateStrongRandomPassword() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "!@#$%^&*()_+=[]{}|:<>?";
+        String all = upper + lower + digits + special;
+
+        SecureRandom rand = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+
+        password.append(upper.charAt(rand.nextInt(upper.length())));
+        password.append(lower.charAt(rand.nextInt(lower.length())));
+        password.append(digits.charAt(rand.nextInt(digits.length())));
+        password.append(special.charAt(rand.nextInt(special.length())));
+
+        for (int i = 0; i < 8; i++) {
+            password.append(all.charAt(rand.nextInt(all.length())));
+        }
+
+        return password.toString();
+    }
 //    public Result createUser(String username, String nickname, String password, String confirmPassword, String email, String gender){}
 //    public Result pickQuestion(int question, String answer, String confirmAnswer){}
 //    public Result login(String username, String password, boolean stayLoggedIn){}

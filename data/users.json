@@ -142,5 +142,25 @@
     "energy": 200,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi"
+  },
+  {
+    "username": "user10",
+    "password": "8bf7b31da5d309f34ba391ebda103a4d16fb906731bf97e3187e6f997d575ec4",
+    "nickname": "hey10",
+    "email": "user2@gmail.com",
+    "gender": true,
+    "energy": 200,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi"
+  },
+  {
+    "username": "user10",
+    "password": "8bf7b31da5d309f34ba391ebda103a4d16fb906731bf97e3187e6f997d575ec4",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": true,
+    "energy": 200,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi"
   }
 ]

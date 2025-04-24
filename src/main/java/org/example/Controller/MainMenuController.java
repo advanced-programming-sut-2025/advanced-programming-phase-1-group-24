@@ -16,6 +16,6 @@ public class MainMenuController implements MenuController {
         clearLoggedInUserFile();
         App app = App.getInstance();
         app.setLoggedInUser(null);
-        app.setCurrentMenu(Menu.MainMenu);
+        app.setCurrentMenu(Menu.LoginMenu);
     }
 }
