@@ -1,8 +1,19 @@
 package org.example.Model.MapManagement;
 
 public enum TileType {
-    WATER,
+    EMPTY, //for the start of the game
+    LAKE, //farm
     ROCK,
-    GREENHOUSE,
+    GREENHOUSE, //farm
+    WATERCONTAINER, //northern wall in green house
+    CAGE, //farm
+    BARN, //farm
+    QUARRY,//farm
+    HOUSE, //farm
+    GRASS, //outside farm
+    FARM, //in farm but not a specific place in it
+    FORAGING,
+    WALL,
+    NPCLAND,
     TREE;
 }

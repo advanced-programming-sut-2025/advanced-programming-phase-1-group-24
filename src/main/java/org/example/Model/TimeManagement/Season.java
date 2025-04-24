@@ -14,4 +14,7 @@ public enum Season {
     public ArrayList<WeatherType> getWeatherTypes() {
         return weatherTypes;
     }
+    public Season next() {
+        return values()[(this.ordinal() + 1) % values().length];
+    }
 }

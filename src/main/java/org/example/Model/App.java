@@ -2,18 +2,17 @@ package org.example.Model;
 
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.example.Model.Menus.Menu;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class App {
     private static App instance;
-    private ArrayList<Game> games = new ArrayList<>();
+    private ArrayList<Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private Game currentGame;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu= Menu.LoginMenu;
@@ -39,14 +38,31 @@ public class App {
             "In my little pony what is appleJack's pet name?",
             "how many times did SpongeBob take the driving test?"
     );
-// print options for user to choose
+
+    private ArrayList<Game> loadActiveGames() {
+        File file = new File("data/active_games.json");
+        if (!file.exists()) return new ArrayList<>();
+
+        try (Reader reader = new FileReader(file)) {
+            Type listType = new TypeToken<ArrayList<Game>>() {}.getType();
+            return new Gson().fromJson(reader, listType);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+    public void saveActiveGames() {
+        File file = new File("data/active_games.json");
+        try (Writer writer = new FileWriter(file)) {
+            new Gson().toJson(activeGames, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public Menu getCurrentMenu() {
         return currentMenu;
-    }
-
-    public ArrayList<Game> getGames() {
-        return games;
     }
 
     private App(){};
@@ -77,14 +93,22 @@ public class App {
 
     public Game getCurrentGame() {return currentGame;}
 
-    public void setGames(ArrayList<Game> games) { this.games = games; }
+    public ArrayList<Game> getActiveGames() {
+        return activeGames;
+    }
+
     public void setCurrentGame(Game currentGame) { this.currentGame = currentGame; }
     public void setCurrentMenu(Menu currentMenu) { this.currentMenu = currentMenu; }
     public void getCurrentGame(Game currentGame) { currentGame = currentGame; }
     public void getCurrentMenu(Menu currentMenu) { currentMenu = currentMenu; }
-    public void getGames(ArrayList<Game> games) { this.games = games; }
 
     public List<String> getSecurityQuestions() {
         return securityQuestions;
+    }
+    public Game getGameByUser(User user) {
+        for (Game game : activeGames) {
+            if (game.hasUser(user)) return game;
+        }
+        return null;
     }
 }

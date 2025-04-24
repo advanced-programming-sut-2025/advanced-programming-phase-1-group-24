@@ -5,7 +5,10 @@
     "nickname": "kiki",
     "email": "user@gmail.com",
     "gender": true,
-    "energy": 200
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user2",
@@ -13,7 +16,10 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user3",
@@ -21,9 +27,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Amoo chand salete?",
-    "securityAnswer": "beToChe"
+    "securityAnswer": "beToChe",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user3",
@@ -31,9 +40,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Amoo chand salete?",
-    "securityAnswer": "beToChe"
+    "securityAnswer": "beToChe",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user4",
@@ -41,7 +53,10 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "useerrr5",
@@ -49,9 +64,12 @@
     "nickname": "hey",
     "email": "user5@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "nooooo"
+    "securityAnswer": "nooooo",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "useerrr5",
@@ -59,9 +77,12 @@
     "nickname": "hey",
     "email": "user5@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "nooooo"
+    "securityAnswer": "nooooo",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user16",
@@ -69,9 +90,12 @@
     "nickname": "hey",
     "email": "user16@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user16",
@@ -79,9 +103,12 @@
     "nickname": "hey",
     "email": "user16@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user15",
@@ -89,9 +116,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user15",
@@ -99,9 +129,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user9",
@@ -109,9 +142,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user9",
@@ -119,9 +155,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user19",
@@ -129,9 +168,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user19",
@@ -139,9 +181,12 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user10",
@@ -149,9 +194,12 @@
     "nickname": "hey10",
     "email": "user2@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
   },
   {
     "username": "user10",
@@ -159,8 +207,22 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": true,
-    "energy": 200,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi"
+    "securityAnswer": "hi",
+    "energy": 200,
+    "money": 0
+  },
+  {
+    "username": "user119",
+    "password": "4249b3184a6a47238d38c98f9db0624fc771a45c2a141ea7cf6bcf4d3c3aa3f8",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "energy": 200,
+    "money": 0
   }
 ]

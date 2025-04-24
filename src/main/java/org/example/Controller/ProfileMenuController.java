@@ -33,8 +33,6 @@ public class ProfileMenuController implements MenuController {
     }
 
 
-
-
     public Result changeEmail(String email) {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -100,8 +98,8 @@ public class ProfileMenuController implements MenuController {
             return new Result(false, "please login first!");
 
         String info = String.format(
-                "username: %s\nemail: %s\nnickname: %s",
-                user.getUsername(), user.getEmail(), user.getNickname()
+                "username: %s\nemail: %s\nnickname: %s\nMax money in a game: %d\nplayed games: %d\n",
+                user.getUsername(), user.getEmail(), user.getNickname(), user.getMaxMoneyInGames(), user.getPlayedGames()
         );
 
         return new Result(true, info);

@@ -1,16 +1,98 @@
 package org.example.Controller;
 
 
+import org.example.Main;
+import org.example.Model.App;
+import org.example.Model.Game;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Result;
 import org.example.Model.Tools.ToolType;
+import org.example.Model.User;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Matcher;
 
 public class GameMenuController implements MenuController {
 
     GameMenuCommands command;
 
-//    public Result createNewGame(String username1, String username2, String username3){}
-//    public Result pickGameMap(int mapNumber){}
+    public Result createGame(String users, Scanner scanner) {
+        App app = App.getInstance();
+        User creator = app.getLoggedInUser();
+
+        if (creator == null)
+            return new Result(false, "please login first!");
+
+        // Split usernames and clean empty entries (e.g., if user types extra spaces)
+        List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
+                .filter(usersString -> !usersString.isEmpty())
+                .toList();
+
+        if (usernames.isEmpty())
+            return new Result(false, "you must specify at least one username!");
+
+        if (usernames.size() > 3)
+            return new Result(false, "you can specify up to 3 usernames!");
+
+        // Check if the creator is already in a game
+        for (Game game : app.getActiveGames()) {
+            if (game.hasUser(creator))
+                return new Result(false, "you are already in another game!");
+        }
+
+        ArrayList<User> players = new ArrayList<>();
+        players.add(creator); // Add the logged-in user first
+
+        for (String username : usernames) {
+            User user = app.getUserByUsername(username);
+            if (user == null)
+                return new Result(false, "invalid username: " + username);
+
+            // Check if the user is already in a game
+            Game game = app.getGameByUser(user);
+            if (game != null) {
+                return new Result(false, username + " is already in another game!");
+            }
+            players.add(user);
+        }
+
+        // Create and add the game
+        Game newGame = new Game(players, creator, creator);
+        app.getActiveGames().add(newGame);
+        app.setCurrentGame(newGame);
+
+        handleMapSelection(players, scanner);
+
+        return new Result(true, "game created successfully!");
+    }
+
+    private void handleMapSelection(List<User> players, Scanner scanner) {
+        for (User player : players) {
+            System.out.println("hey " + player.getUsername() + " choose between map 1 or map 2");
+            boolean hasChosen = false;
+            while (!hasChosen) {
+                String input = scanner.nextLine().trim();
+                Matcher matcher = GameMenuCommands.CHOOSE_MAP.getMatcher(input);
+                if (matcher != null) {
+                    int mapNumber = Integer.parseInt(matcher.group("mapNumber"));
+                    if (mapNumber != 1 && mapNumber != 2) {
+                        System.out.println("invalid map number");
+                    } else {
+                        // Call method to apply map to player ///////////////////////////
+                        hasChosen = true;
+                    }
+                } else {
+                    System.out.println("invalid command");
+                }
+            }
+        }
+    }
+
+
+    //    public Result pickGameMap(int mapNumber){}
 //    public Result loadGame(){}
 //    public Result exitGame(){}
 //    public Result removeGame(){}
@@ -22,9 +104,11 @@ public class GameMenuController implements MenuController {
 //    public Result showSeason(){}
 //    public Result cheatAdvanceTime(int hours){}
 //    public Result cheatAdvanceDate(int days){}
-    public void strikeRandomFarm(){}
+    public void strikeRandomFarm() {
+    }
 
-    public void CheatStrikeLightening(){}
+    public void CheatStrikeLightening() {
+    }
 
 //    public Result showCurrentWeather(){}
 //    public Result showPredictedWeather(){}
@@ -40,6 +124,151 @@ public class GameMenuController implements MenuController {
 //    public Result showTradingMenu(){}
 
 
-    public void startNewDay(){}
+    public void startNewDay() {
+    }
+
+    public Result loadGame() {
+        App app = App.getInstance();
+        User user = app.getLoggedInUser();
+
+        if (user == null)
+            return new Result(false, "please login first!");
+
+        Game savedGameToLoad = app.getGameByUser(user);
+
+        if (savedGameToLoad == null)
+            return new Result(false, "no saved game found!");
+
+        savedGameToLoad.setMainPlayer(user);
+        app.setCurrentGame(savedGameToLoad);
+        return new Result(true, "game loaded successfully!");
+    }
+
+    public Result exitGame() {
+        App app = App.getInstance();
+        User currentUser = app.getLoggedInUser();
+        Game currentGame = app.getCurrentGame();
+
+        if ( currentGame == null)
+            return new Result(false, "no active game to exit!");
+
+        if (!currentGame.getMainPlayer().equals(currentUser))
+            return new Result(false, "only the game owner can exit the game!");
+
+        if (!currentGame.getCurrentPlayer().equals(currentUser)) // check if it's their turn
+            return new Result(false, "you can only exit the game during your turn!");
+
+        // Save the current game state
+        app.saveActiveGames();
+
+        // Exit game: go back to game menu
+        app.setCurrentGame(null);
+        return new Result(true, "game exited and saved successfully. returning to game menu...");
+    }
+
+    public Result startForceTerminateVote(Scanner scanner) {
+        App app = App.getInstance();
+        Game currentGame = app.getCurrentGame();
+        User currentUser = app.getLoggedInUser();
+
+        if (currentUser == null || currentGame == null)
+            return new Result(false, "no active game!");
+
+        if (currentGame.isVoteInProgress())
+            return new Result(false, "a termination vote is already in progress!");
+
+        // Start the vote and auto-approve for the initiator
+        currentGame.setVoteInProgress(true);
+        currentGame.getTerminationVotes().clear();
+        currentGame.getTerminationVotes().put(currentUser, true);
+
+        return new Result(true, "termination vote started. your vote is recorded as YES.");
+    }
+    public Result voteToTerminate(boolean approve) {
+        App app = App.getInstance();
+        Game currentGame = app.getCurrentGame();
+        User currentUser = app.getLoggedInUser();
+
+        if (currentGame == null || !currentGame.isVoteInProgress())
+            return new Result(false, "no active termination vote!");
+
+        if (!currentGame.isUserTurn(currentUser))
+            return new Result(false, "you can only vote during your own turn!");
+
+        if (currentGame.getTerminationVotes().containsKey(currentUser))
+            return new Result(false, "you have already voted!");
+
+        currentGame.getTerminationVotes().put(currentUser, approve);
+
+        if (!approve) {
+            currentGame.setVoteInProgress(false);
+            currentGame.getTerminationVotes().clear();
+            return new Result(true, "you voted NO. game termination cancelled.");
+        }
+
+        // If last turn and all approved
+        if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
+            // Everyone voted yes
+            app.getActiveGames().remove(currentGame);
+            app.setCurrentGame(null);
+            app.saveActiveGames();
+            return new Result(true, "game terminated by unanimous vote. returning to game menu...");
+        }
+
+        return new Result(true, "your vote is recorded as YES.");
+    }
+
+//    public Result nextTurn(Scanner scanner) {
+//        App app = App.getInstance();
+//        Game currentGame = app.getCurrentGame();
+//        User currentUser = app.getLoggedInUser();
+//
+//        if (currentUser == null || currentGame == null)
+//            return new Result(false, "no active game!");
+//
+//        // If force terminate vote is in progress and this user hasn’t voted
+//        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
+//            System.out.println("a force terminate vote is in progress. you must vote first. enter 'yes' or 'no':");
+//
+//            while (true) {
+//                String vote = scanner.nextLine().trim().toLowerCase();
+//                if (vote.equals("yes")) {
+//                    currentGame.getTerminationVotes().put(currentUser, true);
+//                    System.out.println("you voted YES.");
+//                    break;
+//                } else if (vote.equals("no")) {
+//                    currentGame.setVoteInProgress(false);
+//                    currentGame.getTerminationVotes().clear();
+//                    return new Result(true, "you voted NO. force terminate vote cancelled.");
+//                } else {
+//                    System.out.println("invalid vote. enter 'yes' or 'no':");
+//                }
+//            }
+//
+//            // Check if everyone has voted YES after this vote
+//            if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
+//                app.getActiveGames().remove(currentGame);
+//                app.setCurrentGame(null);
+//                app.saveActiveGames();
+//                return new Result(true, "all players voted YES. game force terminated and deleted.");
+//            }
+//        }
+//
+//        // Check if it's this user's turn
+//        if (!currentGame.getCurrentTurnPlayer().equals(currentUser))
+//            return new Result(false, "it's not your turn!");
+//
+//        // Advance turn
+//        currentGame.advanceTurn();
+//        currentGame.getPlayerEnergy().put(currentUser, 50); // reset energy for next turn
+//
+//        // If a full round has passed
+//        if (currentGame.getCurrentTurnIndex() % currentGame.getPlayers().size() == 0) {
+//            currentGame.advanceTimeByOneHour();
+//        }
+//
+//        app.saveActiveGames();
+//        return new Result(true, "turn passed to " + currentGame.getCurrentTurnPlayer().getUsername() + ".");
+//    }
 
 }

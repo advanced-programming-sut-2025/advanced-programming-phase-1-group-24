@@ -18,7 +18,14 @@ public class User {
     String nickname;
     String email;
     boolean gender;
-    int energy = 200;
+    int playedGames;
+    int maxMoneyInGames;
+    private String securityQuestion;
+    private String securityAnswer;
+
+    //player
+    private int energy = 200;
+    private int money = 0;
     Map<Skill, Integer> skills;
     Tile currentTile;
     ToolType currentTool;
@@ -28,8 +35,8 @@ public class User {
     Map<User, FriendshipLevels> friends;
     Backpack backpack;
     Tool trashCan;
-    private String securityQuestion;
-    private String securityAnswer;
+    private int currentTurnEnergy = 50;
+
 
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
@@ -39,10 +46,33 @@ public class User {
         this.gender = gender;
     }
 
-    public String getUsername() { return username; }
-    public String getPassword() { return password; }
-    public String getNickname() { return nickname; }
-    public String getEmail() { return email; }
+    public int getCurrentTurnEnergy() {
+        return currentTurnEnergy;
+    }
+
+    public void setCurrentTurnEnergy(int currentTurnEnergy) {
+        this.currentTurnEnergy = currentTurnEnergy;
+    }
+
+    public void resetTurnEnergy() {
+        this.currentTurnEnergy = 50;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 
     public int getEnergy() {
         return energy;
@@ -60,9 +90,16 @@ public class User {
         return friends;
     }
 
-//    public Shop getCurrentShop() {
+    //    public Shop getCurrentShop() {
 //        return currentShop;
 //    }
+    public int getPlayedGames() {
+        return playedGames;
+    }
+
+    public void setPlayedGames(int playedGames) {
+        this.playedGames = playedGames;
+    }
 
     public Tile getCurrentTile() {
         return currentTile;
@@ -88,14 +125,58 @@ public class User {
         this.securityAnswer = securityAnswer;
     }
 
-    public void setUsername(String username) { this.username = username; }
-    public void setPassword(String password) { this.password = password; }
-    public void setNickname(String nickname) { this.nickname = nickname; }
-    public void setEmail(String email) { this.email = email; }
+    public int getMaxMoneyInGames() {
+        return maxMoneyInGames;
+    }
 
-    public void faint(){};
-    public void setEnergy(int energy) { this.energy = energy; }
+    public int getMoney() {
+        return money;
+    }
 
-    public void trade(){}
+    public void setMaxMoneyInGames(int maxMoneyInGames) {
+        this.maxMoneyInGames = maxMoneyInGames;
+    }
+
+    public void setMoney(int money) {
+        this.money = money;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void faint() {
+    }
+
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    public void trade() {
+    }
+
+    //always call this function before any task that consumes energy if returns false cant do the task
+    public boolean tryConsumeEnergy(int energyRequired) {
+        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+            System.out.println("not enough energy!");
+            return false;
+        }
+        currentTurnEnergy -= energyRequired;
+        energy -= energyRequired;
+        return true;
+    }
 
 }
