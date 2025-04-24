@@ -178,5 +178,39 @@ public class User {
         energy -= energyRequired;
         return true;
     }
+    public void updateGameFields() {
+        this.playedGames += 1;
+        this.energy = 200;
+        this.money = 0;
+        this.currentTurnEnergy = 50;
 
+        this.currentTile = null; // or a default starting tile
+        this.currentTool = null;
+        this.backpack = new Backpack(); // assuming it starts empty
+
+        if (this.skills != null) {
+            this.skills.clear(); // reset skills
+        }
+
+        if (this.craftingRecepies != null) {
+            this.craftingRecepies.clear();
+        }
+
+        if (this.cookingRecepies != null) {
+            this.cookingRecepies.clear();
+        }
+
+        if (this.tradeHistory != null) {
+            this.tradeHistory.clear();
+        }
+
+        this.trashCan = null;
+    }
+
+
+    public void updateMaxMoney() {
+        if(money>maxMoneyInGames){
+            maxMoneyInGames=money;
+        }
+    }
 }

@@ -58,7 +58,9 @@ public class GameMenuController implements MenuController {
             }
             players.add(user);
         }
-
+            for(User player:players){
+                player.updateGameFields();
+            }
         // Create and add the game
         Game newGame = new Game(players, creator, creator);
         app.getActiveGames().add(newGame);
@@ -159,6 +161,9 @@ public class GameMenuController implements MenuController {
             return new Result(false, "you can only exit the game during your turn!");
 
         // Save the current game state
+        for(User player:currentGame.getPlayers()){
+            player.updateMaxMoney();
+        }
         app.saveActiveGames();
 
         // Exit game: go back to game menu
@@ -184,21 +189,57 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "termination vote started. your vote is recorded as YES.");
     }
-    public Result voteToTerminate(boolean approve) {
+
+
+    public Result nextTurn(Scanner scanner) {
         App app = App.getInstance();
         Game currentGame = app.getCurrentGame();
-        User currentUser = app.getLoggedInUser();
+        User loggedInUser = app.getLoggedInUser();
+
+        if (loggedInUser == null || currentGame == null)
+            return new Result(false, "no active game!");
+
+        currentGame.goToNextTurn();
+        User currentUser = currentGame.getCurrentPlayer();
+        currentUser.resetTurnEnergy();
+
+        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
+            return voteToTerminateInteractive(scanner, currentUser);
+        }
+
+        return new Result(true, "next turn started for " + currentUser.getUsername());
+    }
+    private Result voteToTerminateInteractive(Scanner scanner, User user) {
+        Game currentGame = App.getInstance().getCurrentGame();
+
+        System.out.println("a force terminate vote is in progress. you must vote first. enter 'yes' or 'no':");
+
+        while (true) {
+            String input = scanner.nextLine().trim().toLowerCase();
+
+            if (input.equals("yes")) {
+                return voteToTerminate(true, user);
+            } else if (input.equals("no")) {
+                return voteToTerminate(false, user);
+            } else {
+                System.out.println("invalid vote. enter 'yes' or 'no':");
+            }
+        }
+    }
+    public Result voteToTerminate(boolean approve, User user) {
+        App app = App.getInstance();
+        Game currentGame = app.getCurrentGame();
 
         if (currentGame == null || !currentGame.isVoteInProgress())
             return new Result(false, "no active termination vote!");
 
-        if (!currentGame.isUserTurn(currentUser))
+        if (!currentGame.isUserTurn(user))
             return new Result(false, "you can only vote during your own turn!");
 
-        if (currentGame.getTerminationVotes().containsKey(currentUser))
+        if (currentGame.getTerminationVotes().containsKey(user))
             return new Result(false, "you have already voted!");
 
-        currentGame.getTerminationVotes().put(currentUser, approve);
+        currentGame.getTerminationVotes().put(user, approve);
 
         if (!approve) {
             currentGame.setVoteInProgress(false);
@@ -206,9 +247,11 @@ public class GameMenuController implements MenuController {
             return new Result(true, "you voted NO. game termination cancelled.");
         }
 
-        // If last turn and all approved
+        // Check if all players have voted yes
         if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
-            // Everyone voted yes
+            for(User player:currentGame.getPlayers()){
+                player.updateMaxMoney();
+            }
             app.getActiveGames().remove(currentGame);
             app.setCurrentGame(null);
             app.saveActiveGames();
@@ -218,32 +261,6 @@ public class GameMenuController implements MenuController {
         return new Result(true, "your vote is recorded as YES.");
     }
 
-//    public Result nextTurn(Scanner scanner) {
-//        App app = App.getInstance();
-//        Game currentGame = app.getCurrentGame();
-//        User currentUser = app.getLoggedInUser();
-//
-//        if (currentUser == null || currentGame == null)
-//            return new Result(false, "no active game!");
-//
-//        // If force terminate vote is in progress and this user hasn’t voted
-//        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
-//            System.out.println("a force terminate vote is in progress. you must vote first. enter 'yes' or 'no':");
-//
-//            while (true) {
-//                String vote = scanner.nextLine().trim().toLowerCase();
-//                if (vote.equals("yes")) {
-//                    currentGame.getTerminationVotes().put(currentUser, true);
-//                    System.out.println("you voted YES.");
-//                    break;
-//                } else if (vote.equals("no")) {
-//                    currentGame.setVoteInProgress(false);
-//                    currentGame.getTerminationVotes().clear();
-//                    return new Result(true, "you voted NO. force terminate vote cancelled.");
-//                } else {
-//                    System.out.println("invalid vote. enter 'yes' or 'no':");
-//                }
-//            }
 //
 //            // Check if everyone has voted YES after this vote
 //            if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
