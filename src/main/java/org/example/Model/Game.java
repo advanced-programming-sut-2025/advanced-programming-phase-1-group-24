@@ -20,6 +20,7 @@ public class Game {
     private User currentPlayer;
     private User mainPlayer;  //the creator of the game or the last player that loaded the game
     private WeatherType currentWeatherType;
+    private WeatherType tomorrowWeatherType;
     private int currentPlayerIndex = 0;
     int turnCounter = 0;
 
@@ -81,21 +82,81 @@ public class Game {
     }
 
     public void goToNextTurn() {
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-        turnCounter++;
+       do {
+           currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+           currentPlayer = players.get(currentPlayerIndex);
+           turnCounter++;
 
-        // Reset energy for the new player
-        getCurrentPlayer().resetTurnEnergy();
-
-        if (turnCounter == players.size()) {
-            // One full round complete
-            turnCounter = 0;
-            advanceTimeByOneHour();
-        }
+           // Reset energy for the new player
+           // Only count the turn if the player is NOT fainted
+           if (!currentPlayer.hasFainted()) {
+               currentPlayer.resetTurnEnergy(); // Reset energy only if they get a turn
+           }
+           if (turnCounter == players.size()) {
+               // One full round complete
+               turnCounter = 0;
+               advanceTimeByOneHour();
+           }
+       }while (currentPlayer.hasFainted());
     }
     public void advanceTimeByOneHour() {
         timeAndDate.advanceHour();
     }
 
 
+    public MapOfGame getMap() {
+        return map;
+    }
+
+    public void setMap(MapOfGame map) {
+        this.map = map;
+    }
+
+    public void setPlayers(ArrayList<User> players) {
+        this.players = players;
+    }
+
+    public TimeAndDate getTimeAndDate() {
+        return timeAndDate;
+    }
+
+    public void setTimeAndDate(TimeAndDate timeAndDate) {
+        this.timeAndDate = timeAndDate;
+    }
+
+    public WeatherType getCurrentWeatherType() {
+        return currentWeatherType;
+    }
+
+    public void setCurrentWeatherType(WeatherType currentWeatherType) {
+        this.currentWeatherType = currentWeatherType;
+    }
+
+    public int getTurnCounter() {
+        return turnCounter;
+    }
+
+    public void setTurnCounter(int turnCounter) {
+        this.turnCounter = turnCounter;
+    }
+
+    public int getCurrentPlayerIndex() {
+        return currentPlayerIndex;
+    }
+
+    public void setCurrentPlayerIndex(int currentPlayerIndex) {
+        this.currentPlayerIndex = currentPlayerIndex;
+    }
+
+    public void setTerminationVotes(Map<User, Boolean> terminationVotes) {
+        this.terminationVotes = terminationVotes;
+    }
+
+    public ArrayList<NPC> getNpcs() {
+        return npcs;
+    }
+
+    public void setNpcs(ArrayList<NPC> npcs) {
+        this.npcs = npcs;
+    }
 }

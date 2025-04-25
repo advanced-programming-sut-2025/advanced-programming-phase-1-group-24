@@ -24,22 +24,32 @@ public class TimeAndDate {
 
     private void advanceDay() {
         day++;
-        dayOfWeek = dayOfWeek.next(); // Assuming you have a next() method in DayOfWeek enum
+        dayOfWeek = dayOfWeek.next();
 
-        if (day > 30) { // or however many days per month you want
+        if (day > 28) {
             day = 1;
             advanceSeason();
         }
     }
 
     private void advanceSeason() {
-        season = season.next(); // Assuming Season enum has a next() method
+        season = season.next();
     }
+
+    public void skipToNextMorning() {
+        advanceDay();
+        this.hour = 9;
+    }
+
 
     // Getters (optional)
     public int getHour() { return hour; }
     public int getDay() { return day; }
     public DayOfWeek getDayOfWeek() { return dayOfWeek; }
     public Season getSeason() { return season; }
+
+    public void setHour(int hour) {
+        this.hour = hour;
+    }
 }
 

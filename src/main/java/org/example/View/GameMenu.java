@@ -14,7 +14,22 @@ public class GameMenu implements AppMenu {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 
-        if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
+
+        if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
+        } else if (input.equals("season")) {
+            System.out.println(controller.printSeason());
+        } else if (input.equals("time")) {
+            System.out.println(controller.printHour());
+        } else if (input.equals("date")) {
+            System.out.println(controller.printDate());
+        } else if (input.equals("datetime")) {
+            System.out.println(controller.printDateTime());
+        } else if (input.matches("^day\\s+of\\s+the\\s+week$")) {
+            System.out.println(controller.printDayOfWeek());
+        } else if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
             System.out.println(controller.nextTurn(scanner));
         } else if ((matcher = GameMenuCommands.TERMINATE_GAME.getMatcher(input)) != null) {
             System.out.println(controller.startForceTerminateVote(scanner));

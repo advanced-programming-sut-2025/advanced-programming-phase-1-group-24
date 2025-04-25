@@ -6,6 +6,8 @@ import org.example.Model.App;
 import org.example.Model.Game;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Result;
+import org.example.Model.TimeManagement.TimeAndDate;
+import org.example.Model.TimeManagement.WeatherType;
 import org.example.Model.Tools.ToolType;
 import org.example.Model.User;
 
@@ -58,9 +60,9 @@ public class GameMenuController implements MenuController {
             }
             players.add(user);
         }
-            for(User player:players){
-                player.updateGameFields();
-            }
+        for (User player : players) {
+            player.updateGameFields();
+        }
         // Create and add the game
         Game newGame = new Game(players, creator, creator);
         app.getActiveGames().add(newGame);
@@ -93,42 +95,6 @@ public class GameMenuController implements MenuController {
         }
     }
 
-
-    //    public Result pickGameMap(int mapNumber){}
-//    public Result loadGame(){}
-//    public Result exitGame(){}
-//    public Result removeGame(){}
-//    public Result nextTurn(){}
-//    public Result showTime(){}
-//    public Result showDate(){}
-//    public Result showTimeAndDate(){}
-//    public Result showDayOfWeek(){}
-//    public Result showSeason(){}
-//    public Result cheatAdvanceTime(int hours){}
-//    public Result cheatAdvanceDate(int days){}
-    public void strikeRandomFarm() {
-    }
-
-    public void CheatStrikeLightening() {
-    }
-
-//    public Result showCurrentWeather(){}
-//    public Result showPredictedWeather(){}
-//    public Result cheatSetWeather(){}
-//    public void buildGreenhouse(){}
-//    public Result walk(int x, int y){}
-//    public Result printMap(int x, int y, int size){}
-//    public Result helpReadMap(){}
-//    public Result showEnergy(){}
-//    public Result cheatEnergySet(int value){}
-//    public Result cheatEnergyUnlimited(){}
-//    public Result trashInventory(ToolType item, int quantity){}
-//    public Result showTradingMenu(){}
-
-
-    public void startNewDay() {
-    }
-
     public Result loadGame() {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -151,7 +117,7 @@ public class GameMenuController implements MenuController {
         User currentUser = app.getLoggedInUser();
         Game currentGame = app.getCurrentGame();
 
-        if ( currentGame == null)
+        if (currentGame == null)
             return new Result(false, "no active game to exit!");
 
         if (!currentGame.getMainPlayer().equals(currentUser))
@@ -161,7 +127,7 @@ public class GameMenuController implements MenuController {
             return new Result(false, "you can only exit the game during your turn!");
 
         // Save the current game state
-        for(User player:currentGame.getPlayers()){
+        for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
         }
         app.saveActiveGames();
@@ -194,21 +160,25 @@ public class GameMenuController implements MenuController {
     public Result nextTurn(Scanner scanner) {
         App app = App.getInstance();
         Game currentGame = app.getCurrentGame();
-        User loggedInUser = app.getLoggedInUser();
 
-        if (loggedInUser == null || currentGame == null)
+        if (currentGame == null)
             return new Result(false, "no active game!");
 
+        User pastUser = currentGame.getCurrentPlayer();
+        pastUser.resetTurnEnergy();
+
         currentGame.goToNextTurn();
+
         User currentUser = currentGame.getCurrentPlayer();
-        currentUser.resetTurnEnergy();
 
         if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
             return voteToTerminateInteractive(scanner, currentUser);
         }
+        handleEndOfDay();
 
         return new Result(true, "next turn started for " + currentUser.getUsername());
     }
+
     private Result voteToTerminateInteractive(Scanner scanner, User user) {
         Game currentGame = App.getInstance().getCurrentGame();
 
@@ -226,6 +196,7 @@ public class GameMenuController implements MenuController {
             }
         }
     }
+
     public Result voteToTerminate(boolean approve, User user) {
         App app = App.getInstance();
         Game currentGame = app.getCurrentGame();
@@ -249,7 +220,7 @@ public class GameMenuController implements MenuController {
 
         // Check if all players have voted yes
         if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
-            for(User player:currentGame.getPlayers()){
+            for (User player : currentGame.getPlayers()) {
                 player.updateMaxMoney();
             }
             app.getActiveGames().remove(currentGame);
@@ -260,32 +231,139 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "your vote is recorded as YES.");
     }
+    private void handleEndOfDay() {
+        App app = App.getInstance();
+        Game game = app.getCurrentGame();
+        if (game.getTimeAndDate().getHour() == 22) {
 
-//
-//            // Check if everyone has voted YES after this vote
-//            if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
-//                app.getActiveGames().remove(currentGame);
-//                app.setCurrentGame(null);
-//                app.saveActiveGames();
-//                return new Result(true, "all players voted YES. game force terminated and deleted.");
-//            }
-//        }
-//
-//        // Check if it's this user's turn
-//        if (!currentGame.getCurrentTurnPlayer().equals(currentUser))
-//            return new Result(false, "it's not your turn!");
-//
-//        // Advance turn
-//        currentGame.advanceTurn();
-//        currentGame.getPlayerEnergy().put(currentUser, 50); // reset energy for next turn
-//
-//        // If a full round has passed
-//        if (currentGame.getCurrentTurnIndex() % currentGame.getPlayers().size() == 0) {
-//            currentGame.advanceTimeByOneHour();
-//        }
-//
-//        app.saveActiveGames();
-//        return new Result(true, "turn passed to " + currentGame.getCurrentTurnPlayer().getUsername() + ".");
-//    }
+            for (User user : game.getPlayers()) {
+//                if (user.canWalkHome()) {
+//                    user.walkHome(); // This should reduce energy and move them to home
+//                } else {
+//                    user.faint(); // Player faints in place
+//                }
+            }
 
+            // Skip time to 9 AM
+            game.getTimeAndDate().skipToNextMorning();
+
+            // Grow crops and update energy
+            for (User user : game.getPlayers()) {
+                user.resetEnergyForNewDay();
+                //user.getFarm().growCropsOneDay();
+               // user.getFarm().generateForageAndMine();
+                //user.collectShippingBinProfits();
+            }
+            //TO DO: update crops and days left to die delete crops and tree
+
+            // Update weather for the new day
+           // game.getCurrentWeatherType() = WeatherType.randomWeather();
+        }
+    }
+
+//    public Result cheatAdvanceTime(int hours){}
+//    public Result cheatAdvanceDate(int days){}
+    public void strikeRandomFarm() {
+    }
+
+    public void CheatStrikeLightening() {
+    }
+
+//    public Result showCurrentWeather(){}
+//    public Result showPredictedWeather(){}
+//    public Result cheatSetWeather(){}
+//    public void buildGreenhouse(){}
+//    public Result walk(int x, int y){}
+//    public Result printMap(int x, int y, int size){}
+//    public Result helpReadMap(){}
+//    public Result showEnergy(){}
+//    public Result cheatEnergySet(int value){}
+//    public Result cheatEnergyUnlimited(){}
+//    public Result trashInventory(ToolType item, int quantity){}
+//    public Result showTradingMenu(){}
+
+
+    public void startNewDay() {
+    }
+
+    public Result printDayOfWeek() {
+        Game currentGame = App.getInstance().getCurrentGame();
+        if (currentGame == null) {
+            return new Result(false, "no active game!");
+        }
+        return new Result(true, "current Day of week: " + currentGame.getTimeAndDate().getDayOfWeek());
+    }
+
+    public Result printDateTime() {
+        Game currentGame = App.getInstance().getCurrentGame();
+        TimeAndDate currentDate = currentGame.getTimeAndDate();
+        if (currentGame == null) {
+            return new Result(false, "no active game!");
+        }
+        return new Result(true, "current Date: " + currentDate.getHour() + " hour of day " + currentDate.getDay());
+    }
+
+    public Result printDate() {
+        Game currentGame = App.getInstance().getCurrentGame();
+        if (currentGame == null) {
+            return new Result(false, "no active game!");
+        }
+        return new Result(true, "current Day of season: " + currentGame.getTimeAndDate().getDay());
+
+    }
+
+    public Result printHour() {
+        Game currentGame = App.getInstance().getCurrentGame();
+        if (currentGame == null) {
+            return new Result(false, "no active game!");
+        }
+        return new Result(true, "current Hour: " + currentGame.getTimeAndDate().getHour());
+    }
+
+    public Result printSeason() {
+        Game currentGame = App.getInstance().getCurrentGame();
+        if (currentGame == null) {
+            return new Result(false, "no active game!");
+        }
+        return new Result(true, "current Season: " + currentGame.getTimeAndDate().getSeason());
+
+    }
+
+
+    public Result cheatAdvanceDate(String number) {
+    int days = Integer.parseInt(number);
+        if (days <= 0) {
+            return new Result(false, "invalid number of days!");
+        }
+
+        Game game = App.getInstance().getCurrentGame();
+        if (game == null) return new Result(false, "no active game!");
+
+        for (int i = 0; i < days; i++) {
+            // Force day to end if not already at 22
+            game.getTimeAndDate().setHour(22);
+            handleEndOfDay(); // Will skip to 9 AM next day and apply effects
+        }
+
+        return new Result(true, "advanced time by " + days + " days.");
+    }
+
+    public Result cheatAdvanceTime(String number) {
+        int hours = Integer.parseInt(number);
+        if (hours <= 0) {
+            return new Result(false, "invalid number of hours!");
+        }
+
+        Game game = App.getInstance().getCurrentGame();
+        if (game == null) return new Result(false, "no active game!");
+
+        for (int i = 0; i < hours; i++) {
+            game.getTimeAndDate().advanceHour(); // You need to implement this method
+            if (game.getTimeAndDate().getHour() == 22) {
+                handleEndOfDay();
+            }
+        }
+
+        return new Result(true, "advanced time by " + hours + " hours.");
+    }
 }

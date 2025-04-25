@@ -5,5 +5,7 @@ import org.example.View.AppView;
 
 public class Main {
     // test
-    public static void main(String[] args) {(new AppView()).run();}
+    public static void main(String[] args) {
+        (new AppView()).run();
+    }
 }

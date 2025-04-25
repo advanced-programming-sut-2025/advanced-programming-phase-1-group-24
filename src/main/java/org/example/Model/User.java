@@ -24,8 +24,15 @@ public class User {
     private String securityAnswer;
 
     //player
-    private int energy = 200;
+    private int maxEnergy = 200;
+    private int maxEnergyTurn = 50;
+    private int energy = maxEnergy;
+    private int currentTurnEnergy = maxEnergyTurn;
+    /* a variable for hours left for special energy Max (eg.coffee)then after each turn if this variable
+    is more than one we minus one and then it when  reaches 0 we turn back the max energy to normal
+     */
     private int money = 0;
+    private boolean fainted = false;
     Map<Skill, Integer> skills;
     Tile currentTile;
     ToolType currentTool;
@@ -35,7 +42,6 @@ public class User {
     Map<User, FriendshipLevels> friends;
     Backpack backpack;
     Tool trashCan;
-    private int currentTurnEnergy = 50;
 
 
     public User(String username, String password, String nickname, String email, boolean gender) {
@@ -55,7 +61,7 @@ public class User {
     }
 
     public void resetTurnEnergy() {
-        this.currentTurnEnergy = 50;
+        this.currentTurnEnergy = maxEnergyTurn;
     }
 
     public String getUsername() {
@@ -160,6 +166,13 @@ public class User {
     public void faint() {
     }
 
+    public boolean hasFainted() {
+        return fainted;
+    }
+
+    public void setFainted(boolean fainted) {
+        this.fainted = fainted;
+    }
 
     public void setEnergy(int energy) {
         this.energy = energy;
@@ -178,11 +191,24 @@ public class User {
         energy -= energyRequired;
         return true;
     }
+
+    public void reduceEnergy(int amount) {
+        this.currentTurnEnergy -= amount;
+        this.energy -= amount;
+        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+            this.energy = 0;
+            this.currentTurnEnergy = 0;
+            System.out.println("not enough energy! You faiented!");
+            this.fainted = true;
+            faint();
+        }
+    }
+
     public void updateGameFields() {
         this.playedGames += 1;
-        this.energy = 200;
+        this.energy = maxEnergy;
         this.money = 0;
-        this.currentTurnEnergy = 50;
+        this.currentTurnEnergy = maxEnergyTurn;
 
         this.currentTile = null; // or a default starting tile
         this.currentTool = null;
@@ -209,8 +235,21 @@ public class User {
 
 
     public void updateMaxMoney() {
-        if(money>maxMoneyInGames){
-            maxMoneyInGames=money;
+        if (money > maxMoneyInGames) {
+            maxMoneyInGames = money;
         }
     }
+
+    public void resetEnergyForNewDay() {
+        if (fainted) {
+            this.energy = (int) (maxEnergy * 0.75);
+            this.fainted = false;
+            //System.out.println(username + " woke up with 75% energy at the same location.");
+        } else {
+            this.energy = maxEnergy;
+            //System.out.println(username + " energy reset to full for the new day.");
+        }
+    }
+
+
 }
