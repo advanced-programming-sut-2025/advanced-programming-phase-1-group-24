@@ -8,7 +8,7 @@ public interface Commands {
     ;
     String SHOW_MENU = "^show\\s+current\\s+menu$";
     ;
-    String MENU_ENTER = "^menu\\s+enter\\s+(?<menuName>\\S+)$)";
+    String MENU_ENTER = "^menu\\s+enter\\s+(?<menuName>\\S+)$";
     ;
     String EXIT = "^menu\\s+exit$";
 
@@ -21,5 +21,6 @@ public interface Commands {
             return matcher;
         }
         return null;
-    } 
+    }
 }
+

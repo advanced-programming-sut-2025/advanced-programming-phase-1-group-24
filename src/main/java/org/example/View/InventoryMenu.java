@@ -1,5 +1,6 @@
 package org.example.View;
 
+
 import org.example.Controller.InventoryMenuController;
 
 import java.util.Scanner;

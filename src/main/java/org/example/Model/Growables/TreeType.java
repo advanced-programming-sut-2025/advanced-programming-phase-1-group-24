@@ -21,7 +21,7 @@ public enum TreeType {
     MysticTree("Mystic Tree", SourceType.MysticTreeSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.MysticSyrup, false, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), null);
 
 
-    
+
     private final String name;
     private final SourceType source;
     private final List<Integer> satges;

@@ -12,9 +12,9 @@ public class Backpack {
     }
 
     Map<Item, Integer> inventoryItems;
-    //Map<Item, Integer> 
+    //Map<Item, Integer>
     Map<Tool, Integer> tools;
     //ArrayList seed
-    
+
 
 }

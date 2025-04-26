@@ -12,11 +12,11 @@ public class Growable implements Cloneable{
     TreeType treeType;
     CropType cropType;
     ForagingCropType foragingCropType;
-    //when the crop/tree is ready to harvest if we can only harvest it once, we will change the growableType , 
+    //when the crop/tree is ready to harvest if we can only harvest it once, we will change the growableType ,
     //else we will create a copy of this growable and put the growableType as product/plant and we make the age and stage of the initial growable 0, we will add the product to the tile
     //if the product of growable(tree) is coal then create an Item that its type is coal
     //note that if growableType is fruit we can find the fruitType from the filled treeType
-    
+
     //if we ever add an ArrayList or List to this class we need to do a deep copy
     @Override
     public Growable clone() {

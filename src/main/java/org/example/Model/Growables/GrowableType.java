@@ -10,8 +10,8 @@ public enum GrowableType {
     Crop,
     Coal,
     CropProduct;
- 
+
     //Tree
     //Crop
-    //Foraging 
+    //Foraging
 }

@@ -1,5 +1,6 @@
 package org.example.Model.Menus;
 
+
 import org.example.View.*;
 
 import java.util.Scanner;
@@ -17,7 +18,16 @@ public enum Menu {
         this.menu = menu;
     }
 
+    public static Menu fromString(String menuName) {
+        for (Menu menu : Menu.values()) {
+            if (menu.name().equalsIgnoreCase(menuName)) {
+                return menu;
+            }
+        }
+        return null;
+    }
+
     public void checkCommand(Scanner scanner) {
-        this.menu.check(scanner);
+        this.menu.handleCommand(scanner);
     }
 }

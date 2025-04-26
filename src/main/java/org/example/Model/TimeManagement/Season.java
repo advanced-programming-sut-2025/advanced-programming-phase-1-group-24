@@ -1,20 +1,20 @@
 package org.example.Model.TimeManagement;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public enum Season {
-    SPRING,
-    SUMMER,
-    AUTUMN,
-    WINTER;
+    SPRING(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    SUMMER(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    AUTUMN(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    WINTER(List.of(WeatherType.SUNNY,WeatherType.SNOW));
 
-    ArrayList<WeatherType> weatherTypes;
-    //ArrayList source (mixed seeds)
-    //َArrayList fish (or we keep season in fish)
-    //product class
-    Season(ArrayList<WeatherType> weatherTypes) {}
+    List<WeatherType> weatherTypes;
+    Season(List<WeatherType> weatherTypes) {}
 
-    public ArrayList<WeatherType> getWeatherTypes() {
+    public List<WeatherType> getWeatherTypes() {
         return weatherTypes;
+    }
+    public Season next() {
+        return values()[(this.ordinal() + 1) % values().length];
     }
 }

@@ -1,6 +1,5 @@
 package org.example.Model.Animals;
 
-import org.example.Model.Places.Habitat;
 
 import org.example.Model.MapManagement.Tile;
 

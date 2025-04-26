@@ -1,6 +1,6 @@
 package org.example.Model.MapManagement;
 
-import org.example.Model.Things.ForagingMineralType;
+import org.example.Model.Things.ForagingType;
 
 
 public class MapOfGame {
@@ -38,7 +38,7 @@ public class MapOfGame {
 
     public void changeTile(TileType newTile, TileType oldTile) {}
 
-    public void randomForaging(ForagingMineralType newForaging) {
+    public void randomForaging(ForagingType newForaging) {
 
     }
 }

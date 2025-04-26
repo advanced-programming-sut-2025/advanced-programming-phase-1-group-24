@@ -1,7 +1,7 @@
 package org.example.Model.MapManagement;
 
 public enum TileType {
-    EMPTY("E"), //for the start of the game 
+    EMPTY("E"), //for the start of the game
     LAKE("L"), //farm
     ROCK("R"),
     GREENHOUSE("G"), //farm
