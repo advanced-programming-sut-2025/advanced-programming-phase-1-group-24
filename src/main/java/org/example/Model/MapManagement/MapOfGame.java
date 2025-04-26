@@ -9,9 +9,12 @@ public class MapOfGame {
     private int width = 300;
     private int height = 200;
 
+    public MapOfGame() {
+        initializeMap();
+    }
 
     private void initializeMap() {
-        map = new Tile[height][width]; 
+        this.map = new Tile[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {

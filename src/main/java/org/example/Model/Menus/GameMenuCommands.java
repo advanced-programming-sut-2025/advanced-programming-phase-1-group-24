@@ -8,7 +8,7 @@ public enum GameMenuCommands implements Commands {
     CHOOSE_MAP("^game\\s+map\\s+(?<mapNumber>\\d+)$"),
     EXIT_GAME("^exit\\s+game$"),
     LOAD_GAME("^load\\s+game$"),
-    NEW_GAME("^game\\s+new\\s+(?<users>.+)$"),
+    NEW_GAME("^game\\s+new\\s+-u\\s+(?<users>.+)$"),
     MENU_ENTER(Commands.MENU_ENTER),
     SHOW_MENU(Commands.SHOW_MENU),
     EXIT(Commands.EXIT);

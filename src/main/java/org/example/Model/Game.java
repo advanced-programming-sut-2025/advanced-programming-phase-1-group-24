@@ -32,9 +32,10 @@ public class Game {
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
         this.timeAndDate = new TimeAndDate(9, 1,DayOfWeek.Saturday, Season.SPRING);
+        this.map = new MapOfGame();
     }
 
-    ArrayList<NPC> npcs;
+    private ArrayList<NPC> npcs;
 
     public List<User> getPlayers() {
         return players;
@@ -103,7 +104,7 @@ public class Game {
         timeAndDate.advanceHour();
     }
 
-    private ArrayList<NPC> npcs;
+
 
     public MapOfGame getMap() {
         return map;
@@ -160,7 +161,6 @@ public class Game {
     public void setNpcs(ArrayList<NPC> npcs) {
         this.npcs = npcs;
     }
-    public void createNPC(){}
 
     public WeatherType getTomorrowWeatherType() {
         return tomorrowWeatherType;

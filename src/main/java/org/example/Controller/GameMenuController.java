@@ -1,21 +1,36 @@
 package org.example.Controller;
 
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.example.Main;
 import org.example.Model.App;
+import org.example.Model.ConfigTemplates.FarmTemplate;
+import org.example.Model.ConfigTemplates.FarmTemplateManager;
 import org.example.Model.Game;
+import org.example.Model.Growables.ForagingCropType;
+import org.example.Model.Growables.GrowableFactory;
+import org.example.Model.Growables.TreeType;
+import org.example.Model.MapManagement.MapOfGame;
+import org.example.Model.MapManagement.Tile;
+import org.example.Model.MapManagement.TileType;
 import org.example.Model.Menus.GameMenuCommands;
+import org.example.Model.Places.*;
 import org.example.Model.Result;
+import org.example.Model.TimeManagement.Season;
 import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
 import org.example.Model.Tools.ToolType;
 import org.example.Model.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public class GameMenuController implements MenuController {
 
@@ -65,6 +80,13 @@ public class GameMenuController implements MenuController {
         }
         // Create and add the game
         Game newGame = new Game(players, creator, creator);
+        //load farm.json            ONLY ONCEEEEEEE
+        if (FarmTemplateManager.getTemplates() == null) {
+            FarmTemplateManager.loadTemplates();
+        }
+        //create a new game and put it as currentgame in app
+        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
+
         app.getActiveGames().add(newGame);
         app.setCurrentGame(newGame);
 
@@ -85,7 +107,7 @@ public class GameMenuController implements MenuController {
                     if (mapNumber != 1 && mapNumber != 2) {
                         System.out.println("invalid map number");
                     } else {
-                        // Call method to apply map to player ///////////////////////////
+                        pickGameMap( player, mapNumber);
                         hasChosen = true;
                     }
                 } else {
@@ -93,8 +115,133 @@ public class GameMenuController implements MenuController {
                 }
             }
         }
+        printMap(0,0,200);
     }
+    //we will call this method for every user
+    public void pickGameMap(User player, int mapNumber){
+        App app = App.getInstance();
+        Game currentGame = app.getCurrentGame();
+        MapOfGame mapOfGame = currentGame.getMap();
+        Farm playerFarm;
+        if(mapNumber % 2 == 0){
+            FarmTemplate template = FarmTemplateManager.getTemplateByType("farm_2");
+            //find an empty corner
+            Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
+            playerFarm = new Farm(player, template, (int)farmCoordinate.getX(), (int)farmCoordinate.getY());
+        }
+        else{
+            FarmTemplate template = FarmTemplateManager.getTemplateByType("farm_1");
+            Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
+            playerFarm = new Farm(player, template, (int)farmCoordinate.getX(), (int)farmCoordinate.getY());
+        }
+        //update tile types that are in the farm
+        Tile[][] map = mapOfGame.getMap();
+        for(int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++){
+            for(int x = playerFarm.getX(); x < playerFarm.getX() + playerFarm.getWidth(); x++){
+                Tile tile = map[y][x];
+                tile.setTileOwner(player);
+                boolean foundSpecial = false;
 
+                for (Habitat lake : playerFarm.getLake()) {
+
+                    if (isInHabitat(x, y, lake)) {
+                        tile.setType(TileType.LAKE);
+                        tile.setWalkable(false);
+                        foundSpecial = true;
+                    }
+                }
+
+                Quarry quarry = playerFarm.getQuarry();
+                Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight());
+
+                if (!foundSpecial && isInHabitat(x, y, quarryHabitat)) {
+                    tile.setType(TileType.QUARRY);
+                    tile.setWalkable(true);
+                    foundSpecial = true;
+                }
+
+                House house = playerFarm.getHouse();
+                Habitat houseHabitat = new Habitat(house.getX(), house.getY(), house.getWidth(), house.getHeight());
+                if (!foundSpecial && isInHabitat(x, y, houseHabitat)) {
+                    tile.setType(TileType.HOUSE);
+                    tile.setWalkable(true);
+                    foundSpecial = true;
+                }
+
+                Habitat houseWallHabitat = new Habitat(
+                        house.getX() - 1,
+                        house.getY() - 1,
+                        house.getWidth() + 2,
+                        house.getHeight() + 2
+                );
+
+                if (isOnHabitatBorder(x, y, houseWallHabitat, houseHabitat)) {
+                    tile.setType(TileType.WALL);
+                    tile.setWalkable(false);
+                }
+
+                GreenHouse greenHouse = playerFarm.getGreenHouse();
+                Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight());
+                if(!foundSpecial && isInHabitat(x, y, greenHouseHabitat)){
+                    tile.setType(TileType.GREENHOUSE);
+                    tile.setWalkable(false);
+                    foundSpecial = true;
+                }
+
+                Habitat greenHouseWallHabitat = new Habitat(
+                        greenHouse.getX() - 1,
+                        greenHouse.getY() - 1,
+                        greenHouse.getWidth() + 2,
+                        greenHouse.getHeight() + 2
+                );
+
+                if (isOnHabitatBorder(x, y, greenHouseWallHabitat, greenHouseHabitat)) {
+                    tile.setType(TileType.WALL);
+                    tile.setWalkable(false);
+                }
+
+                if (x >= greenHouse.getX() && x < greenHouse.getX() + greenHouse.getWidth() && y == greenHouse.getY() - 1) {
+                    tile.setType(TileType.WATERCONTAINER);
+                    tile.setWalkable(false);
+                }
+
+                if (!foundSpecial) {
+                    tile.setType(TileType.FARM);
+                    tile.setWalkable(true); // walkable by default
+                }
+            }
+
+        }
+        List<Point> validTiles = new ArrayList<>();
+        for (int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++) {
+            for (int x = playerFarm.getX(); x < playerFarm.getX() + playerFarm.getWidth(); x++) {
+                if (map[y][x].getType() == TileType.FARM) {
+                    validTiles.add(new Point(x, y));
+                }
+            }
+        }
+
+        int numberOfForagingCrops = 50;
+        int numberOfTrees = 50;
+        Collections.shuffle(validTiles);
+
+        for (int i = 0; i < Math.min(numberOfForagingCrops, validTiles.size()); i++) {
+            Point p = validTiles.get(i);
+            map[p.y][p.x].setType(TileType.GROWABLE);
+            map[p.y][p.x].setContainedGrowable(GrowableFactory.getInstance().create(getRandomForagingCropBySeason(currentGame.getTimeAndDate().getSeason())));
+            map[p.y][p.x].setWalkable(false);
+        }
+
+        for (int i = 0; i < Math.min(numberOfTrees, validTiles.size()); i++) {
+            Point p = validTiles.get(i);
+            Tile tile = map[p.y][p.x];
+
+            TreeType treeType = getRandomForagingTree();
+            tile.setContainedGrowable(GrowableFactory.getInstance().create(treeType.getSource()));
+            tile.setType(TileType.GROWABLE); // Optional: assign a specific tile type
+            tile.setWalkable(false);
+        }
+    }
     public Result loadGame() {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -366,6 +513,102 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "advanced time by " + hours + " hours.");
     }
+
+    public static Point isCornerAvailable(Tile[][] map, int width, int height) {
+        int mapHeight = map.length;
+        int mapWidth = map[0].length;
+
+        int[][] corners = {
+                {0, 0},                             // Top-left
+                {mapWidth - width, 0},             // Top-right
+                {0, mapHeight - height},           // Bottom-left
+                {mapWidth - width, mapHeight - height} // Bottom-right
+        };
+
+        for (int[] corner : corners) {
+            int startX = corner[0];
+            int startY = corner[1];
+
+            if (startX < 0 || startY < 0 || startX + width > mapWidth || startY + height > mapHeight)
+                continue;
+
+            boolean isEmpty = true;
+            for (int y = startY; y < startY + height && isEmpty; y++) {
+                for (int x = startX; x < startX + width; x++) {
+                    if (map[y][x].getType() != TileType.EMPTY) {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isEmpty) {
+                return new Point(startX, startY);
+            }
+        }
+
+        return null;
+    }
+
+    public void creatingRandomForagingForFarm(){
+        //rock ??
+        //choose between foraging mineral types to put in Quarry
+        //choose between foraging crops to put in map
+
+    }
+
+    private boolean isInHabitat(int x, int y, Habitat h) {
+        return x >= h.getX() && x < h.getX() + h.getWidth()
+                && y >= h.getY() && y < h.getY() + h.getHeight();
+    }
+
+    private boolean isOnHabitatBorder(int x, int y, Habitat wallHabitat, Habitat mainHabitat) {
+        // Tile is inside wallHabitat but NOT inside mainHabitat
+        return isInHabitat(x, y, wallHabitat) && !isInHabitat(x, y, mainHabitat);
+    }
+
+    private ForagingCropType getRandomForagingCropBySeason(Season currentSeason) {
+        List<ForagingCropType> valid = Arrays.stream(ForagingCropType.values())
+                .filter(crop -> crop.getSeason().contains(currentSeason))
+                .collect(Collectors.toList());
+
+        return valid.get(new Random().nextInt(valid.size()));
+    }
+
+    private TreeType getRandomForagingTree() {
+        List<TreeType> valid = Arrays.stream(TreeType.values())
+                .filter(TreeType::getIsForagingTree)
+                .collect(Collectors.toList());
+
+        return valid.get(new Random().nextInt(valid.size()));
+    }
+//    public List<Farm> loadFarmTemplates() {
+//        Gson gson = new Gson();
+//        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("farm.json")) {
+//            if (inputStream == null) {
+//                throw new RuntimeException("farm.json not found in resources.");
+//            }
+//
+//            InputStreamReader reader = new InputStreamReader(inputStream);
+//            Type listType = new TypeToken<List<FarmTemplate>>() {}.getType();
+//            return gson.fromJson(reader, listType);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
+
+    public void printMap(int x, int y, int size){
+        Game game = App.getInstance().getCurrentGame();
+        Tile[][] map = game.getMap().getMap();
+        for(int i = y; i < y + size; i++){
+            for(int j = x; j < x + size; j++){
+                System.out.print(map[y][x].getType().getLetterToPrint());
+            }
+            System.out.print("\n");
+        }
+    }
 }
 //package org.example.Controller;
 //
@@ -408,15 +651,15 @@ public class GameMenuController implements MenuController {
 //
 //    //GameMenuCommands command;
 //
-//    // public Result createNewGame(String username1, String username2, String username3){
-//    //     //load farm.json            ONLY ONCEEEEEEE
-//    //     if (FarmTemplateManager.getTemplates() == null) {
-//    //         FarmTemplateManager.loadTemplates();
-//    //     }
-//    //     //create a new game and put it as currentgame in app
-//    //     //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
+//     public Result createNewGame(String username1, String username2, String username3){
+//         //load farm.json            ONLY ONCEEEEEEE
+//         if (FarmTemplateManager.getTemplates() == null) {
+//             FarmTemplateManager.loadTemplates();
+//         }
+//         //create a new game and put it as currentgame in app
+//         //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
 //
-//    // }
+//     }
 //
 //    //we will call this method for every user
 //    public void pickGameMap(User player, int mapNumber){

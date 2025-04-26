@@ -14,7 +14,7 @@
       "height": 26,
       "house": { "startX": 26, "startY": 4, "width": 4, "height": 4},
       "greenHouse": { "startX": 16, "startY": 7, "width": 6, "height": 5},
-      "lake": { "startX": 3, "startY": 19, "width": 7, "height": 5},
+      "lake": [{ "startX": 3, "startY": 19, "width": 7, "height": 5}],
       "quarry": { "startX": 25, "startY": 13,"width": 6, "height": 8}
     }
   ]

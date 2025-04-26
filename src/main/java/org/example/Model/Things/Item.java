@@ -1,7 +1,7 @@
 package org.example.Model.Things;
 
 public class Item {
-    ItemType type;
+    ItemType itemType;
     //foraging minerals
     //
     //animal products

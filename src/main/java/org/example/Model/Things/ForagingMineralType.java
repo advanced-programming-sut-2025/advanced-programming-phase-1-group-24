@@ -1,4 +1,4 @@
 package org.example.Model.Things;
 
-public enum ForagingType {
+public enum ForagingMineralType {
 }

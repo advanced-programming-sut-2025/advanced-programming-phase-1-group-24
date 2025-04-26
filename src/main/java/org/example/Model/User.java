@@ -251,6 +251,6 @@ public class User {
         }
     }
 
-    public void trade(){}
+
 
 }
