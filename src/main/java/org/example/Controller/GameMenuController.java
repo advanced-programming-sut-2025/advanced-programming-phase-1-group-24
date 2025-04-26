@@ -107,7 +107,7 @@ public class GameMenuController implements MenuController {
                     if (mapNumber != 1 && mapNumber != 2) {
                         System.out.println("invalid map number");
                     } else {
-                        pickGameMap( player, mapNumber);
+                        pickGameMap(player, mapNumber);
                         hasChosen = true;
                     }
                 } else {
@@ -115,29 +115,29 @@ public class GameMenuController implements MenuController {
                 }
             }
         }
-        printMap(0,0,200);
+        printMap(0, 0, 100);
     }
+
     //we will call this method for every user
-    public void pickGameMap(User player, int mapNumber){
+    public void pickGameMap(User player, int mapNumber) {
         App app = App.getInstance();
         Game currentGame = app.getCurrentGame();
         MapOfGame mapOfGame = currentGame.getMap();
         Farm playerFarm;
-        if(mapNumber % 2 == 0){
+        if (mapNumber % 2 == 0) {
             FarmTemplate template = FarmTemplateManager.getTemplateByType("farm_2");
             //find an empty corner
             Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
-            playerFarm = new Farm(player, template, (int)farmCoordinate.getX(), (int)farmCoordinate.getY());
-        }
-        else{
+            playerFarm = new Farm(player, template, (int) farmCoordinate.getX(), (int) farmCoordinate.getY());
+        } else {
             FarmTemplate template = FarmTemplateManager.getTemplateByType("farm_1");
             Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
-            playerFarm = new Farm(player, template, (int)farmCoordinate.getX(), (int)farmCoordinate.getY());
+            playerFarm = new Farm(player, template, (int) farmCoordinate.getX(), (int) farmCoordinate.getY());
         }
         //update tile types that are in the farm
         Tile[][] map = mapOfGame.getMap();
-        for(int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++){
-            for(int x = playerFarm.getX(); x < playerFarm.getX() + playerFarm.getWidth(); x++){
+        for (int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++) {
+            for (int x = playerFarm.getX(); x < playerFarm.getX() + playerFarm.getWidth(); x++) {
                 Tile tile = map[y][x];
                 tile.setTileOwner(player);
                 boolean foundSpecial = false;
@@ -182,7 +182,7 @@ public class GameMenuController implements MenuController {
 
                 GreenHouse greenHouse = playerFarm.getGreenHouse();
                 Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight());
-                if(!foundSpecial && isInHabitat(x, y, greenHouseHabitat)){
+                if (!foundSpecial && isInHabitat(x, y, greenHouseHabitat)) {
                     tile.setType(TileType.GREENHOUSE);
                     tile.setWalkable(false);
                     foundSpecial = true;
@@ -210,7 +210,6 @@ public class GameMenuController implements MenuController {
                     tile.setWalkable(true); // walkable by default
                 }
             }
-
         }
         List<Point> validTiles = new ArrayList<>();
         for (int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++) {
@@ -241,7 +240,9 @@ public class GameMenuController implements MenuController {
             tile.setType(TileType.GROWABLE); // Optional: assign a specific tile type
             tile.setWalkable(false);
         }
+
     }
+
     public Result loadGame() {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -378,6 +379,7 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "your vote is recorded as YES.");
     }
+
     private void handleEndOfDay() {
         App app = App.getInstance();
         Game game = app.getCurrentGame();
@@ -398,17 +400,17 @@ public class GameMenuController implements MenuController {
             for (User user : game.getPlayers()) {
                 user.resetEnergyForNewDay();
                 //user.getFarm().growCropsOneDay();
-               // user.getFarm().generateForageAndMine();
+                // user.getFarm().generateForageAndMine();
                 //user.collectShippingBinProfits();
             }
             //TO DO: update crops and days left to die delete crops and tree
 
             // Update weather for the new day
-           // game.getCurrentWeatherType() = WeatherType.randomWeather();
+            // game.getCurrentWeatherType() = WeatherType.randomWeather();
         }
     }
 
-//    public Result cheatAdvanceTime(int hours){}
+    //    public Result cheatAdvanceTime(int hours){}
 //    public Result cheatAdvanceDate(int days){}
     public void strikeRandomFarm() {
     }
@@ -478,7 +480,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result cheatAdvanceDate(String number) {
-    int days = Integer.parseInt(number);
+        int days = Integer.parseInt(number);
         if (days <= 0) {
             return new Result(false, "invalid number of days!");
         }
@@ -550,7 +552,7 @@ public class GameMenuController implements MenuController {
         return null;
     }
 
-    public void creatingRandomForagingForFarm(){
+    public void creatingRandomForagingForFarm() {
         //rock ??
         //choose between foraging mineral types to put in Quarry
         //choose between foraging crops to put in map
@@ -599,12 +601,12 @@ public class GameMenuController implements MenuController {
 //        }
 //    }
 
-    public void printMap(int x, int y, int size){
+    public void printMap(int x, int y, int size) {
         Game game = App.getInstance().getCurrentGame();
         Tile[][] map = game.getMap().getMap();
-        for(int i = y; i < y + size; i++){
-            for(int j = x; j < x + size; j++){
-                System.out.print(map[y][x].getType().getLetterToPrint());
+        for (int i = y; i < y + size; i++) {
+            for (int j = x; j < x + size; j++) {
+                System.out.print(map[i][j].getType().getLetterToPrint());
             }
             System.out.print("\n");
         }

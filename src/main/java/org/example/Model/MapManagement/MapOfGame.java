@@ -6,8 +6,8 @@ import org.example.Model.Things.ForagingType;
 public class MapOfGame {
 
     private Tile[][] map;
-    private int width = 300;
-    private int height = 200;
+    private int width = 100;
+    private int height = 100;
 
     public MapOfGame() {
         initializeMap();
@@ -38,6 +38,9 @@ public class MapOfGame {
         return width;
     }
 
+    public void setMap(Tile[][] map) {
+        this.map = map;
+    }
 
     public void changeTile(TileType newTile, TileType oldTile) {}
 

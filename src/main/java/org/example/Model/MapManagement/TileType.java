@@ -16,7 +16,7 @@ public enum TileType {
     WALL("W"),
     NPCLAND("N"),
     PRODUCTOGROWABLE("P"),
-    GROWABLE("G");
+    GROWABLE("g");
     //Letter for printing the map
 
     private final String letterToPrint;
