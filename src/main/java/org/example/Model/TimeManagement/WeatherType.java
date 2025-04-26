@@ -10,14 +10,12 @@ public enum WeatherType {
 
     boolean automaticWatering;
     int energyOfToolsModifier;
-    boolean destroysCrops;
     boolean causesLightning;
 
 
-    WeatherType(boolean automaticWatering, int energyOfToolsModifier, boolean destroyCrops, boolean causesLightning) {
+    WeatherType(boolean automaticWatering, int energyOfToolsModifier, boolean causesLightning) {
         this.automaticWatering = automaticWatering;
         this.energyOfToolsModifier = energyOfToolsModifier;
-        this.destroysCrops = destroyCrops;
         this.causesLightning = causesLightning;
 
     }
@@ -28,10 +26,6 @@ public enum WeatherType {
 
     public boolean isAutomaticWatering() {
         return automaticWatering;
-    }
-
-    public boolean isDestroysCrops() {
-        return destroysCrops;
     }
 
     public boolean isCausesLightning() {

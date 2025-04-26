@@ -3,6 +3,7 @@ package org.example.Model.Growables;
 import java.util.*;
 
 public class GrowableFactory {
+    private static final GrowableFactory instance = new GrowableFactory();
     private final Map<SourceType, Growable> prototypes = new EnumMap<>(SourceType.class);
     private final Map<ForagingCropType, Growable> foragingPrototypes = new EnumMap<>(ForagingCropType.class);
 
@@ -16,6 +17,10 @@ public class GrowableFactory {
         for (ForagingCropType forage : ForagingCropType.values()) {
             foragingPrototypes.put(forage, createPrototypeFromForaging(forage));
         }
+    }
+
+    public static GrowableFactory getInstance() {
+        return instance;
     }
 
     private Growable createPrototypeFromCrop(CropType crop) {

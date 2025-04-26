@@ -15,7 +15,7 @@ public class NPC{
     Map<ArrayList<Item>, ArrayList<Item>> missions;
     //requiredItems, prizeItems
 
-    public Result talkToNPC(){}
+    //public Result talkToNPC(){}
     public void doMission(){}
     public void giveGift(){}
 

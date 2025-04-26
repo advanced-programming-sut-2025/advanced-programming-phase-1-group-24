@@ -1,6 +1,6 @@
 package org.example.Model.Menus;
 
-import View.*;
+import org.example.View.*;
 
 import java.util.Scanner;
 

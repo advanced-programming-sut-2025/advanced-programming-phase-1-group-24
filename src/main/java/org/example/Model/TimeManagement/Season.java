@@ -3,7 +3,7 @@ package org.example.Model.TimeManagement;
 import java.util.ArrayList;
 
 public enum Season {
-    SPRING(new ArrayList<>()),
+    SPRING,
     SUMMER,
     AUTUMN,
     WINTER;

@@ -57,9 +57,9 @@ public class User {
         return friends;
     }
 
-    public Shop getCurrentShop() {
-        return currentShop;
-    }
+    // public Shop getCurrentShop() {
+    //     return currentShop;
+    // }
 
     public Tile getCurrentTile() {
         return currentTile;

@@ -7,19 +7,19 @@ public class ProfileMenuController {
 
     ProfileMenuCommands command;
 
-    public Result changeUsername(String newUsername) {
-    }
+    // public Result changeUsername(String newUsername) {
+    // }
 
-    public Result changeNickname(String newNickname) {
-    }
+    // public Result changeNickname(String newNickname) {
+    // }
 
-    public Result changeEmail(String newEmail) {
-    }
+    // public Result changeEmail(String newEmail) {
+    // }
 
-    public Result changePassword(String newPassword, String oldPassword) {
-    }
+    // public Result changePassword(String newPassword, String oldPassword) {
+    // }
 
-    public Result showUserInfo() {
-    }
+    // public Result showUserInfo() {
+    // }
 }
 
