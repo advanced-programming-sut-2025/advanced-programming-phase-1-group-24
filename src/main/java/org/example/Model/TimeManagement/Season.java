@@ -1,17 +1,17 @@
 package org.example.Model.TimeManagement;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public enum Season {
-    SPRING(new ArrayList<>()),
-    SUMMER(new ArrayList<>()),
-    AUTUMN(new ArrayList<>()),
-    WINTER(new ArrayList<>());
+    SPRING(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    SUMMER(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    AUTUMN(List.of(WeatherType.SUNNY,WeatherType.RAIN,WeatherType.STORM)),
+    WINTER(List.of(WeatherType.SUNNY,WeatherType.SNOW));
 
-    ArrayList<WeatherType> weatherTypes;
-    Season(ArrayList<WeatherType> weatherTypes) {}
+    List<WeatherType> weatherTypes;
+    Season(List<WeatherType> weatherTypes) {}
 
-    public ArrayList<WeatherType> getWeatherTypes() {
+    public List<WeatherType> getWeatherTypes() {
         return weatherTypes;
     }
     public Season next() {

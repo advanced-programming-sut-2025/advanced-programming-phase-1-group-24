@@ -19,7 +19,7 @@ public class Game {
     private TimeAndDate timeAndDate;
     private User currentPlayer;
     private User mainPlayer;  //the creator of the game or the last player that loaded the game
-    private WeatherType currentWeatherType;
+    private WeatherType currentWeatherType=WeatherType.SUNNY;
     private WeatherType tomorrowWeatherType;
     private int currentPlayerIndex = 0;
     int turnCounter = 0;
@@ -158,5 +158,13 @@ public class Game {
 
     public void setNpcs(ArrayList<NPC> npcs) {
         this.npcs = npcs;
+    }
+
+    public WeatherType getTomorrowWeatherType() {
+        return tomorrowWeatherType;
+    }
+
+    public void setTomorrowWeatherType(WeatherType tomorrowWeatherType) {
+        this.tomorrowWeatherType = tomorrowWeatherType;
     }
 }

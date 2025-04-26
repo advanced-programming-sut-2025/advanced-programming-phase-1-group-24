@@ -33,5 +33,6 @@ public enum WeatherType {
         return causesLightning;
     }
 
+
 }
 
