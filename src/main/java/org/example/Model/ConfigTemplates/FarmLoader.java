@@ -15,9 +15,6 @@ import java.util.List;
 public class FarmLoader {
 
     public static List<FarmTemplate> loadFarmTemplates() {
-        String currentDirectory = System.getProperty("user.dir");
-        System.out.println("Current working directory: " + currentDirectory);
-
         File file = new File("src/main/resources/farms.json");
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
