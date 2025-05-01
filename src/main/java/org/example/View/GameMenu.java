@@ -14,8 +14,19 @@ public class GameMenu implements AppMenu {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 
-
-        if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
+        if ((matcher = GameMenuCommands.CHEAT_ENERGY.getMatcher(input)) != null) {
+            System.out.println(controller.cheatChangeEnergy(matcher.group("value")));
+        } else if ((matcher = GameMenuCommands.CHEAT_UNLIMITED_ENERGY.getMatcher(input)) != null) {
+            System.out.println(controller.cheatUnlimitedEnergy());
+        } else if ((matcher = GameMenuCommands.ENERGY.getMatcher(input)) != null) {
+            System.out.println(controller.showEnergy());
+        } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
+            System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
+        } else if ((matcher = GameMenuCommands.WEATHER.getMatcher(input)) != null) {
+            System.out.println(controller.showCurrentWeather());
+        } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMatcher(input)) != null) {
+            System.out.println(controller.showTomorrowWeather());
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
