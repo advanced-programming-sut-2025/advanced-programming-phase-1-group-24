@@ -14,7 +14,15 @@ public class GameMenu implements AppMenu {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 
-        if ((matcher = GameMenuCommands.PET.getMatcher(input)) != null) {
+        if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMatcher(input)) != null) {
+            System.out.println(controller.shepherdAnimal(matcher.group("name"), matcher.group("x"), matcher.group("y")));
+        } else if ((matcher = GameMenuCommands.FEED_HAY.getMatcher(input)) != null) {
+            System.out.println(controller.feedHay(matcher.group("name")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAnimalFriendship(matcher.group("name"), matcher.group("amount")));
+        } else if ((matcher = GameMenuCommands.ANIMALS_INFO.getMatcher(input)) != null) {
+            System.out.println(controller.showOwnedAnimals());
+        } else if ((matcher = GameMenuCommands.PET.getMatcher(input)) != null) {
             System.out.println(controller.petAnimal(matcher.group("name")));
         } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
             System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));

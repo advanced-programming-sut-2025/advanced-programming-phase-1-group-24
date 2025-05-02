@@ -3,6 +3,7 @@ package org.example.Model.MapManagement;
 import org.example.Model.Growables.GrowableType;
 import org.example.Model.Places.Farm;
 import org.example.Model.Things.ForagingType;
+import org.example.Model.User;
 
 import java.util.*;
 
@@ -118,6 +119,21 @@ public class MapOfGame {
         }
         return false;
     }
+    public Farm getFarmByOwner(User owner) {
+        for (Farm farm : farms) {
+            if (farm.getOwner().equals(owner)) {
+                return farm;
+            }
+        }
+        return null;
+    }
+    public Tile getTile(int x, int y) {
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+            return map[y][x];
+        }
+        return null; // or throw an exception if you prefer
+    }
+
 
     public void changeTile(TileType newTile, TileType oldTile) {}
 

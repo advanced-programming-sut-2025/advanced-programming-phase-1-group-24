@@ -887,7 +887,7 @@ public class GameMenuController implements MenuController {
         Tile playerTile = player.getCurrentTile();
         Animal animal = player.getAnimalByName(animalName);
         Tile animalTile = animal.getCurrentTile();
-        if(playerTile == null) {
+        if (playerTile == null) {
             return new Result(false, "Player tile not found!");
         }
         if (animal == null || animalTile == null) {
@@ -905,7 +905,99 @@ public class GameMenuController implements MenuController {
     private boolean isAdjacent(Tile t1, Tile t2) {
         int dx = Math.abs(t1.getX() - t2.getX());
         int dy = Math.abs(t1.getY() - t2.getY());
-        return dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0); // Exclude the same tile
+        return dx <= 1 && dy <= 1;
+        //&& !(dx == 0 && dy == 0); // Exclude the same tile
     }
+
+    public Result cheatAnimalFriendship(String name, String amount) {
+        Game game = App.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        Animal animal = player.getAnimalByName(name);
+        int amountInt = Integer.parseInt(amount);
+        if (amountInt < 0 || amountInt > 1000) {
+            return new Result(false, "Invalid amount: must be a positve number between 0 and 1000.");
+        }
+        if (animal == null) {
+            return new Result(false, "Error: No animal found with the name " + name + ".");
+        }
+        animal.setFriendship(amountInt);
+        return new Result(true, "Friendship of " + name + " set to " + amountInt + ".");
+    }
+
+
+    public Result showOwnedAnimals() {
+        Game game = App.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+
+        if (player.getOwnedAnimals().isEmpty()) {
+            return new Result(true, "You have no animals.");
+        }
+        StringBuilder sb = new StringBuilder("Owned animals:\n");
+        for (Animal animal : player.getOwnedAnimals()) {
+            sb.append("- ").append(animal.getName())
+                    .append(" (Friendship: ").append(animal.getFriendship())
+                    .append(", Fed today: ").append(animal.isFedToday())
+                    .append(", Petted today: ").append(animal.isPettedToday())
+                    .append(")\n");
+        }
+
+        return new Result(true, sb.toString());
+    }
+
+    public Result feedHay(String name) {
+        Game game = App.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        Animal animal = player.getAnimalByName(name);
+        if (animal == null) {
+            return new Result(false, "No animal named " + name + " found.");
+        }
+
+        if (animal.isFedToday()) {
+            return new Result(false, name + " has already been fed today.");
+        }
+
+        // check for hay in storage and deduct one unit here
+
+        animal.feed(); // sets fedToday = true and increases friendship
+        return new Result(true, name + " was fed with hay.");
+    }
+
+    public Result shepherdAnimal(String name, String x, String y) {
+        Game game = App.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        int targetX = Integer.parseInt(x);
+        int targetY = Integer.parseInt(y);
+        Animal animal = player.getAnimalByName(name);
+        Farm farm = game.getMap().getFarmByOwner(player);
+        if (animal == null) {
+            return new Result(false, "No animal named " + name + " found.");
+        }
+        //validate target x and target y
+        //get farm by owner in map clas and get tile by x and y in map class
+        if (targetX < farm.getX() || targetX > farm.getX() + farm.getWidth() ||
+                targetY < farm.getY() || targetY > farm.getY() + farm.getHeight()) {
+//completeeee    /?????????
+        }
+        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+            return new Result(false, "Cannot shepherd animals outside in bad weather.");
+        }
+
+        if (!isValidOutdoorTile(targetX, targetY)) {
+            return new Result(false, "Invalid location for shepherding.");
+        }
+
+        animal.setCurrentTile(game.getMap().getTile(targetX, targetY)); // Assuming getTile returns a Tile
+        animal.feed();///??????????????????
+        return new Result(true, name + " was shepherded to (" + targetX + ", " + targetY + ").");
+    }
+
+    private boolean isValidOutdoorTile(int x, int y) {
+        Game game = App.getInstance().getCurrentGame();
+        Tile tileGame[][] = game.getMap().getMap();
+        Tile tile = tileGame[y][x];
+        //getTile(x, y);  // assumes a method to access the tile
+        return tile != null && tile.isOutdoor() && tile.getisWalkable(); // or however your logic works
+    }
+
 
 }

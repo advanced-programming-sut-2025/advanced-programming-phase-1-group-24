@@ -360,6 +360,9 @@ public class User {
         return null;
     }
 
+    public ArrayList<Animal> getOwnedAnimals() {
+        return ownedAnimals;
+    }
 
     @Override
     public boolean equals(Object o) {
