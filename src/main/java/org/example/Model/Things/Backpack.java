@@ -5,9 +5,9 @@ import org.example.Model.Tools.Tool;
 import java.util.Map;
 
 public class Backpack {
-    BackpackType type;
+    StorageType type;
 
-    public BackpackType getType() {
+    public StorageType getType() {
         return type;
     }
 

@@ -1,6 +1,15 @@
 package org.example.Model.Menus;
 
 public enum GameMenuCommands implements Commands {
+    SELL_ANIMAL("^sell\\s+animal\\s+-n\\s+(?<name>.+)$"),
+    COLLECT_PRODUCTS("^collect\\s+produce\\s+-n\\s+(?<name>.+)$"),
+    SHOW_PRODUCTS("^produces$"),
+    FEED_HAY("^feed\\s+hay\\s+-n\\s+(?<name>.+)$"),
+    SHEPHERD_ANIMALS("^shepherd\\s+animals\\s+-n\\s+(?<name>.+)\\s+-l\\s+<(?<x>\\d+)\\s+,\\s+(?<y>\\d+)>$"),
+    ANIMALS_INFO("^animals$"),
+    CHEAT_ANIMAL_FRIENDSHIP("^cheat\\s+set\\s+friendship\\s+-n\\s+(?<name>.+)\\s+-c\\s+(?<amount>-?\\d+)$"),
+    PET("^pet\\s+-n\\s+(?<name>.+)$"),
+    CHeat_THOR("^cheat\\s+Thor\\s+-l\\s+<(?<x>\\d+),(?<y>\\d+)>$"),
     CHEAT_UNLIMITED_ENERGY("^energy\\s+unlimited$"),
     CHEAT_ENERGY("^energy\\s+set\\s+-v\\s+(?<value>-?\\d+)$"),
     ENERGY("^energy\\s+show$"),

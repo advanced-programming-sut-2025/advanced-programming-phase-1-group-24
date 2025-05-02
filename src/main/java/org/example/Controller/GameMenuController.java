@@ -4,10 +4,10 @@ package org.example.Controller;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.example.Main;
-import org.example.Model.App;
+import org.example.Model.*;
+import org.example.Model.Animals.Animal;
 import org.example.Model.ConfigTemplates.FarmTemplate;
 import org.example.Model.ConfigTemplates.FarmTemplateManager;
-import org.example.Model.Game;
 import org.example.Model.Growables.ForagingCropType;
 import org.example.Model.Growables.GrowableFactory;
 import org.example.Model.Growables.TreeType;
@@ -16,12 +16,10 @@ import org.example.Model.MapManagement.Tile;
 import org.example.Model.MapManagement.TileType;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Places.*;
-import org.example.Model.Result;
 import org.example.Model.TimeManagement.Season;
 import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
 import org.example.Model.Tools.ToolType;
-import org.example.Model.User;
 
 import java.awt.*;
 import java.io.InputStream;
@@ -36,6 +34,64 @@ public class GameMenuController implements MenuController {
 
     GameMenuCommands command;
 
+    //    public Result createGame(String users, Scanner scanner) {
+//        App app = App.getInstance();
+//        User creator = app.getLoggedInUser();
+//
+//        if (creator == null)
+//            return new Result(false, "please login first!");
+//
+//        // Split usernames and clean empty entries (e.g., if user types extra spaces)
+//        List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
+//                .filter(usersString -> !usersString.isEmpty())
+//                .toList();
+//
+//        if (usernames.isEmpty())
+//            return new Result(false, "you must specify at least one username!");
+//
+//        if (usernames.size() > 3)
+//            return new Result(false, "you can specify up to 3 usernames!");
+//
+//        // Check if the creator is already in a game
+//        for (Game game : app.getActiveGames()) {
+//            if (game.hasUser(creator))
+//                return new Result(false, "you are already in another game!");
+//        }
+//
+//        ArrayList<User> players = new ArrayList<>();
+//        players.add(creator); // Add the logged-in user first
+//
+//        for (String username : usernames) {
+//            User user = app.getUserByUsername(username);
+//            if (user == null)
+//                return new Result(false, "invalid username: " + username);
+//
+//            // Check if the user is already in a game
+//            Game game = app.getGameByUser(user);
+//            if (game != null) {
+//                return new Result(false, username + " is already in another game!");
+//            }
+//            players.add(user);
+//        }
+//        for (User player : players) {
+//            player.updateGameFields();
+//        }
+//        // Create and add the game
+//        Game newGame = new Game(players, creator, creator);
+//        //load farm.json            ONLY ONCEEEEEEE
+//        if (FarmTemplateManager.getTemplates() == null) {
+//            FarmTemplateManager.loadTemplates();
+//        }
+//        //create a new game and put it as currentgame in app
+//        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
+//
+//        app.getActiveGames().add(newGame);
+//        app.setCurrentGame(newGame);
+//
+//        handleMapSelection(players, scanner);
+//
+//        return new Result(true, "game created successfully!");
+//    }
     public Result createGame(String users, Scanner scanner) {
         App app = App.getInstance();
         User creator = app.getLoggedInUser();
@@ -43,49 +99,49 @@ public class GameMenuController implements MenuController {
         if (creator == null)
             return new Result(false, "please login first!");
 
-        // Split usernames and clean empty entries (e.g., if user types extra spaces)
+        // Split usernames and clean empty entries
         List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
-                .filter(usersString -> !usersString.isEmpty())
+                .filter(s -> !s.isEmpty())
                 .toList();
 
         if (usernames.isEmpty())
             return new Result(false, "you must specify at least one username!");
-
         if (usernames.size() > 3)
             return new Result(false, "you can specify up to 3 usernames!");
 
-        // Check if the creator is already in a game
-        for (Game game : app.getActiveGames()) {
-            if (game.hasUser(creator))
-                return new Result(false, "you are already in another game!");
-        }
+        // Build a set of all users already in any active game
+        Set<User> usersInGames = app.getActiveGames().stream()
+                .flatMap(game -> game.getPlayers().stream())
+                .collect(Collectors.toSet());
 
-        ArrayList<User> players = new ArrayList<>();
-        players.add(creator); // Add the logged-in user first
+        if (usersInGames.contains(creator))
+            return new Result(false, "you are already in another game!");
 
+        // Try to resolve all usernames to actual users
+        List<User> invitedUsers = new ArrayList<>();
         for (String username : usernames) {
             User user = app.getUserByUsername(username);
             if (user == null)
                 return new Result(false, "invalid username: " + username);
-
-            // Check if the user is already in a game
-            Game game = app.getGameByUser(user);
-            if (game != null) {
+            if (usersInGames.contains(user))
                 return new Result(false, username + " is already in another game!");
-            }
-            players.add(user);
+            invitedUsers.add(user);
         }
+
+        // Add the creator as the first player
+        ArrayList<User> players = new ArrayList<>();
+        players.add(creator);
+        players.addAll(invitedUsers);
+
         for (User player : players) {
-            player.updateGameFields();
+            player.updateGameFields(); // whatever this does
         }
-        // Create and add the game
+
         Game newGame = new Game(players, creator, creator);
-        //load farm.json            ONLY ONCEEEEEEE
+
         if (FarmTemplateManager.getTemplates() == null) {
-            FarmTemplateManager.loadTemplates();
+            FarmTemplateManager.loadTemplates(); // only once
         }
-        //create a new game and put it as currentgame in app
-        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
 
         app.getActiveGames().add(newGame);
         app.setCurrentGame(newGame);
@@ -94,6 +150,7 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "game created successfully!");
     }
+
 
     private void handleMapSelection(List<User> players, Scanner scanner) {
         for (User player : players) {
@@ -129,10 +186,12 @@ public class GameMenuController implements MenuController {
             //find an empty corner
             Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
             playerFarm = new Farm(player, template, (int) farmCoordinate.getX(), (int) farmCoordinate.getY());
+            mapOfGame.addFarm(playerFarm);
         } else {
             FarmTemplate template = FarmTemplateManager.getTemplateByType("farm_1");
             Point farmCoordinate = isCornerAvailable(mapOfGame.getMap(), template.width, template.height);
             playerFarm = new Farm(player, template, (int) farmCoordinate.getX(), (int) farmCoordinate.getY());
+            mapOfGame.addFarm(playerFarm);
         }
         //update tile types that are in the farm
         Tile[][] map = mapOfGame.getMap();
@@ -282,6 +341,7 @@ public class GameMenuController implements MenuController {
 
         // Exit game: go back to game menu
         app.setCurrentGame(null);
+        UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "game exited and saved successfully. returning to game menu...");
     }
 
@@ -305,27 +365,70 @@ public class GameMenuController implements MenuController {
     }
 
 
+    //    public Result nextTurn(Scanner scanner) {
+//        App app = App.getInstance();
+//        Game currentGame = app.getCurrentGame();
+//
+//        if (currentGame == null)
+//            return new Result(false, "no active game!");
+//
+//        User pastUser = currentGame.getCurrentPlayer();
+//        pastUser.resetTurnEnergy();
+//
+//        currentGame.goToNextTurn();
+//
+//        User currentUser = currentGame.getCurrentPlayer();
+//
+//        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
+//            return voteToTerminateInteractive(scanner, currentUser);
+//        }
+//        handleEndOfDay();
+//
+//        return new Result(true, "next turn started for " + currentUser.getUsername());
+//    }
     public Result nextTurn(Scanner scanner) {
         App app = App.getInstance();
         Game currentGame = app.getCurrentGame();
 
         if (currentGame == null)
             return new Result(false, "no active game!");
-
-        User pastUser = currentGame.getCurrentPlayer();
-        pastUser.resetTurnEnergy();
-
-        currentGame.goToNextTurn();
-
+        goToNextTurn(currentGame);
         User currentUser = currentGame.getCurrentPlayer();
-
         if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
             return voteToTerminateInteractive(scanner, currentUser);
         }
-        handleEndOfDay();
-
         return new Result(true, "next turn started for " + currentUser.getUsername());
     }
+
+    public void goToNextTurn(Game game) {
+        List<User> players = game.getPlayers();
+        int currentPlayerIndex = game.getCurrentPlayerIndex();
+        int turnCounter = game.getTurnCounter();
+
+        User currentPlayer;
+
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+            currentPlayer = players.get(currentPlayerIndex);
+            turnCounter++;
+
+            if (!currentPlayer.hasFainted()) {
+                currentPlayer.resetTurnEnergy();
+            }
+
+            if (turnCounter == players.size()) {
+                turnCounter = 0;
+                game.advanceTimeByOneHour();
+                handleEndOfDay();
+            }
+        } while (currentPlayer.hasFainted());
+
+        // Update game state back
+        game.setCurrentPlayer(currentPlayer);
+        game.setCurrentPlayerIndex(currentPlayerIndex);
+        game.setTurnCounter(turnCounter);
+    }
+
 
     private Result voteToTerminateInteractive(Scanner scanner, User user) {
         Game currentGame = App.getInstance().getCurrentGame();
@@ -374,6 +477,7 @@ public class GameMenuController implements MenuController {
             app.getActiveGames().remove(currentGame);
             app.setCurrentGame(null);
             app.saveActiveGames();
+            UserDatabase.saveUsers(app.getUsers());
             return new Result(true, "game terminated by unanimous vote. returning to game menu...");
         }
 
@@ -403,12 +507,20 @@ public class GameMenuController implements MenuController {
                 // user.getFarm().generateForageAndMine();
                 //user.collectShippingBinProfits();
             }
-            //TO DO: update crops and days left to die delete crops and tree
-            //TO Do: upadte fpraging and
+
 
             // Update weather for the new day
             game.setCurrentWeatherType(game.getTomorrowWeatherType());
             game.predictTomorrowWeather();
+            game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
+            // the lightning strike logic should go into your handleEndOfDay() function — specifically after the new day
+            //starts and the weather is known, but before or during crop updates (so the lightning can damage crops befor growth).
+
+            //TO DO: update crops and days left to die delete crops and tree
+            //TO Do: upadte fpraging and
+            //To Do:  update animal days left to produce
+            //To Do: crows attack
+
         }
     }
 
@@ -683,6 +795,7 @@ public class GameMenuController implements MenuController {
 
     public Result cheatChangeEnergy(String value) {
         Game game = App.getInstance().getCurrentGame();
+        User currentPlayer = game.getCurrentPlayer();
         if (game == null) {
             return new Result(false, "No active game!");
         }
@@ -697,12 +810,102 @@ public class GameMenuController implements MenuController {
         if (newEnergy < 0) {
             return new Result(false, "Energy cannot be negative!");
         }
+        if (newEnergy > currentPlayer.getMaxEnergy()) {
+            return new Result(false, "Energy cannot more than max energy!");
+        }
 
-        User currentPlayer = game.getCurrentPlayer();
         currentPlayer.setEnergy(newEnergy);
         // currentPlayer.setCurrentTurnEnergy(newEnergy);
 
         return new Result(true, "Player energy set to " + newEnergy + ".");
+    }
+
+    public Result cheatThor(String x, String y) {
+        Game game = App.getInstance().getCurrentGame();
+        if (game == null) {
+            return new Result(false, "No active game!");
+        }
+
+        MapOfGame mapOfGame = game.getMap();
+        Tile[][] map = mapOfGame.getMap();
+
+        try {
+            int xCoord = Integer.parseInt(x.trim());
+            int yCoord = Integer.parseInt(y.trim());
+
+            if (xCoord < 0 || xCoord >= mapOfGame.getWidth() || yCoord < 0 || yCoord >= mapOfGame.getHeight()) {
+                return new Result(false, "out of bounds!");
+            }
+
+            Tile targetTile = map[yCoord][xCoord]; // note: map[y][x] because map is row-major
+
+            mapOfGame.applyLightningEffect(targetTile);
+
+            return new Result(true, "Lightning striked the tile (" + xCoord + "," + yCoord + ").");
+        } catch (NumberFormatException e) {
+            return new Result(false, "invalid x or y!.");
+        }
+    }
+
+    //always call this function before any task that consumes energy if it returns false cant do the task
+    public boolean tryConsumeEnergy(User player, int energyRequired) {
+        if (player.getCurrentTurnEnergy() < energyRequired || player.getEnergy() < energyRequired) {
+            System.out.println("Not enough energy!");
+            return false;
+        }
+
+        player.setCurrentTurnEnergy(player.getMaxEnergyTurn() - energyRequired);
+        player.setEnergy(player.getEnergy() - energyRequired);
+
+        handleFainting(player);
+
+        return true;
+    }
+
+
+    public void reduceEnergy(User player, int amount) {
+        player.setCurrentTurnEnergy(player.getMaxEnergyTurn() - amount);
+        player.setEnergy(player.getEnergy() - amount);
+        handleFainting(player);
+    }
+
+    public void handleFainting(User player) {
+        Game game = App.getInstance().getCurrentGame();
+        if (player.getEnergy() <= 0 || player.getCurrentTurnEnergy() <= 0) {
+            player.setEnergy(0);
+            player.setCurrentTurnEnergy(0);
+            player.setFainted(true);
+            System.out.println("Not enough energy! You fainted!");
+            goToNextTurn(game); // advance to the next turn
+        }
+    }
+
+
+    public Result petAnimal(String animalName) {
+        Game game = App.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        Tile playerTile = player.getCurrentTile();
+        Animal animal = player.getAnimalByName(animalName);
+        Tile animalTile = animal.getCurrentTile();
+        if(playerTile == null) {
+            return new Result(false, "Player tile not found!");
+        }
+        if (animal == null || animalTile == null) {
+            return new Result(false, "Error: No animal found with the name " + animalName + ".");
+        }
+
+        if (isAdjacent(playerTile, animalTile)) {
+            animal.pet();
+            return new Result(false, "You petted " + animalName + ". Friendship is now: " + animal.getFriendship());
+        } else {
+            return new Result(false, "Error: You must be in one of the 8 tiles around the animal to pet it.");
+        }
+    }
+
+    private boolean isAdjacent(Tile t1, Tile t2) {
+        int dx = Math.abs(t1.getX() - t2.getX());
+        int dy = Math.abs(t1.getY() - t2.getY());
+        return dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0); // Exclude the same tile
     }
 
 }

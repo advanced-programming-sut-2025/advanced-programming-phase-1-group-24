@@ -8,9 +8,9 @@ public enum WeatherType {
 
     //Override the functions in each type!
 
-    private boolean automaticWatering;
-    private double energyOfToolsModifier;
-    private boolean causesLightning;
+    private final boolean automaticWatering;
+    private final double energyOfToolsModifier;
+    private final boolean causesLightning;
 
 
     WeatherType(boolean automaticWatering, double energyOfToolsModifier, boolean causesLightning) {

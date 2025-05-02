@@ -81,29 +81,10 @@ public class Game {
     public void createNPC() {
     }
 
-    public void goToNextTurn() {
-        do {
-            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-            currentPlayer = players.get(currentPlayerIndex);
-            turnCounter++;
-
-            // Reset energy for the new player
-            // Only count the turn if the player is NOT fainted
-            if (!currentPlayer.hasFainted()) {
-                currentPlayer.resetTurnEnergy(); // Reset energy only if they get a turn
-            }
-            if (turnCounter == players.size()) {
-                // One full round complete
-                turnCounter = 0;
-                advanceTimeByOneHour();
-            }
-        } while (currentPlayer.hasFainted());
-    }
 
     public void advanceTimeByOneHour() {
         timeAndDate.advanceHour();
     }
-
 
     public MapOfGame getMap() {
         return map;

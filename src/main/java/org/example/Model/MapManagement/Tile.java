@@ -7,11 +7,14 @@ import org.example.Model.User;;
 public class Tile {
     private TileType type;
     private boolean isWalkable;
+    private boolean isPlowed;
     private Item containedItem;
     private Growable containedGrowable;
     private Growable productOfGrowable;  //when ever it is time for the giah to create a product we will check if this field is full we will not create another product
     //also we wil check if the season is correct for giving product
     private User tileOwner;
+    private int x;
+    private int y;
 
 
     public TileType getType() {
@@ -31,6 +34,16 @@ public class Tile {
     }
     public User getTileOwner() {
         return tileOwner;
+    }
+    public boolean isPlowed() {
+        return isPlowed;
+    }
+
+    public int getX() {
+        return x;
+    }
+    public int getY() {
+        return y;
     }
 
     public void setWalkable(boolean isWalkable) {
@@ -52,8 +65,37 @@ public class Tile {
         this.tileOwner = tileOwner;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
 
+    public void setY(int y) {
+        this.y = y;
+    }
+
+//    public void updateGrowable(Tile tile){
+//        if(tile.getContainedGrowable() != null){
+//            Growable growable = tile.getContainedGrowable();
+//            if(growable.getTreeType() != null){
+//                int currentStage = growable.getCurrentStage();
+//                if(growable.getTreeType().getSatges().get(currentStage) != null){
+//                    for(int i = 0; i < )
+//                    if(growable.getTreeType().getSatges().get(currentStage) >= growable.getAge()){}
+//                }
+//                else {
+//                    if(tile.getProductOfGrowable() == null){
+//
+//                    }
+//                }
+//            }
+//            else if(growable.getCropType() != null){}
+//            else if(growable.getForagingCropType() != null){}
+//        }
+//
+//
+//    }
 
     public void changeTile(){}
 
 }
+

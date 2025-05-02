@@ -14,7 +14,11 @@ public class GameMenu implements AppMenu {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 
-        if ((matcher = GameMenuCommands.CHEAT_ENERGY.getMatcher(input)) != null) {
+        if ((matcher = GameMenuCommands.PET.getMatcher(input)) != null) {
+            System.out.println(controller.petAnimal(matcher.group("name")));
+        } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
+            System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ENERGY.getMatcher(input)) != null) {
             System.out.println(controller.cheatChangeEnergy(matcher.group("value")));
         } else if ((matcher = GameMenuCommands.CHEAT_UNLIMITED_ENERGY.getMatcher(input)) != null) {
             System.out.println(controller.cheatUnlimitedEnergy());
@@ -49,7 +53,7 @@ public class GameMenu implements AppMenu {
         } else if ((matcher = GameMenuCommands.LOAD_GAME.getMatcher(input)) != null) {
             System.out.println(controller.loadGame());
         } else if ((matcher = GameMenuCommands.NEW_GAME.getMatcher(input)) != null) {
-            System.out.println(controller.createGame(matcher.group("users"),scanner));
+            System.out.println(controller.createGame(matcher.group("users"), scanner));
         } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
             System.out.println(controller.enterMenu(matcher.group("menuName")));
         } else if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
