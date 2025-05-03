@@ -2,7 +2,7 @@ package org.example.Model.Tools;
 
 import org.example.Model.Things.ToolMaterial;
 
-public abstract class Tool {
+public  class Tool {
     String name;
     ToolType type;
     ToolMaterial material;

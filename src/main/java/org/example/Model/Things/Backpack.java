@@ -27,16 +27,16 @@ public class Backpack {
         this.inventoryItems = new HashMap<Item, Integer>();
         this.tools = new ArrayList<>();
         this.trashcan = new TrashCan();
-//        Hoe hoe = new Hoe();
-//        tools.add(hoe);
-//        PickAxe pickaxe = new PickAxe();
-//        tools.add(pickaxe);
-//        Axe axe = new Axe();
-//        tools.add(axe);
-//        WateringCan wateringcan = new WateringCan();
-//        tools.add(wateringcan);
-//        Scythe scythe = new Scythe();
-//        tools.add(scythe);
+        Hoe hoe = new Hoe(ToolType.HOE);
+        tools.add(hoe);
+        PickAxe pickaxe = new PickAxe(ToolType.PICKAXE);
+        tools.add(pickaxe);
+        Axe axe = new Axe(ToolType.AXE);
+        tools.add(axe);
+        WateringCan wateringcan = new WateringCan(ToolType.WATERINGCAN);
+        tools.add(wateringcan);
+        Scythe scythe = new Scythe(ToolType.SCYTHE);
+        tools.add(scythe);
     }
 
     public void upgrade(StorageType type) {

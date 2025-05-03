@@ -6,5 +6,4 @@ public class PickAxe extends Tool{
     public PickAxe(ToolType type) {
         super(type);
     }
-
 }

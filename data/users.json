@@ -475,7 +475,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 3,
+    "playedGames": 5,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -491,7 +491,33 @@
       "type": "INITIAL",
       "maxSize": 12,
       "inventoryItems": {},
-      "tools": [],
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
       "trashcan": {
         "material": "Initial"
       }
@@ -531,7 +557,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 4,
+    "playedGames": 6,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -547,7 +573,33 @@
       "type": "INITIAL",
       "maxSize": 12,
       "inventoryItems": {},
-      "tools": [],
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
       "trashcan": {
         "material": "Initial"
       }
@@ -587,7 +639,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 2,
+    "playedGames": 4,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -603,7 +655,33 @@
       "type": "INITIAL",
       "maxSize": 12,
       "inventoryItems": {},
-      "tools": [],
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
       "trashcan": {
         "material": "Initial"
       }
@@ -644,7 +722,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 3,
+    "playedGames": 5,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -660,7 +738,33 @@
       "type": "INITIAL",
       "maxSize": 12,
       "inventoryItems": {},
-      "tools": [],
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
       "trashcan": {
         "material": "Initial"
       }

@@ -1,6 +1,6 @@
 package org.example.Model.Things;
 
-public abstract class Item {
+public class Item {
     protected String name;
     protected boolean isSellable;
     protected int price;
