@@ -1,7 +1,6 @@
 package org.example.Model.Growables;
 
 import java.util.*;
-
 public class GrowableFactory {
     private static final GrowableFactory instance = new GrowableFactory();
     private final Map<SourceType, Growable> prototypes = new EnumMap<>(SourceType.class);
@@ -36,7 +35,7 @@ public class GrowableFactory {
         g.setName(crop.getName());
         g.setSellable(true);
         g.setPrice(crop.getBaseSellPrice());
-        g.setPlacable(false);
+        g.setPlaceable(false);
 
         return g;
     }
@@ -54,7 +53,7 @@ public class GrowableFactory {
         g.setName(tree.getName());
         g.setSellable(true);
         g.setPrice(tree.getFruitType().getFruitBaseSellPrice());
-        g.setPlacable(false);
+        g.setPlaceable(false);
 
         return g;
     }
@@ -72,7 +71,7 @@ public class GrowableFactory {
         g.setName(forage.getName());
         g.setSellable(true);
         g.setPrice(forage.getBaseSellPrice());
-        g.setPlacable(false);
+        g.setPlaceable(false);
 
         return g;
     }

@@ -4,6 +4,7 @@ import org.example.Model.Growables.GrowableType;
 import org.example.Model.Places.Farm;
 import org.example.Model.Things.ForagingMineral;
 import org.example.Model.Things.ForagingMineralType;
+import org.example.Model.Things.ProductQuality;
 import org.example.Model.User;
 
 import java.util.*;
@@ -105,7 +106,7 @@ public class MapOfGame {
             return;
         }
         if (tile.getContainedGrowable() != null) {
-            tile.setContainedItem(new ForagingMineral(ForagingMineralType.Coal));
+            tile.setContainedItem(new ForagingMineral(ProductQuality.Normal, ForagingMineralType.Coal));
             tile.getContainedGrowable().setGrowableType(GrowableType.Coal);
             tile.setProductOfGrowable(null);
         }
@@ -127,7 +128,6 @@ public class MapOfGame {
     }
 
     public void changeTile(TileType newTile, TileType oldTile) {}
-
 
     public Farm getFarmByOwner(User owner) {
         for (Farm farm : farms) {

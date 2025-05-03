@@ -15,7 +15,6 @@ import java.util.List;
 public class FarmLoader {
 
     public static List<FarmTemplate> loadFarmTemplates() {
-
         File file = new File("src/main/resources/farms.json");
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

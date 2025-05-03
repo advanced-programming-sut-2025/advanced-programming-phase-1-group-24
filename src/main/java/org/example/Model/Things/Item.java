@@ -1,54 +1,60 @@
 package org.example.Model.Things;
 
-public abstract class Item {
+public class Item {
     protected String name;
     protected boolean isSellable;
     protected int price;
-    protected boolean isPlacable;
-    protected ProductQuality quality;
+    protected boolean isPlaceable;
+    protected ProductQuality productQuality = ProductQuality.Normal;
 
-    public int getPrice() {
-        return price;
+    public Item(String name, boolean isSellable, int price, boolean isPlaceable, ProductQuality productQuality) {
+        this.name = name;
+        this.isSellable = isSellable;
+        this.price = price;
+        this.isPlaceable = isPlaceable;
+        this.productQuality = productQuality;
     }
-
     public String getName() {
         return name;
-    }
-
-    public boolean isSellable() {
-        return isSellable;
-    }
-
-    public boolean isPlacable() {
-        return isPlacable;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
+    public boolean isSellable() {
+        return isSellable;
+    }
+
     public void setSellable(boolean sellable) {
         isSellable = sellable;
+    }
+
+    public int getPrice() {
+        return price;
     }
 
     public void setPrice(int price) {
         this.price = price;
     }
 
-    public void setPlacable(boolean placable) {
-        isPlacable = placable;
+    public boolean isPlaceable() {
+        return isPlaceable;
     }
 
-    public void setQuality(ProductQuality quality) {
-        this.quality = quality;
+    public void setPlaceable(boolean placeable) {
+        isPlaceable = placeable;
     }
 
-    public String toString() {
+    public ProductQuality getProductQuality() {
+        return productQuality;
+    }
+
+    public void setQuality(ProductQuality productQuality) {
+        this.productQuality = productQuality;
+    }
+    public String toString(){
         return name;
     }
-
-    public ProductQuality getQuality() {
-        return quality;
-    }
-
 }
+

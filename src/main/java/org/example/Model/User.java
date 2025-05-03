@@ -1,9 +1,10 @@
 package org.example.Model;
 
 
+import org.example.Model.Animals.Animal;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
-import org.example.Model.Reccepies.Food;
+import org.example.Model.Things.Food;
 import org.example.Model.Things.Backpack;
 import org.example.Model.Things.Item;
 import org.example.Model.Tools.Tool;
@@ -15,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class User {
+    //user
     private String username;
     private String password;
     private String nickname;
@@ -35,16 +37,16 @@ public class User {
      */
     private int money = 0;
     private boolean fainted = false;
-    Map<Skill, Integer> skillsLevel;
+    private Map<Skill, Integer> skillsLevel;
     private Map<Skill, Integer> skillExperience;
-    Tile currentTile;
-    ToolType currentTool;
-    ArrayList<Craft> craftingRecepies;
-    ArrayList<Food> cookingRecepies;
-    Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
-    Map<User, FriendshipLevels> friends;
+    private Tile currentTile;
+    private Tool equippedTool;
+    private ArrayList<Craft> craftingRecepies;
+    private ArrayList<Food> cookingRecepies;
+    private Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
+    private Map<User, FriendshipLevels> friends;
     private Backpack backpack;
-    Tool trashCan;
+    private ArrayList<Animal> ownedAnimals;
 
 
     public User(String username, String password, String nickname, String email, boolean gender) {
@@ -122,10 +124,6 @@ public class User {
         return currentTile;
     }
 
-    public ToolType getCurrentTool() {
-        return currentTool;
-    }
-
     public String getSecurityQuestion() {
         return securityQuestion;
     }
@@ -174,6 +172,8 @@ public class User {
         this.email = email;
     }
 
+    public void faint() {
+    }
 
     public boolean hasFainted() {
         return fainted;
@@ -198,7 +198,7 @@ public class User {
         this.currentTurnEnergy = maxEnergyTurn;
 
         this.currentTile = null; // or a default starting tile
-        this.currentTool = null;
+        this.equippedTool = null;
         this.backpack = new Backpack(); // assuming it starts empty
 
         if (this.skillsLevel != null) {
@@ -219,8 +219,6 @@ public class User {
         if (this.tradeHistory != null) {
             this.tradeHistory.clear();
         }
-
-        this.trashCan = null;
     }
 
 
@@ -251,33 +249,25 @@ public class User {
 
     // the format to use this function user.addSkillExperience(Skill.FARMING);
     // use this function in farming fishing mining and foraging
-//    public void addSkillExperience(Skill skill) {
-//        int amount = skill.getXpPerAction();
-//        int currentLevel = skillsLevel.getOrDefault(skill, 0);
-//        int currentXP = skillExperience.getOrDefault(skill, 0);
-//
-//        currentXP += amount;
-//
-//        // update level
-//        while (currentLevel < 4 && currentXP >= 100 * currentLevel + 50) {
-//            currentXP -= 100 * currentLevel + 50;
-//            currentLevel++;
-//        }
-//
-//        this.skillsLevel.put(skill, currentLevel);
-//        this.skillExperience.put(skill, currentXP);
-//    }
+    public void addSkillExperience(Skill skill) {
+        int amount = skill.getXpPerAction();
+        int currentLevel = skillsLevel.getOrDefault(skill, 0);
+        int currentXP = skillExperience.getOrDefault(skill, 0);
 
-    public boolean isFainted() {
-        return fainted;
+        currentXP += amount;
+
+        // update level
+        while (currentLevel < 4 && currentXP >= 100 * currentLevel + 50) {
+            currentXP -= 100 * currentLevel + 50;
+            currentLevel++;
+        }
+
+        this.skillsLevel.put(skill, currentLevel);
+        this.skillExperience.put(skill, currentXP);
     }
 
     public void setCurrentTile(Tile currentTile) {
         this.currentTile = currentTile;
-    }
-
-    public void setCurrentTool(ToolType currentTool) {
-        this.currentTool = currentTool;
     }
 
     public int getMaxEnergy() {
@@ -294,14 +284,6 @@ public class User {
 
     public void setGender(boolean gender) {
         this.gender = gender;
-    }
-
-    public Tool getTrashCan() {
-        return trashCan;
-    }
-
-    public void setTrashCan(Tool trashCan) {
-        this.trashCan = trashCan;
     }
 
     public Backpack getBackpack() {
@@ -348,6 +330,19 @@ public class User {
         this.skillExperience = skillExperience;
     }
 
+    public Animal getAnimalByName(String name) {
+        for (Animal animal : ownedAnimals) {
+            if (animal.getName().equalsIgnoreCase(name)) {
+                return animal;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Animal> getOwnedAnimals() {
+        return ownedAnimals;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -361,5 +356,39 @@ public class User {
         return Objects.hash(username); // match the field used in equals
     }
 
+    public Tool getEquippedTool() {
+        return equippedTool;
+    }
+
+    public void setEquippedTool(Tool equippedTool) {
+        this.equippedTool = equippedTool;
+    }
+
+    //always call this function before any task that consumes energy if it returns false cant do the task
+    public boolean tryConsumeEnergy(int energyRequired) {
+        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+            System.out.println("not enough energy!");
+            return false;
+        }
+        currentTurnEnergy -= energyRequired;
+        energy -= energyRequired;
+        handleFainting();
+        return true;
+    }
+
+    public void reduceEnergy(int amount) {
+        this.currentTurnEnergy -= amount;
+        this.energy -= amount;
+        handleFainting();
+    }
+
+    public void handleFainting() {
+        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+            this.energy = 0;
+            this.currentTurnEnergy = 0;
+            System.out.println("not enough energy! You faiented!");
+            this.fainted = true;
+        }
+    }
 
 }

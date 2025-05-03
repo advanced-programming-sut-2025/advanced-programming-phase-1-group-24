@@ -1,40 +1,28 @@
 package org.example.Model.Things;
 
 public enum ProductQuality {
-    Normal(1, 0, 0.5),
-    Silver(1.25, 0.5, 0.7),
-    Golden(1.5, 0.7, 0.9),
-    Iridium(2, 0.9, 1000);
+    Normal(1,0,0.5),
+    Silver(1.25,0.5,0.7),
+    Golden(1.5,0.7,0.9),
+    Iridium(2,0.9,1);
 
-    private final double priceCoefficient;
-    private final double obtainedAmountStart;
-    private final double obtainedAmountEnd;
+    private double priceCoefficient;
+    private double obtainedAmountStart;
+    private double obtainedAmountEnd;
 
     ProductQuality(double priceCoefficient, double obtainedAmountStart, double obtainedAmountEnd) {
         this.priceCoefficient = priceCoefficient;
         this.obtainedAmountStart = obtainedAmountStart;
         this.obtainedAmountEnd = obtainedAmountEnd;
     }
-
-    public double getPriceCoefficient() {
-        return priceCoefficient;
-    }
-
-    public double getObtainedAmountStart() {
-        return obtainedAmountStart;
-    }
-
-    public double getObtainedAmountEnd() {
-        return obtainedAmountEnd;
-    }
-
-    public static ProductQuality findQuality(double obtainedQuality) {
+    public static ProductQuality getQualityByValue(double value) {
         for (ProductQuality quality : ProductQuality.values()) {
-            if (quality.getObtainedAmountEnd() >= obtainedQuality
-                    && quality.getObtainedAmountStart() <= obtainedQuality) {
+            if (value >= quality.obtainedAmountStart && value < quality.obtainedAmountEnd) {
                 return quality;
             }
         }
-        return null;
+        // If value is exactly 1.0 or no match (should only happen with value == 1), return the highest quality
+        return ProductQuality.Iridium;
     }
+
 }
