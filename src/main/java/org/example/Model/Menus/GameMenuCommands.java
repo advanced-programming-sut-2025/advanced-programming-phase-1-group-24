@@ -1,14 +1,25 @@
 package org.example.Model.Menus;
 
 public enum GameMenuCommands implements Commands {
-    SELL_ANIMAL("^sell\\s+animal\\s+-n\\s+(?<name>.+)$"),
-    COLLECT_PRODUCTS("^collect\\s+produce\\s+-n\\s+(?<name>.+)$"),
+    //inventory commands
+    SHOW_INVENTORY("^\\s*inventory\\s+show\\s*$"),
+    INVENTORY_TRASH("^\\s*inventory\\s+trash\\s+-i\\s+(?<itemName>.+?)(?:\\s+-n\\s+(?<number>\\d+))?$"),
+    EQUIP_TOOL("^\\s*tools\\s+equip\\s+(?<toolName>.+)\\s*$"),
+    SHOW_CURRENT_TOOL("^\\s*tools\\s+show\\s+current\\s*$"),
+    SHOW_AVAILABLE_TOOLS("^\\s*tools\\s+show\\s+available\\s*$"),
+    TOOL_UPGRADE("^\\s*tools\\s+upgrade\\s+(?<toolName>.+)\\s*$"),
+    USE_TOOL("^\\s*tools\\s+use\\s+-d\\s+(?<direction>.+)\\s*$"),
+    FISH("^\\s*fishing\\s+-p\\s+(?<fishingPole>.+)\\s*$"),
+    CHEAT_ADD_ITEM("^\\s*cheat\\s+add\\s+item\\s+-n\\s+(?<itemName>.+)\\s+-c\\s+(?<count>\\d+)\\s*$"),
+
+    SELL_ANIMAL("^sell\\s+animal\\s+-n\\s+(?<name>\\S+)$"),
+    COLLECT_PRODUCTS("^collect\\s+produce\\s+-n\\s+(?<name>\\S+)$"),
     SHOW_PRODUCTS("^produces$"),
     FEED_HAY("^feed\\s+hay\\s+-n\\s+(?<name>.+)$"),
-    SHEPHERD_ANIMALS("^shepherd\\s+animals\\s+-n\\s+(?<name>.+)\\s+-l\\s+<(?<x>\\d+)\\s+,\\s+(?<y>\\d+)>$"),
+    SHEPHERD_ANIMALS("^shepherd\\s+animals\\s+-n\\s+(?<name>\\S+)\\s+-l\\s+<(?<x>\\d+)\\s+,\\s+(?<y>\\d+)>$"),
     ANIMALS_INFO("^animals$"),
-    CHEAT_ANIMAL_FRIENDSHIP("^cheat\\s+set\\s+friendship\\s+-n\\s+(?<name>.+)\\s+-c\\s+(?<amount>-?\\d+)$"),
-    PET("^pet\\s+-n\\s+(?<name>.+)$"),
+    CHEAT_ANIMAL_FRIENDSHIP("^cheat\\s+set\\s+friendship\\s+-n\\s+(?<name>\\S+)\\s+-c\\s+(?<amount>-?\\d+)$"),
+    PET("^pet\\s+-n\\s+(?<name>\\S+)$"),
     CHeat_THOR("^cheat\\s+Thor\\s+-l\\s+<(?<x>\\d+),(?<y>\\d+)>$"),
     CHEAT_UNLIMITED_ENERGY("^energy\\s+unlimited$"),
     CHEAT_ENERGY("^energy\\s+set\\s+-v\\s+(?<value>-?\\d+)$"),

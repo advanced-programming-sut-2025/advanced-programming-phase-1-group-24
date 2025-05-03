@@ -1,15 +1,28 @@
 package org.example.Model.Tools;
 
+import org.example.Model.Things.ToolMaterial;
 
-import org.example.Model.Things.Item;
-import org.example.Model.Things.Material;
+public abstract class Tool {
+    String name;
+    ToolType type;
+    ToolMaterial material;
 
-public class Tool extends Item {
-    ToolType toolType;
-    int level;
-    Material material;
+    public Tool(ToolType type) {
+        this.name =type.name();
+        this.type = type;
+        this.material = ToolMaterial.Initial;
+    }
 
     public ToolType getType() {
-        return toolType;
+        return type;
+    }
+    public String getName() { return name; }
+
+    public String toString() {
+        return name;
+    }
+
+    public void upgrade(ToolMaterial material) {
+        this.material = material;
     }
 }

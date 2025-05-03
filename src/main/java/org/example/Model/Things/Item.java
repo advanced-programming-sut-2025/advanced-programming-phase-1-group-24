@@ -4,9 +4,16 @@ public abstract class Item {
     protected String name;
     protected boolean isSellable;
     protected int price;
-    protected boolean isPlacable;
+    protected boolean isPlaceable;
     protected ProductQuality productQuality = ProductQuality.Normal;
 
+    public Item(String name, boolean isSellable, int price, boolean isPlaceable, ProductQuality productQuality) {
+        this.name = name;
+        this.isSellable = isSellable;
+        this.price = price;
+        this.isPlaceable = isPlaceable;
+        this.productQuality = productQuality;
+    }
     public String getName() {
         return name;
     }
@@ -31,20 +38,23 @@ public abstract class Item {
         this.price = price;
     }
 
-    public boolean isPlacable() {
-        return isPlacable;
+    public boolean isPlaceable() {
+        return isPlaceable;
     }
 
-    public void setPlacable(boolean placable) {
-        isPlacable = placable;
+    public void setPlaceable(boolean placeable) {
+        isPlaceable = placeable;
     }
 
     public ProductQuality getProductQuality() {
         return productQuality;
     }
 
-    public void setProductQuality(ProductQuality productQuality) {
+    public void setQuality(ProductQuality productQuality) {
         this.productQuality = productQuality;
+    }
+    public String toString(){
+        return name;
     }
 }
 

@@ -3,8 +3,7 @@ package org.example.Model.Animals;
 
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Places.Habitat;
-
-import java.util.ArrayList;
+import org.example.Model.Things.ProductQuality;
 
 public class Animal {
     private final String name;
@@ -14,15 +13,16 @@ public class Animal {
     private int friendship = 0;
     private boolean pettedToday = false;
     private boolean fedToday = false;
-    private boolean sleptOutside = false;
-    private ArrayList<AnimalProduct> products = new ArrayList<>();
-    private int daysLeftToProuce;
+    private boolean isInHabitat = true;
+    private AnimalProduct product = null;
+    private int daysLeftToProduce;
 
     public Animal(String name, AnimalType animalType) {
         this.name = name;
         this.animalType = animalType;
         this.currentTile = null;
         this.livingPlace = null;
+        this.daysLeftToProduce = animalType.getDaysToProduce();
 
     }
 
@@ -34,39 +34,52 @@ public class Animal {
     }
 
     public void feed() {
-        fedToday = true;
-        friendship = Math.min(friendship + 8, 1000);
+        if (!fedToday) {
+            fedToday = true;
+            friendship = Math.min(friendship + 8, 1000);
+        }
     }
 
     public void endOfDayUpdate() {
         // in controller update the sleptOutSide
         //if (!isInHabitat()) sleptOutside = true;
         if (!fedToday) friendship -= 20;
-        if (sleptOutside) friendship -= 20;
+        if (!isInHabitat) friendship -= 20;
         if (!pettedToday) friendship -= 10;
         //(200 / Math.max(friendship, 1)); ?????????
         if (friendship <= 0) friendship = 0;
 
         fedToday = false;
         pettedToday = false;
-        sleptOutside = false;
+        //isInHabitat = false;
     }
 
-//    public AnimalProduct produceProduct() {
-//        if (!fedToday) return null;
-//
-//        AnimalProductType type = animalType.getPrimaryProduct();
-//        if (animalType.hasSecondaryProduct() && friendship >= 100) {
-//            double chance = (friendship + 150 * (0.5 + Math.random())) / 1500.0;
-//            if (Math.random() < chance)
-//                type = animalType.getSecondaryProduct();
-//          }
-//
-//        double quality = (friendship / 1000.0) * (0.5 + 0.5 * Math.random());
-//        AnimalProduct product = new AnimalProduct(type, quality);
-//        products.add(product);
-//        return product;
-//    }
+    public void updateProductEndDay() {
+        if (daysLeftToProduce > 0 && product == null) daysLeftToProduce--;
+        if (!fedToday || daysLeftToProduce > 0) return;
+
+        AnimalProductType type = animalType.getPrimaryProduct();
+        if (animalType.hasSecondaryProduct() && friendship >= 100) {
+            double chance = (friendship + 150 * (0.5 + Math.random())) / 1500.0;
+            if (Math.random() < chance)
+                type = animalType.getSecondaryProduct();
+        }
+
+        double quality = (friendship / 1000.0) * (0.5 + 0.5 * Math.random());
+        ProductQuality productQuality = ProductQuality.getQualityByValue(quality);
+        this.product = new AnimalProduct(productQuality, type);
+        if (daysLeftToProduce == 0) daysLeftToProduce = animalType.getDaysToProduce();
+    }
+
+    public AnimalProduct getProduct() {
+        return product;
+    }
+
+    public AnimalProduct collectProduct() {
+        AnimalProduct product = this.product;
+        this.product = null;
+        return product;
+    }
 
     // Getters, Setters, etc...
 
@@ -87,28 +100,28 @@ public class Animal {
         return friendship;
     }
 
-    public ArrayList<AnimalProduct> getProducts() {
-        return products;
+    public AnimalProduct getProducts() {
+        return product;
     }
 
     public void setDaysLeftToProduce(int days) {
-        this.daysLeftToProuce = days;
+        this.daysLeftToProduce = days;
     }
 
-//    private boolean isInHabitat() {
-//        if (currentTile == null || livingPlace == null) return false;
-//
-//        int tileX = getX(currentTile);
-//        int tileY = currentTile.getY();
-//
-//        int habitatX = livingPlace.getX();
-//        int habitatY = livingPlace.getY();
-//        int habitatWidth = livingPlace.getWidth();
-//        int habitatHeight = livingPlace.getHeight();
-//
-//        return tileX >= habitatX && tileX < habitatX + habitatWidth &&
-//                tileY >= habitatY && tileY < habitatY + habitatHeight;
-//    }
+    public boolean updateIsInHabitat() {
+        if (currentTile == null || livingPlace == null) return false;
+
+        int tileX = currentTile.getX();
+        int tileY = currentTile.getY();
+
+        int habitatX = livingPlace.getX();
+        int habitatY = livingPlace.getY();
+        int habitatWidth = livingPlace.getWidth();
+        int habitatHeight = livingPlace.getHeight();
+        isInHabitat = (tileX >= habitatX && tileX < habitatX + habitatWidth &&
+                tileY >= habitatY && tileY < habitatY + habitatHeight);
+        return isInHabitat;
+    }
 
 
     public Tile getCurrentTile() {
@@ -143,23 +156,19 @@ public class Animal {
         this.fedToday = fedToday;
     }
 
-    public boolean isSleptOutside() {
-        return sleptOutside;
+    public boolean isInHabitat() {
+        return isInHabitat;
     }
 
-    public void setSleptOutside(boolean sleptOutside) {
-        this.sleptOutside = sleptOutside;
+    public void setInHabitat(boolean inHabitat) {
+        isInHabitat = inHabitat;
     }
 
-    public void setProducts(ArrayList<AnimalProduct> products) {
-        this.products = products;
+    public int getDaysLeftToProduce() {
+        return daysLeftToProduce;
     }
 
-    public int getDaysLeftToProuce() {
-        return daysLeftToProuce;
-    }
-
-    public void setDaysLeftToProuce(int daysLeftToProuce) {
-        this.daysLeftToProuce = daysLeftToProuce;
+    public void setProduct(AnimalProduct product) {
+        this.product = product;
     }
 }

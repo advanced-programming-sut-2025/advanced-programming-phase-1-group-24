@@ -1,11 +1,13 @@
 package org.example.Model.Growables;
 
+import org.example.Model.Things.Item;
+import org.example.Model.Things.ProductQuality;
 import org.example.Model.TimeManagement.Season;
 
 import java.util.List;
 import java.util.Map;
 
-public class Growable implements Cloneable{
+public class Growable extends Item implements Cloneable{
     //When the growable is added to a tile we will fill out the containedGrowable field in the tile
     SourceType source;
     GrowableType growableType;
@@ -21,7 +23,9 @@ public class Growable implements Cloneable{
     //else we will create a copy of this growable and put the growableType as product/plant and we make the age and stage of the initial growable 0, we will add the product to the tile
     //if the product of growable(tree) is coal then create an Item that its type is coal
     //note that if growableType is fruit we can find the fruitType from the filled treeType
-
+    public Growable() {
+        super("Unknown", true, 0, false, ProductQuality.Normal); // default values
+    }
     //if we ever add an ArrayList or List to this class we need to do a deep copy
     @Override
     public Growable clone() {
@@ -98,5 +102,9 @@ public class Growable implements Cloneable{
 
     public void setGrowableType(GrowableType growableType) {
         this.growableType = growableType;
+    }
+
+    public void setIsWateredToday(boolean wateredToday) {
+        isWateredToday = wateredToday;
     }
 }

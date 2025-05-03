@@ -2,7 +2,6 @@ package org.example.Model.MapManagement;
 
 import org.example.Model.Growables.GrowableType;
 import org.example.Model.Places.Farm;
-import org.example.Model.Things.ForagingType;
 import org.example.Model.User;
 
 import java.util.*;
@@ -105,7 +104,7 @@ public class MapOfGame {
         }
     }
 
-    public boolean isInsideAnyFarm(int x, int y) {
+    public Farm isInsideAnyFarm(int x, int y) {
         for (Farm farm : farms) {
             int farmX = farm.getX();
             int farmY = farm.getY();
@@ -114,11 +113,16 @@ public class MapOfGame {
 
             if (x >= farmX && x < farmX + farmWidth &&
                     y >= farmY && y < farmY + farmHeight) {
-                return true;
+                return farm;
             }
         }
-        return false;
+        return null;
     }
+
+
+    public void changeTile(TileType newTile, TileType oldTile) {}
+
+
     public Farm getFarmByOwner(User owner) {
         for (Farm farm : farms) {
             if (farm.getOwner().equals(owner)) {
@@ -132,12 +136,5 @@ public class MapOfGame {
             return map[y][x];
         }
         return null; // or throw an exception if you prefer
-    }
-
-
-    public void changeTile(TileType newTile, TileType oldTile) {}
-
-    public void randomForaging(ForagingType newForaging) {
-
     }
 }

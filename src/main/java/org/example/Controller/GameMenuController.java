@@ -6,6 +6,9 @@ import com.google.gson.reflect.TypeToken;
 import org.example.Main;
 import org.example.Model.*;
 import org.example.Model.Animals.Animal;
+import org.example.Model.Animals.AnimalProduct;
+import org.example.Model.Animals.AnimalProductType;
+import org.example.Model.Animals.AnimalType;
 import org.example.Model.ConfigTemplates.FarmTemplate;
 import org.example.Model.ConfigTemplates.FarmTemplateManager;
 import org.example.Model.Growables.ForagingCropType;
@@ -19,12 +22,15 @@ import org.example.Model.Places.*;
 import org.example.Model.TimeManagement.Season;
 import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
+import org.example.Model.Tools.FishingPole;
+import org.example.Model.Tools.Tool;
 import org.example.Model.Tools.ToolType;
 
 import java.awt.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -503,6 +509,10 @@ public class GameMenuController implements MenuController {
             // Grow crops and update energy
             for (User user : game.getPlayers()) {
                 user.resetEnergyForNewDay();
+                for (Animal animal : user.getOwnedAnimals()) {
+                    animal.updateProductEndDay();
+                    animal.endOfDayUpdate();
+                }
                 //user.getFarm().growCropsOneDay();
                 // user.getFarm().generateForageAndMine();
                 //user.collectShippingBinProfits();
@@ -520,6 +530,7 @@ public class GameMenuController implements MenuController {
             //TO Do: upadte fpraging and
             //To Do:  update animal days left to produce
             //To Do: crows attack
+            // To Do: update animal products
 
         }
     }
@@ -847,38 +858,6 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    //always call this function before any task that consumes energy if it returns false cant do the task
-    public boolean tryConsumeEnergy(User player, int energyRequired) {
-        if (player.getCurrentTurnEnergy() < energyRequired || player.getEnergy() < energyRequired) {
-            System.out.println("Not enough energy!");
-            return false;
-        }
-
-        player.setCurrentTurnEnergy(player.getMaxEnergyTurn() - energyRequired);
-        player.setEnergy(player.getEnergy() - energyRequired);
-
-        handleFainting(player);
-
-        return true;
-    }
-
-
-    public void reduceEnergy(User player, int amount) {
-        player.setCurrentTurnEnergy(player.getMaxEnergyTurn() - amount);
-        player.setEnergy(player.getEnergy() - amount);
-        handleFainting(player);
-    }
-
-    public void handleFainting(User player) {
-        Game game = App.getInstance().getCurrentGame();
-        if (player.getEnergy() <= 0 || player.getCurrentTurnEnergy() <= 0) {
-            player.setEnergy(0);
-            player.setCurrentTurnEnergy(0);
-            player.setFainted(true);
-            System.out.println("Not enough energy! You fainted!");
-            goToNextTurn(game); // advance to the next turn
-        }
-    }
 
 
     public Result petAnimal(String animalName) {
@@ -886,12 +865,16 @@ public class GameMenuController implements MenuController {
         User player = game.getCurrentPlayer();
         Tile playerTile = player.getCurrentTile();
         Animal animal = player.getAnimalByName(animalName);
-        Tile animalTile = animal.getCurrentTile();
+
         if (playerTile == null) {
             return new Result(false, "Player tile not found!");
         }
-        if (animal == null || animalTile == null) {
+        if (animal == null) {
             return new Result(false, "Error: No animal found with the name " + animalName + ".");
+        }
+        Tile animalTile = animal.getCurrentTile();
+        if (animalTile == null) {
+            return new Result(false, "Error: animal tile not found.");
         }
 
         if (isAdjacent(playerTile, animalTile)) {
@@ -969,35 +952,125 @@ public class GameMenuController implements MenuController {
         int targetY = Integer.parseInt(y);
         Animal animal = player.getAnimalByName(name);
         Farm farm = game.getMap().getFarmByOwner(player);
+
         if (animal == null) {
             return new Result(false, "No animal named " + name + " found.");
         }
-        //validate target x and target y
-        //get farm by owner in map clas and get tile by x and y in map class
-        if (targetX < farm.getX() || targetX > farm.getX() + farm.getWidth() ||
-                targetY < farm.getY() || targetY > farm.getY() + farm.getHeight()) {
-//completeeee    /?????????
+        Tile animalTile = animal.getCurrentTile();
+        if (animalTile == null) {
+            return new Result(false, "Error: animal tile not found.");
         }
+
+        // Validate target location is inside player's farm bounds
+        if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
+                targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
+            return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
+        }
+
+        // Check weather condition — animals can only go out in SUNNY weather
         if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
             return new Result(false, "Cannot shepherd animals outside in bad weather.");
         }
 
-        if (!isValidOutdoorTile(targetX, targetY)) {
+        // Check tile validity
+        Tile targetTile = game.getMap().getTile(targetX, targetY);
+        if (targetTile == null || !targetTile.getisWalkable()) {
             return new Result(false, "Invalid location for shepherding.");
         }
 
-        animal.setCurrentTile(game.getMap().getTile(targetX, targetY)); // Assuming getTile returns a Tile
-        animal.feed();///??????????????????
+        // Move animal to the target tile
+        animal.setCurrentTile(targetTile);
+
+        // Feed the animal based on its location
+        if (!animal.updateIsInHabitat()) {
+            animal.feed(); // Assume this feeds the animal fresh grass
+        }
+//        else {
+//            boolean fed = player.useHay(1); // Try to feed from hay (1 unit)
+//            if (!fed) {
+//                return new Result(false, name + " could not be fed (no hay available).");
+//            }
+//            animal.feedWithHay();
+//        }
         return new Result(true, name + " was shepherded to (" + targetX + ", " + targetY + ").");
     }
 
-    private boolean isValidOutdoorTile(int x, int y) {
+    public Result collectProduct(String name) {
         Game game = App.getInstance().getCurrentGame();
-        Tile tileGame[][] = game.getMap().getMap();
-        Tile tile = tileGame[y][x];
-        //getTile(x, y);  // assumes a method to access the tile
-        return tile != null && tile.isOutdoor() && tile.getisWalkable(); // or however your logic works
+        User player = game.getCurrentPlayer();
+        Animal animal = player.getAnimalByName(name);
+        if (animal == null)
+            return new Result(false, "No animal found with name: " + name);
+
+        AnimalProduct product = animal.getProduct();
+        if (product == null)
+            return new Result(false, "This animal has no product to collect.");
+
+        AnimalType type = animal.getAnimalType();
+
+        // Check tool requirement for cow, goat, sheep
+        if (type == AnimalType.COW || type == AnimalType.GOAT) {
+            //check if the player have milk pail
+            if (!player.getBackpack().hasTool(""))
+                return new Result(false, "You need a milk pail to collect from this animal.");
+        } else if (type == AnimalType.SHEEP) {
+            //check if the player have shear
+            if (!player.getBackpack().hasTool(""))
+                return new Result(false, "You need a shear to collect from this animal.");
+
+        }
+        // Check pig must be outside
+        else if (type == AnimalType.PIG && animal.isInHabitat())
+            return new Result(false, "Pig must be outside to collect its product.");
+
+        AnimalProduct collected = animal.collectProduct();
+        player.getBackpack().addItem(collected, 1); // assuming such method exists
+        player.addSkillExperience(Skill.FARMING);
+
+        return new Result(true, "Collected " + collected.getAnimalProductType() + " of " + collected.getProductQuality() + " quality.");
+    }
+    public Result showInventory() {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return currentPlayer.getBackpack().showInventory();
     }
 
+    public Result trashInventory(String itemName, int count) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return currentPlayer.getBackpack().removeItem(itemName, count);
+    }
 
+    public Result equipTool(String toolName) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return currentPlayer.getBackpack().equipTool(toolName);
+    }
+
+    public Result showCurrentTool() {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tool tool = currentPlayer.getEquippedTool();
+        if (tool == null) {return new Result(false, "No equipped tool found.");}
+        return new Result (true,tool.toString());
+    }
+
+    public Result showAllTools() {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return currentPlayer.getBackpack().showTools();
+    }
+
+    public Result fish(String fishingPole) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Game currentGame = App.getInstance().getCurrentGame();
+        MapOfGame map = currentGame.getMap();
+        Tile currentTile = currentPlayer.getCurrentTile();
+        FishingPole pole;
+        for (Tool tool : currentPlayer.getBackpack().getTools()) {
+            if (tool.getName().equalsIgnoreCase(fishingPole)) {
+                pole = (FishingPole) tool;
+                double modifier = currentGame.getCurrentWeatherType().getEnergyOfToolsModifier();
+                return pole.useFishingPole(pole, map, currentTile, currentPlayer, currentGame, modifier);
+            }
+        }
+        return new Result(false, "No fishing pole found.");
+    }
+//    public Result sellAnimal(String name) {
+//    }
 }

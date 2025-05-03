@@ -1,7 +1,6 @@
 package org.example.Model.Growables;
 
 import java.util.*;
-
 public class GrowableFactory {
     private static final GrowableFactory instance = new GrowableFactory();
     private final Map<SourceType, Growable> prototypes = new EnumMap<>(SourceType.class);
@@ -32,6 +31,12 @@ public class GrowableFactory {
         g.treeType = null;
         g.cropType = crop; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.foragingCropType = null;
+
+        g.setName(crop.getName());
+        g.setSellable(true);
+        g.setPrice(crop.getBaseSellPrice());
+        g.setPlaceable(false);
+
         return g;
     }
 
@@ -44,6 +49,12 @@ public class GrowableFactory {
         g.treeType = tree; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.cropType = null;
         g.foragingCropType = null;
+
+        g.setName(tree.getName());
+        g.setSellable(true);
+        g.setPrice(tree.getFruitType().getFruitBaseSellPrice());
+        g.setPlaceable(false);
+
         return g;
     }
 
@@ -56,6 +67,12 @@ public class GrowableFactory {
         g.foragingCropType = forage;
         g.treeType = null;
         g.cropType = null;
+
+        g.setName(forage.getName());
+        g.setSellable(true);
+        g.setPrice(forage.getBaseSellPrice());
+        g.setPlaceable(false);
+
         return g;
     }
 

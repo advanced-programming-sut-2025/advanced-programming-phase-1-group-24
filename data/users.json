@@ -313,7 +313,15 @@
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user78",
@@ -348,7 +356,15 @@
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user79",
@@ -383,7 +399,15 @@
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user77",
@@ -418,7 +442,15 @@
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user76",
@@ -443,7 +475,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 2,
+    "playedGames": 3,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -455,7 +487,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user81",
@@ -475,7 +515,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user82",
@@ -483,7 +531,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 3,
+    "playedGames": 4,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -495,7 +543,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user82",
@@ -515,7 +571,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user83",
@@ -523,7 +587,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 1,
+    "playedGames": 2,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -535,7 +599,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user83",
@@ -572,7 +644,7 @@
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 2,
+    "playedGames": 3,
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
@@ -584,7 +656,15 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   },
   {
     "username": "user84",
@@ -604,6 +684,14 @@
     "fainted": false,
     "skillsLevel": {},
     "skillExperience": {},
-    "backpack": {}
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [],
+      "trashcan": {
+        "material": "Initial"
+      }
+    }
   }
 ]

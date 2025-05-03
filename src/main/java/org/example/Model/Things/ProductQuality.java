@@ -15,5 +15,15 @@ public enum ProductQuality {
         this.obtainedAmountStart = obtainedAmountStart;
         this.obtainedAmountEnd = obtainedAmountEnd;
     }
+    public static ProductQuality getQualityByValue(double value) {
+        for (ProductQuality quality : ProductQuality.values()) {
+            if (value >= quality.obtainedAmountStart && value < quality.obtainedAmountEnd) {
+                return quality;
+            }
+        }
+        // If value is exactly 1.0 or no match (should only happen with value == 1), return the highest quality
+        return ProductQuality.Iridium;
+    }
+
 }
 

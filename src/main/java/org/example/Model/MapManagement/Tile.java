@@ -97,5 +97,8 @@ public class Tile {
 
     public void changeTile(){}
 
+    public void setIsPlowed(boolean plowed) {
+        isPlowed = plowed;
+    }
 }
 

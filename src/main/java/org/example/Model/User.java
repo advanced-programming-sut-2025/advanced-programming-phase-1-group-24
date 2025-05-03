@@ -4,7 +4,7 @@ package org.example.Model;
 import org.example.Model.Animals.Animal;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
-import org.example.Model.Reccepies.Food;
+import org.example.Model.Things.Food;
 import org.example.Model.Things.Backpack;
 import org.example.Model.Things.Item;
 import org.example.Model.Tools.Tool;
@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class User {
+    //user
     private String username;
     private String password;
     private String nickname;
@@ -39,13 +40,12 @@ public class User {
     private Map<Skill, Integer> skillsLevel;
     private Map<Skill, Integer> skillExperience;
     private Tile currentTile;
-    private ToolType currentTool;
+    private Tool equippedTool;
     private ArrayList<Craft> craftingRecepies;
     private ArrayList<Food> cookingRecepies;
     private Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
     private Map<User, FriendshipLevels> friends;
     private Backpack backpack;
-    private Tool trashCan;
     private ArrayList<Animal> ownedAnimals;
 
 
@@ -124,9 +124,6 @@ public class User {
         return currentTile;
     }
 
-    public ToolType getCurrentTool() {
-        return currentTool;
-    }
 
     public String getSecurityQuestion() {
         return securityQuestion;
@@ -200,7 +197,7 @@ public class User {
         this.currentTurnEnergy = maxEnergyTurn;
 
         this.currentTile = null; // or a default starting tile
-        this.currentTool = null;
+        this.equippedTool = null;
         this.backpack = new Backpack(); // assuming it starts empty
 
         if (this.skillsLevel != null) {
@@ -222,7 +219,6 @@ public class User {
             this.tradeHistory.clear();
         }
 
-        this.trashCan = null;
     }
 
 
@@ -279,10 +275,6 @@ public class User {
         this.currentTile = currentTile;
     }
 
-    public void setCurrentTool(ToolType currentTool) {
-        this.currentTool = currentTool;
-    }
-
     public int getMaxEnergy() {
         return maxEnergy;
     }
@@ -297,14 +289,6 @@ public class User {
 
     public void setGender(boolean gender) {
         this.gender = gender;
-    }
-
-    public Tool getTrashCan() {
-        return trashCan;
-    }
-
-    public void setTrashCan(Tool trashCan) {
-        this.trashCan = trashCan;
     }
 
     public Backpack getBackpack() {
@@ -377,5 +361,39 @@ public class User {
         return Objects.hash(username); // match the field used in equals
     }
 
+    public Tool getEquippedTool() {
+        return equippedTool;
+    }
+
+    public void setEquippedTool(Tool equippedTool) {
+        this.equippedTool = equippedTool;
+    }
+
+    //always call this function before any task that consumes energy if it returns false cant do the task
+    public boolean tryConsumeEnergy(int energyRequired) {
+        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+            System.out.println("not enough energy!");
+            return false;
+        }
+        currentTurnEnergy -= energyRequired;
+        energy -= energyRequired;
+        handleFainting();
+        return true;
+    }
+
+    public void reduceEnergy(int amount) {
+        this.currentTurnEnergy -= amount;
+        this.energy -= amount;
+        handleFainting();
+    }
+
+    public void handleFainting() {
+        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+            this.energy = 0;
+            this.currentTurnEnergy = 0;
+            System.out.println("not enough energy! You faiented!");
+            this.fainted = true;
+        }
+    }
 
 }
