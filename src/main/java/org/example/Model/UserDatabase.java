@@ -20,7 +20,8 @@ public class UserDatabase {
         }
 
         try (Reader reader = new FileReader(file)) {
-            Type userListType = new TypeToken<ArrayList<User>>() {}.getType();
+            Type userListType = new TypeToken<ArrayList<User>>() {
+            }.getType();
             return gson.fromJson(reader, userListType);
         } catch (IOException e) {
             return new ArrayList<>();

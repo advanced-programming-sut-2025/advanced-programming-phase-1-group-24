@@ -21,4 +21,3 @@ public enum StorageType {
         return habitatCapacity;
     }
 }
-

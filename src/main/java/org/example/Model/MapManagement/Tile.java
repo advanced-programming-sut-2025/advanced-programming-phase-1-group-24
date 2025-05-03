@@ -35,8 +35,12 @@ public class Tile {
     public User getTileOwner() {
         return tileOwner;
     }
-    public boolean isPlowed() {
+    public boolean getIsPlowed() {
         return isPlowed;
+    }
+
+    public void setIsPlowed(boolean plowed) {
+        isPlowed = plowed;
     }
 
     public int getX() {
@@ -73,32 +77,6 @@ public class Tile {
         this.y = y;
     }
 
-//    public void updateGrowable(Tile tile){
-//        if(tile.getContainedGrowable() != null){
-//            Growable growable = tile.getContainedGrowable();
-//            if(growable.getTreeType() != null){
-//                int currentStage = growable.getCurrentStage();
-//                if(growable.getTreeType().getSatges().get(currentStage) != null){
-//                    for(int i = 0; i < )
-//                    if(growable.getTreeType().getSatges().get(currentStage) >= growable.getAge()){}
-//                }
-//                else {
-//                    if(tile.getProductOfGrowable() == null){
-//
-//                    }
-//                }
-//            }
-//            else if(growable.getCropType() != null){}
-//            else if(growable.getForagingCropType() != null){}
-//        }
-//
-//
-//    }
-
     public void changeTile(){}
 
-    public void setIsPlowed(boolean plowed) {
-        isPlowed = plowed;
-    }
 }
-

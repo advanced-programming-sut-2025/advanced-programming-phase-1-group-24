@@ -124,7 +124,6 @@ public class User {
         return currentTile;
     }
 
-
     public String getSecurityQuestion() {
         return securityQuestion;
     }
@@ -173,6 +172,8 @@ public class User {
         this.email = email;
     }
 
+    public void faint() {
+    }
 
     public boolean hasFainted() {
         return fainted;
@@ -218,7 +219,6 @@ public class User {
         if (this.tradeHistory != null) {
             this.tradeHistory.clear();
         }
-
     }
 
 
@@ -229,7 +229,6 @@ public class User {
     }
 
     public void resetEnergyForNewDay() {
-        this.currentTurnEnergy = maxEnergyTurn;
         if (fainted) {
             this.energy = (int) (maxEnergy * 0.75);
             this.fainted = false;
@@ -265,10 +264,6 @@ public class User {
 
         this.skillsLevel.put(skill, currentLevel);
         this.skillExperience.put(skill, currentXP);
-    }
-
-    public boolean isFainted() {
-        return fainted;
     }
 
     public void setCurrentTile(Tile currentTile) {

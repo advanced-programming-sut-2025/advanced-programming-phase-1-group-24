@@ -7,7 +7,8 @@ import org.example.Model.TimeManagement.Season;
 import java.util.List;
 import java.util.Map;
 
-public class Growable extends Item implements Cloneable{
+public class Growable extends Item implements Cloneable { //extend Item
+    //note that we cannot put tree or crops in inventory  only seeds and products
     //When the growable is added to a tile we will fill out the containedGrowable field in the tile
     SourceType source;
     GrowableType growableType;
@@ -65,7 +66,6 @@ public class Growable extends Item implements Cloneable{
     }
 
     public void grow(){}
-    public void harvest(){}
     private static final Map<Season, List<SourceType>> mixedSeedsMap = Map.of(
             Season.SPRING, List.of(
                     SourceType.CauliflowerSeeds,
@@ -102,6 +102,18 @@ public class Growable extends Item implements Cloneable{
 
     public void setGrowableType(GrowableType growableType) {
         this.growableType = growableType;
+    }
+
+    public void setCurrentStage(int currentStage) {
+        this.currentStage = currentStage;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setDaysLeftToDie(int daysLeftToDie) {
+        this.daysLeftToDie = daysLeftToDie;
     }
 
     public void setIsWateredToday(boolean wateredToday) {

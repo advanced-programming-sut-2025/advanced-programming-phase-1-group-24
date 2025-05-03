@@ -85,4 +85,12 @@ public enum SourceType {
     public ArrayList<Season> getNormalSeasons() {
         return normalSeasons;
     }
+    public static SourceType fromName(String name) {
+        for (SourceType type : values()) {
+            if (type.getName().equalsIgnoreCase(name)) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("No SourceType with name: " + name);
+    }
 }

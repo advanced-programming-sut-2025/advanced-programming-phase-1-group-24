@@ -43,10 +43,21 @@ public class TimeAndDate {
 
 
     // Getters (optional)
-    public int getHour() { return hour; }
-    public int getDay() { return day; }
-    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
-    public Season getSeason() { return season; }
+    public int getHour() {
+        return hour;
+    }
+
+    public int getDay() {
+        return day;
+    }
+
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public Season getSeason() {
+        return season;
+    }
 
     public void setHour(int hour) {
         this.hour = hour;

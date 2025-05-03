@@ -6,6 +6,7 @@ import org.example.Model.Animals.Animal;
 import org.example.Model.Things.StorageType;
 
 public class Habitat extends Place{
+    //type of cage and barn delux and ...
     ArrayList<Animal> livingAnimals = new ArrayList<>();
     StorageType storageType;
 
