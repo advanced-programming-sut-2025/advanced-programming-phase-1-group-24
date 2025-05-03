@@ -18,7 +18,10 @@ public enum ToolType {
     int price;
     Skill relatedSkill;
 
-    public void breakTool(){}
-    public void useTool(){} //includes using fishingpole.
+    public void breakTool() {
+    }
+
+    public void useTool() {
+    } //includes using fishingpole.
 
 }

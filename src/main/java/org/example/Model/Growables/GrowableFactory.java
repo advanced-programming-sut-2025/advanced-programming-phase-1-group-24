@@ -32,6 +32,12 @@ public class GrowableFactory {
         g.treeType = null;
         g.cropType = crop; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.foragingCropType = null;
+
+        g.setName(crop.getName());
+        g.setSellable(true);
+        g.setPrice(crop.getBaseSellPrice());
+        g.setPlacable(false);
+
         return g;
     }
 
@@ -44,6 +50,12 @@ public class GrowableFactory {
         g.treeType = tree; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.cropType = null;
         g.foragingCropType = null;
+
+        g.setName(tree.getName());
+        g.setSellable(true);
+        g.setPrice(tree.getFruitType().getFruitBaseSellPrice());
+        g.setPlacable(false);
+
         return g;
     }
 
@@ -56,6 +68,12 @@ public class GrowableFactory {
         g.foragingCropType = forage;
         g.treeType = null;
         g.cropType = null;
+
+        g.setName(forage.getName());
+        g.setSellable(true);
+        g.setPrice(forage.getBaseSellPrice());
+        g.setPlacable(false);
+
         return g;
     }
 

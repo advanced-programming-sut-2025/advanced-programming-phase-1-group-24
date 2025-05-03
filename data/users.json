@@ -7,8 +7,12 @@
     "gender": true,
     "playedGames": 0,
     "maxMoneyInGames": 0,
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user2",
@@ -18,8 +22,12 @@
     "gender": false,
     "playedGames": 0,
     "maxMoneyInGames": 0,
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user3",
@@ -31,8 +39,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Amoo chand salete?",
     "securityAnswer": "beToChe",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user3",
@@ -44,8 +56,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Amoo chand salete?",
     "securityAnswer": "beToChe",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user4",
@@ -55,8 +71,12 @@
     "gender": false,
     "playedGames": 0,
     "maxMoneyInGames": 0,
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "useerrr5",
@@ -68,8 +88,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "nooooo",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "useerrr5",
@@ -81,8 +105,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "nooooo",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user16",
@@ -94,8 +122,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user16",
@@ -107,8 +139,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user15",
@@ -120,8 +156,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user15",
@@ -133,8 +173,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user9",
@@ -146,8 +190,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user9",
@@ -159,8 +207,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user19",
@@ -172,8 +224,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user19",
@@ -185,8 +241,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user10",
@@ -198,8 +258,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user10",
@@ -211,8 +275,12 @@
     "maxMoneyInGames": 0,
     "securityQuestion": "Riazi 2 to chand shodi?",
     "securityAnswer": "hi",
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
   },
   {
     "username": "user119",
@@ -222,7 +290,243 @@
     "gender": false,
     "playedGames": 0,
     "maxMoneyInGames": 0,
+    "maxEnergy": 0,
+    "maxEnergyTurn": 0,
     "energy": 200,
-    "money": 0
+    "currentTurnEnergy": 0,
+    "money": 0,
+    "fainted": false
+  },
+  {
+    "username": "user81",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user81",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user82",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user82",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user83",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user83",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user84",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
+  },
+  {
+    "username": "user84",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    },
+    "skillExperience": {
+      "farmingSkill": 0,
+      "miningSkill": 0,
+      "foragingSkill": 0,
+      "fishingSkill": 0
+    }
   }
 ]

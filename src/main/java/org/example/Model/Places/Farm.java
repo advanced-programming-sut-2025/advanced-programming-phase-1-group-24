@@ -1,6 +1,8 @@
 package org.example.Model.Places;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.example.Model.User;
 import org.example.Model.ConfigTemplates.FarmTemplate;
@@ -48,6 +50,31 @@ public class Farm extends Place{
     this.cage = new ArrayList<>();
     this.barn = new ArrayList<>();
     }
+
+    public Tile getRandomFarmTile(Tile[][] map) {
+        List<Tile> farmTiles = new ArrayList<>();
+
+        int startX = this.getX();
+        int startY = this.getY();
+        int width = this.getWidth();
+        int height = this.getHeight();
+
+        for (int i = startX; i < startX + width; i++) {
+            for (int j = startY; j < startY + height; j++) {
+                if (map[j][i].getType() == TileType.FARM) {
+                    farmTiles.add(map[i][j]);
+                }
+            }
+        }
+
+        if (farmTiles.isEmpty()) {
+            return null;
+        }
+
+        Random rand = new Random();
+        return farmTiles.get(rand.nextInt(farmTiles.size()));
+    }
+
 
     public void setTileTypes(Tile[][] map) {
     for (int y = this.y; y < this.y + this.height; y++) {

@@ -7,6 +7,7 @@ public enum FriendshipLevels {
     stage3,
     stage4;
 
-    public void useFriendship(){}
+    public void useFriendship() {
+    }
     //override later
 }

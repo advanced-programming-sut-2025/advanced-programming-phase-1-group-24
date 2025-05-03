@@ -19,7 +19,7 @@ public class Game {
     private TimeAndDate timeAndDate;
     private User currentPlayer;
     private User mainPlayer;  //the creator of the game or the last player that loaded the game
-    private WeatherType currentWeatherType=WeatherType.SUNNY;
+    private WeatherType currentWeatherType = WeatherType.SUNNY;
     private WeatherType tomorrowWeatherType;
     private int currentPlayerIndex = 0;
     int turnCounter = 0;
@@ -31,7 +31,7 @@ public class Game {
         this.players = players;
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
-        this.timeAndDate = new TimeAndDate(9, 1,DayOfWeek.Saturday, Season.SPRING);
+        this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
         this.map = new MapOfGame();
     }
 
@@ -83,27 +83,27 @@ public class Game {
     }
 
     public void goToNextTurn() {
-       do {
-           currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-           currentPlayer = players.get(currentPlayerIndex);
-           turnCounter++;
+        do {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+            currentPlayer = players.get(currentPlayerIndex);
+            turnCounter++;
 
-           // Reset energy for the new player
-           // Only count the turn if the player is NOT fainted
-           if (!currentPlayer.hasFainted()) {
-               currentPlayer.resetTurnEnergy(); // Reset energy only if they get a turn
-           }
-           if (turnCounter == players.size()) {
-               // One full round complete
-               turnCounter = 0;
-               advanceTimeByOneHour();
-           }
-       }while (currentPlayer.hasFainted());
+            // Reset energy for the new player
+            // Only count the turn if the player is NOT fainted
+            if (!currentPlayer.hasFainted()) {
+                currentPlayer.resetTurnEnergy(); // Reset energy only if they get a turn
+            }
+            if (turnCounter == players.size()) {
+                // One full round complete
+                turnCounter = 0;
+                advanceTimeByOneHour();
+            }
+        } while (currentPlayer.hasFainted());
     }
+
     public void advanceTimeByOneHour() {
         timeAndDate.advanceHour();
     }
-
 
 
     public MapOfGame getMap() {

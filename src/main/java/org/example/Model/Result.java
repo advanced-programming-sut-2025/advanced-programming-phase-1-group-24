@@ -1,6 +1,6 @@
 package org.example.Model;
 
-public record Result(boolean isSuccessful, String message){
+public record Result(boolean isSuccessful, String message) {
 
     @Override
     public boolean isSuccessful() {

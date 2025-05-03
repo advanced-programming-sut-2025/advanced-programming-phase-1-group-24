@@ -1,6 +1,13 @@
 package org.example.Model.Growables;
 
-public class Growable implements Cloneable{
+import org.example.Model.Things.Item;
+import org.example.Model.TimeManagement.Season;
+
+import java.util.List;
+import java.util.Map;
+
+public class Growable extends Item implements Cloneable { //extend Item
+    //note that we cannot put tree or crops in inventory  only seeds and products
     //When the growable is added to a tile we will fill out the containedGrowable field in the tile
     SourceType source;
     GrowableType growableType;
@@ -56,5 +63,57 @@ public class Growable implements Cloneable{
     }
 
     public void grow(){}
-    public void harvest(){}
+    private static final Map<Season, List<SourceType>> mixedSeedsMap = Map.of(
+            Season.SPRING, List.of(
+                    SourceType.CauliflowerSeeds,
+                    SourceType.ParsnipSeeds,
+                    SourceType.PotatoSeeds,
+                    SourceType.JazzSeeds,
+                    SourceType.TulipBulb
+            ),
+            Season.SUMMER, List.of(
+                    SourceType.CornSeeds,
+                    SourceType.PepperSeeds,
+                    SourceType.RadishSeeds,
+                    SourceType.WheatSeeds,
+                    SourceType.PoppySeeds,
+                    SourceType.SunflowerSeeds,
+                    SourceType.SummerSquashSeeds
+            ),
+            Season.AUTUMN, List.of(
+                    SourceType.ArtichokeSeeds,
+                    SourceType.CornSeeds,
+                    SourceType.EggplantSeeds,
+                    SourceType.PumpkinSeeds,
+                    SourceType.SunflowerSeeds,
+                    SourceType.FairySeeds
+            ),
+            Season.WINTER, List.of(
+                    SourceType.PowdermelonSeeds
+            )
+    );
+
+    public static List<SourceType> getMixedSeeds(Season season) {
+        return mixedSeedsMap.getOrDefault(season, List.of());
+    }
+
+    public void setGrowableType(GrowableType growableType) {
+        this.growableType = growableType;
+    }
+
+    public void setCurrentStage(int currentStage) {
+        this.currentStage = currentStage;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public void setDaysLeftToDie(int daysLeftToDie) {
+        this.daysLeftToDie = daysLeftToDie;
+    }
+
+    public void setIsWateredToday(boolean wateredToday) {
+        isWateredToday = wateredToday;
+    }
 }

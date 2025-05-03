@@ -9,6 +9,11 @@ public enum GameMenuCommands implements Commands {
     EXIT_GAME("^exit\\s+game$"),
     LOAD_GAME("^load\\s+game$"),
     NEW_GAME("^game\\s+new\\s+-u\\s+(?<users>.+)$"),
+    PRINT_GAME("^print\\s+map\\s+-l\\s+(?<x>\\d+),\\s+(?<y>\\d+)\\s+-s\\s+(?<size>\\d+)$"),
+    HELP_READ_MAP("help\\s+reading\\s+map"),
+    WALK("^walk\\s+-l\\s+(?<x>\\d+),\\s+(?<y>\\d+)$"),
+    CAFTINFO("^craftinfo\\s+-n\\s+(?<craftname>.+)$"),
+    TREEINFO("^treeinfo\\s+-n\\s+(?<treename>.+)$"),
     MENU_ENTER(Commands.MENU_ENTER),
     SHOW_MENU(Commands.SHOW_MENU),
     EXIT(Commands.EXIT);

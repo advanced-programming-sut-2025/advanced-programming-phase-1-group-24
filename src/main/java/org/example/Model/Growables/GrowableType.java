@@ -6,7 +6,7 @@ public enum GrowableType {
     Source,
     ForagingSeed,
     Fruit,
-    ForagingCrop,
+    ForagingCrop,   //put the object of foraging crop inside the product Of growable in tile
     Crop,
     Coal,
     CropProduct;

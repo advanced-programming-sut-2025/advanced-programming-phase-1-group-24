@@ -7,11 +7,14 @@ import org.example.Model.User;;
 public class Tile {
     private TileType type;
     private boolean isWalkable;
+    private boolean isPlowed;
     private Item containedItem;
     private Growable containedGrowable;
     private Growable productOfGrowable;  //when ever it is time for the giah to create a product we will check if this field is full we will not create another product
     //also we wil check if the season is correct for giving product
     private User tileOwner;
+    private int x;
+    private int y;
 
 
     public TileType getType() {
@@ -31,6 +34,20 @@ public class Tile {
     }
     public User getTileOwner() {
         return tileOwner;
+    }
+    public boolean getIsPlowed() {
+        return isPlowed;
+    }
+
+    public void setIsPlowed(boolean plowed) {
+        isPlowed = plowed;
+    }
+
+    public int getX() {
+        return x;
+    }
+    public int getY() {
+        return y;
     }
 
     public void setWalkable(boolean isWalkable) {
@@ -52,7 +69,13 @@ public class Tile {
         this.tileOwner = tileOwner;
     }
 
+    public void setX(int x) {
+        this.x = x;
+    }
 
+    public void setY(int y) {
+        this.y = y;
+    }
 
     public void changeTile(){}
 
