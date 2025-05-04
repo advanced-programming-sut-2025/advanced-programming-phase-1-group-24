@@ -42,6 +42,9 @@ public enum GameMenuCommands implements Commands {
     TREEINFO("^treeinfo\\s+-n\\s+(?<treename>.+)$"),
     MENU_ENTER(Commands.MENU_ENTER),
     SHOW_MENU(Commands.SHOW_MENU),
+    PLANT("^plant\\s+-s\\s+(?<seedName>.+)\\s+-d\\s+(?<direction>.+)$"),
+    SHOWPLANT("^showplant\\s+-l\\s+(?<x>\\d+),\\s+(?<y>\\d+)$"),
+    FERTALISE("^fertilize\\s+-f\\s+(<?fertilizer>.+)\\s+-d\\s+(?<direction>.+)$"),
     EXIT(Commands.EXIT);
 
 

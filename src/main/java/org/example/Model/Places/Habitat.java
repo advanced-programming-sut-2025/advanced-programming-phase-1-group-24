@@ -10,11 +10,12 @@ public class Habitat extends Place{
     ArrayList<Animal> livingAnimals = new ArrayList<>();
     StorageType storageType;
 
-    public Habitat(int startX, int startY, int width, int height){
+    public Habitat(int startX, int startY, int width, int height, StorageType storageType) {
         this.x = startX;
         this.y = startY;
         this.width = width;
         this.height = height;
+        this.storageType = storageType;
     }
 
     public ArrayList<Animal> getLivingAnimals() {
@@ -22,6 +23,9 @@ public class Habitat extends Place{
     }
     public void setLivingAnimals(ArrayList<Animal> livingAnimals) {
         this.livingAnimals = livingAnimals;
+    }
+    public StorageType getStorageType() {
+        return storageType;
     }
     
 }

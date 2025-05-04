@@ -46,9 +46,13 @@ public class GameMenuController implements MenuController {
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
 
-    public boolean checkEnergy(){
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
-        if(player.getCurrentTurnEnergy() <= 0 || player.hasFainted()){
+    public boolean checkEnergy() {
+        Game game = App.getInstance().getCurrentGame();
+        if (game == null) {
+            return false;
+        }
+        User player = game.getCurrentPlayer();
+        if (player.getCurrentTurnEnergy() <= 0 || player.hasFainted()) {
             return false;
         }
         return true;
@@ -233,7 +237,7 @@ public class GameMenuController implements MenuController {
                 }
 
                 Quarry quarry = playerFarm.getQuarry();
-                Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight());
+                Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL);
 
                 if (!foundSpecial && isInHabitat(x, y, quarryHabitat)) {
                     tile.setType(TileType.QUARRY);
@@ -242,7 +246,7 @@ public class GameMenuController implements MenuController {
                 }
 
                 House house = playerFarm.getHouse();
-                Habitat houseHabitat = new Habitat(house.getX(), house.getY(), house.getWidth(), house.getHeight());
+                Habitat houseHabitat = new Habitat(house.getX(), house.getY(), house.getWidth(), house.getHeight(), StorageType.INITIAL);
                 if (!foundSpecial && isInHabitat(x, y, houseHabitat)) {
                     tile.setType(TileType.HOUSE);
                     tile.setWalkable(true);
@@ -253,7 +257,8 @@ public class GameMenuController implements MenuController {
                         house.getX() - 1,
                         house.getY() - 1,
                         house.getWidth() + 2,
-                        house.getHeight() + 2
+                        house.getHeight() + 2,
+                        StorageType.INITIAL
                 );
 
                 if (isOnHabitatBorder(x, y, houseWallHabitat, houseHabitat)) {
@@ -270,7 +275,7 @@ public class GameMenuController implements MenuController {
                 }
 
                 GreenHouse greenHouse = playerFarm.getGreenHouse();
-                Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight());
+                Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight(), StorageType.INITIAL);
                 if (!foundSpecial && isInHabitat(x, y, greenHouseHabitat)) {
                     tile.setType(TileType.GREENHOUSE);
                     tile.setWalkable(false);  // it is false because it is not fixed yet
@@ -281,7 +286,8 @@ public class GameMenuController implements MenuController {
                         greenHouse.getX() - 1,
                         greenHouse.getY() - 1,
                         greenHouse.getWidth() + 2,
-                        greenHouse.getHeight() + 2
+                        greenHouse.getHeight() + 2,
+                        StorageType.INITIAL
                 );
 
                 if (isOnHabitatBorder(x, y, greenHouseWallHabitat, greenHouseHabitat)) {
@@ -311,7 +317,7 @@ public class GameMenuController implements MenuController {
         }
 
         Quarry quarry = playerFarm.getQuarry();
-        Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight());
+        Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL);
         List<Tile> quarryTiles = new ArrayList<>();
 
         for (int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++) {
@@ -569,15 +575,23 @@ public class GameMenuController implements MenuController {
             // Grow crops and update energy
             for (User user : game.getPlayers()) {
                 user.resetEnergyForNewDay();
-                for (Animal animal : user.getOwnedAnimals()) {
-                    animal.updateProductEndDay();
-                    animal.endOfDayUpdate();
-                }
+//                for (Animal animal : user.getOwnedAnimals()) {
+//                    animal.updateProductEndDay();
+//                    animal.endOfDayUpdate();
+//                }
                 //user.getFarm().growCropsOneDay();
                 // user.getFarm().generateForageAndMine();
                 //user.collectShippingBinProfits();
             }
 
+            //crowAttack();
+            Tile[][] tiles = game.getMap().getMap();
+//            for(int j = 0; j < tiles.length; j++) {
+//                for(int i = 0; i < tiles[0].length; i++) {
+//                    updateGrowable(tiles[j][i]);
+//                }
+//            }
+            randomForaging();
 
             // Update weather for the new day
             game.setCurrentWeatherType(game.getTomorrowWeatherType());
@@ -736,13 +750,6 @@ public class GameMenuController implements MenuController {
         return null;
     }
 
-    public void creatingRandomForagingForFarm() {
-        //rock ??
-        //choose between foraging mineral types to put in Quarry
-        //choose between foraging crops to put in map
-
-    }
-
     private boolean isInHabitat(int x, int y, Habitat h) {
         return x >= h.getX() && x < h.getX() + h.getWidth()
                 && y >= h.getY() && y < h.getY() + h.getHeight();
@@ -821,17 +828,18 @@ public class GameMenuController implements MenuController {
                 TileType type = map[i][j].getType();
                 if(map[i][j].getContainedGrowable() != null){
                     if(map[i][j].getContainedGrowable().getTreeType() != null){
-                        System.out.print("\u001B[32mT\u001B[0m");
+                        System.out.print("\u001B[37;42mT\u001B[0m");
                     }
                     else if(map[i][j].getContainedGrowable().getCropType() != null){
-                        System.out.print("\u001B[32mC\u001B[0m");
+                        System.out.print("\u001B[37;42mC\u001B[0m");
                     }
                 }
                 else if(map[i][j].getProductOfGrowable() != null){
-                    System.out.print("\u001B[38;5;22mg\u001B[0m");
+                    System.out.print("\u001B[37;48;5;22mg\u001B[0m");
                 }
                 else if(map[i][j].getContainedItem() != null){
-                    System.out.print("\u001B[38;5;208mf\u001B[0m");
+                    System.out.print("\u001B[37;48;5;208mf\u001B[0m");
+
                 }
                 else System.out.print(type.coloredSymbol());
             }
@@ -1304,7 +1312,7 @@ public class GameMenuController implements MenuController {
         }
 
         int currentEnergy = player.getEnergy();
-        if (bestEnergy <= currentEnergy) {
+        if (bestEnergy < currentEnergy) {
             // Enough energy, walk fully
             for (String pos : path) {
                 String[] parts = pos.split(",");
@@ -1313,6 +1321,8 @@ public class GameMenuController implements MenuController {
                 player.setCurrentTile(map[y][x]);
             }
             player.setEnergy(currentEnergy - bestEnergy);
+            int newTurnEnergy = Math.max(0, player.getCurrentTurnEnergy() - bestEnergy);
+            player.setCurrentTurnEnergy(newTurnEnergy);
             System.out.println("Walked to destination. Energy left: " + player.getEnergy());
         } else {
             // Not enough energy, walk as far as possible
@@ -1331,7 +1341,9 @@ public class GameMenuController implements MenuController {
                 player.setCurrentTile(map[y][x]);
 
                 int usedEnergy = energyUsed.get(lastReachable) / 20;
-                player.setEnergy(player.getEnergy() - usedEnergy);
+                player.setEnergy(0);
+                player.setCurrentTurnEnergy(0);
+                player.setFainted(true);
                 System.out.println("You fainted at " + lastReachable + ". Energy left: " + player.getEnergy());
             } else {
                 System.out.println("You don’t have enough energy to move.");
@@ -1384,7 +1396,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void randomForaging(){
-        //call this every morning or knight
+        //call this every morning or night
         Game currentGame = App.getInstance().getCurrentGame();
         Tile[][] map = currentGame.getMap().getMap();
         for(Farm farm : App.getInstance().getCurrentGame().getMap().getFarms()){
@@ -1416,33 +1428,233 @@ public class GameMenuController implements MenuController {
         }
     }
 
-//    public Result plantGrowable(String seedName, String direction){
-//        SourceType sourceType = SourceType.fromName(seedName);
-//        Backpack playerBackPack = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
-//        Growable growable = findGrowableInBackpackBySourceType(playerBackPack, sourceType);
-//        if(growable == null){
-//            return new Result(false, "Growable with name '" + seedName + "' not found in inventory.");
-//        }
-//        //playerBackPack.getInventoryItems().
-//
-//
-//    }
+    public Result showPlant(String x, String y){
+        int tileX = Integer.parseInt(x);
+        int tileY = Integer.parseInt(y);
+        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        if(map[tileY][tileX].getContainedGrowable() == null){
+            return new Result(false, "There is no product in this tile!");
+        }
+        Growable growable = map[tileY][tileX].getContainedGrowable();
+        StringBuilder sb = new StringBuilder();
+        if (growable.getTreeType() != null) {
+            sb.append("TreeType: ").append(growable.getTreeType().getName()).append("\n");
+        } else if (growable.getCropType() != null) {
+            sb.append("CropType: ").append(growable.getCropType().getName()).append("\n");
+        } else if (growable.getForagingCropType() != null) {
+            sb.append("ForagingCropType: ").append(growable.getForagingCropType().getName()).append("\n");
+        }
+
+        // Append other fields
+        sb.append("SourceType: ").append(growable.getSource().getName()).append("\n");
+        sb.append("GrowableType: ").append(growable.getGrowableType().name()).append("\n");
+        sb.append("Age: ").append(growable.getAge()).append("\n");
+        sb.append("Current Stage: ").append(growable.getCurrentStage()).append("\n");
+        sb.append("Watered Today: ").append(growable.getIsWateredToday()).append("\n");
+        sb.append("Fertilized: ").append(growable.hasBeenFertalized()).append("\n");
+        sb.append("Days Left to Die: ").append(growable.getDaysLeftToDie()).append("\n");
+        return new Result(true, sb.toString());
+    }
+
+    public Result plantGrowable(String seedName, String direction){
+        SourceType sourceType = SourceType.fromName(seedName);
+        Backpack playerBackPack = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Growable growable = findGrowableInBackpackBySourceType(playerBackPack, sourceType);
+        if(growable == null){
+            return new Result(false, "Growable with name '" + seedName + "' not found in inventory.");
+        }
+        Result result = playerBackPack.grabItem(growable.getName(), 1);
+        if(result.isSuccessful()){
+            System.out.println(result.message());
+            int x = currentPlayer.getCurrentTile().getX();
+            int y = currentPlayer.getCurrentTile().getY();
+            if(direction.equals("up")) y--;
+            else if(direction.equals("down")) y++;
+            else if(direction.equals("left")) x--;
+            else if(direction.equals("right")) x++;
+            if(x < 0 || y < 0 || x >= map[0].length || y >= map.length){
+                return new Result(false, "direction is invalid.");
+            }
+            if(hasGiantNeighbor(map, y, x)){
+                return new Result(false, "You cannot plant next to a giant crop!");
+            }
+            if(growable.getGrowableType() == GrowableType.MixedSeeds){
+                growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(App.getInstance()
+                                          .getCurrentGame().getTimeAndDate().getSeason()));
+            }
+            if(growable.getCropType() != null){
+                tryFormGiant(map, y, x, growable.getCropType());
+            }
+            map[y][x].setWalkable(false);
+            map[y][x].setContainedItem(growable);
+            map[y][x].setIsPlowed(false);
+            return new Result(true, "Growable with name '" + seedName + "' has been planted.");
+        }
+        else{
+         return result;
+        }
+    }
+
+    public Result fertalizeGrowable(String fertalizer, String direction){
+        Result result = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        int x = currentPlayer.getCurrentTile().getX();
+        int y = currentPlayer.getCurrentTile().getY();
+        if(direction.equals("up")) y--;
+        else if(direction.equals("down")) y++;
+        else if(direction.equals("left")) x--;
+        else if(direction.equals("right")) x++;
+        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length){
+            return new Result(false, "direction is invalid.");
+        }
+        if(map[y][x].getContainedGrowable() == null){
+            return new Result(false, "There is no growable in the chosen tile!");
+        }
+        if(result.isSuccessful()){
+            System.out.println(result.message());
+            map[y][x].getContainedGrowable().setHasBeenFertalized(true);
+            Growable growable = map[y][x].getContainedGrowable();
+            if(growable.getGrowableType() == GrowableType.Giant){
+                for(int j = Math.max(0 , map[y][x].getY() - 1); j <= Math.min(149, map[y][x].getY() + 1); j++){
+                    for(int i = Math.max(0, map[y][x].getX() - 1); i <= Math.min(149, map[y][x].getX() + 1); i++){
+                        if(map[j][i].getContainedGrowable() != null && map[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant){
+                            map[j][i].getContainedGrowable().setHasBeenFertalized(true);
+                        }
+                    }
+                }
+            }
+            return new Result(true, "Growable with name '" + fertalizer + "' has been fertalized.");
+        }
+        else{
+            return result;
+        }
+    }
+
+    public void tryFormGiant(Tile[][] grid, int row, int col, CropType cropType) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        // The 4 possible 2x2 squares that include (row, col)
+        int[][][] squareOffsets = {
+                {{0, 0}, {0, 1}, {1, 0}, {1, 1}},   // top-left
+                {{-1, 0}, {-1, 1}, {0, 0}, {0, 1}}, // bottom-left
+                {{0, -1}, {0, 0}, {1, -1}, {1, 0}}, // top-right
+                {{-1, -1}, {-1, 0}, {0, -1}, {0, 0}} // bottom-right
+        };
+
+        for (int[][] square : squareOffsets) {
+            List<Tile> tiles = new ArrayList<>();
+            boolean valid = true;
+
+            for (int[] offset : square) {
+                int r = row + offset[0];
+                int c = col + offset[1];
+
+                // Check bounds
+                if (r < 0 || r >= rows || c < 0 || c >= cols) {
+                    valid = false;
+                    break;
+                }
+
+                Tile tile = grid[r][c];
+                Growable growable = tile.getContainedGrowable();
+
+                if (growable == null) {
+                    valid = false;
+                    break;
+                }
+
+                if (growable.getCropType() != cropType) {
+                    valid = false;
+                    break;
+                }
+
+                tiles.add(tile);
+            }
+
+            // If match found, convert all to Giant
+            int maxAge = 0;
+            int maxStage = 0;
+            int maxDaysLeftToDie = 2;
+
+            if (valid) {
+                for (Tile tile : tiles) {
+                    Growable g = tile.getContainedGrowable();
+                    g.setGrowableType(GrowableType.Giant);
+
+                    if (g.getAge() > maxAge) maxAge = g.getAge();
+                    if (g.getCurrentStage() > maxStage) maxStage = g.getCurrentStage();
+                    if (g.getDaysLeftToDie() > maxDaysLeftToDie) maxDaysLeftToDie = g.getDaysLeftToDie();
+                }
+
+                for (Tile tile : tiles) {
+                    Growable g = tile.getContainedGrowable();
+                    g.setAge(maxAge);
+                    g.setCurrentStage(maxStage);
+                    g.setDaysLeftToDie(maxDaysLeftToDie);
+                }
+
+                return;
+            }
+        }
+    }
+
+
+    public boolean hasGiantNeighbor(Tile[][] grid, int row, int col) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        for (int dRow = -1; dRow <= 1; dRow++) {
+            for (int dCol = -1; dCol <= 1; dCol++) {
+                // Skip the center tile itself
+                if (dRow == 0 && dCol == 0) continue;
+
+                int newRow = row + dRow;
+                int newCol = col + dCol;
+
+                // Check bounds
+                if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                    Growable growable = grid[newRow][newCol].getContainedGrowable();
+                    Growable productOfGrowable = grid[newRow][newCol].getProductOfGrowable();
+                    if ((growable != null && growable.getGrowableType() == GrowableType.Giant) ||
+                            (productOfGrowable != null && productOfGrowable.getGrowableType() == GrowableType.Giant)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
 
     public void crowAttack(){                                                                   //TODO
         Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
         Farm playerFarm = App.getInstance().getCurrentGame().getMap().getFarmByOwner(App.getInstance().getCurrentGame().getCurrentPlayer());
-        int numOfGrowables = 0;
+
+        List<Tile> growableTiles = new ArrayList<>();
+
         for(int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++){
             for(int x = playerFarm.getX(); x < playerFarm.getX() + playerFarm.getWidth(); x++){
-                if(map[y][x].getType() == TileType.FARM && map[y][x].getContainedGrowable() != null){
-                    numOfGrowables++;
+                if(map[y][x].getType() == TileType.FARM && map[y][x].getProductOfGrowable() != null){
+                    growableTiles.add(map[y][x]);
                 }
             }
         }
         int rand = RANDOM.nextInt(100);
-        if(numOfGrowables >= 16 && rand <= 25){
-
-
+        if (growableTiles.size() >= 16 && RANDOM.nextInt(100) <= 25) {
+            Tile target = growableTiles.get(RANDOM.nextInt(growableTiles.size()));
+            if(target.getProductOfGrowable() != null){
+                target.setProductOfGrowable(null);
+                if(target.getContainedGrowable().getCropType() != null && target.getContainedGrowable().getCropType().oneTime())
+                    target.setContainedGrowable(null);
+                else{
+                    target.getContainedGrowable().setHasBeenAttackedByCrow(true);
+                }
+                System.out.println("A crow destroyed a crop at tile (" + target.getX() + ", " + target.getY() + ")!");
+            }
         }
     }
 
@@ -1459,10 +1671,16 @@ public class GameMenuController implements MenuController {
                 tile.setProductOfGrowable(null);
                 return;
             }
-            if(!tile.getContainedGrowable().getIsWateredToday()){
+            if(!tile.getContainedGrowable().getIsWateredToday() && !tile.getContainedGrowable().hasBeenFertalized()){
                 tile.getContainedGrowable().setDaysLeftToDie(tile.getContainedGrowable().getDaysLeftToDie() - 1);
                 return;
             }
+            if(tile.getContainedGrowable().hasBeenAttackedByCrow()){
+                tile.getContainedGrowable().setHasBeenAttackedByCrow(false);
+                return;
+            }
+            tile.getContainedGrowable().setHasBeenFertalized(false);
+            tile.getContainedGrowable().setIsWateredToday(false);
             Growable growable = tile.getContainedGrowable();
             if(growable != null && growable.getTreeType() != null && growable.getTreeType().getNormalSeasons().contains(currentSeason)){
                 growable.setAge(growable.getAge() + 1);
@@ -1504,10 +1722,11 @@ public class GameMenuController implements MenuController {
                 else{
                     if(tile.getProductOfGrowable() == null){
                         if(growable.getCropType().oneTime()){
-                            tile.setContainedGrowable(null);
                             Growable product = GrowableFactory.getInstance().create(growable.getCropType().getSource());
-                            product.setGrowableType(GrowableType.CropProduct);
+                            if(growable.getGrowableType() != GrowableType.Giant) product.setGrowableType(GrowableType.CropProduct);
+                            else product.setGrowableType(GrowableType.Giant);
                             tile.setProductOfGrowable(product);
+                            tile.setContainedGrowable(null);
                         }
                         else{
                             if(growable.getCropType().getTotalHarvestTime() +
@@ -1515,7 +1734,8 @@ public class GameMenuController implements MenuController {
                                 growable.setAge(0);
                                 growable.setCurrentStage(1);
                                 Growable product = GrowableFactory.getInstance().create(growable.getCropType().getSource());
-                                product.setGrowableType(GrowableType.CropProduct);
+                                if(growable.getGrowableType() != GrowableType.Giant) product.setGrowableType(GrowableType.CropProduct);
+                                else product.setGrowableType(GrowableType.Giant);
                                 tile.setProductOfGrowable(product);
                             }
                         }

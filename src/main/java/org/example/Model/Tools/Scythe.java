@@ -45,14 +45,27 @@ public class Scythe extends Tool{
         if (productOfGrowable == null)
             return new Result(false, "Nothing to harvest here.");
         else {
+            Tile[][] tiles = map.getMap();
             int farmingSkill = currentPlayer.getSkillsLevel().get(Skill.FARMING);
             if (farmingSkill == 0) productOfGrowable.setQuality(ProductQuality.Normal);
             else if (farmingSkill == 1) productOfGrowable.setQuality(ProductQuality.Normal);
             else if (farmingSkill == 2) productOfGrowable.setQuality(ProductQuality.Silver);
             else if (farmingSkill == 3) productOfGrowable.setQuality(ProductQuality.Golden);
             else if (farmingSkill == 4) productOfGrowable.setQuality(ProductQuality.Iridium);
-            currentPlayer.getBackpack().addItem(productOfGrowable, 1);
-            nextTile.setProductOfGrowable(null);
+            if(currentTile.getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                currentPlayer.getBackpack().addItem(productOfGrowable, 10);
+                for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
+                    for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
+                        if(tiles[j][i].getProductOfGrowable() != null && tiles[j][i].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                            nextTile.setProductOfGrowable(null);
+                        }
+                    }
+                }
+            }
+            else {
+                currentPlayer.getBackpack().addItem(productOfGrowable, 1);
+                nextTile.setProductOfGrowable(null);
+            }
             currentPlayer.addSkillExperience(Skill.FARMING);
             return new Result(true, "Harvested " + productOfGrowable.getName());
         }

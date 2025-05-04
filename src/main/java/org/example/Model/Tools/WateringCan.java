@@ -1,6 +1,7 @@
 package org.example.Model.Tools;
 
 import org.example.Model.Growables.Growable;
+import org.example.Model.Growables.GrowableType;
 import org.example.Model.MapManagement.MapOfGame;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.MapManagement.TileType;
@@ -61,6 +62,16 @@ public class WateringCan extends Tool{
                 return new Result(false, "You have not planted anything!");
             else {
                 growable.setIsWateredToday(true);
+                Tile[][] tiles = map.getMap();
+                if(growable.getGrowableType() == GrowableType.Giant){
+                    for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
+                        for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
+                            if(tiles[j][i].getContainedGrowable() != null && tiles[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant){
+                                tiles[j][i].getContainedGrowable().setIsWateredToday(true);
+                            }
+                        }
+                    }
+                }
                 this.waterLeft -= 1;
                 return new Result(true, "Watered successfully!");
             }

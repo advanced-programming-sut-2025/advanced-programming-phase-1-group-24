@@ -117,7 +117,17 @@ public class GameMenu implements AppMenu {
             int count = Integer.parseInt(matcher.group("count"));
             //System.out.println(controller.cheatAddItem(itemName, count));
             //COMPLETE THIS AFTER WRITING LIST OF ALL ITEMS
-        } else {
+        }
+        else if((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
+            System.out.println(controller.plantGrowable(matcher.group("seedName"), matcher.group("direction")).message());
+        }
+        else if((matcher = GameMenuCommands.SHOWPLANT.getMatcher(input)) != null) {
+             System.out.println(controller.showPlant(matcher.group("x"), matcher.group("y")).message());
+        }
+        else if((matcher = GameMenuCommands.FERTALISE.getMatcher(input)) != null) {
+            System.out.println(controller.fertalizeGrowable(matcher.group("fertilizer"), matcher.group("direction")).message());
+        }
+        else {
             System.out.println("invalid command");
         }
 
