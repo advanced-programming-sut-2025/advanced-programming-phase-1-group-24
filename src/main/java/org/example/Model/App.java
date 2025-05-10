@@ -15,8 +15,8 @@ public class App {
     private ArrayList<Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private Game currentGame;
     private ArrayList<User> users = UserDatabase.loadUsers();
-    private Menu currentMenu= Menu.LoginMenu;
-    private User loggedInUser= loadLoggedInUser();// instead of null
+    private Menu currentMenu = Menu.LoginMenu;
+    private User loggedInUser = loadLoggedInUser();// instead of null
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -44,13 +44,15 @@ public class App {
         if (!file.exists()) return new ArrayList<>();
 
         try (Reader reader = new FileReader(file)) {
-            Type listType = new TypeToken<ArrayList<Game>>() {}.getType();
+            Type listType = new TypeToken<ArrayList<Game>>() {
+            }.getType();
             return new Gson().fromJson(reader, listType);
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
+
     public void saveActiveGames() {
         File file = new File("data/active_games.json");
         try (Writer writer = new FileWriter(file)) {
@@ -65,10 +67,13 @@ public class App {
         return currentMenu;
     }
 
-    private App(){};
+    private App() {
+    }
 
-    public static App getInstance(){
-        if(instance == null){
+    ;
+
+    public static App getInstance() {
+        if (instance == null) {
             instance = new App();
         }
         return instance;
@@ -84,27 +89,50 @@ public class App {
     }
 
 
+    public ArrayList<User> getUsers() {
+        return users;
+    }
 
+    public User getLoggedInUser() {
+        return loggedInUser;
+    }
 
-    public ArrayList<User> getUsers() { return users; }
-    public User getLoggedInUser() { return loggedInUser; }
-    public void setLoggedInUser(User loggedInUser) { this.loggedInUser = loggedInUser; }
-    public void setUsers(ArrayList<User> users) { this.users = users; }
+    public void setLoggedInUser(User loggedInUser) {
+        this.loggedInUser = loggedInUser;
+    }
 
-    public Game getCurrentGame() {return currentGame;}
+    public void setUsers(ArrayList<User> users) {
+        this.users = users;
+    }
+
+    public Game getCurrentGame() {
+        return currentGame;
+    }
 
     public ArrayList<Game> getActiveGames() {
         return activeGames;
     }
 
-    public void setCurrentGame(Game currentGame) { this.currentGame = currentGame; }
-    public void setCurrentMenu(Menu currentMenu) { this.currentMenu = currentMenu; }
-    public void getCurrentGame(Game currentGame) { currentGame = currentGame; }
-    public void getCurrentMenu(Menu currentMenu) { currentMenu = currentMenu; }
+    public void setCurrentGame(Game currentGame) {
+        this.currentGame = currentGame;
+    }
+
+    public void setCurrentMenu(Menu currentMenu) {
+        this.currentMenu = currentMenu;
+    }
+
+    public void getCurrentGame(Game currentGame) {
+        currentGame = currentGame;
+    }
+
+    public void getCurrentMenu(Menu currentMenu) {
+        currentMenu = currentMenu;
+    }
 
     public List<String> getSecurityQuestions() {
         return securityQuestions;
     }
+
     public Game getGameByUser(User user) {
         for (Game game : activeGames) {
             if (game.hasUser(user)) return game;

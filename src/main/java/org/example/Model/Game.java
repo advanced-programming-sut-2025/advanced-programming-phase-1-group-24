@@ -8,10 +8,7 @@ import org.example.Model.TimeManagement.Season;
 import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Game {
     private MapOfGame map;
@@ -19,7 +16,7 @@ public class Game {
     private TimeAndDate timeAndDate;
     private User currentPlayer;
     private User mainPlayer;  //the creator of the game or the last player that loaded the game
-    private WeatherType currentWeatherType=WeatherType.SUNNY;
+    private WeatherType currentWeatherType;
     private WeatherType tomorrowWeatherType;
     private int currentPlayerIndex = 0;
     int turnCounter = 0;
@@ -31,8 +28,10 @@ public class Game {
         this.players = players;
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
-        this.timeAndDate = new TimeAndDate(9, 1,DayOfWeek.Saturday, Season.SPRING);
+        this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
         this.map = new MapOfGame();
+        this.currentWeatherType = WeatherType.SUNNY;
+        predictTomorrowWeather();
     }
 
     private ArrayList<NPC> npcs;
@@ -82,29 +81,10 @@ public class Game {
     public void createNPC() {
     }
 
-    public void goToNextTurn() {
-       do {
-           currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
-           currentPlayer = players.get(currentPlayerIndex);
-           turnCounter++;
 
-           // Reset energy for the new player
-           // Only count the turn if the player is NOT fainted
-           if (!currentPlayer.hasFainted()) {
-               currentPlayer.resetTurnEnergy(); // Reset energy only if they get a turn
-           }
-           if (turnCounter == players.size()) {
-               // One full round complete
-               turnCounter = 0;
-               advanceTimeByOneHour();
-           }
-       }while (currentPlayer.hasFainted());
-    }
     public void advanceTimeByOneHour() {
         timeAndDate.advanceHour();
     }
-
-
 
     public MapOfGame getMap() {
         return map;
@@ -169,4 +149,12 @@ public class Game {
     public void setTomorrowWeatherType(WeatherType tomorrowWeatherType) {
         this.tomorrowWeatherType = tomorrowWeatherType;
     }
+
+    public void predictTomorrowWeather() {
+        Season currentSeason = timeAndDate.getSeason();
+        List<WeatherType> possibleWeathers = currentSeason.getWeatherTypes();
+        int randomIndex = new Random().nextInt(possibleWeathers.size());
+        this.tomorrowWeatherType = possibleWeathers.get(randomIndex);
+    }
+
 }

@@ -1,25 +1,29 @@
 package org.example.Model;
 
 
+import org.example.Model.Animals.Animal;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
-import org.example.Model.Reccepies.Food;
+import org.example.Model.Things.Food;
 import org.example.Model.Things.Backpack;
 import org.example.Model.Things.Item;
 import org.example.Model.Tools.Tool;
 import org.example.Model.Tools.ToolType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class User {
-    String username;
-    String password;
-    String nickname;
-    String email;
-    boolean gender;
-    int playedGames;
-    int maxMoneyInGames;
+    //user
+    private String username;
+    private String password;
+    private String nickname;
+    private String email;
+    private boolean gender;
+    private int playedGames;
+    private int maxMoneyInGames;
     private String securityQuestion;
     private String securityAnswer;
 
@@ -28,20 +32,21 @@ public class User {
     private int maxEnergyTurn = 50;
     private int energy = maxEnergy;
     private int currentTurnEnergy = maxEnergyTurn;
-    /* a variable for hours left for special energy Max (eg.coffee)then after each turn if this variable
+    /* a variable for hours left for special energy Max (e.g.coffee)then after each turn if this variable
     is more than one we minus one and then it when  reaches 0 we turn back the max energy to normal
      */
     private int money = 0;
     private boolean fainted = false;
-    Map<Skill, Integer> skills;
-    Tile currentTile;
-    ToolType currentTool;
-    ArrayList<Craft> craftingRecepies;
-    ArrayList<Food> cookingRecepies;
-    Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
-    Map<User, FriendshipLevels> friends;
-    Backpack backpack;
-    Tool trashCan;
+    private Map<Skill, Integer> skillsLevel;
+    private Map<Skill, Integer> skillExperience;
+    private Tile currentTile;
+    private Tool equippedTool;
+    private ArrayList<Craft> craftingRecepies;
+    private ArrayList<Food> cookingRecepies;
+    private Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
+    private Map<User, FriendshipLevels> friends;
+    private Backpack backpack;
+    private ArrayList<Animal> ownedAnimals;
 
 
     public User(String username, String password, String nickname, String email, boolean gender) {
@@ -50,6 +55,14 @@ public class User {
         this.nickname = nickname;
         this.email = email;
         this.gender = gender;
+        this.skillsLevel = new HashMap<>();
+        for (Skill skill : Skill.values()) {
+            skillsLevel.put(skill, 0);
+        }
+        this.skillExperience = new HashMap<>();
+        for (Skill skill : Skill.values()) {
+            skillExperience.put(skill, 0);
+        }
     }
 
     public int getCurrentTurnEnergy() {
@@ -109,10 +122,6 @@ public class User {
 
     public Tile getCurrentTile() {
         return currentTile;
-    }
-
-    public ToolType getCurrentTool() {
-        return currentTool;
     }
 
     public String getSecurityQuestion() {
@@ -181,28 +190,6 @@ public class User {
     public void trade() {
     }
 
-    //always call this function before any task that consumes energy if returns false cant do the task
-    public boolean tryConsumeEnergy(int energyRequired) {
-        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
-            System.out.println("not enough energy!");
-            return false;
-        }
-        currentTurnEnergy -= energyRequired;
-        energy -= energyRequired;
-        return true;
-    }
-
-    public void reduceEnergy(int amount) {
-        this.currentTurnEnergy -= amount;
-        this.energy -= amount;
-        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
-            this.energy = 0;
-            this.currentTurnEnergy = 0;
-            System.out.println("not enough energy! You faiented!");
-            this.fainted = true;
-            faint();
-        }
-    }
 
     public void updateGameFields() {
         this.playedGames += 1;
@@ -211,11 +198,14 @@ public class User {
         this.currentTurnEnergy = maxEnergyTurn;
 
         this.currentTile = null; // or a default starting tile
-        this.currentTool = null;
+        this.equippedTool = null;
         this.backpack = new Backpack(); // assuming it starts empty
 
-        if (this.skills != null) {
-            this.skills.clear(); // reset skills
+        if (this.skillsLevel != null) {
+            this.skillsLevel.clear(); // reset skills
+        }
+        if (this.skillExperience != null) {
+            this.skillExperience.clear(); // reset skills
         }
 
         if (this.craftingRecepies != null) {
@@ -229,8 +219,6 @@ public class User {
         if (this.tradeHistory != null) {
             this.tradeHistory.clear();
         }
-
-        this.trashCan = null;
     }
 
 
@@ -251,6 +239,156 @@ public class User {
         }
     }
 
+    public void setMaxEnergy(int maxEnergy) {
+        this.maxEnergy = maxEnergy;
+    }
 
+    public void setMaxEnergyTurn(int maxEnergyTurn) {
+        this.maxEnergyTurn = maxEnergyTurn;
+    }
+
+    // the format to use this function user.addSkillExperience(Skill.FARMING);
+    // use this function in farming fishing mining and foraging
+    public void addSkillExperience(Skill skill) {
+        int amount = skill.getXpPerAction();
+        int currentLevel = skillsLevel.getOrDefault(skill, 0);
+        int currentXP = skillExperience.getOrDefault(skill, 0);
+
+        currentXP += amount;
+
+        // update level
+        while (currentLevel < 4 && currentXP >= 100 * currentLevel + 50) {
+            currentXP -= 100 * currentLevel + 50;
+            currentLevel++;
+        }
+
+        this.skillsLevel.put(skill, currentLevel);
+        this.skillExperience.put(skill, currentXP);
+    }
+
+    public void setCurrentTile(Tile currentTile) {
+        this.currentTile = currentTile;
+    }
+
+    public int getMaxEnergy() {
+        return maxEnergy;
+    }
+
+    public int getMaxEnergyTurn() {
+        return maxEnergyTurn;
+    }
+
+    public boolean isGender() {
+        return gender;
+    }
+
+    public void setGender(boolean gender) {
+        this.gender = gender;
+    }
+
+    public Backpack getBackpack() {
+        return backpack;
+    }
+
+    public void setBackpack(Backpack backpack) {
+        this.backpack = backpack;
+    }
+
+    public void setFriends(Map<User, FriendshipLevels> friends) {
+        this.friends = friends;
+    }
+
+    public void setTradeHistory(Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory) {
+        this.tradeHistory = tradeHistory;
+    }
+
+    public void setCookingRecepies(ArrayList<Food> cookingRecepies) {
+        this.cookingRecepies = cookingRecepies;
+    }
+
+    public ArrayList<Craft> getCraftingRecepies() {
+        return craftingRecepies;
+    }
+
+    public void setCraftingRecepies(ArrayList<Craft> craftingRecepies) {
+        this.craftingRecepies = craftingRecepies;
+    }
+
+    public Map<Skill, Integer> getSkillsLevel() {
+        return skillsLevel;
+    }
+
+    public void setSkillsLevel(Map<Skill, Integer> skillsLevel) {
+        this.skillsLevel = skillsLevel;
+    }
+
+    public Map<Skill, Integer> getSkillExperience() {
+        return skillExperience;
+    }
+
+    public void setSkillExperience(Map<Skill, Integer> skillExperience) {
+        this.skillExperience = skillExperience;
+    }
+
+    public Animal getAnimalByName(String name) {
+        for (Animal animal : ownedAnimals) {
+            if (animal.getName().equalsIgnoreCase(name)) {
+                return animal;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Animal> getOwnedAnimals() {
+        return ownedAnimals;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username); // or a unique ID
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username); // match the field used in equals
+    }
+
+    public Tool getEquippedTool() {
+        return equippedTool;
+    }
+
+    public void setEquippedTool(Tool equippedTool) {
+        this.equippedTool = equippedTool;
+    }
+
+    //always call this function before any task that consumes energy if it returns false cant do the task
+    public boolean tryConsumeEnergy(int energyRequired) {
+        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+            System.out.println("not enough energy!");
+            return false;
+        }
+        currentTurnEnergy -= energyRequired;
+        energy -= energyRequired;
+        handleFainting();
+        return true;
+    }
+
+    public void reduceEnergy(int amount) {
+        this.currentTurnEnergy -= amount;
+        this.energy -= amount;
+        handleFainting();
+    }
+
+    public void handleFainting() {
+        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+            this.energy = 0;
+            this.currentTurnEnergy = 0;
+            System.out.println("not enough energy! You faiented!");
+            this.fainted = true;
+        }
+    }
 
 }
