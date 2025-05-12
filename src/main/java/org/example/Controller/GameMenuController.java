@@ -670,10 +670,10 @@ public class GameMenuController implements MenuController {
             }
             processShippingBinsAtNight();
 
-//            for (User user : game.getPlayers()) {
-//                Tile home = user.getHomeTile();
-//                walkToInternal(user, home.getX(), home.getY());
-//            }
+            for (User user : game.getPlayers()) {
+                Tile home = user.getHomeTile();
+                walkToInternal(user, home.getX(), home.getY());
+            }
             handleMachinRecipes(game);
 
             // Skip time to 9 AM
@@ -2566,7 +2566,16 @@ public class GameMenuController implements MenuController {
 
         return new Result(true, "Flower sent successfully.");
     }
-//    public Result sellAnimal(String name) {
-//    }
+
+    public Result cheatWalk(int x, int y){
+        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+            return new Result(false, "You are out of bounds.");
+        }
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        currentPlayer.setCurrentTile(map[y][x]);
+        return new Result(true, "You are now in tile " + x + ", " + y + ".");
+    }
+
 }
 

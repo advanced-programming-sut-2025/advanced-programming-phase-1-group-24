@@ -61,6 +61,7 @@ public enum GameMenuCommands implements Commands {
     ASK_MARRIAGE("^ask\\s+marriage\\s+-u\\s+(?<username>.+)\\s+-r\\s+(?<ring>.+)$"),
     RESPOND("^respond\\s+(?<response>(accept|reject))\\s+-u\\s+(?<username>.+)$"),
     START_TRADE("start\\s+trade"),
+    CHEAT_WALK("cheat\\s+walk\\s+(?<x>\\d+),\\s+(?<y>\\d+)$"),
     EXIT(Commands.EXIT);
 
 

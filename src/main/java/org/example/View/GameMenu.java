@@ -205,6 +205,8 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.respondToMarriage(matcher.group("response"), matcher.group("username")));
         } else if ((matcher = GameMenuCommands.START_TRADE.getMatcher(input)) != null) {
             controller.startTrade();
+        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+            System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else {
             System.out.println("invalid command");
         }
