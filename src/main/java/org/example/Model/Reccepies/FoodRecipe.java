@@ -19,7 +19,7 @@ public enum FoodRecipe {
                 ForagingCropType.Dandelion,1),113,110),
     Omelet(Map.of(AnimalProductType.EGG,1,
             AnimalProductType.COW_MILK,1),100,125),
-    PumpkinPie(Map.of(randomStuffType.Pumpkin,1,
+    PumpkinPie(Map.of(CropType.PUMPKIN,1,
             randomStuffType.WheatFlower,1,
             AnimalProductType.COW_MILK,1,
             randomStuffType.Sugar,1),225,385),

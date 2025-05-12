@@ -13,8 +13,10 @@ public enum TileType {
     FARM("F", "\u001B[103m"),          // Bright Yellow
     WALL("w", "\u001B[47m"),           // White
     NPCLAND("N", "\u001B[106m"),       // Bright Cyan
-    DOOR("D", "\u001B[41m"),           // White
-    SHOP("S", "\u001B[42m");           // Green
+    NPCHOUSE("h", "\u001B[105m"),
+    DOOR("D", "\u001B[41m"), // White
+    SHOP("S", "\u001B[42m"),           // Green
+    SHIPPINGBIN("s","\u001B[41m");
 
     private final String letterToPrint;
     private final String backgroundColor;

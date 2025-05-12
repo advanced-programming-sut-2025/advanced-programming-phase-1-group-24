@@ -1,18 +1,26 @@
 package org.example.Model.Things;
 
+import org.example.Model.Growables.*;
+import org.example.Model.Reccepies.randomStuff;
+import org.example.Model.Reccepies.randomStuffType;
+
+import java.util.Objects;
+
 public class Item {
     protected String name;
     protected boolean isSellable;
     protected int price;
     protected boolean isPlaceable;
+    protected boolean isEatable;
     protected ProductQuality productQuality = ProductQuality.Normal;
 
-    public Item(String name, boolean isSellable, int price, boolean isPlaceable, ProductQuality productQuality) {
+    public Item(String name, boolean isSellable, int price, boolean isPlaceable, ProductQuality productQuality, boolean isEatable) {
         this.name = name;
         this.isSellable = isSellable;
         this.price = price;
         this.isPlaceable = isPlaceable;
         this.productQuality = productQuality;
+        this.isEatable = isEatable;
     }
     public String getName() {
         return name;
@@ -55,6 +63,87 @@ public class Item {
     }
     public String toString(){
         return name;
+    }
+
+    public boolean isEatable() {
+        return isEatable;
+    }
+
+    public void setEatable(boolean eatable) {
+        isEatable = eatable;
+    }
+    public Item copy() {
+        return new Item(name, isSellable, price, isPlaceable, productQuality, isEatable);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        if (isSellable != item.isSellable) return false;
+        if (price != item.price) return false;
+        if (isPlaceable != item.isPlaceable) return false;
+        if (!name.equalsIgnoreCase(item.name)) return false;
+        return productQuality == item.productQuality;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, isSellable, price, isPlaceable, productQuality);
+    }
+
+
+    public static Item getRandomItem(String name) {
+        for (FishType fishType : FishType.values()) {
+            if (fishType.getName().equalsIgnoreCase(name)) {
+                return new Fish(ProductQuality.Normal, fishType);
+            }
+        }
+        for (FoodType foodType : FoodType.values()) {
+            if (foodType.getName().equalsIgnoreCase(name)) {
+                return new Food(foodType.getName(), foodType);
+            }
+        }
+        for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
+            if (foragingMineralType.getName().equalsIgnoreCase(name)) {
+                return new ForagingMineral(ProductQuality.Normal,foragingMineralType);
+            }
+        }
+        for (randomStuffType randomStuffType : randomStuffType.values()) {
+            if (randomStuffType.getName().equalsIgnoreCase(name)) {
+                return new randomStuff(randomStuffType.getSellPrice(), randomStuffType);
+            }
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            if(sourceType.getName().equalsIgnoreCase(name)) {
+                return GrowableFactory.getInstance().create(sourceType);
+            }
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            if(foragingCropType.getName().equalsIgnoreCase(name)) {
+                return GrowableFactory.getInstance().create(foragingCropType);
+            }
+        }
+        for(CropType cropType : CropType.values()) {
+            if(cropType.getName().equalsIgnoreCase(name)) {
+                Growable newCrop = GrowableFactory.getInstance().create(cropType.getSource());
+                newCrop.setName(cropType.getName());
+                return newCrop;
+            }
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            if(fruitType.getName().equalsIgnoreCase(name)) {
+                for (TreeType treeType : TreeType.values()) {
+                    if (treeType.getFruitType() == fruitType) {
+                        Growable newFruit = GrowableFactory.getInstance().create(treeType.getSource());
+                        newFruit.setName(fruitType.getName());
+                        break;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
 

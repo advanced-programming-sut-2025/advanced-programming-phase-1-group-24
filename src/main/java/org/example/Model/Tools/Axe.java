@@ -31,7 +31,7 @@ public class Axe extends Tool {
 
         Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
         Growable containedGrowable = nextTile.getContainedGrowable();
-        if (containedGrowable.getGrowableType() == GrowableType.Tree) {
+        if (containedGrowable != null && containedGrowable.getGrowableType() == GrowableType.Tree) {
             Growable productOfGrowable = nextTile.getProductOfGrowable();
             if (productOfGrowable != null)
                 currentPlayer.getBackpack().addItem(productOfGrowable, 20); //might change later

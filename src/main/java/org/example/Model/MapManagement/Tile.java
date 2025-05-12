@@ -1,6 +1,8 @@
 package org.example.Model.MapManagement;
 
+import org.example.Model.Animals.Animal;
 import org.example.Model.Growables.Growable;
+import org.example.Model.NPCManagement.NPC;
 import org.example.Model.Things.Item;
 import org.example.Model.User;;
 
@@ -12,9 +14,11 @@ public class Tile {
     private Growable containedGrowable;
     private Growable productOfGrowable;  //when ever it is time for the giah to create a product we will check if this field is full we will not create another product
     //also we wil check if the season is correct for giving product
-    private User tileOwner;
+    private String tileOwner;
     private int x;
     private int y;
+    private Animal containedAnimal;
+    private NPC containedNPC;
 
 
     public TileType getType() {
@@ -32,7 +36,7 @@ public class Tile {
     public Growable getProductOfGrowable() {
         return productOfGrowable;
     }
-    public User getTileOwner() {
+    public String getTileOwner() {
         return tileOwner;
     }
     public boolean getIsPlowed() {
@@ -50,6 +54,14 @@ public class Tile {
         return y;
     }
 
+    public Animal getContainedAnimal() {
+        return containedAnimal;
+    }
+
+    public NPC getContainedNPC() {
+        return containedNPC;
+    }
+
     public void setWalkable(boolean isWalkable) {
         this.isWalkable = isWalkable;
     }
@@ -65,7 +77,7 @@ public class Tile {
     public void setProductOfGrowable(Growable productOfGrowable) {
         this.productOfGrowable = productOfGrowable;
     }
-    public void setTileOwner(User tileOwner) {
+    public void setTileOwner(String tileOwner) {
         this.tileOwner = tileOwner;
     }
 
@@ -75,6 +87,14 @@ public class Tile {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public void setContainedAnimal(Animal containedAnimal) {
+        this.containedAnimal = containedAnimal;
+    }
+
+    public void setContainedNPC(NPC containedNPC) {
+        this.containedNPC = containedNPC;
     }
 
     public void changeTile(){}

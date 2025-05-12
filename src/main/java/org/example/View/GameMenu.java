@@ -2,13 +2,18 @@ package org.example.View;
 
 
 import org.example.Controller.GameMenuController;
+import org.example.Controller.HouseMenuController;
+import org.example.Controller.TradeMenuController;
 import org.example.Model.Menus.GameMenuCommands;
+import org.example.Model.Menus.HouseMenuCommands;
+import org.example.Model.Menus.TradeMenuCommands;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class GameMenu implements AppMenu {
     GameMenuController controller = new GameMenuController();
+    HouseMenuController houseController = new HouseMenuController();
 
     public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
@@ -108,7 +113,7 @@ public class GameMenu implements AppMenu {
         } else if ((matcher = GameMenuCommands.TOOL_UPGRADE.getMatcher(input)) != null) {
             //COMPLETE THIS AFTER MAKING SHOP
         } else if ((matcher = GameMenuCommands.USE_TOOL.getMatcher(input)) != null) {
-            //COMPLETE THIS AFTER COMPLETEING TOOLS
+            System.out.println(controller.useTool(matcher.group("direction")));
         } else if ((matcher = GameMenuCommands.FISH.getMatcher(input)) != null) {
             String fishingPole = matcher.group("fishingPole");
             System.out.println(controller.fish(fishingPole));
@@ -126,6 +131,36 @@ public class GameMenu implements AppMenu {
         }
         else if((matcher = GameMenuCommands.FERTALISE.getMatcher(input)) != null) {
             System.out.println(controller.fertalizeGrowable(matcher.group("fertilizer"), matcher.group("direction")).message());
+        }
+        else if((matcher = GameMenuCommands.BUILDGREENHOUSE.getMatcher(input)) != null) {
+            System.out.println(controller.buildGreenHouse().message());
+        }
+        else if((matcher = HouseMenuCommands.SHOW_RECIPIES.getMatcher(input)) != null) {
+            System.out.println(houseController.showRecipes());
+        }
+        else if((matcher = HouseMenuCommands.CRAFT.getMatcher(input)) != null) {
+            System.out.println(houseController.craft(matcher.group("itemName")));
+        }
+        else if((matcher = HouseMenuCommands.PLACE_ITEM.getMatcher(input)) != null) {
+            System.out.println(houseController.placeItem(matcher.group("itemName"), matcher.group("direction")));
+        }
+        else if((matcher = GameMenuCommands.TALK.getMatcher(input)) != null) {
+            System.out.println(controller.talk(matcher.group("username"), matcher.group("message")).message());
+        }
+        else if((matcher = GameMenuCommands.SHOW_TALK_HISTORY.getMatcher(input)) != null) {
+            System.out.println(controller.showTalkHistory(matcher.group("username")));
+        }
+        else if((matcher = GameMenuCommands.HUG.getMatcher(input)) != null) {
+            System.out.println(controller.hug(matcher.group("username")));
+        }
+        else if((matcher = GameMenuCommands.ASK_MARRIAGE.getMatcher(input)) != null) {
+            System.out.println(controller.askMarriage(matcher.group("username"), matcher.group("ring")));
+        }
+        else if((matcher = GameMenuCommands.RESPOND.getMatcher(input)) != null) {
+            System.out.println(controller.respondToMarriage(matcher.group("response"), matcher.group("username")));
+        }
+        else if((matcher = GameMenuCommands.START_TRADE.getMatcher(input)) != null) {
+            controller.startTrade();
         }
         else {
             System.out.println("invalid command");

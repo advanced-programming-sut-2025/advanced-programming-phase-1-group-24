@@ -59,7 +59,7 @@ public class Backpack {
 
     public Result removeItem(String itemName, int amount) {
         for (Item item : inventoryItems.keySet()) {
-            if (item.getName().equals(itemName)) {
+            if (item.getName().equalsIgnoreCase(itemName)) {
                 int newAmount = inventoryItems.get(item) - amount;
                 if (newAmount <= 0) {
                     trashcan.useTrashCan(item, inventoryItems.get(item));
@@ -76,7 +76,7 @@ public class Backpack {
 
     public Result grabItem(String itemName, int amount) {
         for (Item item : inventoryItems.keySet()) {
-            if (item.getName().equals(itemName)) {
+            if (item.getName().equalsIgnoreCase(itemName)) {
                 int newAmount = inventoryItems.get(item) - amount;
                 if (newAmount == 0) {
                     inventoryItems.remove(item);
@@ -94,7 +94,7 @@ public class Backpack {
 
     public Result equipTool(String newToolName) {
         for (Tool existingTool : tools) {
-            if (existingTool.getName().equals(newToolName)) {
+            if (existingTool.getName().equalsIgnoreCase(newToolName)) {
                 App.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(existingTool);
                 return new Result(true,"equipped tool successfully");
             }
@@ -127,7 +127,32 @@ public class Backpack {
         return false;
     }
 
+    public Boolean hasItem(String itemName, int amount) {
+        for (Item item : inventoryItems.keySet()) {
+            if (item.getName().equalsIgnoreCase(itemName)) {
+                if (inventoryItems.get(item) >= amount)
+                    return true;
+            }
+        }
+        return false;
+    }
 
+    public Item grabItemAndReturn(String itemName, int amount) {
+        for (Item item : inventoryItems.keySet()) {
+            if (item.getName().equalsIgnoreCase(itemName)) {
+                int currentAmount = inventoryItems.get(item);
+                int newAmount = currentAmount - amount;
+                if (newAmount >= 0) {
+                    inventoryItems.put(item, newAmount);
+
+                    Item itemCopy = item.copy();
+
+                    return itemCopy;
+                }
+            }
+        }
+        return null;
+    }
 
 
 

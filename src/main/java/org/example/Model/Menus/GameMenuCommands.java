@@ -44,7 +44,14 @@ public enum GameMenuCommands implements Commands {
     SHOW_MENU(Commands.SHOW_MENU),
     PLANT("^plant\\s+-s\\s+(?<seedName>.+)\\s+-d\\s+(?<direction>.+)$"),
     SHOWPLANT("^showplant\\s+-l\\s+(?<x>\\d+),\\s+(?<y>\\d+)$"),
-    FERTALISE("^fertilize\\s+-f\\s+(<?fertilizer>.+)\\s+-d\\s+(?<direction>.+)$"),
+    FERTALISE("^fertilize\\s+-f\\s+(?<fertilizer>.+)\\s+-d\\s+(?<direction>.+)$"),
+    BUILDGREENHOUSE("^build\\s+greenhouse$"),
+    TALK("^talk\\s+-u\\s+(?<username>.+)\\s+-m\\s+(?<message>.+)$"),
+    SHOW_TALK_HISTORY("^talk\\s+history\\s+-u\\s+(?<username>.+)$"),
+    HUG("^hug\\s+-u\\s+(?<username>.+)$"),
+    ASK_MARRIAGE("^ask\\s+marriage\\s+-u\\s+(?<username>.+)\\s+-r\\s+(?<ring>.+)$"),
+    RESPOND("^respond\\s+(?<response>(accept|reject))\\s+-u\\s+(?<username>.+)$"),
+    START_TRADE("start\\s+trade"),
     EXIT(Commands.EXIT);
 
 

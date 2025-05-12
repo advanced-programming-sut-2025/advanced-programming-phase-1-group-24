@@ -63,7 +63,7 @@ public class Farm extends Place {
         for (int i = startX; i < startX + width; i++) {
             for (int j = startY; j < startY + height; j++) {
                 if (map[j][i].getType() == TileType.FARM) {
-                    farmTiles.add(map[i][j]);
+                    farmTiles.add(map[j][i]);
                 }
             }
         }

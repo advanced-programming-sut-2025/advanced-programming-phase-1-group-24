@@ -171,4 +171,8 @@ public class Animal {
     public void setProduct(AnimalProduct product) {
         this.product = product;
     }
+
+    public Boolean hasProduct() {
+        return product != null;
+    }
 }

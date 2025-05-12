@@ -2,6 +2,7 @@ package org.example.Model.MapManagement;
 
 import org.example.Model.Growables.GrowableType;
 import org.example.Model.Places.Farm;
+import org.example.Model.Places.House;
 import org.example.Model.Things.ForagingMineral;
 import org.example.Model.Things.ForagingMineralType;
 import org.example.Model.Things.ProductQuality;
@@ -34,6 +35,8 @@ public class MapOfGame {
                 tile.setContainedGrowable(null);
                 tile.setX(x);
                 tile.setY(y);
+                tile.setContainedAnimal(null);
+                tile.setContainedNPC(null);
                 map[y][x] = tile;
             }
         }
@@ -143,4 +146,25 @@ public class MapOfGame {
         }
         return null; // or throw an exception if you prefer
     }
+
+    public House getHousePosition(int x, int y) {
+        for (Farm farm : farms) {
+            House house = farm.getHouse();
+            if (isInsideHouse(x, y, house)) {
+                return house;
+            }
+        }
+        return null; // No house contains the coordinates
+    }
+
+    private boolean isInsideHouse(int x, int y, House house) {
+        int houseX = house.getX();
+        int houseY = house.getY();
+        int width = house.getWidth();
+        int height = house.getHeight();
+
+        return x >= houseX && x < houseX + width &&
+                y >= houseY && y < houseY + height;
+    }
+
 }

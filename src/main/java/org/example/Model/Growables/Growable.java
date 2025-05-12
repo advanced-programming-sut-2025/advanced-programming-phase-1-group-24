@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Growable extends Item implements Cloneable { //extend Item
+public class Growable extends Item { //extend Item
     //note that we cannot put tree or crops in inventory  only seeds and products
     //When the growable is added to a tile we will fill out the containedGrowable field in the tile
     SourceType source;
@@ -29,18 +29,47 @@ public class Growable extends Item implements Cloneable { //extend Item
     //if the product of growable(tree) is coal then create an Item that its type is coal
     //note that if growableType is fruit we can find the fruitType from the filled treeType
     public Growable() {
-        super("Unknown", true, 0, false, ProductQuality.Normal); // default values
+        super("Unknown", true, 0, false, ProductQuality.Normal, false); // default values
     }
 
     //if we ever add an ArrayList or List to this class we need to do a deep copy
-    @Override
-    public Growable clone() {
-        try {
-            return (Growable) super.clone(); // Shallow copy (OK if fields are primitives or enums)
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(); // Should never happen
+    public Growable copy() {
+        Growable g = new Growable();
+        g.source = this.source;
+        g.growableType = this.growableType;
+        g.age = this.age;
+        g.currentStage = this.currentStage;
+        g.isWateredToday = this.isWateredToday;
+        g.hasBeenFertalized = this.hasBeenFertalized;
+        g.hasBeenAttackedByCrow = this.hasBeenAttackedByCrow;
+        g.daysLeftToDie = this.daysLeftToDie;
+        g.treeType = this.treeType;
+        g.cropType = this.cropType;
+        g.foragingCropType = this.foragingCropType;
+        g.setName(this.getName());
+        g.setPrice(this.getPrice());
+        g.setSellable(this.isSellable());
+        g.setQuality(this.getProductQuality());
+        g.setPlaceable(this.isPlaceable());
+        if (g.getCropType() != null) {
+            g.setEatable(g.getCropType().getIsEdible());
+        } else {
+            g.setEatable(false);
         }
+
+
+        return g;
     }
+
+//    //if we ever add an ArrayList or List to this class we need to do a deep copy
+//    @Override
+//    public Growable clone() {
+//        try {
+//            return (Growable) super.clone(); // Shallow copy (OK if fields are primitives or enums)
+//        } catch (CloneNotSupportedException e) {
+//            throw new AssertionError(); // Should never happen
+//        }
+//    }
 
     public SourceType getSource() {
         return source;

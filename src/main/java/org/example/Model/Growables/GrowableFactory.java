@@ -27,12 +27,15 @@ public class GrowableFactory {
         g.source = crop.getSource();
         g.age = 0;
         g.currentStage = 0;
+        g.hasBeenFertalized = false;
+        g.hasBeenAttackedByCrow = false;
+        g.isWateredToday = false;
         g.growableType = GrowableType.Source;
         g.treeType = null;
         g.cropType = crop; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.foragingCropType = null;
 
-        g.setName(crop.getName());
+        g.setName(crop.getSource().getName());   //I will change the name to the product whenever the product is being built
         g.setSellable(true);
         g.setPrice(crop.getBaseSellPrice());
         g.setPlaceable(false);
@@ -45,12 +48,15 @@ public class GrowableFactory {
         g.source = tree.getSource();
         g.age = 0;
         g.currentStage = 0;
+        g.hasBeenFertalized = false;
+        g.hasBeenAttackedByCrow = false;
+        g.isWateredToday = false;
         g.growableType = GrowableType.Source;
         g.treeType = tree; //after planting this if the crop is a foraging crop we will change the growableType to that
         g.cropType = null;
         g.foragingCropType = null;
 
-        g.setName(tree.getName());
+        g.setName(tree.getSource().getName());   //I will change the name to the product whenever the product is being built
         g.setSellable(true);
         g.setPrice(tree.getFruitType().getFruitBaseSellPrice());
         g.setPlaceable(false);
@@ -64,6 +70,9 @@ public class GrowableFactory {
         g.age = 0;
         g.currentStage = 0;
         g.growableType = GrowableType.ForagingCrop;
+        g.hasBeenFertalized = false;
+        g.hasBeenAttackedByCrow = false;
+        g.isWateredToday = false;
         g.foragingCropType = forage;
         g.treeType = null;
         g.cropType = null;
@@ -81,7 +90,7 @@ public class GrowableFactory {
         if (original == null) {
             throw new IllegalArgumentException("No growable registered for source: " + source);
         }
-        return original.clone();
+        return original.copy();
     }
 
     public Growable create(ForagingCropType forage) {
@@ -89,6 +98,6 @@ public class GrowableFactory {
         if (prototype == null) {
             throw new IllegalArgumentException("No Growable registered for forage crop: " + forage);
         }
-        return prototype.clone();
+        return prototype.copy();
     }
 }

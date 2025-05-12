@@ -1,7 +1,9 @@
 package org.example.Model.Places;
 
 import java.util.ArrayList;
+
 import org.example.Model.Reccepies.Machine;
+import org.example.Model.Reccepies.MachineType;
 
 public class House extends Place{
   ArrayList<Machine> machines;
@@ -17,5 +19,4 @@ public class House extends Place{
   public ArrayList<Machine> getMachines() {
     return machines;
   }
-    
 }

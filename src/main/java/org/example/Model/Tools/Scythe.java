@@ -34,7 +34,7 @@ public class Scythe extends Tool{
 
         Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
         Growable productOfGrowable = nextTile.getProductOfGrowable();
-        if (nextTile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
+        if (nextTile.getContainedGrowable() != null && nextTile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
             ForagingMineral coal = (ForagingMineral) nextTile.getContainedItem();
             currentPlayer.getBackpack().addItem(coal, 1);
             nextTile.setContainedGrowable(null);
@@ -52,17 +52,18 @@ public class Scythe extends Tool{
             else if (farmingSkill == 2) productOfGrowable.setQuality(ProductQuality.Silver);
             else if (farmingSkill == 3) productOfGrowable.setQuality(ProductQuality.Golden);
             else if (farmingSkill == 4) productOfGrowable.setQuality(ProductQuality.Iridium);
-            if(currentTile.getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+            if(nextTile.getProductOfGrowable().getGrowableType() == GrowableType.Giant){
                 currentPlayer.getBackpack().addItem(productOfGrowable, 10);
                 for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
                     for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
                         if(tiles[j][i].getProductOfGrowable() != null && tiles[j][i].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
-                            nextTile.setProductOfGrowable(null);
+                            tiles[j][i].setProductOfGrowable(null);
                         }
                     }
                 }
             }
             else {
+                //if(productOfGrowable.getGrowableType() == GrowableType.Fruit) productOfGrowable.setIsEdible;
                 currentPlayer.getBackpack().addItem(productOfGrowable, 1);
                 nextTile.setProductOfGrowable(null);
             }
