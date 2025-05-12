@@ -209,7 +209,7 @@ public class StoreMenuController {
                 player.getBackpack().getTools().add(milkPailCopy);
                 result = new Result(true, "Successfully purchased: " + milkPailCopy.getName());
             }
-            } else if (item instanceof FishingPole) {
+        } else if (item instanceof FishingPole) {
             FishingPole fishingPolePailCopy = ((FishingPole) item).copy();
             if ((fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.Iridium && player.getSkillsLevel().get(Skill.FISHING) < 4) ||
                     (fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.FiberGlass && player.getSkillsLevel().get(Skill.FISHING) < 2)) {
@@ -614,7 +614,7 @@ public class StoreMenuController {
         if (game.getTimeAndDate().getHour() < shop.getStartHour() || game.getTimeAndDate().getHour() >= shop.getEndHour()) {
             return new Result(false, "the store is closed");
         }
-        StringBuilder result = new StringBuilder("All Products in Store:\n");
+        StringBuilder result = new StringBuilder("All Products in Store " + shop.getShopName() + ":\n");
 
         for (ShopItem product : shop.getProducts()) { // assumed method
             result.append(String.format("- %s | Price: %d | %s\n",
@@ -638,7 +638,7 @@ public class StoreMenuController {
         if (game.getTimeAndDate().getHour() < shop.getStartHour() || game.getTimeAndDate().getHour() >= shop.getEndHour()) {
             return new Result(false, "the store is closed");
         }
-        StringBuilder result = new StringBuilder("Available Products in Store:\n");
+        StringBuilder result = new StringBuilder("Available Products in Store " + shop.getShopName() + ":\n");
 
         for (ShopItem product : shop.getProducts()) {
             if (product.isAvailable(1) && getCurrentSeasonPrice(product) > 0) {

@@ -85,7 +85,8 @@ SweetGemBerry("Sweet Gem Berry", SourceType.RareSeed, 24, true, 0, 3000, false, 
 Powdermelon("Powdermelon", SourceType.PowdermelonSeeds, 7, true, 0, 60, true, 63,
     new ArrayList<>(List.of(Season.WINTER)), true, List.of(1, 2, 1, 2, 1)),
 AncientFruit("Ancient Fruit", SourceType.AncientSeeds, 28, false, 7, 550, false, 0,
-    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5));
+    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5)),
+    MixedCrop("Mixed Crop", SourceType.MixedSeeds, 0, false, 0, 50, false, 0, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), false, List.of(2, 7, 7, 7, 5));
 
 private final String name;
 private final SourceType source;

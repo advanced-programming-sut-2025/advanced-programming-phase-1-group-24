@@ -61,19 +61,15 @@ public class Backpack {
         return new Result(true, "item added");
     }
 
-    public Result removeItem(String itemName, int amount, boolean withTrashCan) {
+    public Result removeItem(String itemName, int amount) {
         for (Item item : inventoryItems.keySet()) {
             if (item.getName().equalsIgnoreCase(itemName)) {
                 int newAmount = inventoryItems.get(item) - amount;
                 if (newAmount <= 0) {
-                    if (withTrashCan) {
                         trashcan.useTrashCan(item, inventoryItems.get(item));
-                    }
                     inventoryItems.remove(item);
                 } else {
-                    if (withTrashCan) {
                         trashcan.useTrashCan(item, amount);
-                    }
                     inventoryItems.put(item, newAmount);
                 }
                 return new Result(true, "item removed successfully");

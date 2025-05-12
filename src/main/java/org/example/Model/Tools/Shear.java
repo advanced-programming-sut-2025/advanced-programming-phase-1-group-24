@@ -13,14 +13,14 @@ public class Shear extends Tool{
         super(type);
     }
     public Result useShear(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map) {
-        if (currentPlayer.tryConsumeEnergy(4)) {
+        if (!currentPlayer.tryConsumeEnergy(4)) {
             return new Result(false,"You dont have enough energy");
         }
         else {
             int currentX = currentTile.getX();
             int currentY = currentTile.getY();
             Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
-            if (nextTile.getContainedAnimal().getAnimalType() == AnimalType.SHEEP) {
+            if (nextTile.getContainedAnimal()!=null && nextTile.getContainedAnimal().getAnimalType() == AnimalType.SHEEP) {
                 if (nextTile.getContainedAnimal().hasProduct()) {
                     AnimalProduct collectedProduct = nextTile.getContainedAnimal().collectProduct();
                     currentPlayer.getBackpack().addItem(collectedProduct, 1);
