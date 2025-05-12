@@ -6,15 +6,15 @@ public class Food extends Item {
     FoodType type;
     int energy;
 
-    public Food(String name, FoodType type) {
-        super(name, true, type.getSellPrice(), false, ProductQuality.Normal,true
+    public Food(FoodType type) {
+        super(type.getName(), true, type.getSellPrice(), false, ProductQuality.Normal,true
         );
         this.type = type;
         this.energy = type.getEnergy();
     }
     @Override
     public Food copy() {
-        Food newFood = new Food(name, type);
+        Food newFood = new Food(type);
         newFood.setSellable(isSellable);
         newFood.setPlaceable(isPlaceable);
         newFood.setQuality(productQuality);

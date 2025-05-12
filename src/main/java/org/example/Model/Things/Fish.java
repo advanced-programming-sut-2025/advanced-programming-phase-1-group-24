@@ -6,7 +6,7 @@ public class Fish extends Item {
     private FishType type;
 
     public Fish(ProductQuality productQuality, FishType type) {
-        super(type.name(), true, type.getSellPrice(), false, productQuality,true);
+        super(type.getName(), true, type.getSellPrice(), false, productQuality,false);
         this.type = type;
     }
 

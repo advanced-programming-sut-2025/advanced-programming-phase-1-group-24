@@ -5,7 +5,6 @@ import org.example.Model.Growables.Growable;
 import org.example.Model.NPCManagement.NPC;
 import org.example.Model.Things.Item;
 import org.example.Model.User;;
-
 public class Tile {
     private TileType type;
     private boolean isWalkable;
@@ -100,3 +99,4 @@ public class Tile {
     public void changeTile(){}
 
 }
+

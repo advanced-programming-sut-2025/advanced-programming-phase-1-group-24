@@ -25,4 +25,7 @@ public enum ProductQuality {
         return ProductQuality.Iridium;
     }
 
+    public double getPriceCoefficient() {
+        return priceCoefficient;
+    }
 }

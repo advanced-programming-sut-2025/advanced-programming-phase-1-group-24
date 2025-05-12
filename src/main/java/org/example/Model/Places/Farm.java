@@ -3,7 +3,10 @@ package org.example.Model.Places;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.*;
 
+import org.example.Model.Things.StorageType;
+import org.example.Model.Things.Item;
 import org.example.Model.Things.StorageType;
 import org.example.Model.User;
 import org.example.Model.ConfigTemplates.FarmTemplate;
@@ -19,6 +22,7 @@ public class Farm extends Place {
     private Quarry quarry;
     private House house;
     private User owner;
+    private Map<Item, Integer> shippingBin = new HashMap<>();
 
 
     public Farm(User owner, FarmTemplate template, int startX, int startY) {
@@ -195,4 +199,11 @@ public class Farm extends Place {
         this.owner = owner;
     }
 
+    public Map<Item, Integer> getShippingBin() {
+        return shippingBin;
+    }
+
+    public void setShippingBin(Map<Item, Integer> shippingBin) {
+        this.shippingBin = shippingBin;
+    }
 }

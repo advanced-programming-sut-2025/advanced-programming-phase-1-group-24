@@ -12,7 +12,6 @@ public class Shear extends Tool{
     public Shear(ToolType type) {
         super(type);
     }
-
     public Result useShear(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map) {
         if (currentPlayer.tryConsumeEnergy(4)) {
             return new Result(false,"You dont have enough energy");
@@ -37,4 +36,11 @@ public class Shear extends Tool{
 
         }
     }
+    @Override
+    public Shear copy() {
+        Shear copy = new Shear(this.getType());
+        copy.upgrade(this.material);
+        return copy;
+    }
+
 }

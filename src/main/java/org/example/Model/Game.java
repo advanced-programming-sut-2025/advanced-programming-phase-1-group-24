@@ -28,7 +28,7 @@ public class Game {
     private boolean isVoteInProgress = false;
 
     private ArrayList<Message> allMessages = new ArrayList<>();
-    // private ArrayList<Gift> allGifts = new ArrayList<>();
+   // private ArrayList<Gift> allGifts = new ArrayList<>();
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
@@ -183,7 +183,7 @@ public class Game {
         this.allMessages = allMessages;
     }
 
-    //    public ArrayList<Gift> getAllGifts() {
+//    public ArrayList<Gift> getAllGifts() {
 //        return allGifts;
 //    }
 //

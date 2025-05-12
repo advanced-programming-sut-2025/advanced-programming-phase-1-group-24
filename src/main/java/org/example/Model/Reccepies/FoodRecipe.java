@@ -81,4 +81,13 @@ public enum FoodRecipe {
     }
     public int getEnergy() {return energy;}
     public int getSellPrice() {return sellPrice;}
+    public static FoodRecipe fromString(String name) {
+        for (FoodRecipe recipe : FoodRecipe.values()) {
+            if (recipe.name().equalsIgnoreCase(name)) {
+                return recipe;
+            }
+        }
+        return null;
+    }
+
 }

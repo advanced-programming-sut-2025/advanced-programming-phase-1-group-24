@@ -6,7 +6,7 @@ import org.example.Model.Places.Habitat;
 import org.example.Model.Things.ProductQuality;
 
 public class Animal {
-    private final String name;
+    private  String name;
     private final AnimalType animalType;
     private Tile currentTile;
     private Habitat livingPlace;
@@ -172,7 +172,23 @@ public class Animal {
         this.product = product;
     }
 
-    public Boolean hasProduct() {
+    public boolean hasProduct() {
         return product != null;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Animal copy() {
+        Animal copy = new Animal(this.name, this.animalType);
+        copy.setFriendship(this.friendship);
+        copy.setPettedToday(this.pettedToday);
+        copy.setFedToday(this.fedToday);
+        copy.setInHabitat(this.isInHabitat);
+        copy.setDaysLeftToProduce(this.daysLeftToProduce);
+
+        return copy;
+    }
+
 }

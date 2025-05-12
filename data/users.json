@@ -815,14 +815,14 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -844,43 +844,14 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
-  },
-  {
-    "username": "user87",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
       "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    },
-    "skillExperience": {
-      "MINING": 0,
-      "FORAGING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -902,14 +873,43 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
+      "FISHING": 0,
+      "FARMING": 0
+    }
+  },
+  {
+    "username": "user87",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "MINING": 0,
+      "FISHING": 0,
+      "FARMING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -931,14 +931,14 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -960,43 +960,14 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
-  },
-  {
-    "username": "user89",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
       "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    },
-    "skillExperience": {
-      "MINING": 0,
-      "FORAGING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -1018,14 +989,14 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
@@ -1047,584 +1018,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     },
     "skillExperience": {
-      "MINING": 0,
       "FORAGING": 0,
+      "MINING": 0,
       "FISHING": 0,
       "FARMING": 0
     }
-  },
-  {
-    "username": "user90",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user90",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user91",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user91",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user92",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user92",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user93",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
-  },
-  {
-    "username": "user93",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "FISHING": 0,
-      "MINING": 0,
-      "FORAGING": 0
-    },
-    "craftingRecepies": [],
-    "cookingRecepies": [],
-    "tradeHistory": {},
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": []
   }
 ]

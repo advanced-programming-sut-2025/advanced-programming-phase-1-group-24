@@ -1,5 +1,7 @@
 package org.example.Model.Things;
 
+import org.example.Model.Animals.AnimalProduct;
+import org.example.Model.Animals.AnimalProductType;
 import org.example.Model.Growables.*;
 import org.example.Model.Reccepies.randomStuff;
 import org.example.Model.Reccepies.randomStuffType;
@@ -22,6 +24,7 @@ public class Item {
         this.productQuality = productQuality;
         this.isEatable = isEatable;
     }
+
     public String getName() {
         return name;
     }
@@ -61,7 +64,8 @@ public class Item {
     public void setQuality(ProductQuality productQuality) {
         this.productQuality = productQuality;
     }
-    public String toString(){
+
+    public String toString() {
         return name;
     }
 
@@ -72,27 +76,6 @@ public class Item {
     public void setEatable(boolean eatable) {
         isEatable = eatable;
     }
-    public Item copy() {
-        return new Item(name, isSellable, price, isPlaceable, productQuality, isEatable);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Item item = (Item) o;
-        if (isSellable != item.isSellable) return false;
-        if (price != item.price) return false;
-        if (isPlaceable != item.isPlaceable) return false;
-        if (!name.equalsIgnoreCase(item.name)) return false;
-        return productQuality == item.productQuality;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, isSellable, price, isPlaceable, productQuality);
-    }
-
 
     public static Item getRandomItem(String name) {
         for (FishType fishType : FishType.values()) {
@@ -102,17 +85,22 @@ public class Item {
         }
         for (FoodType foodType : FoodType.values()) {
             if (foodType.getName().equalsIgnoreCase(name)) {
-                return new Food(foodType.getName(), foodType);
+                return new Food(foodType);
             }
         }
         for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
             if (foragingMineralType.getName().equalsIgnoreCase(name)) {
-                return new ForagingMineral(ProductQuality.Normal,foragingMineralType);
+                return new ForagingMineral(ProductQuality.Normal, foragingMineralType);
             }
         }
         for (randomStuffType randomStuffType : randomStuffType.values()) {
             if (randomStuffType.getName().equalsIgnoreCase(name)) {
                 return new randomStuff(randomStuffType.getSellPrice(), randomStuffType);
+            }
+        }
+        for (AnimalProductType animalProductType : AnimalProductType.values()) {
+            if (animalProductType.getProductName().equalsIgnoreCase(name)) {
+                return new AnimalProduct(ProductQuality.Normal, animalProductType);
             }
         }
         for(SourceType sourceType : SourceType.values()) {
@@ -143,7 +131,30 @@ public class Item {
                 }
             }
         }
+
         return null;
+    }
+
+    public Item copy() {
+        return new Item(name, isSellable, price, isPlaceable, productQuality, isEatable);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Item item = (Item) o;
+        if (isSellable != item.isSellable) return false;
+        if (price != item.price) return false;
+        if (isEatable != item.isEatable) return false;
+        if (isPlaceable != item.isPlaceable) return false;
+        if (!name.equalsIgnoreCase(item.name)) return false;
+        return productQuality == item.productQuality;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, isSellable, price, isPlaceable, productQuality);
     }
 }
 

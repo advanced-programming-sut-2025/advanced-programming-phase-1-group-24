@@ -35,6 +35,11 @@ public class Hoe extends Tool{
             return new Result(false, "You have to use the hoe in the farm or greenhouse.");
         }
     }
-
+    @Override
+    public Hoe copy() {
+        Hoe copy = new Hoe(this.getType());
+        copy.upgrade(this.material);
+        return copy;
+    }
 
 }

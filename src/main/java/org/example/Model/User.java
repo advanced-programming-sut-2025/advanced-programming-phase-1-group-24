@@ -2,11 +2,17 @@ package org.example.Model;
 
 
 import org.example.Model.Animals.Animal;
+import org.example.Model.Friendships.Friendship;
+import org.example.Model.Friendships.Gift;
+import org.example.Model.Friendships.Message;
 import org.example.Model.Friendships.Gift;
 import org.example.Model.Friendships.Message;
 import org.example.Model.Friendships.Trade;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
+import org.example.Model.Reccepies.FoodRecipe;
+import org.example.Model.Reccepies.Machine;
+import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Reccepies.FoodRecipe;
 import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Things.Food;
@@ -60,6 +66,7 @@ public class User {
     private ArrayList<Message> tradeNotifications = new ArrayList<>();
 
 
+    /// /////////////?????????????/
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
         this.password = password;
@@ -71,7 +78,6 @@ public class User {
         for (Skill skill : Skill.values()) {
             skillsLevel.put(skill, 0);
         }
-
         this.skillExperience = new HashMap<>();
         for (Skill skill : Skill.values()) {
             skillExperience.put(skill, 0);
@@ -84,6 +90,9 @@ public class User {
         this.backpack = new Backpack();
         this.notifications = new ArrayList<>();
         this.recievedGift = new ArrayList<>();
+        this.cookingRecepies.add(FoodRecipe.Salad);
+        this.cookingRecepies.add(FoodRecipe.BakedFish);
+        this.cookingRecepies.add(FoodRecipe.FriedEgg);
         this.partner = null;
         this.daysSinceRejection = 0;
         this.tradingHistory = new ArrayList<>();
@@ -219,7 +228,6 @@ public class User {
 
 
     public void updateGameFields() {
-
         this.playedGames += 1;
         this.energy = maxEnergy;
         this.money = 0;
@@ -249,6 +257,7 @@ public class User {
         this.cookingRecepies.add(FoodRecipe.Salad);
         this.cookingRecepies.add(FoodRecipe.BakedFish);
         this.cookingRecepies.add(FoodRecipe.FriedEgg);
+        this.recievedGift = new ArrayList<>();
     }
 
 
@@ -399,7 +408,7 @@ public class User {
     //always call this function before any task that consumes energy if it returns false cant do the task
     public boolean tryConsumeEnergy(int energyRequired) {
         if (currentTurnEnergy < energyRequired || energy < energyRequired) {
-            System.out.println("not enough energy!");
+            //System.out.println("not enough energy!");
             return false;
         }
         currentTurnEnergy -= energyRequired;
@@ -424,10 +433,16 @@ public class User {
     }
 
     public void addMoney(int sellingPrice) {
+        if(this.partner!= null){
+            this.partner.setMoney(this.partner.getMoney() + sellingPrice);
+        }
         money += sellingPrice;
     }
 
     public void decreaseMoney(int sellingPrice) {
+        if(this.partner!= null){
+            this.partner.setMoney(this.partner.getMoney() - sellingPrice);
+        }
         money -= sellingPrice;
     }
 
@@ -438,6 +453,7 @@ public class User {
     public void setHomeTile(Tile homeTile) {
         this.homeTile = homeTile;
     }
+
     public void addEnergy(int amount) {
         if (amount < 0) return;
         this.energy = Math.min(this.energy + amount, maxEnergy);
@@ -448,15 +464,24 @@ public class User {
         return notifications;
     }
 
+    public void setNotifications(ArrayList<Message> notifications) {
+        this.notifications = notifications;
+    }
+
+    public void addToNotifications(Message message) {
+        this.notifications.add(message);
+    }
+
+    public void addRecievedGift(Gift gift) {
+        this.recievedGift.add(gift);
+    }
+
     public ArrayList<Gift> getRecievedGift() {
         return recievedGift;
     }
 
-    public void setNotifications(ArrayList<Message> notifications) {
-        this.notifications = notifications;
-    }
-    public void addToNotifications(Message message) {
-        this.notifications.add(message);
+    public void setRecievedGift(ArrayList<Gift> recievedGift) {
+        this.recievedGift = recievedGift;
     }
 
     public User getPartner() {
@@ -466,7 +491,6 @@ public class User {
     public void setPartner(User partner) {
         this.partner = partner;
     }
-
     public int getDaysSinceRejection() {
         return daysSinceRejection;
     }
@@ -490,3 +514,4 @@ public class User {
         this.tradeNotifications = tradeNotifications;
     }
 }
+

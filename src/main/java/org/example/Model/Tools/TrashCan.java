@@ -4,11 +4,11 @@ import org.example.Model.App;
 import org.example.Model.Things.Item;
 import org.example.Model.Things.ToolMaterial;
 
-public class TrashCan{
-    ToolMaterial material;
+public class TrashCan extends Tool {
 
-    public TrashCan() {
-        this.material = ToolMaterial.Initial;
+
+    public TrashCan(ToolType type) {
+        super(type);
     }
 
     public void upgrade(ToolMaterial material){
@@ -22,22 +22,39 @@ public class TrashCan{
         else if (material == ToolMaterial.Copper){
             int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 15 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().setMoney(amount + addedMoney);
+            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Iron){
             int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 30 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().setMoney(amount + addedMoney);
+            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Gold){
             int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 45 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().setMoney(amount + addedMoney);
+            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Iridium){
             int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 60 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().setMoney(amount + addedMoney);
+            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
     }
+
+    public void setMaterial(ToolMaterial material) {
+        this.material = material;
+    }
+
+    public ToolMaterial getMaterial() {
+        return material;
+    }
+
+    @Override
+    public TrashCan copy() {
+        TrashCan copy = new TrashCan(this.type);
+        copy.upgrade(this.material);
+        return copy;
+    }
+
+
 }

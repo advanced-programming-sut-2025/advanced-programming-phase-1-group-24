@@ -24,8 +24,20 @@ public class Habitat extends Place{
     public void setLivingAnimals(ArrayList<Animal> livingAnimals) {
         this.livingAnimals = livingAnimals;
     }
+
     public StorageType getStorageType() {
         return storageType;
     }
-    
+
+
+    public Habitat copy() {
+        Habitat copy = new Habitat(this.x, this.y, this.width, this.height, this.storageType);
+        ArrayList<Animal> copiedAnimals = new ArrayList<>();
+        for (Animal animal : this.livingAnimals) {
+            copiedAnimals.add(animal.copy());
+        }
+        copy.setLivingAnimals(copiedAnimals);
+        return copy;
+    }
+
 }

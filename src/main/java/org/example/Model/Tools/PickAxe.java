@@ -67,5 +67,10 @@ public class PickAxe extends Tool{
             return new Result(true, "You misused PickAxe!");
         }
     }
-
+    @Override
+    public PickAxe copy() {
+        PickAxe copy = new PickAxe(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        return copy;
+    }
 }

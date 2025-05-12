@@ -71,4 +71,11 @@ public class Scythe extends Tool{
             return new Result(true, "Harvested " + productOfGrowable.getName());
         }
     }
+    @Override
+    public Scythe copy() {
+        Scythe copy = new Scythe(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        return copy;
+    }
+
 }

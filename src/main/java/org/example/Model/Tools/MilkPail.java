@@ -20,20 +20,29 @@ public class MilkPail extends Tool {
             int currentX = currentTile.getX();
             int currentY = currentTile.getY();
             Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
-           if (nextTile.getContainedAnimal().getAnimalType() == AnimalType.COW || nextTile.getContainedAnimal().getAnimalType() == AnimalType.GOAT) {
-               if (nextTile.getContainedAnimal().hasProduct()) {
-                   AnimalProduct collectedProduct = nextTile.getContainedAnimal().collectProduct();
-                   currentPlayer.getBackpack().addItem(collectedProduct, 1);
-                   return new Result(true,"You have collected " + collectedProduct.getName());
-               }
-               else {
-                   return new Result(false,"No product to collect.");
-               }
-           }
-           else {
-               return new Result(false,"No animal to collect from.");
-           }
+            if (nextTile.getContainedAnimal().getAnimalType() == AnimalType.COW || nextTile.getContainedAnimal().getAnimalType() == AnimalType.GOAT) {
+                if (nextTile.getContainedAnimal().hasProduct()) {
+                    AnimalProduct collectedProduct = nextTile.getContainedAnimal().collectProduct();
+                    currentPlayer.getBackpack().addItem(collectedProduct, 1);
+                    return new Result(true,"You have collected " + collectedProduct.getName());
+                }
+                else {
+                    return new Result(false,"No product to collect.");
+                }
+            }
+            else {
+                return new Result(false,"No animal to collect from.");
+            }
 
         }
     }
+    @Override
+    public MilkPail copy() {
+        MilkPail copy = new MilkPail(this.getType());
+        // Make sure the material is properly copied
+        copy.upgrade(this.material);
+        return copy;
+    }
+
+
 }

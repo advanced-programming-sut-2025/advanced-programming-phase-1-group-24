@@ -1,6 +1,13 @@
 package org.example.Model.Menus;
 
 public enum GameMenuCommands implements Commands {
+    //////////
+    FRIEND_SHIP("^friendships$"),
+    SEND_GIFT("^gift\\s+-u\\s+(?<username>\\S+)\\s+-i\\s+(?<item>.+)\\s+-a\\s+(?<amount>\\d+)$"),
+    LIST_GIFT("^gift\\s+list$"),
+    RATE_GIFTS("^gift\\s+rate\\s+-i\\s+(?<gift>\\d+)\\s+-r\\s+(?<rate>\\d+)$"),
+    GIFT_HISTORY("^gift\\s+history\\s+-u\\s+(?<username>\\S+)$"),
+    FLOWER_SEND("^flower\\s+-u\\s+(?<username>\\S+)$"),
     //inventory commands
     SHOW_INVENTORY("^\\s*inventory\\s+show\\s*$"),
     INVENTORY_TRASH("^\\s*inventory\\s+trash\\s+-i\\s+(?<itemName>.+?)(?:\\s+-n\\s+(?<number>\\d+))?$"),
@@ -11,7 +18,7 @@ public enum GameMenuCommands implements Commands {
     USE_TOOL("^\\s*tools\\s+use\\s+-d\\s+(?<direction>.+)\\s*$"),
     FISH("^\\s*fishing\\s+-p\\s+(?<fishingPole>.+)\\s*$"),
     CHEAT_ADD_ITEM("^\\s*cheat\\s+add\\s+item\\s+-n\\s+(?<itemName>.+)\\s+-c\\s+(?<count>\\d+)\\s*$"),
-
+     ///animal commands
     SELL_ANIMAL("^sell\\s+animal\\s+-n\\s+(?<name>\\S+)$"),
     COLLECT_PRODUCTS("^collect\\s+produce\\s+-n\\s+(?<name>\\S+)$"),
     SHOW_PRODUCTS("^produces$"),
@@ -20,6 +27,8 @@ public enum GameMenuCommands implements Commands {
     ANIMALS_INFO("^animals$"),
     CHEAT_ANIMAL_FRIENDSHIP("^cheat\\s+set\\s+friendship\\s+-n\\s+(?<name>\\S+)\\s+-c\\s+(?<amount>-?\\d+)$"),
     PET("^pet\\s+-n\\s+(?<name>\\S+)$"),
+
+    CHEAT_ADD_MONEY("^cheat\\s+add\\s+(?<count>\\d+)\\s+dollars$"),
     CHeat_THOR("^cheat\\s+Thor\\s+-l\\s+<(?<x>\\d+),(?<y>\\d+)>$"),
     CHEAT_UNLIMITED_ENERGY("^energy\\s+unlimited$"),
     CHEAT_ENERGY("^energy\\s+set\\s+-v\\s+(?<value>-?\\d+)$"),
