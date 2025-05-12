@@ -17,12 +17,21 @@ public  class Tool {
         return type;
     }
     public String getName() { return name; }
-
+    @Override
     public String toString() {
         return name;
     }
 
+    public ToolMaterial getMaterial() {
+        return material;
+    }
+
     public void upgrade(ToolMaterial material) {
         this.material = material;
+    }
+    public Tool copy() {
+        Tool copy = new Tool(this.type);
+        copy.upgrade(this.material);
+        return copy;
     }
 }

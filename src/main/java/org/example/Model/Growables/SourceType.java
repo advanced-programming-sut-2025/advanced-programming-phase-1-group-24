@@ -91,6 +91,6 @@ public enum SourceType {
                 return type;
             }
         }
-        throw new IllegalArgumentException("No SourceType with name: " + name);
+        return null;
     }
 }

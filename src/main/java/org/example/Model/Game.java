@@ -1,6 +1,9 @@
 package org.example.Model;
 
 
+import org.example.Model.Friendships.Friendship;
+import org.example.Model.Friendships.Gift;
+import org.example.Model.Friendships.Message;
 import org.example.Model.MapManagement.MapOfGame;
 import org.example.Model.NPCManagement.NPC;
 import org.example.Model.TimeManagement.DayOfWeek;
@@ -24,6 +27,10 @@ public class Game {
     private Map<User, Boolean> terminationVotes = new HashMap<>();
     private boolean isVoteInProgress = false;
 
+    private ArrayList<Message> allMessages = new ArrayList<>();
+   // private ArrayList<Gift> allGifts = new ArrayList<>();
+    private ArrayList<Friendship> allFriendships = new ArrayList<>();
+
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
         this.mainPlayer = mainPlayer;
@@ -31,6 +38,17 @@ public class Game {
         this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
         this.map = new MapOfGame();
         this.currentWeatherType = WeatherType.SUNNY;
+        for (int i = 0; i < players.size(); i++) {
+            User player1 = players.get(i);
+            for (int j = i + 1; j < players.size(); j++) {
+                User player2 = players.get(j);
+
+                Friendship friendship = new Friendship(player1.getUsername(), player2.getUsername());
+
+                allFriendships.add(friendship);
+            }
+        }
+
         predictTomorrowWeather();
     }
 
@@ -157,4 +175,43 @@ public class Game {
         this.tomorrowWeatherType = possibleWeathers.get(randomIndex);
     }
 
+    public ArrayList<Message> getAllMessages() {
+        return allMessages;
+    }
+
+    public void setAllMessages(ArrayList<Message> allMessages) {
+        this.allMessages = allMessages;
+    }
+
+//    public ArrayList<Gift> getAllGifts() {
+//        return allGifts;
+//    }
+//
+//    public void setAllGifts(ArrayList<Gift> allGifts) {
+//        this.allGifts = allGifts;
+//    }
+    public User getPlayerByUsername(String username) {
+        for (User player : players) {
+            if (player.getUsername().equals(username)) {
+                return player;
+            }
+        }
+        return null;
+    }
+    public Friendship getFriendship(String name1, String name2) {
+        // Ensure consistent ordering as used in Friendship constructor
+        String player1 = name1.compareTo(name2) < 0 ? name1 : name2;
+        String player2 = name1.compareTo(name2) < 0 ? name2 : name1;
+
+        for (Friendship friendship : allFriendships) {
+            if (friendship.getPlayer1().equals(player1) && friendship.getPlayer2().equals(player2)) {
+                return friendship;
+            }
+        }
+        return null; // Or throw exception if preferred
+    }
+
+    public ArrayList<Friendship> getAllFriendships() {
+        return allFriendships;
+    }
 }

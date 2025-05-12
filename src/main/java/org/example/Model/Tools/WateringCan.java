@@ -69,4 +69,13 @@ public class WateringCan extends Tool{
         else
             return new Result(false, "You need to be near the farm!");
     }
+    @Override
+    public WateringCan copy() {
+        WateringCan copy = new WateringCan(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        copy.maxCapacity = this.maxCapacity; // Copy maxCapacity
+        copy.waterLeft = this.waterLeft; // Copy waterLeft
+        return copy;
+    }
+
 }

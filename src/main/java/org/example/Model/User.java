@@ -2,8 +2,14 @@ package org.example.Model;
 
 
 import org.example.Model.Animals.Animal;
+import org.example.Model.Friendships.Friendship;
+import org.example.Model.Friendships.Gift;
+import org.example.Model.Friendships.Message;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
+import org.example.Model.Reccepies.FoodRecipe;
+import org.example.Model.Reccepies.Machine;
+import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Things.Food;
 import org.example.Model.Things.Backpack;
 import org.example.Model.Things.Item;
@@ -41,28 +47,46 @@ public class User {
     private Map<Skill, Integer> skillExperience;
     private Tile currentTile;
     private Tool equippedTool;
-    private ArrayList<Craft> craftingRecepies;
-    private ArrayList<Food> cookingRecepies;
-    private Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory;
+    private ArrayList<MachineType> machineRecepies;
+    private ArrayList<FoodRecipe> cookingRecepies;
     private Map<User, FriendshipLevels> friends;
     private Backpack backpack;
-    private ArrayList<Animal> ownedAnimals;
+    private ArrayList<Animal> ownedAnimals = new ArrayList<>();
+    private Tile homeTile;
 
+    private ArrayList<Message> notifications = new ArrayList<>();
+    private ArrayList<Gift> recievedGift = new ArrayList<>();
+    private User partner;
 
+    /// /////////////?????????????/
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
         this.password = password;
         this.nickname = nickname;
         this.email = email;
         this.gender = gender;
+
         this.skillsLevel = new HashMap<>();
         for (Skill skill : Skill.values()) {
             skillsLevel.put(skill, 0);
         }
+
         this.skillExperience = new HashMap<>();
         for (Skill skill : Skill.values()) {
             skillExperience.put(skill, 0);
         }
+
+        this.ownedAnimals = new ArrayList<>();
+        this.machineRecepies = new ArrayList<>();
+        this.cookingRecepies = new ArrayList<>();
+        this.friends = new HashMap<>();
+        this.backpack = new Backpack();
+        this.notifications = new ArrayList<>();
+        this.recievedGift = new ArrayList<>();
+        this.cookingRecepies.add(FoodRecipe.Salad);
+        this.cookingRecepies.add(FoodRecipe.BakedFish);
+        this.cookingRecepies.add(FoodRecipe.FriedEgg);
+        this.partner = null;
     }
 
     public int getCurrentTurnEnergy() {
@@ -70,6 +94,7 @@ public class User {
     }
 
     public void setCurrentTurnEnergy(int currentTurnEnergy) {
+
         this.currentTurnEnergy = currentTurnEnergy;
     }
 
@@ -97,15 +122,15 @@ public class User {
         return energy;
     }
 
-    public ArrayList<Food> getCookingRecepies() {
+    public ArrayList<FoodRecipe> getCookingRecepies() {
+        if (cookingRecepies == null)
+            cookingRecepies = new ArrayList<>();
         return cookingRecepies;
     }
 
-    public Map<User, Map<ArrayList<Item>, ArrayList<Item>>> getTradeHistory() {
-        return tradeHistory;
-    }
-
     public Map<User, FriendshipLevels> getFriends() {
+        if (friends == null)
+            friends = new HashMap<>();
         return friends;
     }
 
@@ -197,27 +222,29 @@ public class User {
         this.money = 0;
         this.currentTurnEnergy = maxEnergyTurn;
 
-        this.currentTile = null; // or a default starting tile
+        this.currentTile = null;
         this.equippedTool = null;
-        this.backpack = new Backpack(); // assuming it starts empty
+        this.backpack = new Backpack(); // reset
 
-        if (this.skillsLevel != null) {
-            this.skillsLevel.clear(); // reset skills
-        }
-        if (this.skillExperience != null) {
-            this.skillExperience.clear(); // reset skills
+        this.ownedAnimals = new ArrayList<>();
+        this.skillExperience = new HashMap<>();
+        this.machineRecepies = new ArrayList<>();
+        this.cookingRecepies = new ArrayList<>();
+        this.friends = new HashMap<>();
+        this.skillsLevel = new HashMap<>();
+        this.notifications = new ArrayList<>();
+        this.recievedGift = new ArrayList<>();
+        this.cookingRecepies.add(FoodRecipe.Salad);
+        this.cookingRecepies.add(FoodRecipe.BakedFish);
+        this.cookingRecepies.add(FoodRecipe.FriedEgg);
+        this.partner = null;
+        for (Skill skill : Skill.values()) {
+            skillsLevel.put(skill, 0);
         }
 
-        if (this.craftingRecepies != null) {
-            this.craftingRecepies.clear();
-        }
-
-        if (this.cookingRecepies != null) {
-            this.cookingRecepies.clear();
-        }
-
-        if (this.tradeHistory != null) {
-            this.tradeHistory.clear();
+        this.skillExperience = new HashMap<>();
+        for (Skill skill : Skill.values()) {
+            skillExperience.put(skill, 0);
         }
     }
 
@@ -229,6 +256,7 @@ public class User {
     }
 
     public void resetEnergyForNewDay() {
+        this.currentTurnEnergy = maxEnergyTurn;
         if (fainted) {
             this.energy = (int) (maxEnergy * 0.75);
             this.fainted = false;
@@ -298,25 +326,23 @@ public class User {
         this.friends = friends;
     }
 
-    public void setTradeHistory(Map<User, Map<ArrayList<Item>, ArrayList<Item>>> tradeHistory) {
-        this.tradeHistory = tradeHistory;
-    }
 
-    public void setCookingRecepies(ArrayList<Food> cookingRecepies) {
+    public void setCookingRecepies(ArrayList<FoodRecipe> cookingRecepies) {
         this.cookingRecepies = cookingRecepies;
     }
 
-    public ArrayList<Craft> getCraftingRecepies() {
-        return craftingRecepies;
+    public ArrayList<MachineType> getMachineRecepies() {
+        return machineRecepies;
     }
 
-    public void setCraftingRecepies(ArrayList<Craft> craftingRecepies) {
-        this.craftingRecepies = craftingRecepies;
+    public void setMachineRecepies(ArrayList<MachineType> machineRecepies) {
+        this.machineRecepies = machineRecepies;
     }
 
     public Map<Skill, Integer> getSkillsLevel() {
         return skillsLevel;
     }
+
 
     public void setSkillsLevel(Map<Skill, Integer> skillsLevel) {
         this.skillsLevel = skillsLevel;
@@ -340,8 +366,12 @@ public class User {
     }
 
     public ArrayList<Animal> getOwnedAnimals() {
+        if (ownedAnimals == null) {
+            ownedAnimals = new ArrayList<>();
+        }
         return ownedAnimals;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -367,7 +397,7 @@ public class User {
     //always call this function before any task that consumes energy if it returns false cant do the task
     public boolean tryConsumeEnergy(int energyRequired) {
         if (currentTurnEnergy < energyRequired || energy < energyRequired) {
-            System.out.println("not enough energy!");
+            //System.out.println("not enough energy!");
             return false;
         }
         currentTurnEnergy -= energyRequired;
@@ -391,4 +421,63 @@ public class User {
         }
     }
 
+    public void addMoney(int sellingPrice) {
+        if(this.partner!= null){
+            this.partner.setMoney(this.partner.getMoney() + sellingPrice);
+        }
+        money += sellingPrice;
+    }
+
+    public void decreaseMoney(int sellingPrice) {
+        if(this.partner!= null){
+            this.partner.setMoney(this.partner.getMoney() - sellingPrice);
+        }
+        money -= sellingPrice;
+    }
+
+    public Tile getHomeTile() {
+        return homeTile;
+    }
+
+    public void setHomeTile(Tile homeTile) {
+        this.homeTile = homeTile;
+    }
+
+    public void addEnergy(int amount) {
+        if (amount < 0) return;
+        this.energy = Math.min(this.energy + amount, maxEnergy);
+        this.currentTurnEnergy = Math.min(this.currentTurnEnergy + amount, maxEnergyTurn);
+    }
+
+    public ArrayList<Message> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(ArrayList<Message> notifications) {
+        this.notifications = notifications;
+    }
+
+    public void addToNotifications(Message message) {
+        this.notifications.add(message);
+    }
+
+    public void addRecievedGift(Gift gift) {
+        this.recievedGift.add(gift);
+    }
+
+    public ArrayList<Gift> getRecievedGift() {
+        return recievedGift;
+    }
+
+    public void setRecievedGift(ArrayList<Gift> recievedGift) {
+        this.recievedGift = recievedGift;
+    }
+
+    public User getPartner() {
+        return partner;
+    }
+
+    public void setPartner(User partner) {
+        this.partner = partner;
+    }
 }

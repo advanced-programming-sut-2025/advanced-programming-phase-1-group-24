@@ -24,14 +24,22 @@ public class Hoe extends Tool{
         }
 
         Tile newTile = map.getMap()[currentY + yDirection][currentX + xDirection];
+        if(newTile.getContainedGrowable() != null || newTile.getProductOfGrowable() != null || newTile.getContainedItem() != null){
+            return new Result(false, "The tile you chose is full!");
+        }
         if (newTile.getType() == TileType.FARM || newTile.getType() == TileType.GREENHOUSE) {
-            newTile.setIsPlowed(true);
+            map.getMap()[currentY + yDirection][currentX + xDirection].setIsPlowed(true);
             return new Result(true, "Plowed the ground successfully.");
         }
         else {
             return new Result(false, "You have to use the hoe in the farm or greenhouse.");
         }
     }
-
+    @Override
+    public Hoe copy() {
+        Hoe copy = new Hoe(this.getType());
+        copy.upgrade(this.material);
+        return copy;
+    }
 
 }

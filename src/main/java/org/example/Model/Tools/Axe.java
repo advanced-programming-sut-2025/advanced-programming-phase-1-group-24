@@ -31,11 +31,11 @@ public class Axe extends Tool {
 
         Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
         Growable containedGrowable = nextTile.getContainedGrowable();
-        if (containedGrowable.getGrowableType() == GrowableType.Tree) {
+        if (containedGrowable != null && containedGrowable.getGrowableType() == GrowableType.Tree) {
             Growable productOfGrowable = nextTile.getProductOfGrowable();
             if (productOfGrowable != null)
                 currentPlayer.getBackpack().addItem(productOfGrowable, 20); //might change later
-           // randomStuff temp = new randomStuff(randomStuffType.Wood); //might change later
+            // randomStuff temp = new randomStuff(randomStuffType.Wood); //might change later
             //currentPlayer.getBackpack().addItem(temp, 20); //might change later
             if (containedGrowable.getTreeType().getIsForagingTree()) {
                 Growable seeds = GrowableFactory.getInstance().create(containedGrowable.getTreeType().getSource());
@@ -50,4 +50,12 @@ public class Axe extends Tool {
         return new Result(false, "No tree to cut here!");
 
     }
+    @Override
+    public Axe copy() {
+        Axe copy = new Axe(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        return copy;
+    }
+
+
 }

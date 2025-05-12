@@ -34,7 +34,7 @@ public class Scythe extends Tool{
 
         Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
         Growable productOfGrowable = nextTile.getProductOfGrowable();
-        if (nextTile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
+        if (nextTile.getContainedGrowable() != null && nextTile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
             ForagingMineral coal = (ForagingMineral) nextTile.getContainedItem();
             currentPlayer.getBackpack().addItem(coal, 1);
             nextTile.setContainedGrowable(null);
@@ -45,16 +45,37 @@ public class Scythe extends Tool{
         if (productOfGrowable == null)
             return new Result(false, "Nothing to harvest here.");
         else {
+            Tile[][] tiles = map.getMap();
             int farmingSkill = currentPlayer.getSkillsLevel().get(Skill.FARMING);
             if (farmingSkill == 0) productOfGrowable.setQuality(ProductQuality.Normal);
             else if (farmingSkill == 1) productOfGrowable.setQuality(ProductQuality.Normal);
             else if (farmingSkill == 2) productOfGrowable.setQuality(ProductQuality.Silver);
             else if (farmingSkill == 3) productOfGrowable.setQuality(ProductQuality.Golden);
             else if (farmingSkill == 4) productOfGrowable.setQuality(ProductQuality.Iridium);
-            currentPlayer.getBackpack().addItem(productOfGrowable, 1);
-            nextTile.setProductOfGrowable(null);
+            if(nextTile.getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                currentPlayer.getBackpack().addItem(productOfGrowable, 10);
+                for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
+                    for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
+                        if(tiles[j][i].getProductOfGrowable() != null && tiles[j][i].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                            tiles[j][i].setProductOfGrowable(null);
+                        }
+                    }
+                }
+            }
+            else {
+                //if(productOfGrowable.getGrowableType() == GrowableType.Fruit) productOfGrowable.setIsEdible;
+                currentPlayer.getBackpack().addItem(productOfGrowable, 1);
+                nextTile.setProductOfGrowable(null);
+            }
             currentPlayer.addSkillExperience(Skill.FARMING);
             return new Result(true, "Harvested " + productOfGrowable.getName());
         }
     }
+    @Override
+    public Scythe copy() {
+        Scythe copy = new Scythe(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        return copy;
+    }
+
 }

@@ -14,4 +14,28 @@ public enum ToolMaterial {
     }
 
     public int getEnergyRequiered() { return energyRequiered; }
+    public static ToolMaterial fromString(String material) {
+        if (material != null) {
+            for (ToolMaterial toolMaterial : ToolMaterial.values()) {
+                if (material.equalsIgnoreCase(toolMaterial.name())) {
+                    return toolMaterial;
+                }
+            }
+        }
+       return null;
+    }
+    public ToolMaterial getNext() {
+        switch (this) {
+            case Initial:
+                return Copper;
+            case Copper:
+                return Iron;
+            case Iron:
+                return Gold;
+            case Gold:
+                return Iridium;
+            default:
+                return null;  // No upgrade available for Initial or Iridium
+        }
+    }
 }
