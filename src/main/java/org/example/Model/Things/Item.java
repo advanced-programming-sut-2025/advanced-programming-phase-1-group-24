@@ -2,6 +2,7 @@ package org.example.Model.Things;
 
 import org.example.Model.Animals.AnimalProduct;
 import org.example.Model.Animals.AnimalProductType;
+import org.example.Model.Growables.*;
 import org.example.Model.Reccepies.randomStuff;
 import org.example.Model.Reccepies.randomStuffType;
 
@@ -100,6 +101,34 @@ public class Item {
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             if (animalProductType.getProductName().equalsIgnoreCase(name)) {
                 return new AnimalProduct(ProductQuality.Normal, animalProductType);
+            }
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            if(sourceType.getName().equalsIgnoreCase(name)) {
+                return GrowableFactory.getInstance().create(sourceType);
+            }
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            if(foragingCropType.getName().equalsIgnoreCase(name)) {
+                return GrowableFactory.getInstance().create(foragingCropType);
+            }
+        }
+        for(CropType cropType : CropType.values()) {
+            if(cropType.getName().equalsIgnoreCase(name)) {
+                Growable newCrop = GrowableFactory.getInstance().create(cropType.getSource());
+                newCrop.setName(cropType.getName());
+                return newCrop;
+            }
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            if(fruitType.getName().equalsIgnoreCase(name)) {
+                for (TreeType treeType : TreeType.values()) {
+                    if (treeType.getFruitType() == fruitType) {
+                        Growable newFruit = GrowableFactory.getInstance().create(treeType.getSource());
+                        newFruit.setName(fruitType.getName());
+                        break;
+                    }
+                }
             }
         }
 

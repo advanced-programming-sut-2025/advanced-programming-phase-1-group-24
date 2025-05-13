@@ -10,6 +10,7 @@ public enum Menu {
     LoginMenu(new LoginMenu()),
     GameMenu(new GameMenu()),
     ProfileMenu(new ProfileMenu()),
+    TradeMenu(new TradeMenu()),
     ExitMenu(new ExitMenu());
 
     private final AppMenu menu;

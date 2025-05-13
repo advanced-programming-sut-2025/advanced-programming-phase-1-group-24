@@ -19,5 +19,4 @@ public class House extends Place{
   public ArrayList<Machine> getMachines() {
     return machines;
   }
-    
 }

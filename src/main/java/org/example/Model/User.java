@@ -5,10 +5,15 @@ import org.example.Model.Animals.Animal;
 import org.example.Model.Friendships.Friendship;
 import org.example.Model.Friendships.Gift;
 import org.example.Model.Friendships.Message;
+import org.example.Model.Friendships.Gift;
+import org.example.Model.Friendships.Message;
+import org.example.Model.Friendships.Trade;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
 import org.example.Model.Reccepies.FoodRecipe;
 import org.example.Model.Reccepies.Machine;
+import org.example.Model.Reccepies.MachineType;
+import org.example.Model.Reccepies.FoodRecipe;
 import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Things.Food;
 import org.example.Model.Things.Backpack;
@@ -51,12 +56,15 @@ public class User {
     private ArrayList<FoodRecipe> cookingRecepies;
     private Map<User, FriendshipLevels> friends;
     private Backpack backpack;
-    private ArrayList<Animal> ownedAnimals = new ArrayList<>();
+    private ArrayList<Animal> ownedAnimals=new ArrayList<>();
     private Tile homeTile;
-
     private ArrayList<Message> notifications = new ArrayList<>();
     private ArrayList<Gift> recievedGift = new ArrayList<>();
     private User partner;
+    private int daysSinceRejection;
+    private ArrayList<Trade> tradingHistory = new ArrayList<>();
+    private ArrayList<Message> tradeNotifications = new ArrayList<>();
+
 
     /// /////////////?????????????/
     public User(String username, String password, String nickname, String email, boolean gender) {
@@ -70,7 +78,6 @@ public class User {
         for (Skill skill : Skill.values()) {
             skillsLevel.put(skill, 0);
         }
-
         this.skillExperience = new HashMap<>();
         for (Skill skill : Skill.values()) {
             skillExperience.put(skill, 0);
@@ -87,6 +94,9 @@ public class User {
         this.cookingRecepies.add(FoodRecipe.BakedFish);
         this.cookingRecepies.add(FoodRecipe.FriedEgg);
         this.partner = null;
+        this.daysSinceRejection = 0;
+        this.tradingHistory = new ArrayList<>();
+        this.tradeNotifications = new ArrayList<>();
     }
 
     public int getCurrentTurnEnergy() {
@@ -94,7 +104,6 @@ public class User {
     }
 
     public void setCurrentTurnEnergy(int currentTurnEnergy) {
-
         this.currentTurnEnergy = currentTurnEnergy;
     }
 
@@ -121,6 +130,8 @@ public class User {
     public int getEnergy() {
         return energy;
     }
+
+
 
     public ArrayList<FoodRecipe> getCookingRecepies() {
         if (cookingRecepies == null)
@@ -217,6 +228,8 @@ public class User {
 
 
     public void updateGameFields() {
+        this.maxEnergy = 200;
+        this.maxEnergyTurn = 50;
         this.playedGames += 1;
         this.energy = maxEnergy;
         this.money = 0;
@@ -233,11 +246,6 @@ public class User {
         this.friends = new HashMap<>();
         this.skillsLevel = new HashMap<>();
         this.notifications = new ArrayList<>();
-        this.recievedGift = new ArrayList<>();
-        this.cookingRecepies.add(FoodRecipe.Salad);
-        this.cookingRecepies.add(FoodRecipe.BakedFish);
-        this.cookingRecepies.add(FoodRecipe.FriedEgg);
-        this.partner = null;
         for (Skill skill : Skill.values()) {
             skillsLevel.put(skill, 0);
         }
@@ -246,7 +254,16 @@ public class User {
         for (Skill skill : Skill.values()) {
             skillExperience.put(skill, 0);
         }
+        this.tradingHistory = new ArrayList<>();
+        this.tradeNotifications = new ArrayList<>();
+        this.cookingRecepies.add(FoodRecipe.Salad);
+        this.cookingRecepies.add(FoodRecipe.BakedFish);
+        this.cookingRecepies.add(FoodRecipe.FriedEgg);
+        this.recievedGift = new ArrayList<>();
+        this.partner = null;
+        this.fainted = false;
     }
+
 
 
     public void updateMaxMoney() {
@@ -326,7 +343,6 @@ public class User {
         this.friends = friends;
     }
 
-
     public void setCookingRecepies(ArrayList<FoodRecipe> cookingRecepies) {
         this.cookingRecepies = cookingRecepies;
     }
@@ -342,7 +358,6 @@ public class User {
     public Map<Skill, Integer> getSkillsLevel() {
         return skillsLevel;
     }
-
 
     public void setSkillsLevel(Map<Skill, Integer> skillsLevel) {
         this.skillsLevel = skillsLevel;
@@ -480,4 +495,27 @@ public class User {
     public void setPartner(User partner) {
         this.partner = partner;
     }
+    public int getDaysSinceRejection() {
+        return daysSinceRejection;
+    }
+    public void setDaysSinceRejection(int daysSinceRejection) {
+        this.daysSinceRejection = daysSinceRejection;
+    }
+
+    public ArrayList<Trade> getTradingHistory() {
+        return tradingHistory;
+    }
+
+    public ArrayList<Message> getTradeNotifications() {
+        return tradeNotifications;
+    }
+
+    public void setTradingHistory(ArrayList<Trade> tradingHistory) {
+        this.tradingHistory = tradingHistory;
+    }
+
+    public void setTradeNotifications(ArrayList<Message> tradeNotifications) {
+        this.tradeNotifications = tradeNotifications;
+    }
 }
+

@@ -74,7 +74,7 @@ Eggplant("Eggplant", SourceType.EggplantSeeds, 5, false, 5, 60, true, 20,
     new ArrayList<>(List.of(Season.AUTUMN)), false, List.of(1, 1, 1, 1, 1)),
 FairyRose("Fairy Rose", SourceType.FairySeeds, 12, true, 0, 290, true, 90,
     new ArrayList<>(List.of(Season.AUTUMN)), false, List.of(1, 4, 4, 3)),
-Grape("Grape", SourceType.GrapeStarter, 10, false, 3, 80, true, 38,
+Grape("Grapes", SourceType.GrapeStarter, 10, false, 3, 80, true, 38,
     new ArrayList<>(List.of(Season.AUTUMN)), false, List.of(1, 1, 2, 3, 3)),
 PUMPKIN("Pumpkin", SourceType.PumpkinSeeds, 13, true, 0, 320, false, 0,
     new ArrayList<>(List.of(Season.AUTUMN)), true, List.of(1, 2, 3, 4, 3)),
@@ -85,7 +85,8 @@ SweetGemBerry("Sweet Gem Berry", SourceType.RareSeed, 24, true, 0, 3000, false, 
 Powdermelon("Powdermelon", SourceType.PowdermelonSeeds, 7, true, 0, 60, true, 63,
     new ArrayList<>(List.of(Season.WINTER)), true, List.of(1, 2, 1, 2, 1)),
 AncientFruit("Ancient Fruit", SourceType.AncientSeeds, 28, false, 7, 550, false, 0,
-    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5));
+    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5)),
+    MixedCrop("Mixed Crop", SourceType.MixedSeeds, 0, false, 0, 50, false, 0, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), false, List.of(2, 7, 7, 7, 5));
 
 private final String name;
 private final SourceType source;

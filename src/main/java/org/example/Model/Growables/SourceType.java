@@ -58,7 +58,8 @@ public enum SourceType {
     PineCones("Pine Cones", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MahoganySeeds("Mahogany Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MushroomTreeSeeds("Mushroom Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
-    MysticTreeSeeds("Mystic Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)));
+    MysticTreeSeeds("Mystic Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
+    MixedSeeds("Mixed Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)));
     
 
     private final String name;

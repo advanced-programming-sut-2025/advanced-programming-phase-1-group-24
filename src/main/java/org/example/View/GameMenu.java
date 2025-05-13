@@ -4,9 +4,13 @@ package org.example.View;
 import jdk.jfr.RecordingState;
 import org.example.Controller.GameMenuController;
 import org.example.Controller.StoreMenuController;
+import org.example.Controller.HouseMenuController;
+import org.example.Controller.TradeMenuController;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Menus.StoreMenuCommands;
 import org.example.Model.Result;
+import org.example.Model.Menus.HouseMenuCommands;
+import org.example.Model.Menus.TradeMenuCommands;
 
 import javax.imageio.spi.ImageReaderWriterSpi;
 import java.util.Scanner;
@@ -14,6 +18,7 @@ import java.util.regex.Matcher;
 
 public class GameMenu implements AppMenu {
     GameMenuController controller = new GameMenuController();
+    HouseMenuController houseController = new HouseMenuController();
     StoreMenuController storeController = new StoreMenuController();
 
     public void handleCommand(Scanner scanner) {
@@ -30,12 +35,16 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.loadGame());
         } else if ((matcher = GameMenuCommands.NEW_GAME.getMatcher(input)) != null) {
             System.out.println(controller.createGame(matcher.group("users"), scanner));
-        }else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
+        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
             System.out.println(controller.enterMenu(matcher.group("menuName")));
         } else if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
             System.out.println(controller.showCurrentMenu());
         } else if ((matcher = GameMenuCommands.EXIT.getMatcher(input)) != null) {
             controller.menuExit();
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
         } else if (!canUseCommand.isSuccessful()) {  /////////////////////////////////////////////////////////////////////////
             System.out.println(canUseCommand);
         } else if ((matcher = StoreMenuCommands.BUILD_HABITAT.getMatcher(input)) != null) {
@@ -70,14 +79,11 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.listGift());
         } else if ((matcher = GameMenuCommands.RATE_GIFTS.getMatcher(input)) != null) {
             System.out.println(controller.rateGifts(matcher.group("gift"), matcher.group("rate")));
-        }else if ((matcher = GameMenuCommands.GIFT_HISTORY.getMatcher(input)) != null) {
+        } else if ((matcher = GameMenuCommands.GIFT_HISTORY.getMatcher(input)) != null) {
             System.out.println(controller.giftHistory(matcher.group("username")));
         } else if ((matcher = GameMenuCommands.FLOWER_SEND.getMatcher(input)) != null) {
             System.out.println(controller.sendFlower(matcher.group("username")));
-        }
-
-
-        else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMatcher(input)) != null) {
+        } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMatcher(input)) != null) {
             System.out.println(controller.sellAnimal(matcher.group("name")));
         } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMatcher(input)) != null) {
             System.out.println(controller.showAnimalProducts());
@@ -107,10 +113,6 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.showCurrentWeather());
         } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMatcher(input)) != null) {
             System.out.println(controller.showTomorrowWeather());
-        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
-            System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
-            System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
         } else if (input.equals("season")) {
             System.out.println(controller.printSeason());
         } else if (input.equals("time")) {
@@ -121,6 +123,18 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.printDateTime());
         } else if (input.matches("^day\\s+of\\s+the\\s+week$")) {
             System.out.println(controller.printDayOfWeek());
+        } else if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
+            System.out.println(controller.nextTurn(scanner));
+        } else if ((matcher = GameMenuCommands.TERMINATE_GAME.getMatcher(input)) != null) {
+            System.out.println(controller.startForceTerminateVote(scanner));
+        } else if ((matcher = GameMenuCommands.EXIT_GAME.getMatcher(input)) != null) {
+            System.out.println(controller.exitGame());
+        } else if ((matcher = GameMenuCommands.LOAD_GAME.getMatcher(input)) != null) {
+            System.out.println(controller.loadGame());
+        } else if ((matcher = GameMenuCommands.NEW_GAME.getMatcher(input)) != null) {
+            System.out.println(controller.createGame(matcher.group("users"), scanner));
+        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
+            System.out.println(controller.createGame(matcher.group("users"), scanner));
         } else if ((matcher = GameMenuCommands.PRINT_GAME.getMatcher(input)) != null) {
             System.out.println(controller.printMap(matcher.group("x"), matcher.group("y"), matcher.group("size")).message());
         } else if ((matcher = GameMenuCommands.HELP_READ_MAP.getMatcher(input)) != null) {
@@ -131,6 +145,12 @@ public class GameMenu implements AppMenu {
             controller.printCraftInfo(matcher.group("craftname"));
         } else if ((matcher = GameMenuCommands.TREEINFO.getMatcher(input)) != null) {
             controller.printTreeInfo(matcher.group("treename"));
+        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
+            System.out.println(controller.enterMenu(matcher.group("menuName")));
+        } else if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+            System.out.println(controller.showCurrentMenu());
+        } else if ((matcher = GameMenuCommands.EXIT.getMatcher(input)) != null) {
+            controller.menuExit();
         } else if ((matcher = GameMenuCommands.SHOW_INVENTORY.getMatcher(input)) != null) {
             System.out.println(controller.showInventory());
         } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMatcher(input)) != null) {
@@ -151,7 +171,6 @@ public class GameMenu implements AppMenu {
             //COMPLETE THIS AFTER MAKING SHOP
         } else if ((matcher = GameMenuCommands.USE_TOOL.getMatcher(input)) != null) {
             System.out.println(controller.useTool(matcher.group("direction")));
-            //COMPLETE THIS AFTER COMPLETEING TOOLS
         } else if ((matcher = GameMenuCommands.FISH.getMatcher(input)) != null) {
             String fishingPole = matcher.group("fishingPole");
             System.out.println(controller.fish(fishingPole));
@@ -160,6 +179,34 @@ public class GameMenu implements AppMenu {
             int count = Integer.parseInt(matcher.group("count"));
             //System.out.println(controller.cheatAddItem(itemName, count));
             //COMPLETE THIS AFTER WRITING LIST OF ALL ITEMS
+        } else if ((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
+            System.out.println(controller.plantGrowable(matcher.group("seedName"), matcher.group("direction")).message());
+        } else if ((matcher = GameMenuCommands.SHOWPLANT.getMatcher(input)) != null) {
+            System.out.println(controller.showPlant(matcher.group("x"), matcher.group("y")).message());
+        } else if ((matcher = GameMenuCommands.FERTALISE.getMatcher(input)) != null) {
+            System.out.println(controller.fertalizeGrowable(matcher.group("fertilizer"), matcher.group("direction")).message());
+        } else if ((matcher = GameMenuCommands.BUILDGREENHOUSE.getMatcher(input)) != null) {
+            System.out.println(controller.buildGreenHouse().message());
+        } else if ((matcher = HouseMenuCommands.SHOW_RECIPIES.getMatcher(input)) != null) {
+            System.out.println(houseController.showRecipes());
+        } else if ((matcher = HouseMenuCommands.CRAFT.getMatcher(input)) != null) {
+            System.out.println(houseController.craft(matcher.group("itemName")));
+        } else if ((matcher = HouseMenuCommands.PLACE_ITEM.getMatcher(input)) != null) {
+            System.out.println(houseController.placeItem(matcher.group("itemName"), matcher.group("direction")));
+        } else if ((matcher = GameMenuCommands.TALK.getMatcher(input)) != null) {
+            System.out.println(controller.talk(matcher.group("username"), matcher.group("message")).message());
+        } else if ((matcher = GameMenuCommands.SHOW_TALK_HISTORY.getMatcher(input)) != null) {
+            System.out.println(controller.showTalkHistory(matcher.group("username")));
+        } else if ((matcher = GameMenuCommands.HUG.getMatcher(input)) != null) {
+            System.out.println(controller.hug(matcher.group("username")));
+        } else if ((matcher = GameMenuCommands.ASK_MARRIAGE.getMatcher(input)) != null) {
+            System.out.println(controller.askMarriage(matcher.group("username"), matcher.group("ring")));
+        } else if ((matcher = GameMenuCommands.RESPOND.getMatcher(input)) != null) {
+            System.out.println(controller.respondToMarriage(matcher.group("response"), matcher.group("username")));
+        } else if ((matcher = GameMenuCommands.START_TRADE.getMatcher(input)) != null) {
+            controller.startTrade();
+        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+            System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else {
             System.out.println("invalid command");
         }

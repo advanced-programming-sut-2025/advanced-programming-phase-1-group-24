@@ -27,8 +27,6 @@ public class Game {
     private Map<User, Boolean> terminationVotes = new HashMap<>();
     private boolean isVoteInProgress = false;
 
-    private ArrayList<Message> allMessages = new ArrayList<>();
-   // private ArrayList<Gift> allGifts = new ArrayList<>();
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
@@ -175,21 +173,6 @@ public class Game {
         this.tomorrowWeatherType = possibleWeathers.get(randomIndex);
     }
 
-    public ArrayList<Message> getAllMessages() {
-        return allMessages;
-    }
-
-    public void setAllMessages(ArrayList<Message> allMessages) {
-        this.allMessages = allMessages;
-    }
-
-//    public ArrayList<Gift> getAllGifts() {
-//        return allGifts;
-//    }
-//
-//    public void setAllGifts(ArrayList<Gift> allGifts) {
-//        this.allGifts = allGifts;
-//    }
     public User getPlayerByUsername(String username) {
         for (User player : players) {
             if (player.getUsername().equals(username)) {

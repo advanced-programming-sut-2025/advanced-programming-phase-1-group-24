@@ -40,6 +40,10 @@ public class GrowableFactory {
         g.setPrice(crop.getBaseSellPrice());
         g.setPlaceable(false);
 
+        if(crop.getSource() == SourceType.MixedSeeds){
+            g.growableType = GrowableType.MixedSeeds;
+        }
+
         return g;
     }
 

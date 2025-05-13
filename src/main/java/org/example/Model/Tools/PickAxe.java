@@ -14,6 +14,7 @@ public class PickAxe extends Tool{
     public PickAxe(ToolType type) {
         super(type);
     }
+
     public Result usePickAxe(int xDirection, int yDirection, Tile currentTile,
                              MapOfGame map, User currentPlayer, double energyWeatherModifier){
 

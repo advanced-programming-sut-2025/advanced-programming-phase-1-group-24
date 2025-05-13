@@ -9,6 +9,7 @@ public class Friendship {
     private int level;
     private int xp;
     private ArrayList<Gift> gifts = new ArrayList<>();
+    private  ArrayList<Message> talkHistory = new ArrayList<>();
 
     public Friendship(String player1, String player2) {
         // Always store in lexicographical order to avoid duplicates
@@ -19,9 +20,10 @@ public class Friendship {
             this.player1 = player2;
             this.player2 = player1;
         }
-        this.level = 2;
+        this.level = 0;
         this.xp = 0;
         this.gifts = new ArrayList<>();
+        this.talkHistory = new ArrayList<>();
     }
 
     public void addXp(int amount) {
@@ -53,21 +55,10 @@ public class Friendship {
     }
 
     // Getters
-    public int getLevel() {
-        return level;
-    }
-
-    public int getXp() {
-        return xp;
-    }
-
-    public String getPlayer1() {
-        return player1;
-    }
-
-    public String getPlayer2() {
-        return player2;
-    }
+    public int getLevel() { return level; }
+    public int getXp() { return xp; }
+    public String getPlayer1() { return player1; }
+    public String getPlayer2() { return player2; }
 
     public ArrayList<Gift> getGifts() {
         return gifts;
@@ -75,6 +66,10 @@ public class Friendship {
 
     public void addToGifts(Gift gift) {
         gifts.add(gift);
+    }
+
+    public ArrayList<Message> getTalkHistory() {
+        return talkHistory;
     }
 
     public void setLevel(int level) {
@@ -96,5 +91,3 @@ public class Friendship {
         return Objects.hash(player1, player2);
     }
 }
-
-

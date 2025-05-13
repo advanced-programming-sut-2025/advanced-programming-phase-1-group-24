@@ -13,8 +13,14 @@ import org.example.Model.Reccepies.randomStuff;
 import org.example.Model.Reccepies.randomStuffType;
 import org.example.Model.Things.*;
 import org.example.Model.Tools.*;
+import org.example.Model.Places.Farm;
+import org.example.Model.Places.House;
+import org.example.Model.Things.ForagingMineral;
+import org.example.Model.Things.ForagingMineralType;
+import org.example.Model.Things.ProductQuality;
 import org.example.Model.User;
 
+import javax.naming.InsufficientResourcesException;
 import java.util.*;
 
 
@@ -90,11 +96,9 @@ public class MapOfGame {
     public Tile[][] getMap() {
         return map;
     }
-
     public int getHeight() {
         return height;
     }
-
     public int getWidth() {
         return width;
     }
@@ -177,8 +181,7 @@ public class MapOfGame {
         return null;
     }
 
-    public void changeTile(TileType newTile, TileType oldTile) {
-    }
+    public void changeTile(TileType newTile, TileType oldTile) {}
 
     public Farm getFarmByOwner(User owner) {
         for (Farm farm : farms) {
@@ -188,7 +191,6 @@ public class MapOfGame {
         }
         return null;
     }
-
     public Tile getTile(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return map[y][x];
@@ -346,6 +348,7 @@ public class MapOfGame {
         items.add(new ShopItem("Sugar", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.Sugar), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Wheat Flour", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.WheatFlower), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Rice", Integer.MAX_VALUE, new randomStuff(250, randomStuffType.Rice), ShopItemType.RANDOMSTUFF, 250, 250, 250, 250));
+        items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
 
         return items;
     }
@@ -541,6 +544,28 @@ public class MapOfGame {
             }
         }
         return null;
+    }
+
+
+
+    public House getHousePosition(int x, int y) {
+        for (Farm farm : farms) {
+            House house = farm.getHouse();
+            if (isInsideHouse(x, y, house)) {
+                return house;
+            }
+        }
+        return null; // No house contains the coordinates
+    }
+
+    private boolean isInsideHouse(int x, int y, House house) {
+        int houseX = house.getX();
+        int houseY = house.getY();
+        int width = house.getWidth();
+        int height = house.getHeight();
+
+        return x >= houseX && x < houseX + width &&
+                y >= houseY && y < houseY + height;
     }
 
 }

@@ -1,6 +1,5 @@
 package org.example.Model.Things;
 
-
 import org.example.Model.TimeManagement.Season;
 public enum FishType {
     Salmon("Salmon",Season.AUTUMN,75, RarenessType.COMMON),
@@ -55,4 +54,3 @@ public enum FishType {
         LEGENDARY;
     }
 }
-
