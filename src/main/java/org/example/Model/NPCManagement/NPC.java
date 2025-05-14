@@ -1,5 +1,6 @@
 package org.example.Model.NPCManagement;
 
+import org.example.Model.App;
 import org.example.Model.Game;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.FoodRecipe;
@@ -15,19 +16,19 @@ import java.util.Map;
 
 public class NPC {
     private NPCtype npcName;
-    private Tile currentTile;
-    private Map <User, Integer> friendshipLevels;
-    private Map <User, Integer> friendshipPoints;
-    private Map <User, Boolean> talkedToNPCToday;
-    private Map <User, Boolean> gaveGiftToNPCToday;
+    //private Tile currentTile;
+    private Map <String, Integer> friendshipLevels;
+    private Map <String, Integer> friendshipPoints;
+    private Map <String, Boolean> talkedToNPCToday;
+    private Map <String, Boolean> gaveGiftToNPCToday;
     private ArrayList<NPCMission> missions;
-    private Map <User, ArrayList<NPCMission>> unlockedMissions;
+    private Map <String, ArrayList<NPCMission>> unlockedMissions;
     private int daysLeftToUnlockThirdMission;
 
-    public NPC(NPCtype npcName, Tile currentTile, ArrayList<User> users,
+    public NPC(NPCtype npcName, ArrayList<User> users,
                ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission) {
         this.npcName = npcName;
-        this.currentTile = currentTile;
+        //this.currentTile = currentTile;
         this.friendshipLevels = new HashMap<>();
         this.friendshipPoints = new HashMap<>();
         this.talkedToNPCToday = new HashMap<>();
@@ -35,12 +36,12 @@ public class NPC {
         this.missions = new ArrayList<>(missions);
         this.unlockedMissions = new HashMap<>();
         for (User user : users) {
-            friendshipLevels.put(user, 0);
-            friendshipPoints.put(user, 0);
-            talkedToNPCToday.put(user, false);
-            gaveGiftToNPCToday.put(user, false);
-            unlockedMissions.put(user, new ArrayList<>());
-            unlockedMissions.get(user).add(missions.get(0));
+            friendshipLevels.put(user.getUsername(), 0);
+            friendshipPoints.put(user.getUsername(), 0);
+            talkedToNPCToday.put(user.getUsername(), false);
+            gaveGiftToNPCToday.put(user.getUsername(), false);
+            unlockedMissions.put(user.getUsername(), new ArrayList<>());
+            unlockedMissions.get(user.getUsername()).add(missions.get(0));
         }
         this.daysLeftToUnlockThirdMission = daysLeftToUnlockThirdMission;
     }
@@ -53,31 +54,32 @@ public class NPC {
         return npcName;
     }
 
-    public Tile getCurrentTile() {
-        return currentTile;
-    }
+//    public Tile getCurrentTile() {
+//        return currentTile;
+//    }
 
-    public Map<User, Integer> getFriendshipLevels() {
+
+    public Map<String, Integer> getFriendshipLevels() {
         return friendshipLevels;
     }
 
-    public Map<User, Integer> getFriendshipPoints() {
-        return friendshipPoints;
+    public Map<String, Boolean> getGaveGiftToNPCToday() {
+        return gaveGiftToNPCToday;
     }
 
-    public Map<User, Boolean> getTalkedToNPCToday() {
+    public Map<String, Boolean> getTalkedToNPCToday() {
         return talkedToNPCToday;
     }
 
-    public Map<User, Boolean> getGaveGiftToNPCToday() {
-        return gaveGiftToNPCToday;
+    public Map<String, Integer> getFriendshipPoints() {
+        return friendshipPoints;
     }
 
     public ArrayList<NPCMission> getMissions() {
         return missions;
     }
 
-    public Map<User, ArrayList<NPCMission>> getUnlockedMissions() {
+    public Map<String, ArrayList<NPCMission>> getUnlockedMissions() {
         return unlockedMissions;
     }
 
@@ -92,11 +94,11 @@ public class NPC {
     public Result talkToNPC (WeatherType currentWeather, User currentPlayer){
         for (Dialog dialog : npcName.getDialogs()) {
             if (currentWeather.equals(dialog.getWeatherType())
-                    && friendshipLevels.get(currentPlayer) == dialog.getRequiredFriendshipLevel()) {
-                if (!talkedToNPCToday.get(currentPlayer)) {
-                    friendshipPoints.merge(currentPlayer, 20, Integer::sum);
+                    && friendshipLevels.get(currentPlayer.getUsername()) == dialog.getRequiredFriendshipLevel()) {
+                if (!talkedToNPCToday.get(currentPlayer.getUsername())) {
+                    friendshipPoints.merge(currentPlayer.getUsername(), 20, Integer::sum);
                     this.updateFriendshipLevel(currentPlayer);
-                    talkedToNPCToday.put(currentPlayer, true);
+                    talkedToNPCToday.put(currentPlayer.getUsername(), true);
                 }
                 return dialog.useDialog();
             }
@@ -109,7 +111,7 @@ public class NPC {
         missionIndex--;
         if (missionIndex < 0) { return new Result(false, "False index."); }
 
-        NPCMission mission = unlockedMissions.get(currentPlayer).get(missionIndex);
+        NPCMission mission = unlockedMissions.get(currentPlayer.getUsername()).get(missionIndex);
         if (mission.getAlreadyDone()) return new Result(false,"This mission is already done.");
 
         for (String itemName : mission.getRequiredItems().keySet()) {
@@ -122,15 +124,15 @@ public class NPC {
         }
         int howManyItems = 1;
         String message = "";
-        if (friendshipLevels.get(currentPlayer) >= 2)  howManyItems = 2;
+        if (friendshipLevels.get(currentPlayer.getUsername()) >= 2)  howManyItems = 2;
         for (String itemName : mission.getPrizeItems().keySet()) {
             if (itemName.equals("Gold Coin")) {
                 currentPlayer.addMoney( mission.getPrizeItems().get(itemName) * howManyItems);
                 message = "Your current money is " + currentPlayer.getMoney() + ".";
             }
             else if (itemName.equals("Friendship Level")) {
-                friendshipLevels.put(currentPlayer,friendshipLevels.get(currentPlayer) + 1);
-                message = "Your new Friendship level is " + friendshipLevels.get(currentPlayer) + ".";
+                friendshipLevels.put(currentPlayer.getUsername(),friendshipLevels.get(currentPlayer.getUsername()) + 1);
+                message = "Your new Friendship level is " + friendshipLevels.get(currentPlayer.getUsername()) + ".";
             }
             else if (itemName.equals("Salmon Dinner Recipe")) {
                 currentPlayer.getCookingRecepies().add(FoodRecipe.SalmonDinner);
@@ -145,20 +147,20 @@ public class NPC {
     }
 
     public Result giveGift(String itemName, User currentPlayer){
-        if (gaveGiftToNPCToday.get(currentPlayer)) {
+        if (gaveGiftToNPCToday.get(currentPlayer.getUsername())) {
             return new Result(false,"You already gave a gift today.");
         }
         for (String favoriteItem : npcName.getFavoriteItems()) {
             if (favoriteItem.equals(itemName)) {
-                friendshipPoints.merge(currentPlayer, 200, Integer::sum);
+                friendshipPoints.merge(currentPlayer.getUsername(), 200, Integer::sum);
                 this.updateFriendshipLevel(currentPlayer);
-                gaveGiftToNPCToday.put(currentPlayer, true);
+                gaveGiftToNPCToday.put(currentPlayer.getUsername(), true);
                 return new Result(true,"I love your gift!!");
             }
         }
-        friendshipPoints.merge(currentPlayer, 50, Integer::sum);
+        friendshipPoints.merge(currentPlayer.getUsername(), 50, Integer::sum);
         this.updateFriendshipLevel(currentPlayer);
-        gaveGiftToNPCToday.put(currentPlayer, true);
+        gaveGiftToNPCToday.put(currentPlayer.getUsername(), true);
         return new Result(true,"Thank you!");
     }
 
@@ -166,10 +168,11 @@ public class NPC {
         for (NPC npc : currentGame.getNpcs()) {
             if (npc.getDaysLeftToUnlockThirdMission() > 0)
                 npc.setDaysLeftToUnlockThirdMission(npc.getDaysLeftToUnlockThirdMission() - 1);
-            for (User user : npc.getTalkedToNPCToday().keySet()) {
-                npc.getTalkedToNPCToday().put(user, false);
-                npc.getGaveGiftToNPCToday().put(user, false);
-                if (npc.getFriendshipLevels().get(user) == 3) {
+            for (String username : npc.getTalkedToNPCToday().keySet()) {
+                User user = App.getInstance().getCurrentGame().getPlayerByUsername(username);
+                npc.getTalkedToNPCToday().put(user.getUsername(), false);
+                npc.getGaveGiftToNPCToday().put(user.getUsername(), false);
+                if (npc.getFriendshipLevels().get(user.getUsername()) == 3) {
                     int random = (int) (Math.random() + 0.5);
                     String itemName = npc.getNpcName().getRandomGifts().get(random);
                     Item item = Item.getRandomItem(itemName);
@@ -177,7 +180,7 @@ public class NPC {
                     //might add a message to show that the user received a gift later
                 }
                 if (npc.getDaysLeftToUnlockThirdMission() == 0) {
-                    npc.getUnlockedMissions().get(user).add(npc.getMissions().get(2));
+                    npc.getUnlockedMissions().get(user.getUsername()).add(npc.getMissions().get(2));
                     npc.setDaysLeftToUnlockThirdMission(-1);
                     //might add a message to show that a new message has been unlocked
                 }
@@ -186,13 +189,14 @@ public class NPC {
     }
 
     public void updateFriendshipLevel(User currentPlayer) {
-        for (User user : friendshipPoints.keySet()) {
-            if (friendshipPoints.get(user) > 799) friendshipPoints.put(user, 799);
-            int previousFriendshipLevel = friendshipLevels.get(user);
-            int newFriendshipLevel = (int)Math.floor(friendshipPoints.get(user) / 200);
+        for (String username : friendshipPoints.keySet()) {
+            User user = App.getInstance().getCurrentGame().getPlayerByUsername(username);
+            if (friendshipPoints.get(user.getUsername()) > 799) friendshipPoints.put(user.getUsername(), 799);
+            int previousFriendshipLevel = friendshipLevels.get(user.getUsername());
+            int newFriendshipLevel = (int)Math.floor(friendshipPoints.get(user.getUsername()) / 200);
             if (newFriendshipLevel != previousFriendshipLevel) {
-                friendshipLevels.put(user, newFriendshipLevel);
-                if (newFriendshipLevel == 1) unlockedMissions.get(currentPlayer).add(missions.get(1));
+                friendshipLevels.put(user.getUsername(), newFriendshipLevel);
+                if (newFriendshipLevel == 1) unlockedMissions.get(currentPlayer.getUsername()).add(missions.get(1));
             }
         }
     }
@@ -200,13 +204,14 @@ public class NPC {
     public Boolean checkIfIsNearNPC(Tile userCurrentTile) {
         int userX = userCurrentTile.getX();
         int userY = userCurrentTile.getY();
-        int NPCX = currentTile.getX();
-        int NPCY = currentTile.getY();
-        if ( (userX == NPCX || userX + 1 == NPCX || userX - 1 == NPCX) &&
-                (userY == NPCY || userY + 1 == NPCY || userY - 1 == NPCY) ) {
-            return true;
+        int[] xDirections = {1,1,0,-1,-1,-1,0,1};
+        int[] yDirections = {0,-1,-1,-1,0,1,1,1};
+        for (int i = 0; i < 8; i++) {
+            if (this.equals(App.getInstance().getCurrentGame().getMap().getTile(userX + xDirections[i], userY + yDirections[i]).getContainedNPC())) {
+                return true;
+            }
         }
-        else return false;
+        return false;
     }
 
 

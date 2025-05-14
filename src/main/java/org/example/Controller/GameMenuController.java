@@ -2729,8 +2729,8 @@ public class GameMenuController implements MenuController {
         User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
         for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
             result.append(npc.getNpcName() + " : Level ");
-            result.append(npc.getFriendshipLevels().get(currentPlayer));
-            result.append(", " + npc.getFriendshipPoints().get(currentPlayer) + " points\n");
+            result.append(npc.getFriendshipLevels().get(currentPlayer.getUsername()));
+            result.append(", " + npc.getFriendshipPoints().get(currentPlayer.getUsername()) + " points\n");
         }
         return new Result(true, result.toString());
     }

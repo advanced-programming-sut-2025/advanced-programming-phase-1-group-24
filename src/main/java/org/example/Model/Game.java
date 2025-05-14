@@ -226,7 +226,7 @@ public class Game {
         sebastianMissions.add(sebastianMission1);
         sebastianMissions.add(sebastianMission2);
         sebastianMissions.add(sebastianMission3);
-        NPC sebastian = new NPC(NPCtype.Sebastian, nextTile, players, sebastianMissions,30);
+        NPC sebastian = new NPC(NPCtype.Sebastian, players, sebastianMissions,30);
         npcs.add(sebastian);
         nextTile.setContainedNPC(sebastian);
 
@@ -250,7 +250,7 @@ public class Game {
         abigailMissions.add(abigailMission1);
         abigailMissions.add(abigailMission2);
         abigailMissions.add(abigailMission3);
-        NPC abigail = new NPC(NPCtype.Abigail, nextTile, players,abigailMissions,60);
+        NPC abigail = new NPC(NPCtype.Abigail, players,abigailMissions,60);
         npcs.add(abigail);
         nextTile.setContainedNPC(abigail);
 
@@ -274,7 +274,7 @@ public class Game {
         harveyMissions.add(harveyMission1);
         harveyMissions.add(harveyMission2);
         harveyMissions.add(harveyMission3);
-        NPC harvey = new NPC(NPCtype.Harvey, nextTile, players, harveyMissions,40);
+        NPC harvey = new NPC(NPCtype.Harvey, players, harveyMissions,40);
         npcs.add(harvey);
         nextTile.setContainedNPC(harvey);
 
@@ -298,7 +298,7 @@ public class Game {
         leahMissions.add(leahMission1);
         leahMissions.add(leahMission2);
         leahMissions.add(leahMission3);
-        NPC leah = new NPC(NPCtype.Leah, nextTile, players, leahMissions,90);
+        NPC leah = new NPC(NPCtype.Leah, players, leahMissions,90);
         npcs.add(leah);
         nextTile.setContainedNPC(leah);
 
@@ -322,7 +322,7 @@ public class Game {
         robinMissions.add(robinMission1);
         robinMissions.add(robinMission2);
         robinMissions.add(robinMission3);
-        NPC robin = new NPC(NPCtype.Robin, nextTile, players, robinMissions,120);
+        NPC robin = new NPC(NPCtype.Robin, players, robinMissions,120);
         npcs.add(robin);
         nextTile.setContainedNPC(robin);
     }
