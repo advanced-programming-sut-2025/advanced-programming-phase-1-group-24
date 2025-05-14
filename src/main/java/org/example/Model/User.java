@@ -8,6 +8,7 @@ import org.example.Model.Friendships.Message;
 import org.example.Model.Friendships.Gift;
 import org.example.Model.Friendships.Message;
 import org.example.Model.Friendships.Trade;
+import org.example.Model.Growables.Growable;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Reccepies.Craft;
 import org.example.Model.Reccepies.FoodRecipe;
@@ -20,6 +21,9 @@ import org.example.Model.Things.Backpack;
 import org.example.Model.Things.Item;
 import org.example.Model.Tools.Tool;
 import org.example.Model.Tools.ToolType;
+import org.example.Model.Things.*;
+import org.example.Model.Reccepies.*;
+import org.example.Model.Growables.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,6 +69,13 @@ public class User {
     private ArrayList<Trade> tradingHistory = new ArrayList<>();
     private ArrayList<Message> tradeNotifications = new ArrayList<>();
 
+    private boolean buffMaxEnergy;
+    private boolean buffForagingSkill;
+    private boolean buffFarmingSkill;
+    private boolean buffFishingSkill;
+    private boolean buffMiningSkill;
+    private int hoursLeftForBuff;
+
 
     /// /////////////?????????????/
     public User(String username, String password, String nickname, String email, boolean gender) {
@@ -97,6 +108,12 @@ public class User {
         this.daysSinceRejection = 0;
         this.tradingHistory = new ArrayList<>();
         this.tradeNotifications = new ArrayList<>();
+        this.buffFarmingSkill = false;
+        this.buffForagingSkill = false;
+        this.buffFishingSkill = false;
+        this.buffMiningSkill = false;
+        this.buffMaxEnergy = false;
+        this.hoursLeftForBuff = 0;
     }
 
     public int getCurrentTurnEnergy() {
@@ -262,6 +279,12 @@ public class User {
         this.recievedGift = new ArrayList<>();
         this.partner = null;
         this.fainted = false;
+        this.buffFarmingSkill = false;
+        this.buffForagingSkill = false;
+        this.buffFishingSkill = false;
+        this.buffMiningSkill = false;
+        this.buffMaxEnergy = false;
+        this.hoursLeftForBuff = 0;
     }
 
 
@@ -520,6 +543,164 @@ public class User {
 
     public User(String username, String password) {
         this(username, password, "defaultNick", "default@email.com", true);
+    }
+
+    public void handleSpecialFoodsEffects() {  //add this to the method that handles each hour
+        if (this.hoursLeftForBuff > 0) hoursLeftForBuff--;
+        if (hoursLeftForBuff == 0) {
+            if (buffMaxEnergy) {
+                maxEnergy = 200;
+                if (energy > 200) energy = 200;
+                buffMaxEnergy = false;
+            }
+
+            if (buffForagingSkill) {
+                buffForagingSkill = false;
+            }
+
+            if (buffFarmingSkill){
+                buffFarmingSkill = false;
+            }
+
+            if (buffMiningSkill) {
+                buffMiningSkill = false;
+            }
+
+            if (buffFishingSkill) {
+                buffFishingSkill = false;
+            }
+        }
+    }
+
+    public void cancelAllBuffs() {
+        if (buffMaxEnergy) {
+            buffMaxEnergy = false;
+            hoursLeftForBuff = 0;
+            this.maxEnergy = 200;
+            if (this.energy > 200) energy = 200;
+        }
+        else if (buffForagingSkill) {
+            buffForagingSkill = false;
+            hoursLeftForBuff = 0;
+        }
+        else if (buffFarmingSkill) {
+            buffFarmingSkill = false;
+            hoursLeftForBuff = 0;
+        }
+        else if (buffMiningSkill) {
+            buffMiningSkill = false;
+            hoursLeftForBuff = 0;
+        }
+        else if (buffFishingSkill) {
+            buffFishingSkill = false;
+            hoursLeftForBuff = 0;
+        }
+    }
+
+    public Result eat(Item item) {
+        if (!item.isEatable())
+            return new Result(false, "You cant eat this item!");
+        else if (item instanceof Food) {
+            addEnergy(((Food) item).getEnergy());
+            if (item.getName().equals(FoodType.TripleShotEspresso.getName())) {
+                cancelAllBuffs();
+                this.maxEnergy = 300;
+                this.energy += 100;
+                this.hoursLeftForBuff = 5;
+                this.buffMaxEnergy = true;
+            }
+            else if (item.getName().equals(FoodType.RedPlate.getName())) {
+                cancelAllBuffs();
+                this.maxEnergy = 250;
+                this.energy += 50;
+                this.hoursLeftForBuff = 3;
+                this.buffMaxEnergy = true;
+            }
+            else if (item.getName().equals(FoodType.HashBrown.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 5;
+                this.buffFarmingSkill = true;
+            }
+            else if (item.getName().equals("Pancakes")) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 11;
+                this.buffForagingSkill = true;
+            }
+            else if (item.getName().equals(FoodType.SurvivalBurger.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 5;
+                this.buffForagingSkill = true;
+            }
+            else if (item.getName().equals(FoodType.FarmersLaunch.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 5;
+                this.buffFarmingSkill = true;
+            }
+            else if (item.getName().equals(FoodType.DishOtheSea.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 5;
+                this.buffFishingSkill = true;
+
+            }
+            else if (item.getName().equals(FoodType.SeaformPudding.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 10;
+                this.buffFishingSkill = true;
+            }
+            else if (item.getName().equals(FoodType.MinersTreat.getName())) {
+                cancelAllBuffs();
+                this.hoursLeftForBuff = 5;
+                this.buffMiningSkill = true;
+            }
+        }
+        else if (item instanceof randomStuff) {
+            if (((randomStuff) item).getType().getEatable()) {
+                addEnergy(((randomStuff) item).getType().getEnergy());
+            }
+            else return new Result(false, "You cant eat this item!");
+        }
+        else if (item instanceof Growable) {
+            if (((Growable) item).getGrowableType().equals(GrowableType.Fruit)) {
+                if (((Growable) item).getTreeType().getFruitType().getIsFruitEdible()) {
+                    addEnergy(((Growable) item).getTreeType().getFruitType().getFruitEnergy());
+                }
+                else return new Result(false, "You cant eat this item!");
+            }
+            else if (((Growable) item).getGrowableType().equals(GrowableType.CropProduct)){
+                if (((Growable) item).getCropType().getIsEdible()) {
+                    addEnergy(((Growable) item).getCropType().getEnergy());
+                }
+                else return new Result(false, "You cant eat this item!");
+            }
+            else if (((Growable) item).getGrowableType().equals(GrowableType.ForagingCrop)){
+                addEnergy(((Growable) item).getForagingCropType().getEnergy());
+            }
+        }
+        this.getBackpack().grabItem(item.getName(),1);
+        return new Result(false, "Item eaten successfully!");
+    }
+    public boolean isBuffMaxEnergy() {
+        return buffMaxEnergy;
+    }
+
+    public boolean isBuffForagingSkill() {
+        return buffForagingSkill;
+    }
+
+    public boolean isBuffFarmingSkill() {
+        return buffFarmingSkill;
+    }
+
+    public boolean isBuffFishingSkill() {
+        return buffFishingSkill;
+    }
+
+    public boolean isBuffMiningSkill() {
+        return buffMiningSkill;
+    }
+
+    public int getHoursLeftForBuff() {
+        return hoursLeftForBuff;
     }
 }
 

@@ -116,6 +116,9 @@ public class App {
     public void setCurrentGame(Game currentGame) {
         this.currentGame = currentGame;
     }
+    public void setSecurityQuestions(List<String> securityQuestions) {
+        this.securityQuestions = securityQuestions;
+    }
 
     public void setCurrentMenu(Menu currentMenu) {
         this.currentMenu = currentMenu;

@@ -19,6 +19,7 @@ public class Hoe extends Tool{
 
         int energy = this.material.getEnergyRequiered();
         energy = (int)(energy * energyWeatherModifier);
+        if (currentPlayer.isBuffFarmingSkill()) energy--;
         if (!currentPlayer.tryConsumeEnergy(energy)) {
             return new Result(false, "You don't have enough energy");
         }

@@ -21,9 +21,9 @@ public enum FoodType {
     Bread("Bread", FoodRecipe.Bread, 60),
     SalmonDinner("Salmon Dinner", FoodRecipe.SalmonDinner, 300),
     VegetableMedley("Vegetable Medley", FoodRecipe.VegetableMedley, 120),
-    // FarmersLaunch("Farmers Launch", FoodRecipe.FarmersLaunch, 150),
-    //    SurvivalBurger(FoodRecipe.SurvivalBurger,180),
-//    DishOtheSea(FoodRecipe.DishOtheSea,220),
+    FarmersLaunch("Farmers Launch",FoodRecipe.FarmersLaunch,150),
+    SurvivalBurger("Survival Burger",FoodRecipe.SurvivalBurger,180),
+    DishOtheSea("Dish O the Sea",FoodRecipe.DishOtheSea,220),
     SeaformPudding("Sea form Pudding",FoodRecipe.SeaformPudding,300),
     MinersTreat("Miners Treat", FoodRecipe.MinersTreat, 200);
 

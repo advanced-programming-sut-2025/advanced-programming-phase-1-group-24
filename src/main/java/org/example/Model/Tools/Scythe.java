@@ -28,6 +28,7 @@ public class Scythe extends Tool{
 
         int energy = 2;
         energy = (int)(energy * energyWeatherModifier);
+        if (currentPlayer.isBuffFarmingSkill()) energy--;
         if (!currentPlayer.tryConsumeEnergy(energy)) {
             return new Result(false, "You don't have enough energy");
         }

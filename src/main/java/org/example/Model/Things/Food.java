@@ -34,6 +34,12 @@ public class Food extends Item {
         return Objects.hash(super.hashCode(), type, energy);
     }
 
+    public FoodType getType() {
+        return type;
+    }
 
+    public int getEnergy() {
+        return energy;
+    }
 }
 

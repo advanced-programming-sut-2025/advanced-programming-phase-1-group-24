@@ -149,6 +149,7 @@ public class FishingPole extends Tool {
 
         int energyRequired = pole.getPoleMaterial().getEnergyRequired();
         energyRequired = (int) (energyRequired * energyWeatherModifier);
+        if (currentPlayer.isBuffFishingSkill()) energyRequired--;
         int fishingLevel = currentPlayer.getSkillsLevel().get(Skill.FISHING);
         if (fishingLevel == 4) energyRequired -= 1;
         if (!currentPlayer.tryConsumeEnergy(energyRequired))

@@ -23,6 +23,7 @@ public class PickAxe extends Tool{
 
         int energyRequired = this.material.getEnergyRequiered();
         energyRequired = (int) (energyRequired * energyWeatherModifier);
+        if (currentPlayer.isBuffMiningSkill()) energyRequired--;
         int miningLevel = currentPlayer.getSkillsLevel().get(Skill.MINING);
         if (miningLevel == 4) energyRequired -= 1;
         if (!currentPlayer.tryConsumeEnergy(energyRequired)) {

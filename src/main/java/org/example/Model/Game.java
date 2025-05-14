@@ -6,12 +6,16 @@ import org.example.Model.Friendships.Gift;
 import org.example.Model.Friendships.Message;
 import org.example.Model.MapManagement.MapOfGame;
 import org.example.Model.NPCManagement.NPC;
+import org.example.Model.NPCManagement.NPCMission;
+import org.example.Model.NPCManagement.NPCtype;
+import org.example.Model.Reccepies.FoodRecipe;
 import org.example.Model.TimeManagement.DayOfWeek;
 import org.example.Model.TimeManagement.Season;
 import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
 
 import java.util.*;
+import org.example.Model.MapManagement.*;
 
 public class Game {
     private MapOfGame map;
@@ -48,6 +52,7 @@ public class Game {
         }
 
         predictTomorrowWeather();
+        generateNPCs();
     }
 
     private ArrayList<NPC> npcs;
@@ -197,4 +202,159 @@ public class Game {
     public ArrayList<Friendship> getAllFriendships() {
         return allFriendships;
     }
+    public void generateNPCs() {
+        if (this.npcs == null) {
+            this.npcs = new ArrayList<>();
+        }
+        Tile nextTile = this.map.getTile(72, 54);
+        Map<String, Integer> requieredItems = new HashMap<>();
+        Map<String, Integer> prize = new HashMap<>();
+        requieredItems.put("Iron Bar", 50);
+        prize.put("Diamond", 2);
+        NPCMission sebastianMission1 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Pumpkin Pie", 1);
+        prize.put("Gold Coin", 5000);
+        NPCMission sebastianMission2 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Rock", 150);
+        prize.put("Quartz", 50);
+        NPCMission sebastianMission3 = new NPCMission(requieredItems, prize);
+        ArrayList<NPCMission> sebastianMissions = new ArrayList<>();
+        sebastianMissions.add(sebastianMission1);
+        sebastianMissions.add(sebastianMission2);
+        sebastianMissions.add(sebastianMission3);
+        NPC sebastian = new NPC(NPCtype.Sebastian, nextTile, players, sebastianMissions,30);
+        npcs.add(sebastian);
+        nextTile.setContainedNPC(sebastian);
+
+        nextTile = this.map.getTile(72, 64);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Gold Bar", 1);
+        prize.put("Friendship Level", 1);
+        NPCMission abigailMission1 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Pumpkin", 1);
+        prize.put("Gold Coin", 500);
+        NPCMission abigailMission2 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wheat", 50);
+        prize.put("Sprinkler", 1);
+        NPCMission abigailMission3 = new NPCMission(requieredItems, prize);
+        ArrayList<NPCMission> abigailMissions = new ArrayList<>();
+        abigailMissions.add(abigailMission1);
+        abigailMissions.add(abigailMission2);
+        abigailMissions.add(abigailMission3);
+        NPC abigail = new NPC(NPCtype.Abigail, nextTile, players,abigailMissions,60);
+        npcs.add(abigail);
+        nextTile.setContainedNPC(abigail);
+
+        nextTile = this.map.getTile(72, 74);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Strawberry", 12);
+        prize.put("Gold Coin", 750);
+        NPCMission harveyMission1 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Salmon", 1);
+        prize.put("Friendship Level", 1);
+        NPCMission harveyMission2 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wine", 1);
+        prize.put("Salad", 5);
+        NPCMission harveyMission3 = new NPCMission(requieredItems, prize);
+        ArrayList<NPCMission> harveyMissions = new ArrayList<>();
+        harveyMissions.add(harveyMission1);
+        harveyMissions.add(harveyMission2);
+        harveyMissions.add(harveyMission3);
+        NPC harvey = new NPC(NPCtype.Harvey, nextTile, players, harveyMissions,40);
+        npcs.add(harvey);
+        nextTile.setContainedNPC(harvey);
+
+        nextTile = this.map.getTile(72, 84);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wood", 10);
+        prize.put("Gold Coin", 500);
+        NPCMission leahMission1 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Salmon", 1);
+        prize.put("Salmon Dinner Recipe", 1);
+        NPCMission leahMission2 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wood", 200);
+        prize.put("Deluxe Scarecrow", 3);
+        NPCMission leahMission3 = new NPCMission(requieredItems, prize);
+        ArrayList<NPCMission> leahMissions = new ArrayList<>();
+        leahMissions.add(leahMission1);
+        leahMissions.add(leahMission2);
+        leahMissions.add(leahMission3);
+        NPC leah = new NPC(NPCtype.Leah, nextTile, players, leahMissions,90);
+        npcs.add(leah);
+        nextTile.setContainedNPC(leah);
+
+        nextTile = this.map.getTile(72, 94);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wood", 80);
+        prize.put("Gold Coin", 1000);
+        NPCMission robinMission1 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Iron Bar", 10);
+        prize.put("Bee House", 3);
+        NPCMission robinMission2 = new NPCMission(requieredItems, prize);
+        requieredItems.clear();
+        prize.clear();
+        requieredItems.put("Wood", 1000);
+        prize.put("Gold Coin", 25000);
+        NPCMission robinMission3 = new NPCMission(requieredItems, prize);
+        ArrayList<NPCMission> robinMissions = new ArrayList<>();
+        robinMissions.add(robinMission1);
+        robinMissions.add(robinMission2);
+        robinMissions.add(robinMission3);
+        NPC robin = new NPC(NPCtype.Robin, nextTile, players, robinMissions,120);
+        npcs.add(robin);
+        nextTile.setContainedNPC(robin);
+    }
+
+    public NPC getNPC(String name) {
+        for (NPC npc : npcs) {
+            if (npc.getName().equals(name)) {
+                return npc;
+            }
+        }
+        return null;
+    }
+
+    public void handleFoodRecipe(User currentPlayer) {  //add this somewhere
+        if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 2 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.VegetableMedley))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.VegetableMedley);
+        if (currentPlayer.getSkillsLevel().get(Skill.FARMING) == 1 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.FarmersLaunch))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.FarmersLaunch);
+        if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 3 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SurvivalBurger))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.SurvivalBurger);
+        if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 2 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.DishOtheSea))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.DishOtheSea);
+        if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 3 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SeaformPudding))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.SeaformPudding);
+        if (currentPlayer.getSkillsLevel().get(Skill.MINING) == 1 &&
+                !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
+            currentPlayer.getCookingRecepies().add(FoodRecipe.MinersTreat);
+    }
+
 }

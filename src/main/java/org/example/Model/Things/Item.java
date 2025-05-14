@@ -128,7 +128,7 @@ public class Item {
                     if (treeType.getFruitType() == fruitType) {
                         Growable newFruit = GrowableFactory.getInstance().create(treeType.getSource());
                         newFruit.setName(fruitType.getName());
-                        break;
+                        return newFruit;
                     }
                 }
             }

@@ -28,11 +28,9 @@ import org.example.Model.MapManagement.TileType;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Menus.Menu;
 import org.example.Model.Places.*;
-import org.example.Model.Reccepies.randomStuff;
-import org.example.Model.Reccepies.randomStuffType;
+import org.example.Model.Reccepies.*;
 import org.example.Model.Result;
 import org.example.Model.Things.*;
-import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Reccepies.randomStuff;
 import org.example.Model.Reccepies.randomStuffType;
 import org.example.Model.Result;
@@ -42,6 +40,7 @@ import org.example.Model.TimeManagement.TimeAndDate;
 import org.example.Model.TimeManagement.WeatherType;
 import org.example.Model.Tools.*;
 import org.example.Model.User;
+import org.example.Model.NPCManagement.*;
 
 import java.awt.*;
 import java.io.InputStream;
@@ -720,6 +719,10 @@ public class GameMenuController implements MenuController {
             //To Do: crows attack
             // To Do: update animal products
 
+            NPC.endOfDay(game);
+            for (User user : game.getPlayers()) {
+                game.handleFoodRecipe(user);
+            }
         }
     }
 
@@ -2371,7 +2374,12 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatAddMoney(String countString) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Game game = App.getInstance().getCurrentGame();
+        if(game==null){
+            return new Result(false,"a new game hasnt started yet");
+        }
+        User player = game.getCurrentPlayer();
+
         int count = Integer.parseInt(countString);
         if (count <= 0) {
             return new Result(true, "Invalid count!");
@@ -2681,8 +2689,259 @@ public class GameMenuController implements MenuController {
         if (item == null) {
             return new Result(false, "No item found.");
         }
-        App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
-        return new Result(true, "item added succeccfully.");
+        return App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+    }
+
+    public Result meetNPC(String npcName) {
+        NPC npc = App.getInstance().getCurrentGame().getNPC(npcName);
+        if (npc == null) {return new Result(false, "No npc found.");}
+        Tile currentTile =  App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        if (!npc.checkIfIsNearNPC(currentTile)) {
+            return new Result(false, "You are not near this npc.");
+        }
+        WeatherType currentWeatherType = App.getInstance().getCurrentGame().getCurrentWeatherType();
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return npc.talkToNPC(currentWeatherType, currentPlayer);
+    }
+
+    public Result giftNPC(String npcName, String itemName) {
+        NPC npc = App.getInstance().getCurrentGame().getNPC(npcName);
+        if (npc == null) {
+            return new Result(false, "No npc found.");
+        }
+        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        if (!npc.checkIfIsNearNPC(currentTile)) {
+            return new Result(false, "You are not near this npc.");
+        }
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        if (currentPlayer.getBackpack().hasItem(itemName, 1)) {
+            Result result = npc.giveGift(itemName, currentPlayer);
+            if (result.isSuccessful()) {
+                currentPlayer.getBackpack().grabItem(itemName, 1);
+            }
+            return result;
+        }
+        else return new Result(false, "you dont have that item.");
+    }
+
+    public Result npcFriendshipList() {
+        StringBuilder result = new StringBuilder();
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+            result.append(npc.getNpcName() + " : Level ");
+            result.append(npc.getFriendshipLevels().get(currentPlayer));
+            result.append(", " + npc.getFriendshipPoints().get(currentPlayer) + " points\n");
+        }
+        return new Result(true, result.toString());
+    }
+
+    public Result npcQuestList() {
+        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        NPC wantedNPC = null;
+        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+            if (npc.checkIfIsNearNPC(currentTile)) {
+                wantedNPC = npc;
+                break;
+            }
+        }
+        if (wantedNPC == null) {return new Result(false, "You are not standing next to an npc.");}
+        StringBuilder result = new StringBuilder();
+        result.append(wantedNPC.getNpcName() + " Unlocked Missions for you :\n");
+        int index = 1;
+        for (NPCMission mission : wantedNPC.getUnlockedMissions().get(currentPlayer)) {
+            result.append("\n" + index + " :\n");
+            result.append("Required items:\n");
+            for (String item : mission.getRequiredItems().keySet()) {
+                result.append(item + " : " + mission.getRequiredItems().get(item) + "\n");
+            }
+            result.append("Prizes:\n");
+            for (String item : mission.getPrizeItems().keySet()) {
+                result.append(item + " : " + mission.getPrizeItems().get(item) + "\n");
+            }
+            if (mission.getAlreadyDone()) result.append("Already done!");
+            else result.append("Not done yet!");
+            index++;
+        }
+        return new Result(true, result.toString());
+    }
+
+    public Result doMission(int missionIndex) {
+        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        NPC wantedNPC = null;
+        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+            if (npc.checkIfIsNearNPC(currentTile)) {
+                wantedNPC = npc;
+                break;
+            }
+        }
+        if (wantedNPC == null) {return new Result(false, "You are not standing next to an npc.");}
+        return wantedNPC.doMission(missionIndex, currentPlayer);
+    }
+
+    public Result putFoodInFridge(String itemName) {
+        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        if (!currentTile.getType().equals(TileType.HOUSE)) {
+            return new Result(false, "You are not in your house.");
+        }
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        House house = App.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
+        for (Item item : currentPlayer.getBackpack().getInventoryItems().keySet()) {
+            if (item.getName().equals(itemName)) {
+                if (!(item instanceof Food)) { return new Result(false, "Thats not a food!"); }
+                house.getFridge().put((Food)item, house.getFridge().getOrDefault((Food)item, 0)
+                        + currentPlayer.getBackpack().getInventoryItems().get(item));
+                currentPlayer.getBackpack().getInventoryItems().remove(item);
+                return new Result(true,"item added to fridge successfully.");
+            }
+        }
+        return new Result(false, "Item not found.");
+    }
+
+    public Result pickFoodFromFridge(String itemName) {
+        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        if (!currentTile.getType().equals(TileType.HOUSE)) {
+            return new Result(false, "You are not in your house.");
+        }
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        House house = App.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
+        for (Item item : house.getFridge().keySet()) {
+            if (item.getName().equals(itemName)) {
+                Result result = currentPlayer.getBackpack().addItem(item, house.getFridge().get(item));
+                if (result.isSuccessful()) house.getFridge().remove(item);
+                return result;
+            }
+        }
+        return new Result(false, "Item not found.");
+    }
+
+    public Result showCookingRecipes() {
+        StringBuilder result = new StringBuilder();
+        for (FoodRecipe recipe : App.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
+            result.append(recipe.toString() + "\n");
+            for (String name : recipe.getRecipe().keySet()) {
+                result.append("    " + name + ": " + recipe.getRecipe().get(name) + "\n");
+            }
+        }
+        return new Result(true, result.toString());
+    }
+
+    public Result cook(String recipeName) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        String recipe = recipeName.replace(" ", "");
+        for (FoodRecipe unlockedRecipe : App.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
+            if (unlockedRecipe.toString().equals(recipe)) {
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    if (!currentPlayer.getBackpack().hasItem(itemName, unlockedRecipe.getRecipe().get(itemName))) {
+                        return new Result(false, "You dont have the ingredients.");
+                    }
+                }
+                Item food = Item.getRandomItem(recipeName);
+                Result result = currentPlayer.getBackpack().addItem(food,1);
+                if (!result.isSuccessful()) return result;
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    currentPlayer.getBackpack().grabItem(itemName, unlockedRecipe.getRecipe().get(itemName));
+                }
+                currentPlayer.reduceEnergy(3);
+                return new Result(true, "food added successfully.");
+            }
+        }
+        return new Result(false, "No recipe found.");
+    }
+
+    public Result eat(String foodName) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        for (Item item : currentPlayer.getBackpack().getInventoryItems().keySet()) {
+            if (item.getName().equals(foodName)) {
+                return currentPlayer.eat(item);
+            }
+        }
+        return new Result(false, "Item not found.");
+    }
+
+    public Result artisanGet(MapOfGame map, String artisanName) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile currentTile = currentPlayer.getCurrentTile();
+        int currentX = currentTile.getX();
+        int currentY = currentTile.getY();
+        int[] xDirections = {1,1,0,-1,-1,-1,0,1};
+        int[] yDirections = {0,-1,-1,-1,0,1,1,1};
+        for (int i = 0; i < 8; i++) {
+            if (map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem() instanceof Machine) {
+                Machine machine = ((Machine) map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem());
+                if (machine.getName().equals(artisanName)) {
+                    if (!machine.getReady() && machine.getActivated()) {
+                        return new Result(false, "The product isnt ready yet.");
+                    } else if (machine.getReady()) {
+                        return machine.grabPreparedProduct(currentPlayer);
+                    } else if (!machine.getActivated()) {
+                        return new Result(false, "No product available");
+                    }
+                }
+            }
+        }
+        return new Result(false,"No machine found.");
+    }
+
+    public Result artisanUse(String artisanName, String itemName1, String itemName2, MapOfGame map) {
+        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile currentTile = currentPlayer.getCurrentTile();
+        int currentX = currentTile.getX();
+        int currentY = currentTile.getY();
+        int[] xDirections = {1,1,0,-1,-1,-1,0,1};
+        int[] yDirections = {0,-1,-1,-1,0,1,1,1};
+        for (int i = 0; i < 8; i++) {
+            if (map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem() instanceof Machine) {
+                Machine machine = ((Machine) map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem());
+                if (machine.getName().equals(artisanName)) {
+                    for (randomStuffType productsName : machine.getType().getProducts()) {
+                        boolean hasItem1 = false;
+                        boolean hasItem2 = false;
+                        if (machine.getType().equals(MachineType.BEE_HOUSE) &&
+                                (itemName1 != null || itemName2 != null))
+                            return new Result(false, "You cant put ingredients in this machine.");
+                        if (itemName2 == null && !machine.getType().equals(MachineType.FURNACE)
+                                && !machine.getType().equals(MachineType.FISH_SMOKER)) hasItem2 = true;
+                        for (String ingredientName : productsName.getIngredients().keySet()) {
+                            if (itemName1 != null) {
+                                if (ingredientName.equals(itemName1)) hasItem1 = true;
+                            }
+                            if (itemName2 != null) {
+                                if (ingredientName.equals(itemName2)) hasItem2 = true;
+                            }
+                        }
+                        if (machine.getName().equalsIgnoreCase(MachineType.BEE_HOUSE.getName())) hasItem1 = true;
+                        if (hasItem1 && hasItem2) {
+                            if (machine.getActivated()) return new Result(false, "This machine is already in use.");
+                            return machine.useMachine(productsName.getName(), currentPlayer);
+                        }
+                        if (hasItem1 && !hasItem2) return new Result(false, "You need more ingredients.");
+                    }
+                    if (itemName1 == null) return new Result(false, "No item selected!");
+                    return new Result(false, "You cant put this item in this machine.");
+                }
+            }
+        }
+        return new Result(false,"No machine found.");
+    }
+
+    public Result showMoney() {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return new Result(true, "Your current money is " + player.getMoney());
+    }
+
+    public Result showSkill(String skillString) {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Skill skill = Skill.fromString(skillString);
+
+        if (skill == null) {
+            return new Result(false, "invalid skill");
+        }
+
+        int currentLevel = player.getSkillsLevel().getOrDefault(skill, 0);
+        return new Result(true, "Your " + skill.name() + " skill is " + currentLevel);
+
     }
 
 

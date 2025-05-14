@@ -15,7 +15,7 @@ public enum randomStuffType {
         //the prices are random
 
         Honey("Honey",350,75,96,null,true),
-        Cheese("Cheese",230,100,3,Map.of("Milk",1),true),
+        Cheese("Cheese",230,100,3,Map.of("Cow Milk",1),true),
         Goat_Cheese("Goat Cheese",400,100,3,Map.of("Goat Milk",1),true),
         Beer("Beer",200,50,24,Map.of("Wheat",1),true),
         Vinegar("Vinegar",100,13,10,Map.of("Rice",1),true),
@@ -79,6 +79,18 @@ public enum randomStuffType {
 
         public int getEnergy() {
                 return energy;
+        }
+
+        public Boolean getEatable() {
+                return isEatable;
+        }
+
+        public int getProcessingTime() {
+                return processingTime;
+        }
+
+        public Map<String, Integer> getIngredients() {
+                return ingredients;
         }
 
         public static randomStuffType fromName(String name) {

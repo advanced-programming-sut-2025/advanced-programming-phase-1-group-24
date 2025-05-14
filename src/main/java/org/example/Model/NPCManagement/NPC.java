@@ -2,6 +2,7 @@ package org.example.Model.NPCManagement;
 
 import org.example.Model.Game;
 import org.example.Model.MapManagement.Tile;
+import org.example.Model.Reccepies.FoodRecipe;
 import org.example.Model.Result;
 import org.example.Model.Things.Item;
 import org.example.Model.TimeManagement.Season;
@@ -39,7 +40,7 @@ public class NPC {
             talkedToNPCToday.put(user, false);
             gaveGiftToNPCToday.put(user, false);
             unlockedMissions.put(user, new ArrayList<>());
-            //unlockedMissions.get(user).add(missions.getFirst());
+            unlockedMissions.get(user).add(missions.get(0));
         }
         this.daysLeftToUnlockThirdMission = daysLeftToUnlockThirdMission;
     }
@@ -84,6 +85,10 @@ public class NPC {
         return daysLeftToUnlockThirdMission;
     }
 
+    public void setDaysLeftToUnlockThirdMission(int daysLeftToUnlockThirdMission) {
+        this.daysLeftToUnlockThirdMission = daysLeftToUnlockThirdMission;
+    }
+
     public Result talkToNPC (WeatherType currentWeather, User currentPlayer){
         for (Dialog dialog : npcName.getDialogs()) {
             if (currentWeather.equals(dialog.getWeatherType())
@@ -116,21 +121,27 @@ public class NPC {
             currentPlayer.getBackpack().grabItem(itemName, mission.getRequiredItems().get(itemName));
         }
         int howManyItems = 1;
+        String message = "";
         if (friendshipLevels.get(currentPlayer) >= 2)  howManyItems = 2;
         for (String itemName : mission.getPrizeItems().keySet()) {
             if (itemName.equals("Gold Coin")) {
-                currentPlayer.setMoney(currentPlayer.getMoney() + mission.getPrizeItems().get(itemName) * howManyItems);
+                currentPlayer.addMoney( mission.getPrizeItems().get(itemName) * howManyItems);
+                message = "Your current money is " + currentPlayer.getMoney() + ".";
             }
             else if (itemName.equals("Friendship Level")) {
                 friendshipLevels.put(currentPlayer,friendshipLevels.get(currentPlayer) + 1);
+                message = "Your new Friendship level is " + friendshipLevels.get(currentPlayer) + ".";
+            }
+            else if (itemName.equals("Salmon Dinner Recipe")) {
+                currentPlayer.getCookingRecepies().add(FoodRecipe.SalmonDinner);
             }
             else {
-                //Item item = Item.getRandomItem(itemName);
-                //currentPlayer.getBackpack().addItem(item, mission.getPrizeItems().get(itemName) * howManyItems);
+                Item item = Item.getRandomItem(itemName);
+                currentPlayer.getBackpack().addItem(item, mission.getPrizeItems().get(itemName) * howManyItems);
             }
         }
         mission.setAlreadyDone(true);
-        return new Result(true, "Mission was completed successfully.");
+        return new Result(true, "Mission was completed successfully." + message);
     }
 
     public Result giveGift(String itemName, User currentPlayer){
@@ -141,29 +152,35 @@ public class NPC {
             if (favoriteItem.equals(itemName)) {
                 friendshipPoints.merge(currentPlayer, 200, Integer::sum);
                 this.updateFriendshipLevel(currentPlayer);
+                gaveGiftToNPCToday.put(currentPlayer, true);
                 return new Result(true,"I love your gift!!");
             }
         }
         friendshipPoints.merge(currentPlayer, 50, Integer::sum);
         this.updateFriendshipLevel(currentPlayer);
+        gaveGiftToNPCToday.put(currentPlayer, true);
         return new Result(true,"Thank you!");
     }
 
-    public void endOfDay() {
-        if (daysLeftToUnlockThirdMission > 0) this.daysLeftToUnlockThirdMission--;
-        for (User user : talkedToNPCToday.keySet()) {
-            talkedToNPCToday.put(user, false);
-            gaveGiftToNPCToday.put(user, false);
-            if (friendshipLevels.get(user) == 3) {
-                int random = (int) (Math.random() + 0.5);
-                String itemName = npcName.getRandomGifts().get(random);
-                Item item = Item.getRandomItem(itemName);
-                user.getBackpack().addItem(item,1);
-                //might add a message to show that the user received a gift later
-            }
-            if (daysLeftToUnlockThirdMission == 0) {
-                unlockedMissions.get(user).add(missions.get(2));
-                //might add a message to show that a new message has been unlocked
+    public static void endOfDay(Game currentGame) {
+        for (NPC npc : currentGame.getNpcs()) {
+            if (npc.getDaysLeftToUnlockThirdMission() > 0)
+                npc.setDaysLeftToUnlockThirdMission(npc.getDaysLeftToUnlockThirdMission() - 1);
+            for (User user : npc.getTalkedToNPCToday().keySet()) {
+                npc.getTalkedToNPCToday().put(user, false);
+                npc.getGaveGiftToNPCToday().put(user, false);
+                if (npc.getFriendshipLevels().get(user) == 3) {
+                    int random = (int) (Math.random() + 0.5);
+                    String itemName = npc.getNpcName().getRandomGifts().get(random);
+                    Item item = Item.getRandomItem(itemName);
+                    user.getBackpack().addItem(item, 1);
+                    //might add a message to show that the user received a gift later
+                }
+                if (npc.getDaysLeftToUnlockThirdMission() == 0) {
+                    npc.getUnlockedMissions().get(user).add(npc.getMissions().get(2));
+                    npc.setDaysLeftToUnlockThirdMission(-1);
+                    //might add a message to show that a new message has been unlocked
+                }
             }
         }
     }

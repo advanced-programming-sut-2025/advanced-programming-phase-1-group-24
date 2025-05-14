@@ -1,5 +1,8 @@
 package org.example.Model.TimeManagement;
 
+import org.example.Model.App;
+import org.example.Model.Reccepies.Machine;
+
 public class TimeAndDate {
     private int hour; // 0 - 23
     private int day;  // 1 - 30 (or similar)
@@ -20,6 +23,8 @@ public class TimeAndDate {
             hour = 0;
             advanceDay();
         }
+        App.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
+        Machine.updateMachines();
     }
 
     private void advanceDay() {

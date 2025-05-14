@@ -34,5 +34,7 @@ public class randomStuff extends Item {
         return Objects.hash(super.hashCode(), type);
     }
 
-
+    public randomStuffType getType() {
+        return type;
+    }
 }

@@ -24,6 +24,7 @@ public class Axe extends Tool {
 
         int energy = this.material.getEnergyRequiered();
         energy = (int)(energy * energyWeatherModifier);
+        if (currentPlayer.isBuffForagingSkill()) energy--;
         if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 4)  energy -= 1;
         if (!currentPlayer.tryConsumeEnergy(energy)) {
             return new Result(false, "You don't have enough energy");
@@ -35,11 +36,11 @@ public class Axe extends Tool {
             Growable productOfGrowable = nextTile.getProductOfGrowable();
             if (productOfGrowable != null)
                 currentPlayer.getBackpack().addItem(productOfGrowable, 20); //might change later
-            // randomStuff temp = new randomStuff(randomStuffType.Wood); //might change later
-            //currentPlayer.getBackpack().addItem(temp, 20); //might change later
+            randomStuff temp = new randomStuff(200, randomStuffType.Wood); //might change later
+            currentPlayer.getBackpack().addItem(temp, 20); //might change later
             //if (containedGrowable.getTreeType().getIsForagingTree()) {
-                Growable seeds = GrowableFactory.getInstance().create(containedGrowable.getTreeType().getSource());
-                currentPlayer.getBackpack().addItem(seeds, 10); //might change later
+            Growable seeds = GrowableFactory.getInstance().create(containedGrowable.getTreeType().getSource());
+            currentPlayer.getBackpack().addItem(seeds, 10); //might change later
             //}
             nextTile.setProductOfGrowable(null);
             nextTile.setContainedGrowable(null);

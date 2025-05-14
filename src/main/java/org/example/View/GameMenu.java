@@ -6,6 +6,7 @@ import org.example.Controller.GameMenuController;
 import org.example.Controller.StoreMenuController;
 import org.example.Controller.HouseMenuController;
 import org.example.Controller.TradeMenuController;
+import org.example.Model.App;
 import org.example.Model.Menus.GameMenuCommands;
 import org.example.Model.Menus.StoreMenuCommands;
 import org.example.Model.Result;
@@ -41,6 +42,10 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.showCurrentMenu());
         } else if ((matcher = GameMenuCommands.EXIT.getMatcher(input)) != null) {
             controller.menuExit();
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMatcher(input)) != null) {
+            System.out.println(controller.showMoney());
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
@@ -60,12 +65,7 @@ public class GameMenu implements AppMenu {
             String countStr = matcher.group("count");
             int count = (countStr != null) ? Integer.parseInt(countStr) : 1;
             System.out.println(storeController.purchase(product, count));
-        } else if ((matcher = StoreMenuCommands.SHIPPING_BIN.getMatcher(input)) != null) {
-            String productString = matcher.group("product").trim();
-            String countString = matcher.group("count");
-            int count = (countString != null) ? Integer.parseInt(countString) : -1;
-            System.out.println(storeController.placeInShippingBin(productString, count));
-        } else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
+        }  else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
             System.out.println(storeController.upgradeTool(matcher.group("tool").trim()));
         } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
             System.out.println(controller.cheatAddMoney(matcher.group("count")));
@@ -85,6 +85,11 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.sendFlower(matcher.group("username")));
         } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMatcher(input)) != null) {
             System.out.println(controller.sellAnimal(matcher.group("name")));
+        }else if ((matcher = StoreMenuCommands.SHIPPING_BIN.getMatcher(input)) != null) {
+            String productString = matcher.group("product").trim();
+            String countString = matcher.group("count");
+            int count = (countString != null) ? Integer.parseInt(countString) : -1;
+            System.out.println(storeController.placeInShippingBin(productString, count));
         } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMatcher(input)) != null) {
             System.out.println(controller.showAnimalProducts());
         } else if ((matcher = GameMenuCommands.COLLECT_PRODUCTS.getMatcher(input)) != null) {
@@ -211,6 +216,45 @@ public class GameMenu implements AppMenu {
         }
         else if((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
             System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")),matcher.group("username")));
+        }
+        else if ((matcher = GameMenuCommands.MEET_NPC.getMatcher(input)) != null) {
+            String npcName = matcher.group("npcName");
+            System.out.println(controller.meetNPC(npcName));
+        } else if ((matcher = GameMenuCommands.GIFT_NPC.getMatcher(input)) != null) {
+            String npcName = matcher.group("npcName");
+            String itemName = matcher.group("item");
+            System.out.println(controller.giftNPC(npcName, itemName));
+        } else if ((matcher = GameMenuCommands.NPC_FRIENDSHIP_LIST.getMatcher(input)) != null) {
+            System.out.println(controller.npcFriendshipList());
+        } else if ((matcher = GameMenuCommands.NPC_QUEST_LIST.getMatcher(input)) != null) {
+            System.out.println(controller.npcQuestList());
+        } else if ((matcher = GameMenuCommands.DO_MISSION.getMatcher(input)) != null) {
+            int missionIndex = Integer.parseInt(matcher.group("index"));
+            System.out.println(controller.doMission(missionIndex));
+        } else if ((matcher = GameMenuCommands.PICK_FOOD_FROM_FRIDGE.getMatcher(input)) != null) {
+            String itemName = matcher.group("item").trim();
+            System.out.println(controller.pickFoodFromFridge(itemName));
+        } else if ((matcher = GameMenuCommands.PUT_FOOD_IN_FRIDGE.getMatcher(input)) != null) {
+            String itemName = matcher.group("item").trim();
+            System.out.println(controller.putFoodInFridge(itemName));
+        } else if ((matcher = GameMenuCommands.SHOW_COOKING_RECIPES.getMatcher(input)) != null) {
+            System.out.println(controller.showCookingRecipes());
+        } else if ((matcher = GameMenuCommands.COOK.getMatcher(input)) != null) {
+            String recipeName = matcher.group("recipe").trim();
+            System.out.println(controller.cook(recipeName));
+        } else if ((matcher = GameMenuCommands.EAT.getMatcher(input)) != null) {
+            String food = matcher.group("food").trim();
+            System.out.println(controller.eat(food));
+        } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMatcher(input)) != null) {
+            String artisanName = matcher.group("artisanName").trim();
+            String itemName1 = matcher.group("itemName1");
+            if (itemName1 != null) itemName1 = itemName1.trim();
+            String itemName2 = matcher.group("itemName2");
+            if (itemName2 != null) itemName2 = itemName2.trim();
+            System.out.println(controller.artisanUse(artisanName, itemName1, itemName2, App.getInstance().getCurrentGame().getMap()));
+        } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMatcher(input)) != null) {
+            String artisanName = matcher.group("artisanName").trim();
+            System.out.println(controller.artisanGet(App.getInstance().getCurrentGame().getMap(), artisanName));
         }
         else {
             System.out.println("invalid command");

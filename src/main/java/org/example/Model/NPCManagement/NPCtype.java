@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum NPCtype {
-    Sebastian("Sebastian", Arrays.asList("Wool", "Pumpkin Pie", "Pizza"), Arrays.asList("Coffee", "Squid")),
+    Sebastian("Sebastian", Arrays.asList("Wool", "PumpkinPie", "Pizza"), Arrays.asList("Coffee", "Squid")),
     Abigail("Abigail",Arrays.asList("Rock", "Iron", "Coffee"),Arrays.asList("Spaghetti","Tilapia")),
     Harvey("Harvey",Arrays.asList("Coffee", "Pickle", "Wine"),Arrays.asList("Mystic Syrup","Lion Fish")),
     Leah("Leah",Arrays.asList("Salad", "Grapes", "Wine"), Arrays.asList("Pomegranate", "Apricot")),
