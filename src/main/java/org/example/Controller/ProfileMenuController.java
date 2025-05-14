@@ -8,9 +8,6 @@ import org.example.Model.User;
 import org.example.Model.UserDatabase;
 
 public class ProfileMenuController implements MenuController {
-
-    ProfileMenuCommands command;
-
     public Result changeUsername(String username) {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -31,8 +28,6 @@ public class ProfileMenuController implements MenuController {
         UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "username changed successfully!");
     }
-
-
     public Result changeEmail(String email) {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -50,8 +45,6 @@ public class ProfileMenuController implements MenuController {
         UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "email changed successfully!");
     }
-
-
     public Result changePassword(String newPassword, String oldPassword) {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -73,8 +66,6 @@ public class ProfileMenuController implements MenuController {
         UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "password changed successfully!");
     }
-
-
     public Result changeNickname(String nickname) {
         App app = App.getInstance();
         User user = app.getLoggedInUser();
@@ -104,19 +95,4 @@ public class ProfileMenuController implements MenuController {
 
         return new Result(true, info);
     }
-//    public Result changeUsername(String newUsername) {
-//    }
-//
-//    public Result changeNickname(String newNickname) {
-//    }
-//
-//    public Result changeEmail(String newEmail) {
-//    }
-//
-//    public Result changePassword(String newPassword, String oldPassword) {
-//    }
-//
-//    public Result showUserInfo() {
-//    }
 }
-

@@ -45,6 +45,12 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMatcher(input)) != null) {
+            System.out.println(controller.showMoney());
+        } else if ((matcher = GameMenuCommands.SHOW_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.showSkill(matcher.group("skill")));
         } else if (!canUseCommand.isSuccessful()) {  /////////////////////////////////////////////////////////////////////////
             System.out.println(canUseCommand);
         } else if ((matcher = StoreMenuCommands.BUILD_HABITAT.getMatcher(input)) != null) {
@@ -60,12 +66,7 @@ public class GameMenu implements AppMenu {
             String countStr = matcher.group("count");
             int count = (countStr != null) ? Integer.parseInt(countStr) : 1;
             System.out.println(storeController.purchase(product, count));
-        } else if ((matcher = StoreMenuCommands.SHIPPING_BIN.getMatcher(input)) != null) {
-            String productString = matcher.group("product").trim();
-            String countString = matcher.group("count");
-            int count = (countString != null) ? Integer.parseInt(countString) : -1;
-            System.out.println(storeController.placeInShippingBin(productString, count));
-        } else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
+        }  else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
             System.out.println(storeController.upgradeTool(matcher.group("tool").trim()));
         } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
             System.out.println(controller.cheatAddMoney(matcher.group("count")));
@@ -85,7 +86,12 @@ public class GameMenu implements AppMenu {
             System.out.println(controller.sendFlower(matcher.group("username")));
         } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMatcher(input)) != null) {
             System.out.println(controller.sellAnimal(matcher.group("name")));
-        } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMatcher(input)) != null) {
+        } else if ((matcher = StoreMenuCommands.SHIPPING_BIN.getMatcher(input)) != null) {
+            String productString = matcher.group("product").trim();
+            String countString = matcher.group("count");
+            int count = (countString != null) ? Integer.parseInt(countString) : -1;
+            System.out.println(storeController.placeInShippingBin(productString, count));
+        }else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMatcher(input)) != null) {
             System.out.println(controller.showAnimalProducts());
         } else if ((matcher = GameMenuCommands.COLLECT_PRODUCTS.getMatcher(input)) != null) {
             System.out.println(controller.collectProduct(matcher.group("name")));
@@ -174,12 +180,11 @@ public class GameMenu implements AppMenu {
         } else if ((matcher = GameMenuCommands.FISH.getMatcher(input)) != null) {
             String fishingPole = matcher.group("fishingPole");
             System.out.println(controller.fish(fishingPole));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+        }else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
             String itemName = matcher.group("itemName");
             int count = Integer.parseInt(matcher.group("count"));
-            //System.out.println(controller.cheatAddItem(itemName, count));
-            //COMPLETE THIS AFTER WRITING LIST OF ALL ITEMS
-        } else if ((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAddItem(itemName, count));
+        }else if ((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
             System.out.println(controller.plantGrowable(matcher.group("seedName"), matcher.group("direction")).message());
         } else if ((matcher = GameMenuCommands.SHOWPLANT.getMatcher(input)) != null) {
             System.out.println(controller.showPlant(matcher.group("x"), matcher.group("y")).message());

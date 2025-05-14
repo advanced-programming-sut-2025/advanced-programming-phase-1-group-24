@@ -139,4 +139,12 @@ public class App {
         }
         return null;
     }
+
+    public void setSecurityQuestions(List<String> securityQuestions) {
+        this.securityQuestions = securityQuestions;
+    }
+
+    public static void setInstance(App instance) {
+        App.instance = instance;
+    }
 }

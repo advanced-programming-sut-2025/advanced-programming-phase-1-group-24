@@ -1,6 +1,9 @@
 package org.example.Model.Menus;
 
 public enum GameMenuCommands implements Commands {
+    CHEAT_SET_SKILL("^set\\s+skill\\s+(?<skill>\\S+)\\s+(?<number>\\d+)$"),
+    SHOW_MONEY("^money$"),
+    SHOW_SKILL("^skill\\s+(?<skill>\\S+)$"),
     //////////
     FRIEND_SHIP("^friendships$"),
     SEND_GIFT("^gift\\s+-u\\s+(?<username>\\S+)\\s+-i\\s+(?<item>.+)\\s+-a\\s+(?<amount>\\d+)$"),

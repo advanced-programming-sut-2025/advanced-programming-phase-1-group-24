@@ -1,492 +1,39 @@
 [
   {
-    "username": "user1",
-    "password": "6ef82208664ba763fec9578bafd4181da56b3c41c35d3dde2511f69bfe7e8b7a",
-    "nickname": "kiki",
-    "email": "user@gmail.com",
+    "username": "john",
+    "password": "22c6436059f16bfc19b39d005740fecdbf768520774e517916ab41c5b48f8faa",
+    "nickname": "John",
+    "email": "john@example.com",
     "gender": true,
     "playedGames": 0,
     "maxMoneyInGames": 0,
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user2",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user3",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Amoo chand salete?",
-    "securityAnswer": "beToChe",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user3",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Amoo chand salete?",
-    "securityAnswer": "beToChe",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user4",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "useerrr5",
-    "password": "36639bf97b703a629441397dd9d10dd708eb7fe0a6b9a6d237db4f88c0784839",
-    "nickname": "hey",
-    "email": "user5@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "nooooo",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "useerrr5",
-    "password": "36639bf97b703a629441397dd9d10dd708eb7fe0a6b9a6d237db4f88c0784839",
-    "nickname": "hey",
-    "email": "user5@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "nooooo",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user16",
-    "password": "d2a0a2189e34af55aca3f23a9e5c16714704ffb6c04eb865d311cf4cb61eaf4f",
-    "nickname": "hey",
-    "email": "user16@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user16",
-    "password": "d2a0a2189e34af55aca3f23a9e5c16714704ffb6c04eb865d311cf4cb61eaf4f",
-    "nickname": "hey",
-    "email": "user16@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user15",
-    "password": "6279b1c933f81d57252f3c4763fdfb2262a0e678cdc2f526f81b8023fd85f227",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user15",
-    "password": "6279b1c933f81d57252f3c4763fdfb2262a0e678cdc2f526f81b8023fd85f227",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user9",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user9",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user19",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user19",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user10",
-    "password": "8bf7b31da5d309f34ba391ebda103a4d16fb906731bf97e3187e6f997d575ec4",
-    "nickname": "hey10",
-    "email": "user2@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user10",
-    "password": "8bf7b31da5d309f34ba391ebda103a4d16fb906731bf97e3187e6f997d575ec4",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": true,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user119",
-    "password": "4249b3184a6a47238d38c98f9db0624fc771a45c2a141ea7cf6bcf4d3c3aa3f8",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "maxEnergy": 0,
-    "maxEnergyTurn": 0,
-    "energy": 200,
-    "currentTurnEnergy": 0,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user78",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 1,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
+    "securityQuestion": "color?",
+    "securityAnswer": "blue",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
     "energy": 200,
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user78",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user79",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 1,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user79",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user77",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 1,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user77",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user76",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 1,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user76",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false
-  },
-  {
-    "username": "user81",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 5,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
@@ -519,56 +66,51 @@
         }
       ],
       "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
         "material": "Initial"
       }
-    }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
-    "username": "user81",
+    "username": "user181",
     "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
     "nickname": "hey",
     "email": "user2@gmail.com",
     "gender": false,
-    "playedGames": 1,
+    "playedGames": 0,
     "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
     "energy": 200,
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user82",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 6,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
@@ -601,56 +143,51 @@
         }
       ],
       "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
         "material": "Initial"
       }
-    }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
-    "username": "user82",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "username": "dirnt1",
+    "password": "aed4347a912fdfd5ec12266f12a458f2eb0cbef01ef448c159929ab730aac921",
     "nickname": "hey",
-    "email": "user2@gmail.com",
+    "email": ".us3er@gmail.com",
     "gender": false,
-    "playedGames": 2,
+    "playedGames": 0,
     "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
     "energy": 200,
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [],
-      "trashcan": {
-        "material": "Initial"
-      }
-    }
-  },
-  {
-    "username": "user83",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 4,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
@@ -683,12 +220,20 @@
         }
       ],
       "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
         "material": "Initial"
       }
-    }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
-    "username": "user83",
+    "username": "user181",
     "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
     "nickname": "hey",
     "email": "user2@gmail.com",
@@ -704,36 +249,24 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FARMING": 0,
       "FORAGING": 0,
+      "FARMING": 0,
       "FISHING": 0,
       "MINING": 0
     },
     "skillExperience": {
-      "FARMING": 0,
       "FORAGING": 0,
+      "FARMING": 0,
       "FISHING": 0,
       "MINING": 0
-    }
-  },
-  {
-    "username": "user84",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 5,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
@@ -766,12 +299,1707 @@
         }
       ],
       "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
         "material": "Initial"
       }
-    }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
-    "username": "user84",
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0,
+      "MINING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user189",
+    "password": "23a1c8c7a5d8bc97914455cb842869c701fe52f8c1b903eb76ffaeb12241c483",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user189",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "dirn7t1",
+    "password": "78a795e73edc7bb381c2e67b951eb4254de5fab2369241add1776d5b8ec1abe4",
+    "nickname": "hey",
+    "email": ".us3er@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "dirn4t1",
+    "password": "5ab42cf95f7168dbfab97a7a264a315fb579acd6d7ebec5ebb528c21daae5375",
+    "nickname": "hey",
+    "email": ".us3er@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user189",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user181",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user201",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user201",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user202",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user202",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user203",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user203",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user204",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user204",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user205",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 12000,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 12000,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user205",
+      "x": 22,
+      "y": 25
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user205",
+      "x": 28,
+      "y": 7
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user205",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 12000,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 12000,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user205",
+      "x": 22,
+      "y": 25
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user205",
+      "x": 28,
+      "y": 7
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user206",
     "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
     "nickname": "hey",
     "email": "user2@gmail.com",
@@ -786,17 +2014,591 @@
     "currentTurnEnergy": 50,
     "money": 0,
     "fainted": false,
-    "skillsLevel": {},
-    "skillExperience": {},
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user206",
+      "x": 122,
+      "y": 21
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
       "inventoryItems": {},
-      "tools": [],
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
       "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
         "material": "Initial"
       }
-    }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user206",
+      "x": 127,
+      "y": 8
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user206",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user206",
+      "x": 122,
+      "y": 21
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user206",
+      "x": 127,
+      "y": 8
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user207",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user207",
+      "x": 12,
+      "y": 135
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user207",
+      "x": 28,
+      "y": 131
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user207",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user207",
+      "x": 12,
+      "y": 135
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user207",
+      "x": 28,
+      "y": 131
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user208",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": false,
+      "isPlowed": false,
+      "productOfGrowable": {
+        "growableType": "ForagingCrop",
+        "age": 0,
+        "currentStage": 0,
+        "isWateredToday": false,
+        "hasBeenFertalized": false,
+        "hasBeenAttackedByCrow": false,
+        "daysLeftToDie": 2,
+        "foragingCropType": "SpringOnion",
+        "name": "Spring Onion",
+        "isSellable": true,
+        "price": 8,
+        "isPlaceable": false,
+        "isEatable": false,
+        "productQuality": "Normal"
+      },
+      "tileOwner": "user208",
+      "x": 122,
+      "y": 130
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user208",
+      "x": 127,
+      "y": 128
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
+  },
+  {
+    "username": "user208",
+    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 1,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": false,
+      "isPlowed": false,
+      "productOfGrowable": {
+        "growableType": "ForagingCrop",
+        "age": 0,
+        "currentStage": 0,
+        "isWateredToday": false,
+        "hasBeenFertalized": false,
+        "hasBeenAttackedByCrow": false,
+        "daysLeftToDie": 2,
+        "foragingCropType": "SpringOnion",
+        "name": "Spring Onion",
+        "isSellable": true,
+        "price": 8,
+        "isPlaceable": false,
+        "isEatable": false,
+        "productQuality": "Normal"
+      },
+      "tileOwner": "user208",
+      "x": 122,
+      "y": 130
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "user208",
+      "x": 127,
+      "y": 128
+    },
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user86",
@@ -816,16 +2618,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user86",
@@ -845,16 +2699,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user87",
@@ -874,16 +2780,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user87",
@@ -903,16 +2861,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user88",
@@ -932,16 +2942,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user88",
@@ -961,16 +3023,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user89",
@@ -990,16 +3104,68 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   },
   {
     "username": "user89",
@@ -1019,15 +3185,67 @@
     "fainted": false,
     "skillsLevel": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
+      "FISHING": 0
     },
     "skillExperience": {
       "FORAGING": 0,
+      "FARMING": 0,
       "MINING": 0,
-      "FISHING": 0,
-      "FARMING": 0
-    }
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": []
   }
 ]

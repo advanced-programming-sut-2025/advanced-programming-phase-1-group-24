@@ -12,6 +12,14 @@ public enum Skill {
         this.xpPerAction = xpPerAction;
     }
 
+    public static Skill fromString(String skillString) {
+        for (Skill skill : Skill.values()) {
+            if (skillString.equalsIgnoreCase(skill.name())) {
+                return skill;
+            }
+        }
+        return null;
+    }
     public int getXpPerAction() {
         return xpPerAction;
     }

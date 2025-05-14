@@ -129,12 +129,12 @@ public class StoreMenuController {
             default:
                 return new Result(false, "Unknown carpenter item: " + item.getName());
         }
-        /// ///////////////////////////////////////////for testing process
-        randomStuff wood = new randomStuff(12, randomStuffType.Wood);
-        randomStuff stone = new randomStuff(12, randomStuffType.Stone);
-        player.getBackpack().addItem(wood, requiredWood + 1);
-        player.getBackpack().addItem(stone, requiredStone + 1);
-        /// /////////////////////////////
+//        /// ///////////////////////////////////////////for testing process
+//        randomStuff wood = new randomStuff(12, randomStuffType.Wood);
+//        randomStuff stone = new randomStuff(12, randomStuffType.Stone);
+//        player.getBackpack().addItem(wood, requiredWood + 1);
+//        player.getBackpack().addItem(stone, requiredStone + 1);
+//        /// /////////////////////////////
         int playerWood = player.getBackpack().getItemCount("Wood");
         int playerStone = player.getBackpack().getItemCount("Stone");
         int playerCoins = player.getMoney();
@@ -251,14 +251,7 @@ public class StoreMenuController {
             } else {
                 result = new Result(false, "no empty space for shipping bin!");
             }
-        }
-//        else if (item instanceof TrashCan) {
-//            TrashCan trashCanCopy = ((TrashCan) item).copy();
-//            player.getBackpack().getTrashcan().upgrade(trashCanCopy.getMaterial());
-//            result = new Result(true,"Trashcan updated");
-//
-//        }
-        else if (item instanceof Fish) {
+        } else if (item instanceof Fish) {
             Fish fishCopy = ((Fish) item).copy();
             result = player.getBackpack().addItem(fishCopy, count);
         } else if (item instanceof randomStuff) {

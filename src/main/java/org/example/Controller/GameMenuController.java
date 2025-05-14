@@ -869,6 +869,7 @@ public class GameMenuController implements MenuController {
             game.getTimeAndDate().advanceHour(); // You need to implement this method
             if (game.getTimeAndDate().getHour() == 22) {
                 handleEndOfDay();
+                i = Math.min(i + 11, hours);
             }
         }
 
@@ -1676,52 +1677,52 @@ public class GameMenuController implements MenuController {
 //        growable = (Growable) playerBackPack.grabItemAndReturn(seedName, 1);
 //        Result result = playerBackPack.grabItem(growable.getName(), 1);
         //if (result.isSuccessful()) {
-            //System.out.println(result.message());
-            int x = currentPlayer.getCurrentTile().getX();
-            int y = currentPlayer.getCurrentTile().getY();
-            if (direction.equals("up")) y--;
-            else if (direction.equals("down")) y++;
-            else if (direction.equals("left")) x--;
-            else if (direction.equals("right")) x++;
-            if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
-                return new Result(false, "direction is invalid.");
+        //System.out.println(result.message());
+        int x = currentPlayer.getCurrentTile().getX();
+        int y = currentPlayer.getCurrentTile().getY();
+        if (direction.equals("up")) y--;
+        else if (direction.equals("down")) y++;
+        else if (direction.equals("left")) x--;
+        else if (direction.equals("right")) x++;
+        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+            return new Result(false, "direction is invalid.");
+        }
+        if (hasGiantNeighbor(map, y, x)) {
+            return new Result(false, "You cannot plant next to a giant crop!");
+        }
+        if (map[y][x].getType() != TileType.FARM && map[y][x].getType() != TileType.GREENHOUSE) {
+            return new Result(false, "You cannot plant in this tile!");
+        }
+        if (map[y][x].getContainedItem() != null || map[y][x].getContainedGrowable() != null || map[y][x].getProductOfGrowable() != null) {
+            return new Result(false, "This tile is full!");
+        }
+        if (growable.getGrowableType() == GrowableType.MixedSeeds) {
+            growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(App.getInstance()
+                    .getCurrentGame().getTimeAndDate().getSeason()));
+        } else if (map[y][x].getType() != TileType.GREENHOUSE) {
+            Season currentSeason = App.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+            if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
+                    (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
+                return new Result(false, "You cannot plant this seed out of season!");
             }
-            if (hasGiantNeighbor(map, y, x)) {
-                return new Result(false, "You cannot plant next to a giant crop!");
-            }
-            if (map[y][x].getType() != TileType.FARM && map[y][x].getType() != TileType.GREENHOUSE) {
-                return new Result(false, "You cannot plant in this tile!");
-            }
-            if (map[y][x].getContainedItem() != null || map[y][x].getContainedGrowable() != null || map[y][x].getProductOfGrowable() != null) {
-                return new Result(false, "This tile is full!");
-            }
-            if (growable.getGrowableType() == GrowableType.MixedSeeds) {
-                growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(App.getInstance()
-                        .getCurrentGame().getTimeAndDate().getSeason()));
-            } else if (map[y][x].getType() != TileType.GREENHOUSE) {
-                Season currentSeason = App.getInstance().getCurrentGame().getTimeAndDate().getSeason();
-                if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
-                        (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
-                    return new Result(false, "You cannot plant this seed out of season!");
-                }
-            }
-            if (!map[y][x].getIsPlowed()) {
-                return new Result(false, "The tile isn't plowed!");
-            }
+        }
+        if (!map[y][x].getIsPlowed()) {
+            return new Result(false, "The tile isn't plowed!");
+        }
 //            if(growable.getCropType() != null){
 //                tryFormGiant(y, x, growable.getCropType());
 //            }
-            map[y][x].setWalkable(false);
-            if (growable.getCropType() != null) growable.setName(findCropBySourceName(growable.getName()).getName());
-            if (growable.getTreeType() != null) growable.setName(findTreeBySourceName(growable.getName()).getName());
-            map[y][x].setContainedGrowable(growable);
-            //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
-            map[y][x].getContainedGrowable().setCurrentStage(1);
-            map[y][x].setIsPlowed(false);
-            if (growable.getCropType() != null) {
-                tryFormGiant(y, x, growable.getCropType());
-            }
-            return new Result(true, "Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
+        map[y][x].setWalkable(false);
+        if (growable.getCropType() != null) growable.setName(findCropBySourceName(growable.getName()).getName());
+        if (growable.getTreeType() != null) growable.setName(findTreeBySourceName(growable.getName()).getName());
+        map[y][x].setContainedGrowable(growable);
+        //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
+        map[y][x].getContainedGrowable().setCurrentStage(1);
+        map[y][x].setIsPlowed(false);
+        if (growable.getCropType() != null) {
+            tryFormGiant(y, x, growable.getCropType());
+        }
+        return new Result(true, "Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
         //}
 //        else {
 //            return result;
@@ -1902,7 +1903,7 @@ public class GameMenuController implements MenuController {
         Game currentGame = App.getInstance().getCurrentGame();
         Season currentSeason = currentGame.getTimeAndDate().getSeason();
         if (tile.getContainedGrowable() != null) {
-            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
+            if (tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
                 return;
             }
             if (tile.getContainedGrowable().getDaysLeftToDie() <= 0) {
@@ -2304,7 +2305,12 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatAddMoney(String countString) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Game game = App.getInstance().getCurrentGame();
+        if(game==null){
+            return new Result(false,"a new game hasnt started yet");
+        }
+        User player = game.getCurrentPlayer();
+
         int count = Integer.parseInt(countString);
         if (count <= 0) {
             return new Result(true, "Invalid count!");
@@ -2518,7 +2524,7 @@ public class GameMenuController implements MenuController {
         User sender = game.getCurrentPlayer();
         String senderUsername = sender.getUsername();
         User receiver = game.getPlayerByUsername(receiverUsername);
-        sender.getBackpack().addItem(new randomStuff(20, randomStuffType.Bouquet), 1);
+        // sender.getBackpack().addItem(new randomStuff(20, randomStuffType.Bouquet), 1);
         if (receiver == null) {
             return new Result(false, "Receiver not found.");
         }
@@ -2567,9 +2573,9 @@ public class GameMenuController implements MenuController {
         return new Result(true, "Flower sent successfully.");
     }
 
-    public Result cheatWalk(int x, int y){
+    public Result cheatWalk(int x, int y) {
         Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
-        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
             return new Result(false, "You are out of bounds.");
         }
         User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
@@ -2577,5 +2583,47 @@ public class GameMenuController implements MenuController {
         return new Result(true, "You are now in tile " + x + ", " + y + ".");
     }
 
+    public Result cheatSetSkill(String skillString, String number) {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        int amount = Integer.parseInt(number);
+        Skill skill = Skill.fromString(skillString);
+        if (amount > 4 || amount < 0) {
+            return new Result(false, "invalid number");
+        }
+        if (skill == null) {
+            return new Result(false, "invalid skill");
+        }
+
+        player.getSkillsLevel().put(skill, amount);
+        int currentLevel = player.getSkillsLevel().getOrDefault(skill, 0);
+        return new Result(true, "Your " + skill.name() + " skill is " + currentLevel);
+    }
+
+
+    public Result showMoney() {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        return new Result(true, "Your current money is " + player.getMoney());
+    }
+
+    public Result showSkill(String skillString) {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Skill skill = Skill.fromString(skillString);
+
+        if (skill == null) {
+            return new Result(false, "invalid skill");
+        }
+
+        int currentLevel = player.getSkillsLevel().getOrDefault(skill, 0);
+        return new Result(true, "Your " + skill.name() + " skill is " + currentLevel);
+
+    }
+    public Result cheatAddItem(String itemName, int count) {
+        Item item = Item.getRandomItem(itemName);
+        if (item == null) {
+            return new Result(false, "No item found.");
+        }
+        App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+        return new Result(true, "item added succeccfully.");
+    }
 }
 

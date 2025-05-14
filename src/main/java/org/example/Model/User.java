@@ -98,6 +98,11 @@ public class User {
         this.tradingHistory = new ArrayList<>();
         this.tradeNotifications = new ArrayList<>();
     }
+    // Add to your User class
+    public User(String username, String password) {
+        this(username, password, "defaultNick", "default@email.com", true);
+    }
+
 
     public int getCurrentTurnEnergy() {
         return currentTurnEnergy;
