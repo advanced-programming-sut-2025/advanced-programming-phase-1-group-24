@@ -19,11 +19,14 @@ public class TradeMenuController implements MenuController {
         }
         User player = App.getInstance().getCurrentGame().getCurrentPlayer();
         Backpack playerBackpack = player.getBackpack();
-        if(!playerBackpack.hasItem(item, amount)) {
-            return new Result(false, "You don't have enough items.");
-        }
         if(!type.equalsIgnoreCase("offer")) {
             return new Result(false, "This is not the right trade type.");
+        }
+        if(amount == 0) {
+            return new Result(false, "Wrong amount format!");
+        }
+        if(!playerBackpack.hasItem(item, amount)) {
+            return new Result(false, "You don't have enough items.");
         }
         Trade trade = new Trade(player, user, type, amount, item, null, 0, price, false);
         user.getTradingHistory().add(trade);
@@ -47,11 +50,14 @@ public class TradeMenuController implements MenuController {
         }
         User player = App.getInstance().getCurrentGame().getCurrentPlayer();
         Backpack playerBackpack = player.getBackpack();
-        if(!playerBackpack.hasItem(item, amount)) {
-            return new Result(false, "You don't have enough items.");
-        }
         if(!type.equalsIgnoreCase("request")) {
             return new Result(false, "This is not the right trade type.");
+        }
+        if(amount == 0) {
+            return new Result(false, "Wrong amount format!");
+        }
+        if(!playerBackpack.hasItem(item, amount)) {
+            return new Result(false, "You don't have enough items.");
         }
         Trade trade = new Trade(player, user, type, amount, item, targetItem, targetAmount, 0, false);
         user.getTradingHistory().add(trade);

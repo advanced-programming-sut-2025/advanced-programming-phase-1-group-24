@@ -39,7 +39,7 @@ public class Scythe extends Tool{
             currentPlayer.getBackpack().addItem(coal, 1);
             nextTile.setContainedGrowable(null);
             nextTile.setContainedItem(null);
-            currentPlayer.addSkillExperience(Skill.FARMING);
+            //currentPlayer.addSkillExperience(Skill.FARMING);
             return new Result(true, "Harvested " + coal.getName());
         }
         if (productOfGrowable == null)

@@ -63,15 +63,15 @@ public class WateringCan extends Tool{
             else {
                 growable.setIsWateredToday(true);
                 Tile[][] tiles = map.getMap();
-                if(growable.getGrowableType() == GrowableType.Giant){
-                    for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
-                        for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
-                            if(tiles[j][i].getContainedGrowable() != null && tiles[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant){
-                                tiles[j][i].getContainedGrowable().setIsWateredToday(true);
-                            }
-                        }
-                    }
-                }
+//                if(growable.getGrowableType() == GrowableType.Giant){
+//                    for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
+//                        for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
+//                            if(tiles[j][i].getContainedGrowable() != null && tiles[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant){
+//                                tiles[j][i].getContainedGrowable().setIsWateredToday(true);
+//                            }
+//                        }
+//                    }
+//                }
                 this.waterLeft -= 1;
                 return new Result(true, "Watered successfully!");
             }

@@ -37,10 +37,10 @@ public class Axe extends Tool {
                 currentPlayer.getBackpack().addItem(productOfGrowable, 20); //might change later
             // randomStuff temp = new randomStuff(randomStuffType.Wood); //might change later
             //currentPlayer.getBackpack().addItem(temp, 20); //might change later
-            if (containedGrowable.getTreeType().getIsForagingTree()) {
+            //if (containedGrowable.getTreeType().getIsForagingTree()) {
                 Growable seeds = GrowableFactory.getInstance().create(containedGrowable.getTreeType().getSource());
                 currentPlayer.getBackpack().addItem(seeds, 10); //might change later
-            }
+            //}
             nextTile.setProductOfGrowable(null);
             nextTile.setContainedGrowable(null);
             currentPlayer.addSkillExperience(Skill.FORAGING);

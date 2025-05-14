@@ -177,8 +177,7 @@ public class GameMenu implements AppMenu {
         } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
             String itemName = matcher.group("itemName");
             int count = Integer.parseInt(matcher.group("count"));
-            //System.out.println(controller.cheatAddItem(itemName, count));
-            //COMPLETE THIS AFTER WRITING LIST OF ALL ITEMS
+            System.out.println(controller.cheatAddItem(itemName, count));
         } else if ((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
             System.out.println(controller.plantGrowable(matcher.group("seedName"), matcher.group("direction")).message());
         } else if ((matcher = GameMenuCommands.SHOWPLANT.getMatcher(input)) != null) {
@@ -207,7 +206,13 @@ public class GameMenu implements AppMenu {
             controller.startTrade();
         } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
             System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
-        } else {
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetSkill(matcher.group("skill"),matcher.group("number")));
+        }
+        else if((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")),matcher.group("username")));
+        }
+        else {
             System.out.println("invalid command");
         }
 

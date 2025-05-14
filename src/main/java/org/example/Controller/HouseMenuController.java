@@ -81,9 +81,6 @@ public class HouseMenuController implements MenuController {
     public Result placeItem(String itemName, String direction) {
         User player = App.getInstance().getCurrentGame().getCurrentPlayer();
         House house = App.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
-        if(house == null){
-            return new Result(false, "You need to be in house to use this menu!");
-        }
         Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();
@@ -91,7 +88,7 @@ public class HouseMenuController implements MenuController {
         else if(direction.equals("down")) y++;
         else if(direction.equals("left")) x--;
         else if(direction.equals("right")) x++;
-        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length){
+        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length || !direction.matches("up|down|left|right")) {
             return new Result(false, "direction is invalid.");
         }
 
@@ -109,12 +106,8 @@ public class HouseMenuController implements MenuController {
             return new Result(false, "the item is not placeable or doesn't exist!");
         }
 
-        Result result = player.getBackpack().grabItem(itemName, 1);
-        if(!result.isSuccessful()){
-            return result;
-        }
-
         map[y][x].setContainedItem(item);
+        if(item instanceof Machine) house.getMachines().add((Machine) item);
         return new Result(true, itemName + " placed successfully!");
 
     }

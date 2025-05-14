@@ -139,4 +139,7 @@ public class App {
         }
         return null;
     }
+    public static void setInstance(App instance) {
+        App.instance = instance;
+    }
 }

@@ -26,7 +26,7 @@ public class TimeAndDate {
         day++;
         dayOfWeek = dayOfWeek.next();
 
-        if (day > 28) {
+        if (day > 35) {
             day = 1;
             advanceSeason();
         }

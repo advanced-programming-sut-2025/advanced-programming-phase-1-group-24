@@ -9,12 +9,12 @@ public enum FruitType {
     Peach("Peach", 1, 140, true, 38),
     Apple("Apple", 1, 100, true, 38),
     Pomegranate("Pomegranate", 1, 140, true, 38),
-    OakResin("Oak Resin", 7, 150, false, 0),
-    MapleSyrup("Maple Syrup", 9, 200, false, 0),
+    OakResin("Oak Resin", 5, 150, false, 0),
+    MapleSyrup("Maple Syrup", 5, 200, false, 0),
     PineTar("Pine Tar", 5, 100, false, 0),
     Sap("Sap", 1, 2, true, -2),
     CommonMushroom("Common Mushroom", 1, 40, true, 38),
-    MysticSyrup("Mystic Syrup", 7, 1000, true, 500);
+    MysticSyrup("Mystic Syrup", 5, 1000, true, 500);
 
     private final String name;
     private final int fullHarvestCycle;

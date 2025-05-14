@@ -129,12 +129,12 @@ public class StoreMenuController {
             default:
                 return new Result(false, "Unknown carpenter item: " + item.getName());
         }
-        /// ///////////////////////////////////////////for testing process
-        randomStuff wood = new randomStuff(12, randomStuffType.Wood);
-        randomStuff stone = new randomStuff(12, randomStuffType.Stone);
-        player.getBackpack().addItem(wood, requiredWood + 1);
-        player.getBackpack().addItem(stone, requiredStone + 1);
-        /// /////////////////////////////
+//        /// ///////////////////////////////////////////for testing process
+//        randomStuff wood = new randomStuff(12, randomStuffType.Wood);
+//        randomStuff stone = new randomStuff(12, randomStuffType.Stone);
+//        player.getBackpack().addItem(wood, requiredWood + 1);
+//        player.getBackpack().addItem(stone, requiredStone + 1);
+//        /// /////////////////////////////
         int playerWood = player.getBackpack().getItemCount("Wood");
         int playerStone = player.getBackpack().getItemCount("Stone");
         int playerCoins = player.getMoney();
@@ -275,10 +275,10 @@ public class StoreMenuController {
 ////            Backpack randomStuffCopy = ((Backpack) item).copy();
 ////            player.getBackpack().addItem(randomStuffCopy,1);
 //        }
-//        else if (item instanceof ForagingMineral) {
-//            ForagingMineral foragingMineralCopy = ((ForagingMineral) item).copy();
-//            result =  player.getBackpack().addItem(foragingMineralCopy,1);
-//        }
+        else if (item instanceof ForagingMineral) {
+            ForagingMineral foragingMineralCopy = ((ForagingMineral) item).copy();
+            result =  player.getBackpack().addItem(foragingMineralCopy,count);
+        }
 //        else if (item instanceof TrashCan) {
 //            TrashCan trashCanCopy = ((TrashCan) item).copy();
 //            //player.getBackpack().addItem(trashCanCopy,1);
@@ -621,6 +621,9 @@ public class StoreMenuController {
                     product.getName(),
                     getCurrentSeasonPrice(product),
                     product.getDailyLimit() - product.getSoldToday() > 0 ? "Available" : "Out of stock"));
+                    if(getCurrentSeasonPrice(product) == 0) {
+                        result.append("- (Not Available in this Season)");
+                    }
         }
 
         return new Result(true, result.toString());

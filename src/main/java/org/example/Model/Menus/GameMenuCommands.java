@@ -62,6 +62,20 @@ public enum GameMenuCommands implements Commands {
     RESPOND("^respond\\s+(?<response>(accept|reject))\\s+-u\\s+(?<username>.+)$"),
     START_TRADE("start\\s+trade"),
     CHEAT_WALK("cheat\\s+walk\\s+(?<x>\\d+),\\s+(?<y>\\d+)$"),
+    CHEAT_SET_SKILL("^set\\s+skill\\s+(?<skill>\\S+)\\s+(?<number>\\d+)$"),
+    CHEAT_SET_LEVEL("^set\\s+level\\s+(?<level>\\d+)\\s+-u\\s+(?<username>.+)$"),
+    MEET_NPC("^\\s*meet\\s+NPC\\s+(?<npcName>.+)\\s*$"),
+    GIFT_NPC("^\\s*gift\\s+NPC\\s+(?<npcName>.+)\\s+-i\\s+(?<item>.+)\\s*$"),
+    NPC_FRIENDSHIP_LIST("^\\s*friendship\\s+NPC\\s+list\\s*$"),
+    NPC_QUEST_LIST("^\\s*quests\\s+list\\s*$"),
+    DO_MISSION("^\\s*quests\\s+finish\\s+-i\\s+(?<index>\\d)\\s*$"),
+    PUT_FOOD_IN_FRIDGE("^\\s*cooking\\s+refrigerator\\s+put\\s+(?<item>.+)\\s*$"),
+    PICK_FOOD_FROM_FRIDGE("^\\s*cooking\\s+refrigerator\\s+pick\\s+(?<item>.+)\\s*$"),
+    SHOW_COOKING_RECIPES("^\\s*cooking\\s+show\\s+recipes\\s*$"),
+    COOK("^\\s*cooking\\s+prepare\\s+(?<recipe>.+)\\s*$"),
+    EAT("^\\s*eat\\s+(?<food>.+)\\s*$"),
+    ARTISAN_USE("^\\s*artisan\\s+use\\s+-a\\s+(?<artisanName>[^-\\s][^-]*?)\\s*(?:-i1\\s+(?<itemName1>[^-\\s][^-]*?))?\\s*(?:-i2\\s+(?<itemName2>[^-\\s][^-]*?))?\\s*$"),
+    ARTISAN_GET("^\\s*artisan\\s+get\\s+(?<artisanName>.+)\\s*$"),
     EXIT(Commands.EXIT);
 
 

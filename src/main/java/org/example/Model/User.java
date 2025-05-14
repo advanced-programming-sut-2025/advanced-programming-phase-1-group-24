@@ -517,5 +517,9 @@ public class User {
     public void setTradeNotifications(ArrayList<Message> tradeNotifications) {
         this.tradeNotifications = tradeNotifications;
     }
+
+    public User(String username, String password) {
+        this(username, password, "defaultNick", "default@email.com", true);
+    }
 }
 

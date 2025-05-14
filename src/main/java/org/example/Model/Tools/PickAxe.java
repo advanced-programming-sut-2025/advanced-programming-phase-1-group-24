@@ -63,6 +63,10 @@ public class PickAxe extends Tool{
                 return new Result(true, "You misused PickAxe!");
             }
         }
+        else if(nextTile.getContainedItem() != null){
+            nextTile.setContainedItem(null);
+            return new Result(true, "The item on this tile has been destroyed!");
+        }
         else{
             return new Result(true, "You misused PickAxe!");
         }

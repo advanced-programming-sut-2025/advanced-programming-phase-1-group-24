@@ -3,6 +3,8 @@ package org.example.Model.Things;
 import org.example.Model.Animals.AnimalProduct;
 import org.example.Model.Animals.AnimalProductType;
 import org.example.Model.Growables.*;
+import org.example.Model.Reccepies.Machine;
+import org.example.Model.Reccepies.MachineType;
 import org.example.Model.Reccepies.randomStuff;
 import org.example.Model.Reccepies.randomStuffType;
 
@@ -131,7 +133,11 @@ public class Item {
                 }
             }
         }
-
+        for (MachineType machineType : MachineType.values()) {
+            if (machineType.getName().equalsIgnoreCase(name)) {
+                return new Machine(machineType);
+            }
+        }
         return null;
     }
 

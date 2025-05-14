@@ -670,10 +670,10 @@ public class GameMenuController implements MenuController {
             }
             processShippingBinsAtNight();
 
-            for (User user : game.getPlayers()) {
-                Tile home = user.getHomeTile();
-                walkToInternal(user, home.getX(), home.getY());
-            }
+//            for (User user : game.getPlayers()) {
+//                Tile home = user.getHomeTile();
+//                walkToInternal(user, home.getX(), home.getY());
+//            }
             handleMachinRecipes(game);
 
             // Skip time to 9 AM
@@ -700,7 +700,8 @@ public class GameMenuController implements MenuController {
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(tiles[j][i]);
+                    if(j == 0 && i == 1)
+                        updateGrowable(tiles[j][i]);
                 }
             }
             randomForaging();
@@ -1571,7 +1572,32 @@ public class GameMenuController implements MenuController {
                 return;
             }
         }
-        System.out.println("Crop with name '" + craftName + "' not found.");
+        for (ForagingCropType forage : ForagingCropType.values()) {
+            if (forage.getName().equalsIgnoreCase(craftName)) {
+                System.out.println("Name: " + forage.getName());
+                System.out.println("Seasons: " + forage.getSeason());
+                System.out.println("Base Sell Price: " + forage.getBaseSellPrice());
+                System.out.println("Energy: " + forage.getEnergy());
+                return;
+            }
+        }
+        for (TreeType tree : TreeType.values()) {
+            if (tree.getName().equalsIgnoreCase(craftName)) {
+                System.out.println("Name: " + tree.getName());
+                System.out.println("Source: " + tree.getSource().getName());
+                System.out.println("Total Grow Time: " + tree.getTotalHarvestTime());
+                System.out.println("Fruit Type: " + tree.getFruitType().getName());
+                System.out.println("Is Fruit Edible: " + tree.getFruitType().getIsFruitEdible());
+                System.out.println("Is Foraging Tree : " + tree.getIsForagingTree());
+                System.out.println("Fruit harvest cycle: " + tree.getFruitType().getFullHarvestCycle());
+                System.out.println("Fruit Base sell Price: " + tree.getFruitType().getFruitBaseSellPrice());
+                System.out.println("Fruit Energy: " + tree.getFruitType().getFruitEnergy());
+                System.out.println("Seasons: " + tree.getNormalSeasons());
+                System.out.println("Stages: " + tree.getSatges());
+                return;
+            }
+        }
+        System.out.println("Growable with name '" + craftName + "' not found.");
     }
 
     public void printTreeInfo(String treeName) {
@@ -1748,32 +1774,32 @@ public class GameMenuController implements MenuController {
             System.out.println(result.message());
             map[y][x].getContainedGrowable().setHasBeenFertalized(true);
             Growable growable = map[y][x].getContainedGrowable();
-            if (growable.getGrowableType() == GrowableType.Giant) {
-                for (int j = Math.max(0, map[y][x].getY() - 1); j <= Math.min(149, map[y][x].getY() + 1); j++) {
-                    for (int i = Math.max(0, map[y][x].getX() - 1); i <= Math.min(149, map[y][x].getX() + 1); i++) {
-                        if (map[j][i].getContainedGrowable() != null && map[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
-                            map[j][i].getContainedGrowable().setHasBeenFertalized(true);
-                        }
-                    }
-                }
-            }
+//            if (growable.getGrowableType() == GrowableType.Giant) {
+//                for (int j = Math.max(0, map[y][x].getY() - 1); j <= Math.min(149, map[y][x].getY() + 1); j++) {
+//                    for (int i = Math.max(0, map[y][x].getX() - 1); i <= Math.min(149, map[y][x].getX() + 1); i++) {
+//                        if (map[j][i].getContainedGrowable() != null && map[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+//                            map[j][i].getContainedGrowable().setHasBeenFertalized(true);
+//                        }
+//                    }
+//                }
+//            }
             return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
         } else if (result.isSuccessful() && randomStuffType.fromName(fertalizer) == randomStuffType.SpeedGro) {
             System.out.println(result.message());
-            map[y][x].getContainedGrowable().setHasBeenFertalized(true);
-            if (map[y][x].getContainedGrowable().getGrowableType() != GrowableType.Giant)
-                map[y][x].getContainedGrowable().setAge(map[y][x].getContainedGrowable().getAge() + 1);
+            //map[y][x].getContainedGrowable().setHasBeenFertalized(true);
+            //if (map[y][x].getContainedGrowable().getGrowableType() != GrowableType.Giant)
+            map[y][x].getContainedGrowable().setAge(map[y][x].getContainedGrowable().getAge() + 1);
             Growable growable = map[y][x].getContainedGrowable();
-            if (growable.getGrowableType() == GrowableType.Giant) {
-                for (int j = Math.max(0, map[y][x].getY() - 1); j <= Math.min(149, map[y][x].getY() + 1); j++) {
-                    for (int i = Math.max(0, map[y][x].getX() - 1); i <= Math.min(149, map[y][x].getX() + 1); i++) {
-                        if (map[j][i].getContainedGrowable() != null && map[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
-                            map[j][i].getContainedGrowable().setHasBeenFertalized(true);
-                            map[j][i].getContainedGrowable().setAge(map[j][i].getContainedGrowable().getAge() + 1);
-                        }
-                    }
-                }
-            }
+//            if (growable.getGrowableType() == GrowableType.Giant) {
+//                for (int j = Math.max(0, map[y][x].getY() - 1); j <= Math.min(149, map[y][x].getY() + 1); j++) {
+//                    for (int i = Math.max(0, map[y][x].getX() - 1); i <= Math.min(149, map[y][x].getX() + 1); i++) {
+//                        if (map[j][i].getContainedGrowable() != null && map[j][i].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+//                            map[j][i].getContainedGrowable().setHasBeenFertalized(true);
+//                            map[j][i].getContainedGrowable().setAge(map[j][i].getContainedGrowable().getAge() + 1);
+//                        }
+//                    }
+//                }
+//            }
             return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
         } else {
             return result;
@@ -1831,11 +1857,22 @@ public class GameMenuController implements MenuController {
             if (g.getDaysLeftToDie() > maxDaysLeft) maxDaysLeft = g.getDaysLeftToDie();
         }
 
+//        for (Tile tile : tiles) {
+//            Growable g = tile.getContainedGrowable();
+//            g.setAge(maxAge);
+//            g.setCurrentStage(maxStage);
+//            g.setDaysLeftToDie(maxDaysLeft);
+//        }
+
+        Growable shared = grid[y1][x1].getContainedGrowable();
+        shared.setGrowableType(GrowableType.Giant);
+        shared.setAge(maxAge);
+        shared.setCurrentStage(maxStage);
+        shared.setDaysLeftToDie(maxDaysLeft);
+
+
         for (Tile tile : tiles) {
-            Growable g = tile.getContainedGrowable();
-            g.setAge(maxAge);
-            g.setCurrentStage(maxStage);
-            g.setDaysLeftToDie(maxDaysLeft);
+            tile.setContainedGrowable(shared);
         }
 
         return true;
@@ -1885,12 +1922,35 @@ public class GameMenuController implements MenuController {
         int rand = RANDOM.nextInt(100);
         if (growableTiles.size() >= 16 && RANDOM.nextInt(100) <= 25) {
             Tile target = growableTiles.get(RANDOM.nextInt(growableTiles.size()));
-            if (target.getProductOfGrowable() != null) {
-                target.setProductOfGrowable(null);
-                if (target.getContainedGrowable() != null) {
-                    target.getContainedGrowable().setHasBeenAttackedByCrow(true);
+            int[] dx = {-1, -1, 0, 1, 1, 1, 0, -1};
+            int[] dy = {0, -1, -1, -1, 0, 1, 1, 1};
+
+            boolean hasScarecrowNearby = false;
+
+            for (int i = 0; i < 8; i++) {
+                int nx = target.getX() + dx[i];
+                int ny = target.getY() + dy[i];
+
+                // Check bounds
+                if (ny >= 0 && ny < map.length && nx >= 0 && nx < map[0].length) {
+                    Tile neighbor = map[ny][nx];
+
+                    if (neighbor.getContainedItem() != null &&
+                            (neighbor.getContainedItem().getName().equals("Scarecrow") ||
+                                    neighbor.getContainedItem().getName().equals("Deluxe Scarecrow"))) {
+                        hasScarecrowNearby = true;
+                        break;
+                    }
                 }
-                System.out.println("A crow destroyed a crop at tile (" + target.getX() + ", " + target.getY() + ")!");
+            }
+            if(!hasScarecrowNearby) {
+                if (target.getProductOfGrowable() != null) {
+                    target.setProductOfGrowable(null);
+                    if (target.getContainedGrowable() != null) {
+                        target.getContainedGrowable().setHasBeenAttackedByCrow(true);
+                    }
+                    System.out.println("A crow destroyed a crop at tile (" + target.getX() + ", " + target.getY() + ")!" + "GHAR GHAR");
+                }
             }
         }
     }
@@ -1918,8 +1978,8 @@ public class GameMenuController implements MenuController {
                 tile.getContainedGrowable().setHasBeenAttackedByCrow(false);
                 return;
             }
-            tile.getContainedGrowable().setHasBeenFertalized(false);
-            tile.getContainedGrowable().setIsWateredToday(false);
+            //tile.getContainedGrowable().setHasBeenFertalized(false);
+            if(!tile.getContainedGrowable().hasBeenFertalized()) tile.getContainedGrowable().setIsWateredToday(false);
             Growable growable = tile.getContainedGrowable();
             if (growable != null && growable.getTreeType() != null && growable.getTreeType().getNormalSeasons().contains(currentSeason)) {
                 growable.setAge(growable.getAge() + 1);
@@ -2033,8 +2093,10 @@ public class GameMenuController implements MenuController {
         }
         if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
             return new Result(false, "Players are not adjacent.");
-        if (sender.getPartner() != null && sender.getPartner().equals(receiver.getPartner())) {
+        if (sender.getPartner() != null && receiver.getPartner() != null && sender.getPartner() == receiver) {
             friendship.addXp(50);
+            sender.addEnergy(50);
+            receiver.addEnergy(50);
         } else friendship.addXp(20);
         receiver.addToNotifications(new Message(senderUsername, receiver.getUsername(), senderUsername + "sent you a message :" + message));
         friendship.getTalkHistory().add(new Message(sender.getUsername(), receiver.getUsername(), message));
@@ -2084,8 +2146,10 @@ public class GameMenuController implements MenuController {
         }
         if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
             return new Result(false, "Players are not adjacent.");
-        if (sender.getPartner() != null && sender.getPartner().equals(receiver.getPartner())) {
+        if (sender.getPartner() != null && sender.getPartner().equals(receiver)) {
             friendship.addXp(50);
+            sender.addEnergy(50);
+            receiver.addEnergy(50);
         } else friendship.addXp(60);
         return new Result(true, "You succesfully hugged " + username + "(ah che chendeshi)");
     }
@@ -2098,16 +2162,19 @@ public class GameMenuController implements MenuController {
         Friendship friendship = game.getFriendship(senderUsername, username);
 
         if (sender == null || receiver == null || friendship == null)
-            return new Result(false, "One or both users ot the relation not found.");
-        if (sender.isGender())
-            return new Result(false, "Only the male players can ask marriage.");
+            return new Result(false, "One or both users of the relation not found.");
         if (friendship.getLevel() < 3) {
             return new Result(false, "You have not enough level!");
         }
         if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
             return new Result(false, "Players are not adjacent.");
-        Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
-        if (item == null)
+        if (sender.isGender())
+            return new Result(false, "Only the male players can ask marriage.");
+        if(sender.isGender() == receiver.isGender()){
+            return new Result(false, "The male player can only ask a woman to marry him.");
+        }
+        //Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+        if (!sender.getBackpack().hasItem("Wedding Ring", 1))
             return new Result(false, "You don't have any ring!");
         receiver.addToNotifications(new Message(senderUsername, receiver.getUsername(), senderUsername + "has asked to marry you"));
         return new Result(true, "You're marriage request has been sent successfully to " + receiver.getUsername());
@@ -2382,7 +2449,7 @@ public class GameMenuController implements MenuController {
         if (!result.isSuccessful()) {
             return new Result(false, "Receiver inventory is full!");
         }
-        sender.getBackpack().grabItem(item, amount);
+        //sender.getBackpack().grabItem(item, amount);
 
         // Log the gift in friendship
         Gift gift = new Gift(senderUsername, receiverUsername, itemToGift, amount);
@@ -2467,6 +2534,8 @@ public class GameMenuController implements MenuController {
         int friendshipChange = 15 + 30 * (rating - 3);
         if (currentPlayer.getPartner() != null && currentPlayer.getPartner().getUsername().equals(gift.getSender())) {
             friendship.addXp(50);
+            currentPlayer.addEnergy(50);
+            sender.addEnergy(50);
         } else {
             friendship.addXp(friendshipChange);
         }
@@ -2518,7 +2587,7 @@ public class GameMenuController implements MenuController {
         User sender = game.getCurrentPlayer();
         String senderUsername = sender.getUsername();
         User receiver = game.getPlayerByUsername(receiverUsername);
-        sender.getBackpack().addItem(new randomStuff(20, randomStuffType.Bouquet), 1);
+        //sender.getBackpack().addItem(new randomStuff(20, randomStuffType.Bouquet), 1);
         if (receiver == null) {
             return new Result(false, "Receiver not found.");
         }
@@ -2576,6 +2645,46 @@ public class GameMenuController implements MenuController {
         currentPlayer.setCurrentTile(map[y][x]);
         return new Result(true, "You are now in tile " + x + ", " + y + ".");
     }
+
+    public Result cheatSetSkill(String skillString, String number) {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        int amount = Integer.parseInt(number);
+        Skill skill = Skill.fromString(skillString);
+        if (amount > 4 || amount < 0) {
+            return new Result(false, "invalid number");
+        }
+        if (skill == null) {
+            return new Result(false, "invalid skill");
+        }
+
+        player.getSkillsLevel().put(skill, amount);
+        int currentLevel = player.getSkillsLevel().getOrDefault(skill, 0);
+        return new Result(true, "Your " + skill.name() + " skill is " + currentLevel);
+    }
+
+    public Result cheatSetFriendshipLevel(int level, String username) {
+        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Friendship friendships = App.getInstance().getCurrentGame().getFriendship(player.getUsername(), username);
+        if (friendships == null) {
+            return new Result(false, "Friendship not found.");
+        }
+        if(level < 0 || level > 3){
+            return new Result(false, "Level is out of bounds.");
+        }
+        friendships.setLevel(level);
+        return new Result(true, "You're friendship with " + username + " is now in level " + level + ".");
+    }
+
+
+    public Result cheatAddItem(String itemName, int count) {
+        Item item = Item.getRandomItem(itemName);
+        if (item == null) {
+            return new Result(false, "No item found.");
+        }
+        App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+        return new Result(true, "item added succeccfully.");
+    }
+
 
 }
 
