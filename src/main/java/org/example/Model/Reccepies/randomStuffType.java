@@ -6,15 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum randomStuffType {
-        WheatFlower("Wheat Flower", 125,0,0,null,false),
-        Sugar("Sugar",125,0,0,null,false),
-        Rice("Rice",250,0,0,null,false),
-        Fiber("Fiber",200,0,0,null,false),
-        Wood("Wood",200,0,0,null,false),
-        Soil("Soil",200,0,0,null,false),
+        WheatFlower("Wheat Flower", 125,0,0,Map.of(),false),
+        Sugar("Sugar",125,0,0,Map.of(),false),
+        Rice("Rice",250,0,0,Map.of(),false),
+        Fiber("Fiber",200,0,0,Map.of(),false),
+        Wood("Wood",200,0,0,Map.of(),false),
+        Soil("Soil",200,0,0,Map.of(),false),
         //the prices are random
 
-        Honey("Honey",350,75,96,null,true),
+        Honey("Honey",350,75,96,Map.of(),true),
         Cheese("Cheese",230,100,3,Map.of("Cow Milk",1),true),
         Goat_Cheese("Goat Cheese",400,100,3,Map.of("Goat Milk",1),true),
         Beer("Beer",200,50,24,Map.of("Wheat",1),true),

@@ -18,6 +18,7 @@ public class Tile {
     private int y;
     private Animal containedAnimal;
     private NPC containedNPC;
+    private boolean hasBeenBurt;
 
 
     public TileType getType() {
@@ -41,9 +42,16 @@ public class Tile {
     public boolean getIsPlowed() {
         return isPlowed;
     }
+    public boolean isHasBeenBurt() {
+        return hasBeenBurt;
+    }
 
     public void setIsPlowed(boolean plowed) {
         isPlowed = plowed;
+    }
+
+    public void setHasBeenBurt(boolean hasBeenBurt) {
+        this.hasBeenBurt = hasBeenBurt;
     }
 
     public int getX() {

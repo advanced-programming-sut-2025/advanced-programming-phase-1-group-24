@@ -40,6 +40,10 @@ public class PickAxe extends Tool{
                 Backpack playerBackPack = currentPlayer.getBackpack();
                 playerBackPack.addItem(foragingMineral, 20);
                 nextTile.setContainedItem(null);
+                if(miningLevel >= 2){
+                    playerBackPack.addItem(foragingMineral, 20);
+                }
+                currentPlayer.addSkillExperience(Skill.MINING);
                 return new Result(true, "successfully picked mineral!");
             }
             else if(nextTile.getContainedItem() != null){

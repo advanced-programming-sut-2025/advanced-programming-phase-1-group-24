@@ -80,6 +80,7 @@ public class NPC {
     }
 
     public Map<String, ArrayList<NPCMission>> getUnlockedMissions() {
+
         return unlockedMissions;
     }
 

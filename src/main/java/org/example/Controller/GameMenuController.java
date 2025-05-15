@@ -114,7 +114,7 @@ public class GameMenuController implements MenuController {
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
                 return result;
             } else if (currentTool instanceof MilkPail) {
-                return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap());
+                return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap(), App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof PickAxe) {
                 return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Scythe) {
@@ -122,7 +122,7 @@ public class GameMenuController implements MenuController {
             } else if (currentTool instanceof WateringCan) {
                 return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Shear) {
-                return ((Shear) currentTool).useShear(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap());
+                return ((Shear) currentTool).useShear(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap(), App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             }
             return new Result(true, "You have used a tool");
         }
@@ -644,6 +644,7 @@ public class GameMenuController implements MenuController {
         if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
             for (User player : currentGame.getPlayers()) {
                 player.updateMaxMoney();
+                player.setPlayedGames(player.getPlayedGames()+1);
             }
             app.getActiveGames().remove(currentGame);
             app.setCurrentGame(null);
@@ -671,7 +672,7 @@ public class GameMenuController implements MenuController {
 
 //            for (User user : game.getPlayers()) {
 //                Tile home = user.getHomeTile();
-//                walkToInternal(user, home.getX(), home.getY());
+//                if(!user.hasFainted() || user.getEnergy() > 0) walkToInternal(user, home.getX(), home.getY());
 //            }
             handleMachinRecipes(game);
 
@@ -699,8 +700,8 @@ public class GameMenuController implements MenuController {
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                    if(j == 0 && i == 1)
                         updateGrowable(tiles[j][i]);
+                        tiles[j][i].setHasBeenBurt(false);
                 }
             }
             randomForaging();
@@ -1004,7 +1005,11 @@ public class GameMenuController implements MenuController {
                 } else if (map[i][j].getContainedItem() != null) {
                     System.out.print("\u001B[37;48;5;208mf\u001B[0m");
 
-                } else System.out.print(type.coloredSymbol());
+                }
+                else if(map[i][j].isHasBeenBurt()){
+                    System.out.print("\u001B[37;40mO\u001B[0m");
+                }
+                else System.out.print(type.coloredSymbol());
             }
             System.out.println();
         }
@@ -1418,16 +1423,13 @@ public class GameMenuController implements MenuController {
                 {-1, 0}, {1, 0}, {0, -1}, {0, 1}
         };
 
-        // To store best energy so far for each tile
         int[][] minEnergy = new int[rows][cols];
         for (int[] row : minEnergy) Arrays.fill(row, Integer.MAX_VALUE);
 
-        // To rebuild the path later
         Map<String, String> parent = new HashMap<>();
         Map<String, Integer> cameFromDir = new HashMap<>();
         Map<String, Integer> energyUsed = new HashMap<>();
 
-        // BFS Queue: {x, y, distance, turns, dirIndex}
         Queue<int[]> queue = new LinkedList<>();
 
         Tile currentTile = player.getCurrentTile();
@@ -1485,7 +1487,6 @@ public class GameMenuController implements MenuController {
             return;
         }
 
-        // Rebuild the path
         List<String> path = new ArrayList<>();
         String step = bestEnd;
         while (step != null) {
@@ -1500,7 +1501,7 @@ public class GameMenuController implements MenuController {
             int x = Integer.parseInt(parts[0]);
             int y = Integer.parseInt(parts[1]);
 
-            Tile tile = map[y][x]; // Assuming 'map' is your Tile[][]
+            Tile tile = map[y][x];
             TileType type = tile.getType();
 
             System.out.println(" -> " + pos + "," + type);
@@ -1519,7 +1520,6 @@ public class GameMenuController implements MenuController {
 
         int currentEnergy = player.getEnergy();
         if (bestEnergy < currentEnergy) {
-            // Enough energy, walk fully
             for (String pos : path) {
                 String[] parts = pos.split(",");
                 int x = Integer.parseInt(parts[0]);
@@ -1531,11 +1531,10 @@ public class GameMenuController implements MenuController {
             player.setCurrentTurnEnergy(newTurnEnergy);
             System.out.println("Walked to destination. Energy left: " + player.getEnergy());
         } else {
-            // Not enough energy, walk as far as possible
             String lastReachable = null;
             for (String pos : path) {
                 Integer rawEnergy = energyUsed.get(pos);
-                if (rawEnergy == null) break; // can't go further
+                if (rawEnergy == null) break;
                 int required = rawEnergy / 20;
                 if (required > currentEnergy) break;
                 lastReachable = pos;
@@ -1547,7 +1546,6 @@ public class GameMenuController implements MenuController {
                 int y = Integer.parseInt(parts[1]);
                 player.setCurrentTile(map[y][x]);
 
-                //int usedEnergy = energyUsed.get(lastReachable) / 20;
                 player.setEnergy(0);
                 player.setCurrentTurnEnergy(0);
                 player.setFainted(true);
@@ -2689,6 +2687,7 @@ public class GameMenuController implements MenuController {
         if (item == null) {
             return new Result(false, "No item found.");
         }
+        if(count == 0) return new Result(false, "Invalid count.");
         return App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
     }
 
@@ -2749,7 +2748,7 @@ public class GameMenuController implements MenuController {
         StringBuilder result = new StringBuilder();
         result.append(wantedNPC.getNpcName() + " Unlocked Missions for you :\n");
         int index = 1;
-        for (NPCMission mission : wantedNPC.getUnlockedMissions().get(currentPlayer)) {
+        for (NPCMission mission : wantedNPC.getUnlockedMissions().get(currentPlayer.getUsername())) {
             result.append("\n" + index + " :\n");
             result.append("Required items:\n");
             for (String item : mission.getRequiredItems().keySet()) {
@@ -2903,12 +2902,14 @@ public class GameMenuController implements MenuController {
                             return new Result(false, "You cant put ingredients in this machine.");
                         if (itemName2 == null && !machine.getType().equals(MachineType.FURNACE)
                                 && !machine.getType().equals(MachineType.FISH_SMOKER)) hasItem2 = true;
-                        for (String ingredientName : productsName.getIngredients().keySet()) {
-                            if (itemName1 != null) {
-                                if (ingredientName.equals(itemName1)) hasItem1 = true;
-                            }
-                            if (itemName2 != null) {
-                                if (ingredientName.equals(itemName2)) hasItem2 = true;
+                        if (productsName.getIngredients() != null) {
+                            for (String ingredientName : productsName.getIngredients().keySet()) {
+                                if (itemName1 != null) {
+                                    if (ingredientName.equals(itemName1)) hasItem1 = true;
+                                }
+                                if (itemName2 != null) {
+                                    if (ingredientName.equals(itemName2)) hasItem2 = true;
+                                }
                             }
                         }
                         if (machine.getName().equalsIgnoreCase(MachineType.BEE_HOUSE.getName())) hasItem1 = true;

@@ -3,6 +3,7 @@ package org.example.Controller;
 import org.example.Model.App;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.MapManagement.TileType;
+import org.example.Model.Places.Farm;
 import org.example.Model.Places.House;
 import org.example.Model.Reccepies.Machine;
 import org.example.Model.Reccepies.MachineType;
@@ -80,7 +81,8 @@ public class HouseMenuController implements MenuController {
 
     public Result placeItem(String itemName, String direction) {
         User player = App.getInstance().getCurrentGame().getCurrentPlayer();
-        House house = App.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+        Farm farm = App.getInstance().getCurrentGame().getMap().getFarmByOwner(player);
+        House house = farm.getHouse();
         Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();

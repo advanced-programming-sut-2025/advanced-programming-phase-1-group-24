@@ -72,6 +72,8 @@ public class Machine extends Item {
     public Result useMachine(String productName, User currentPlayer) {
         for (randomStuffType item : this.type.getProducts()) {
             if (item.getName().equals(productName)) {
+                if(item.getIngredients() == null)
+                    return new Result(false, "There are no ingredients for " + productName);
                 for (String name : item.getIngredients().keySet()) {
                     if (!currentPlayer.getBackpack().hasItem(name, item.getIngredients().get(name))) {
                         return new Result(false,"You have not enough ingredients to use this machine");

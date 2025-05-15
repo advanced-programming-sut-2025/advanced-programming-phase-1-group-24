@@ -247,7 +247,7 @@ public class User {
     public void updateGameFields() {
         this.maxEnergy = 200;
         this.maxEnergyTurn = 50;
-        this.playedGames += 1;
+        //this.playedGames += 1;
         this.energy = maxEnergy;
         this.money = 0;
         this.currentTurnEnergy = maxEnergyTurn;

@@ -50,6 +50,8 @@ public class MapOfGame {
                 tile.setContainedGrowable(null);
                 tile.setContainedAnimal(null);
                 tile.setContainedNPC(null);
+                tile.setHasBeenBurt(false);
+                tile.setIsPlowed(false);
                 tile.setX(x);
                 tile.setY(y);
                 map[y][x] = tile;
@@ -164,6 +166,7 @@ public class MapOfGame {
             tile.getContainedGrowable().setGrowableType(GrowableType.Coal);
             tile.setProductOfGrowable(null);
         }
+        tile.setHasBeenBurt(true);
     }
 
     public Farm isInsideAnyFarm(int x, int y) {

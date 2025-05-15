@@ -5,6 +5,7 @@ import org.example.Model.Animals.AnimalType;
 import org.example.Model.MapManagement.MapOfGame;
 import org.example.Model.MapManagement.Tile;
 import org.example.Model.Result;
+import org.example.Model.Skill;
 import org.example.Model.User;
 
 public class MilkPail extends Tool {
@@ -12,8 +13,9 @@ public class MilkPail extends Tool {
         super(type);
     }
 
-    public Result useMilkPail(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map) {
-        if (!currentPlayer.tryConsumeEnergy(4)) {
+    public Result useMilkPail(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map, double weatherModifier) {
+        int energy = (int) (4 * weatherModifier);
+        if (!currentPlayer.tryConsumeEnergy(energy)) {
             return new Result(false,"You dont have enough energy");
         }
         else {
@@ -25,6 +27,7 @@ public class MilkPail extends Tool {
                 if (nextTile.getContainedAnimal().hasProduct()) {
                     AnimalProduct collectedProduct = nextTile.getContainedAnimal().collectProduct();
                     currentPlayer.getBackpack().addItem(collectedProduct, 1);
+                    currentPlayer.addSkillExperience(Skill.FARMING);
                     return new Result(true,"You have collected " + collectedProduct.getName());
                 }
                 else {
