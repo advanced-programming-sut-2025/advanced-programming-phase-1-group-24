@@ -372,6 +372,3 @@ class ProfileMenuControllerTest {
     }
 }
 
-    // Repeat similarly for changeEmail, changePassword, changeNickname, showUserInfo...
-
-
