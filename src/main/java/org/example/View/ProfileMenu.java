@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 public class ProfileMenu implements AppMenu {
     ProfileMenuController controller = new ProfileMenuController();
 
+
     public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
