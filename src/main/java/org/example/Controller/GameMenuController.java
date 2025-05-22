@@ -2500,6 +2500,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result rateGifts(String giftNumberString, String rateString) {
+
         Game game = App.getInstance().getCurrentGame();
         User currentPlayer = game.getCurrentPlayer();
         // Retrieve the received gift
