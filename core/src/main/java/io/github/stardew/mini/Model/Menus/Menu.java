@@ -1,23 +1,21 @@
 package io.github.stardew.mini.Model.Menus;
-
-
+import com.badlogic.gdx.Screen;
+import io.github.stardew.mini.Controller.*;
+import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.GameAssetManager;
 import io.github.stardew.mini.View.*;
 
 import java.util.Scanner;
 
 public enum Menu {
-    MainMenu(new MainMenu()),
-    LoginMenu(new LoginMenu()),
-    GameMenu(new GameMenu()),
-    ProfileMenu(new ProfileMenu()),
-    TradeMenu(new TradeMenu()),
-    ExitMenu(new ExitMenu());
-
-    private final AppMenu menu;
-
-    Menu(AppMenu menu) {
-        this.menu = menu;
-    }
+    //dige niaze?
+    MainMenu,
+    LoginMenu,
+    PreGameMenu,
+    GameMenu,
+    ProfileMenu,
+    TradeMenu,
+    ExitMenu;
 
     public static Menu fromString(String menuName) {
         for (Menu menu : Menu.values()) {
@@ -29,6 +27,7 @@ public enum Menu {
     }
 
     public void checkCommand(Scanner scanner) {
-        this.menu.handleCommand(scanner);
+
+        //this.menu.handleCommand(scanner);
     }
 }

@@ -1,16 +1,19 @@
 package io.github.stardew.mini.View;
 
 
+import com.badlogic.gdx.Screen;
 import io.github.stardew.mini.Controller.MainMenuController;
-import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Menus.MainMenuCommands;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class MainMenu implements AppMenu{
+public class MainMenuView implements AppMenuView, Screen {
     MainMenuController controller = new MainMenuController();
-
+public MainMenuView(MainMenuController controller) {
+    this.controller = controller;
+    controller.setView(this);
+}
 
     public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
@@ -27,6 +30,41 @@ public class MainMenu implements AppMenu{
             System.out.println("invalid command");
         }
 
+
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+    @Override
+    public void render(float v) {
+
+    }
+
+    @Override
+    public void resize(int i, int i1) {
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
 
     }
 }

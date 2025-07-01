@@ -7,6 +7,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.LoginMenuView;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,7 +22,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoginMenuController implements MenuController {
+    LoginMenuView view;
 
+    public void setView(LoginMenuView view) {
+        this.view = view;
+    }
 
     public Result register(Matcher matcher) {
         MainApp app = MainApp.getInstance();
