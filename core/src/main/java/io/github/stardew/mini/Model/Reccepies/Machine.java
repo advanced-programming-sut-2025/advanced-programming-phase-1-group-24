@@ -1,13 +1,12 @@
 package io.github.stardew.mini.Model.Reccepies;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Things.ProductQuality;
 import io.github.stardew.mini.Model.User;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class Machine extends Item {
@@ -92,8 +91,8 @@ public class Machine extends Item {
     }
 
     public static void updateMachines() {  //use this method every hour
-        for (User user : App.getInstance().getCurrentGame().getPlayers()) {
-            House house = App.getInstance().getCurrentGame().getMap().getFarmByOwner(user).getHouse();
+        for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            House house = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(user).getHouse();
             for (Machine machine : house.getMachines()) {
                 if (machine.getActivated()) {
                     machine.setHoursLeft(machine.getHoursLeft() - 1);

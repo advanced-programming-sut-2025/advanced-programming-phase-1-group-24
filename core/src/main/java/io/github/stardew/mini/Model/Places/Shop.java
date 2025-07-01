@@ -2,18 +2,6 @@ package io.github.stardew.mini.Model.Places;
 
 import java.util.ArrayList;
 
-import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.App;
-import io.github.stardew.mini.Model.Growables.Growable;
-import io.github.stardew.mini.Model.MapManagement.MapOfGame;
-import io.github.stardew.mini.Model.Reccepies.randomStuff;
-import io.github.stardew.mini.Model.Things.Backpack;
-import io.github.stardew.mini.Model.Things.Fish;
-import io.github.stardew.mini.Model.Things.Food;
-import io.github.stardew.mini.Model.Things.ForagingMineral;
-import io.github.stardew.mini.Model.Tools.TrashCan;
-import io.github.stardew.mini.Model.User;
-
 public class Shop extends Place {
     private ShopType shopType;
     private String shopName;

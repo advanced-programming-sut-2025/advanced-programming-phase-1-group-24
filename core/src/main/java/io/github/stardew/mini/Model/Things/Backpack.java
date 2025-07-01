@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Model.Things;
 
 import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Tools.*;
 
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public class Backpack {
     public Result equipTool(String newToolName) {
         for (Tool existingTool : tools) {
             if (existingTool.getName().equalsIgnoreCase(newToolName)) {
-                App.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(existingTool);
+                MainApp.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(existingTool);
                 return new Result(true, "equipped tool successfully");
             }
         }

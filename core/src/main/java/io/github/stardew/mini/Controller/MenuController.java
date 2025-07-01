@@ -1,15 +1,13 @@
 package io.github.stardew.mini.Controller;
 
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 
-import java.awt.*;
-
 public interface MenuController {
     default void menuExit() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         if (app.getCurrentMenu() == Menu.LoginMenu) {
             app.setCurrentMenu(Menu.ExitMenu);
             return;
@@ -18,13 +16,13 @@ public interface MenuController {
     }
 
     default Result showCurrentMenu() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         String menuName = app.getCurrentMenu().name();
         return new Result(true, menuName);
     }
 
     default Result enterMenu(String menuName) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Menu matchedMenu = Menu.fromString(menuName);
         if (matchedMenu == null) {
             return new Result(false, "Menu not found!");
@@ -32,7 +30,7 @@ public interface MenuController {
         if (matchedMenu != Menu.MainMenu && app.getCurrentMenu() != Menu.MainMenu) {
             return new Result(false, "You can't enter menu " + menuName + " go to MainMenu first!");
         }
-        App.getInstance().setCurrentMenu(matchedMenu);
+        MainApp.getInstance().setCurrentMenu(matchedMenu);
         return new Result(true, "Entered " + menuName + " successfully!");
     }
 

@@ -2,8 +2,6 @@ package io.github.stardew.mini.Model;
 
 
 import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;

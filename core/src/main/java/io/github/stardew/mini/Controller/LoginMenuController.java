@@ -2,8 +2,7 @@ package io.github.stardew.mini.Controller;
 
 
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.App;
-import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -25,7 +24,7 @@ public class LoginMenuController implements MenuController {
 
 
     public Result register(Matcher matcher) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         String username = matcher.group("username");
         String password = matcher.group("password");
         String confirm = matcher.group("confirm");
@@ -95,7 +94,7 @@ public class LoginMenuController implements MenuController {
         String enteredPassword = matcher.group("password");
         boolean stayLoggedIn = matcher.group(3) != null;
 
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         List<User> users = app.getUsers();
         User matchedUser = app.getUserByUsername(username);
 
@@ -124,7 +123,7 @@ public class LoginMenuController implements MenuController {
     }
 
     public Result pickQuestion(Matcher matcher) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User currentUser = app.getLoggedInUser();
 
         if (currentUser == null) {
@@ -179,7 +178,7 @@ public class LoginMenuController implements MenuController {
 
     public Result forgetPassword(Matcher matcher, Scanner scanner) {
         String username = matcher.group("username");
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getUserByUsername(username);
 
         if (user == null)

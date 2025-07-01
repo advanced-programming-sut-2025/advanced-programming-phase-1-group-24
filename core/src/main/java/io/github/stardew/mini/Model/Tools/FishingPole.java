@@ -9,7 +9,6 @@ import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Things.Fish;
 import io.github.stardew.mini.Model.Things.FishType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
-import io.github.stardew.mini.Model.Things.ToolMaterial;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;

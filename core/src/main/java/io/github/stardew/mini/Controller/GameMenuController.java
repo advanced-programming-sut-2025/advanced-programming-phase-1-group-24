@@ -1,20 +1,15 @@
 package io.github.stardew.mini.Controller;
 
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
-import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Animals.AnimalType;
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
-import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Growables.ForagingCropType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -32,8 +27,6 @@ import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
@@ -42,10 +35,6 @@ import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.NPCManagement.*;
 
 import java.awt.*;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
-import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -69,7 +58,7 @@ public class GameMenuController implements MenuController {
 //    }
 
     public Result checkEnergy() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) {
             return new Result(true, "");
         }
@@ -86,7 +75,7 @@ public class GameMenuController implements MenuController {
     public Result useTool(String direction) {
 //        App.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getTools().get(0));
         //App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(GrowableFactory.getInstance().create(SourceType.CauliflowerSeeds), 10);
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tool currentTool = player.getEquippedTool();
         if (currentTool == null) {
             return new Result(false, "You don't have an equipped tool");
@@ -98,30 +87,30 @@ public class GameMenuController implements MenuController {
         else if (direction.equals("left")) x--;
         else if (direction.equals("right")) x++;
         Tile currentTile = player.getCurrentTile();
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         if (currentTile.getX() + x < 0 || currentTile.getX() + x >= map[0].length || currentTile.getY() + y < 0 || currentTile.getY() + y >= map.length) {
             return new Result(false, "Direction is wrong");
         } else {
             if (currentTool instanceof Axe) {
-                return ((Axe) currentTool).useAxe(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player,
-                        App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((Axe) currentTool).useAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player,
+                        MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof FishingPole) {
-                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, App.getInstance().getCurrentGame().getMap(), currentTile,
-                        player, App.getInstance().getCurrentGame(), App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
+                        player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Hoe) {
-                Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
                 return result;
             } else if (currentTool instanceof MilkPail) {
-                return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap(), App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, MainApp.getInstance().getCurrentGame().getMap(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof PickAxe) {
-                return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Scythe) {
-                return ((Scythe) currentTool).useScythe(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((Scythe) currentTool).useScythe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof WateringCan) {
-                return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, App.getInstance().getCurrentGame().getMap(), player, App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Shear) {
-                return ((Shear) currentTool).useShear(x, y, currentTile, player, App.getInstance().getCurrentGame().getMap(), App.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((Shear) currentTool).useShear(x, y, currentTile, player, MainApp.getInstance().getCurrentGame().getMap(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             }
             return new Result(true, "You have used a tool");
         }
@@ -186,7 +175,7 @@ public class GameMenuController implements MenuController {
 //        return new Result(true, "game created successfully!");
 //    }
     public Result createGame(String users, Scanner scanner) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User creator = app.getLoggedInUser();
 
         if (creator == null)
@@ -269,7 +258,7 @@ public class GameMenuController implements MenuController {
 
     //we will call this method for every user
     public void pickGameMap(User player, int mapNumber) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
         MapOfGame mapOfGame = currentGame.getMap();
         Farm playerFarm;
@@ -445,26 +434,26 @@ public class GameMenuController implements MenuController {
     }
 
     public Result buildGreenHouse() {
-        Backpack playerBackPack = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
-        if (App.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
+        Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
                 !playerBackPack.hasItem("Stone", 500)) {
             return new Result(false, "green house build failed");
         }
-        Farm farm = App.getInstance().getCurrentGame().getMap().getFarmByOwner(App.getInstance().getCurrentGame().getCurrentPlayer());
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
         GreenHouse greenHouse = farm.getGreenHouse();
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         for (int j = greenHouse.getY(); j < greenHouse.getY() + greenHouse.getHeight(); j++) {
             for (int i = greenHouse.getX(); i < greenHouse.getX() + greenHouse.getWidth(); i++) {
                 map[j][i].setWalkable(true);
             }
         }
-        App.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
-        App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
         return new Result(true, "green house build successful");
     }
 
     public Result loadGame() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)
@@ -481,7 +470,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result exitGame() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User currentUser = app.getLoggedInUser();
         Game currentGame = app.getCurrentGame();
 
@@ -506,7 +495,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result startForceTerminateVote(Scanner scanner) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
         User currentUser = app.getLoggedInUser();
 
@@ -547,7 +536,7 @@ public class GameMenuController implements MenuController {
 //        return new Result(true, "next turn started for " + currentUser.getUsername());
 //    }
     public Result nextTurn(Scanner scanner) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
 
         if (currentGame == null)
@@ -601,7 +590,7 @@ public class GameMenuController implements MenuController {
 
 
     private Result voteToTerminateInteractive(Scanner scanner, User user) {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
 
         System.out.println("a force terminate vote is in progress. you must vote first. enter 'yes' or 'no':");
 
@@ -619,7 +608,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result voteToTerminate(boolean approve, User user) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
 
         if (currentGame == null || !currentGame.isVoteInProgress())
@@ -656,7 +645,7 @@ public class GameMenuController implements MenuController {
     }
 
     private void handleEndOfDay() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         Game game = app.getCurrentGame();
         Tile[][] map = game.getMap().getMap();
 
@@ -727,7 +716,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void processShippingBinsAtNight() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
 
         for (Farm farm : game.getMap().getFarms()) {
             Map<Item, Integer> shippingBin = farm.getShippingBin();
@@ -798,7 +787,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result printDayOfWeek() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -806,7 +795,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result printDateTime() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         TimeAndDate currentDate = currentGame.getTimeAndDate();
         if (currentGame == null) {
             return new Result(false, "no active game!");
@@ -816,7 +805,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result printDate() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -825,7 +814,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result printHour() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -833,7 +822,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result printSeason() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -848,7 +837,7 @@ public class GameMenuController implements MenuController {
             return new Result(false, "invalid number of days!");
         }
 
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) return new Result(false, "no active game!");
 
         for (int i = 0; i < days; i++) {
@@ -866,7 +855,7 @@ public class GameMenuController implements MenuController {
             return new Result(false, "invalid number of hours!");
         }
 
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) return new Result(false, "no active game!");
 
         for (int i = 0; i < hours; i++) {
@@ -980,7 +969,7 @@ public class GameMenuController implements MenuController {
         int x = Integer.parseInt(column);
         int y = Integer.parseInt(row);
         int size = Integer.parseInt(sizeOfMap);
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game.getMap().getHeight() < size + y || game.getMap().getWidth() < size + x) {
             return new Result(false, "invalid size");
         }
@@ -1017,7 +1006,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result showCurrentWeather() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -1026,7 +1015,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showTomorrowWeather() {
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         if (currentGame == null) {
             return new Result(false, "no active game!");
         }
@@ -1036,7 +1025,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result cheatChangeWeather(String weather) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) {
             return new Result(false, "no active game!");
         }
@@ -1058,7 +1047,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showEnergy() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) {
             return new Result(false, "no active game!");
         }
@@ -1067,7 +1056,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatUnlimitedEnergy() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) {
             return new Result(false, "No active game!");
         }
@@ -1086,7 +1075,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result cheatChangeEnergy(String value) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User currentPlayer = game.getCurrentPlayer();
         if (game == null) {
             return new Result(false, "No active game!");
@@ -1116,7 +1105,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatThor(String x, String y) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if (game == null) {
             return new Result(false, "No active game!");
         }
@@ -1144,7 +1133,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result petAnimal(String animalName) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Tile playerTile = player.getCurrentTile();
         Animal animal = player.getAnimalByName(animalName);
@@ -1176,7 +1165,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatAnimalFriendship(String name, String amount) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Animal animal = player.getAnimalByName(name);
         int amountInt = Integer.parseInt(amount);
@@ -1192,7 +1181,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result showOwnedAnimals() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
 
         if (player.getOwnedAnimals().isEmpty()) {
@@ -1212,7 +1201,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result feedHay(String name) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Animal animal = player.getAnimalByName(name);
         if (animal == null) {
@@ -1235,7 +1224,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result shepherdAnimal(String name, String x, String y) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         int targetX = Integer.parseInt(x);
         int targetY = Integer.parseInt(y);
@@ -1286,7 +1275,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result collectProduct(String name) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Animal animal = player.getAnimalByName(name);
         if (animal == null)
@@ -1324,22 +1313,22 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showInventory() {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return currentPlayer.getBackpack().showInventory();
     }
 
     public Result trashInventory(String itemName, int count) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return currentPlayer.getBackpack().removeItem(itemName, count);
     }
 
     public Result equipTool(String toolName) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return currentPlayer.getBackpack().equipTool(toolName);
     }
 
     public Result showCurrentTool() {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tool tool = currentPlayer.getEquippedTool();
         if (tool == null) {
             return new Result(false, "No equipped tool found.");
@@ -1348,13 +1337,13 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showAllTools() {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return currentPlayer.getBackpack().showTools();
     }
 
     public Result fish(String fishingPole) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        Game currentGame = App.getInstance().getCurrentGame();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         MapOfGame map = currentGame.getMap();
         Tile currentTile = currentPlayer.getCurrentTile();
         FishingPole pole;
@@ -1369,7 +1358,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result sellAnimal(String name) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Animal animal = player.getAnimalByName(name);
         if (animal == null)
@@ -1403,10 +1392,10 @@ public class GameMenuController implements MenuController {
     public void walkTo(String destX, String destY, Scanner scanner) {
         int targetX = Integer.parseInt(destX);
         int targetY = Integer.parseInt(destY);
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
 
-        if (App.getInstance().getCurrentGame().getMap().isInsideAnyFarm(targetX, targetY) != null && !(map[targetY][targetX].getTileOwner().equals(player.getUsername()) || (player.getPartner() != null && map[targetY][targetX].getTileOwner().equals(player.getPartner().getUsername())))) {
+        if (MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(targetX, targetY) != null && !(map[targetY][targetX].getTileOwner().equals(player.getUsername()) || (player.getPartner() != null && map[targetY][targetX].getTileOwner().equals(player.getPartner().getUsername())))) {
             System.out.println("You are not allowed to walk to another player's farm!");
             return;
         }
@@ -1626,9 +1615,9 @@ public class GameMenuController implements MenuController {
 
     public void randomForaging() {
         //call this every morning or night
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         Tile[][] map = currentGame.getMap().getMap();
-        for (Farm farm : App.getInstance().getCurrentGame().getMap().getFarms()) {
+        for (Farm farm : MainApp.getInstance().getCurrentGame().getMap().getFarms()) {
             for (int j = farm.getY(); j < farm.getHeight() + farm.getY(); j++) {
                 for (int i = farm.getX(); i < farm.getX() + farm.getWidth(); i++) {
                     int rand = RANDOM.nextInt(100);
@@ -1659,7 +1648,7 @@ public class GameMenuController implements MenuController {
     public Result showPlant(String x, String y) {
         int tileX = Integer.parseInt(x);
         int tileY = Integer.parseInt(y);
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         if (map[tileY][tileX].getContainedGrowable() == null && map[tileY][tileX].getProductOfGrowable() == null) {
             return new Result(false, "There is no product in this tile!");
         }
@@ -1691,9 +1680,9 @@ public class GameMenuController implements MenuController {
     public Result plantGrowable(String seedName, String direction) {
         SourceType sourceType = SourceType.fromName(seedName);
         if (sourceType == null) return new Result(false, "There is no such source type!");
-        Backpack playerBackPack = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         //Growable growable = findGrowableInBackpackBySourceType(playerBackPack, sourceType);
         Growable growable = (Growable) playerBackPack.grabItemAndReturn(seedName, 1);
         if (growable == null) {
@@ -1722,10 +1711,10 @@ public class GameMenuController implements MenuController {
                 return new Result(false, "This tile is full!");
             }
             if (growable.getGrowableType() == GrowableType.MixedSeeds) {
-                growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(App.getInstance()
+                growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(MainApp.getInstance()
                         .getCurrentGame().getTimeAndDate().getSeason()));
             } else if (map[y][x].getType() != TileType.GREENHOUSE) {
-                Season currentSeason = App.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+                Season currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
                 if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
                         (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
                     return new Result(false, "You cannot plant this seed out of season!");
@@ -1755,9 +1744,9 @@ public class GameMenuController implements MenuController {
     }
 
     public Result fertalizeGrowable(String fertalizer, String direction) {
-        Result result = App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Result result = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         int x = currentPlayer.getCurrentTile().getX();
         int y = currentPlayer.getCurrentTile().getY();
         if (direction.equals("up")) y--;
@@ -1807,7 +1796,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void tryFormGiant(int y, int x, CropType cropType) {
-        Tile[][] grid = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] grid = MainApp.getInstance().getCurrentGame().getMap().getMap();
         int height = grid.length;
         int width = grid[0].length;
 
@@ -1833,7 +1822,7 @@ public class GameMenuController implements MenuController {
 
     private boolean isValidGiantSquare(int y1, int x1, int y2, int x2,
                                        int y3, int x3, int y4, int x4, CropType cropType) {
-        Tile[][] grid = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] grid = MainApp.getInstance().getCurrentGame().getMap().getMap();
         Tile[] tiles = {
                 grid[y1][x1], grid[y2][x2], grid[y3][x3], grid[y4][x4]
         };
@@ -1907,8 +1896,8 @@ public class GameMenuController implements MenuController {
 
 
     public void crowAttack() {
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
-        Farm playerFarm = App.getInstance().getCurrentGame().getMap().getFarmByOwner(App.getInstance().getCurrentGame().getCurrentPlayer());
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        Farm playerFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
 
         List<Tile> growableTiles = new ArrayList<>();
 
@@ -1959,7 +1948,7 @@ public class GameMenuController implements MenuController {
     public void updateGrowable(Tile tile) {
         //this should be called at the end of the days
         //when we are not in the required season the growables won't grow in this function so naturally they won't produce any product
-        Game currentGame = App.getInstance().getCurrentGame();
+        Game currentGame = MainApp.getInstance().getCurrentGame();
         Season currentSeason = currentGame.getTimeAndDate().getSeason();
         if (tile.getContainedGrowable() != null) {
             if(tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
@@ -2051,7 +2040,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void rainOnGrowables(WeatherType tommorowWeather) {
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         if (tommorowWeather == WeatherType.RAIN) {
             for (int i = 0; i < map.length; i++) {
                 for (int j = 0; j < map[0].length; j++) {
@@ -2082,7 +2071,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result talk(String username, String message) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         String senderUsername = game.getCurrentPlayer().getUsername();
         User sender = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(username);
@@ -2104,7 +2093,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showTalkHistory(String username) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Friendship friendship = game.getFriendship(player.getUsername(), username);
         ArrayList<Message> relevantMessages = new ArrayList<>();
@@ -2133,7 +2122,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result hug(String username) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         String senderUsername = game.getCurrentPlayer().getUsername();
         User sender = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(username);
@@ -2155,7 +2144,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result askMarriage(String username, String ring) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         String senderUsername = game.getCurrentPlayer().getUsername();
         User sender = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(username);
@@ -2181,7 +2170,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result respondToMarriage(String response, String username) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User currentPlayer = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(username);
         Friendship friendship = game.getFriendship(currentPlayer.getUsername(), username);
@@ -2204,7 +2193,7 @@ public class GameMenuController implements MenuController {
     }
 
     public void startTrade() {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         if (!currentPlayer.getTradeNotifications().isEmpty()) {
             System.out.println("You have the following trade notifications:");
             for (Message message : currentPlayer.getTradeNotifications()) {
@@ -2214,11 +2203,11 @@ public class GameMenuController implements MenuController {
             System.out.println("You have no trade notifications.");
         }
         currentPlayer.getTradeNotifications().clear();
-        App.getInstance().setCurrentMenu(Menu.TradeMenu);
+        MainApp.getInstance().setCurrentMenu(Menu.TradeMenu);
     }
 
     private boolean walkToInternal(User player, int targetX, int targetY) {
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         //User player = App.getInstance().getCurrentGame().getCurrentPlayer();
 
         int rows = map.length;
@@ -2343,7 +2332,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showAnimalProducts() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
 
         List<Animal> animals = player.getOwnedAnimals();
@@ -2371,7 +2360,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatAddMoney(String countString) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         if(game==null){
             return new Result(false,"a new game hasnt started yet");
         }
@@ -2386,7 +2375,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showFriendships() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         StringBuilder result = new StringBuilder();
         String currentUsername = game.getCurrentPlayer().getUsername();
 
@@ -2409,7 +2398,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result sendGift(String receiverUsername, String item, String amountString) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         int amount;
         try {
             amount = Integer.parseInt(amountString);
@@ -2469,7 +2458,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result listGift() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User currentPlayer = game.getCurrentPlayer();
 
         // Retrieve the list of received gifts
@@ -2500,7 +2489,7 @@ public class GameMenuController implements MenuController {
 
     public Result rateGifts(String giftNumberString, String rateString) {
 
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User currentPlayer = game.getCurrentPlayer();
         // Retrieve the received gift
         List<Gift> receivedGifts = currentPlayer.getRecievedGift();
@@ -2553,7 +2542,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result giftHistory(String receiverUsername) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         String senderUsername = game.getCurrentPlayer().getUsername();
 
         User receiver = game.getPlayerByUsername(receiverUsername);
@@ -2589,7 +2578,7 @@ public class GameMenuController implements MenuController {
 
 
     public Result sendFlower(String receiverUsername) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User sender = game.getCurrentPlayer();
         String senderUsername = sender.getUsername();
         User receiver = game.getPlayerByUsername(receiverUsername);
@@ -2643,17 +2632,17 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatWalk(int x, int y){
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         if(x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
             return new Result(false, "You are out of bounds.");
         }
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentPlayer.setCurrentTile(map[y][x]);
         return new Result(true, "You are now in tile " + x + ", " + y + ".");
     }
 
     public Result cheatSetSkill(String skillString, String number) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         int amount = Integer.parseInt(number);
         Skill skill = Skill.fromString(skillString);
         if (amount > 4 || amount < 0) {
@@ -2669,8 +2658,8 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cheatSetFriendshipLevel(int level, String username) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
-        Friendship friendships = App.getInstance().getCurrentGame().getFriendship(player.getUsername(), username);
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Friendship friendships = MainApp.getInstance().getCurrentGame().getFriendship(player.getUsername(), username);
         if (friendships == null) {
             return new Result(false, "Friendship not found.");
         }
@@ -2688,31 +2677,31 @@ public class GameMenuController implements MenuController {
             return new Result(false, "No item found.");
         }
         if(count == 0) return new Result(false, "Invalid count.");
-        return App.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+        return MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
     }
 
     public Result meetNPC(String npcName) {
-        NPC npc = App.getInstance().getCurrentGame().getNPC(npcName);
+        NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
         if (npc == null) {return new Result(false, "No npc found.");}
-        Tile currentTile =  App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        Tile currentTile =  MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
         if (!npc.checkIfIsNearNPC(currentTile)) {
             return new Result(false, "You are not near this npc.");
         }
-        WeatherType currentWeatherType = App.getInstance().getCurrentGame().getCurrentWeatherType();
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        WeatherType currentWeatherType = MainApp.getInstance().getCurrentGame().getCurrentWeatherType();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return npc.talkToNPC(currentWeatherType, currentPlayer);
     }
 
     public Result giftNPC(String npcName, String itemName) {
-        NPC npc = App.getInstance().getCurrentGame().getNPC(npcName);
+        NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
         if (npc == null) {
             return new Result(false, "No npc found.");
         }
-        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
         if (!npc.checkIfIsNearNPC(currentTile)) {
             return new Result(false, "You are not near this npc.");
         }
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         if (currentPlayer.getBackpack().hasItem(itemName, 1)) {
             Result result = npc.giveGift(itemName, currentPlayer);
             if (result.isSuccessful()) {
@@ -2725,8 +2714,8 @@ public class GameMenuController implements MenuController {
 
     public Result npcFriendshipList() {
         StringBuilder result = new StringBuilder();
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
             result.append(npc.getNpcName() + " : Level ");
             result.append(npc.getFriendshipLevels().get(currentPlayer.getUsername()));
             result.append(", " + npc.getFriendshipPoints().get(currentPlayer.getUsername()) + " points\n");
@@ -2735,10 +2724,10 @@ public class GameMenuController implements MenuController {
     }
 
     public Result npcQuestList() {
-        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         NPC wantedNPC = null;
-        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
             if (npc.checkIfIsNearNPC(currentTile)) {
                 wantedNPC = npc;
                 break;
@@ -2766,10 +2755,10 @@ public class GameMenuController implements MenuController {
     }
 
     public Result doMission(int missionIndex) {
-        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         NPC wantedNPC = null;
-        for (NPC npc : App.getInstance().getCurrentGame().getNpcs()) {
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
             if (npc.checkIfIsNearNPC(currentTile)) {
                 wantedNPC = npc;
                 break;
@@ -2780,12 +2769,12 @@ public class GameMenuController implements MenuController {
     }
 
     public Result putFoodInFridge(String itemName) {
-        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
         if (!currentTile.getType().equals(TileType.HOUSE)) {
             return new Result(false, "You are not in your house.");
         }
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        House house = App.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        House house = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
         for (Item item : currentPlayer.getBackpack().getInventoryItems().keySet()) {
             if (item.getName().equals(itemName)) {
                 if (!(item instanceof Food)) { return new Result(false, "Thats not a food!"); }
@@ -2799,12 +2788,12 @@ public class GameMenuController implements MenuController {
     }
 
     public Result pickFoodFromFridge(String itemName) {
-        Tile currentTile = App.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
         if (!currentTile.getType().equals(TileType.HOUSE)) {
             return new Result(false, "You are not in your house.");
         }
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
-        House house = App.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        House house = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
         for (Item item : house.getFridge().keySet()) {
             if (item.getName().equals(itemName)) {
                 Result result = currentPlayer.getBackpack().addItem(item, house.getFridge().get(item));
@@ -2817,7 +2806,7 @@ public class GameMenuController implements MenuController {
 
     public Result showCookingRecipes() {
         StringBuilder result = new StringBuilder();
-        for (FoodRecipe recipe : App.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
+        for (FoodRecipe recipe : MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
             result.append(recipe.toString() + "\n");
             for (String name : recipe.getRecipe().keySet()) {
                 result.append("    " + name + ": " + recipe.getRecipe().get(name) + "\n");
@@ -2827,9 +2816,9 @@ public class GameMenuController implements MenuController {
     }
 
     public Result cook(String recipeName) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         String recipe = recipeName.replace(" ", "");
-        for (FoodRecipe unlockedRecipe : App.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
+        for (FoodRecipe unlockedRecipe : MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCookingRecepies()) {
             if (unlockedRecipe.toString().equals(recipe)) {
                 for (String itemName : unlockedRecipe.getRecipe().keySet()) {
                     if (!currentPlayer.getBackpack().hasItem(itemName, unlockedRecipe.getRecipe().get(itemName))) {
@@ -2850,7 +2839,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result eat(String foodName) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         for (Item item : currentPlayer.getBackpack().getInventoryItems().keySet()) {
             if (item.getName().equals(foodName)) {
                 return currentPlayer.eat(item);
@@ -2860,7 +2849,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result artisanGet(MapOfGame map, String artisanName) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tile currentTile = currentPlayer.getCurrentTile();
         int currentX = currentTile.getX();
         int currentY = currentTile.getY();
@@ -2884,7 +2873,7 @@ public class GameMenuController implements MenuController {
     }
 
     public Result artisanUse(String artisanName, String itemName1, String itemName2, MapOfGame map) {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tile currentTile = currentPlayer.getCurrentTile();
         int currentX = currentTile.getX();
         int currentY = currentTile.getY();
@@ -2928,12 +2917,12 @@ public class GameMenuController implements MenuController {
     }
 
     public Result showMoney() {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         return new Result(true, "Your current money is " + player.getMoney());
     }
 
     public Result showSkill(String skillString) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Skill skill = Skill.fromString(skillString);
 
         if (skill == null) {
