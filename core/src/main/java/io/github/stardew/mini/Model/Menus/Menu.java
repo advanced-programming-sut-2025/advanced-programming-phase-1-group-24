@@ -13,6 +13,7 @@ public enum Menu {
     LoginMenu,
     PreGameMenu,
     NewGameMenu,
+    MapSelectionMenu,
     GameMenu,
     ProfileMenu,
     TradeMenu,
