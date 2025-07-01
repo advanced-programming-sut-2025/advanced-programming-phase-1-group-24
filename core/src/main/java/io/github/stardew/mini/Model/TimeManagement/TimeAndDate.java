@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Model.TimeManagement;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 
 public class TimeAndDate {
@@ -23,7 +23,7 @@ public class TimeAndDate {
             hour = 0;
             advanceDay();
         }
-        App.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
         Machine.updateMachines();
     }
 

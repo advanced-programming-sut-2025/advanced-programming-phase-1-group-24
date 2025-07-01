@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Controller;
 
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
@@ -18,7 +19,7 @@ import java.util.Random;
 
 public class StoreMenuController {
     public Result purchase(String productName, int count) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         if (count <= 0) {
@@ -161,7 +162,7 @@ public class StoreMenuController {
 
 
     private int getCurrentSeasonPrice(ShopItem item) {
-        Season currentSeason = App.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+        Season currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
         switch (currentSeason) {
             case SPRING:
                 return item.getSpringPrice();
@@ -177,7 +178,7 @@ public class StoreMenuController {
     }
 
     public Result buyItem(User player, ShopItem shopItem, int count) {
-        MapOfGame map = App.getInstance().getCurrentGame().getMap();
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
         Object item = shopItem.getItem();
         Object itemCopy = null;
         Result result;
@@ -296,7 +297,7 @@ public class StoreMenuController {
 
 
     private boolean canCreateShippingBin(User player) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         Farm farm = game.getMap().getFarmByOwner(player);
         Tile[][] map = game.getMap().getMap();
         // Create a random object to generate random numbers
@@ -382,7 +383,7 @@ public class StoreMenuController {
 //    }
 
     public Result buyFromCarpenter(String name, String x, String y) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
@@ -469,7 +470,7 @@ public class StoreMenuController {
     }
 
     private Result tryCreatingShippingBin(int xCoord, int yCoord, User player) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         Farm farm = game.getMap().getFarmByOwner(player);
         Tile[][] map = game.getMap().getMap();
         Tile tile = map[yCoord][xCoord];
@@ -486,7 +487,7 @@ public class StoreMenuController {
     }
 
     public boolean isAreaPlaceable(int x, int y, int width, int height) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
@@ -509,7 +510,7 @@ public class StoreMenuController {
 
 
     public boolean isOccupied(int x, int y) {
-        MapOfGame map = App.getInstance().getCurrentGame().getMap();
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
         Tile tile = map.getTile(x, y);
         return tile != null && (
                 tile.getContainedGrowable() != null ||
@@ -520,7 +521,7 @@ public class StoreMenuController {
 
 
     public Result buyAnimal(String animal, String name) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Tile playerTile = player.getCurrentTile();
@@ -603,7 +604,7 @@ public class StoreMenuController {
     }
 
     public Result showAllProducts() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
 
@@ -630,7 +631,7 @@ public class StoreMenuController {
     }
 
     public Result showAllAvailableProducts() {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
 
@@ -657,7 +658,7 @@ public class StoreMenuController {
 
 
     public Result placeInShippingBin(String productString, int count) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Farm farm = game.getMap().getFarmByOwner(player);
 
@@ -703,7 +704,7 @@ public class StoreMenuController {
 
     private boolean isNearShippingBin(User player) {
         // Get the player's current tile position (assuming player has a position method)
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         Tile playerPosition = player.getCurrentTile();
         int playerX = playerPosition.getX();
         int playerY = playerPosition.getY();
@@ -736,7 +737,7 @@ public class StoreMenuController {
 
 
     public Result upgradeTool(String tool) {
-        Game game = App.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
 

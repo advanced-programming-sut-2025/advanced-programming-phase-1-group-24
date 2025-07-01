@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Controller;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.Farm;
@@ -17,9 +17,9 @@ import java.util.Map;
 
 public class HouseMenuController implements MenuController {
     public Result showRecipes() {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         ArrayList<MachineType> machineRecipes = player.getMachineRecepies();
-        House house = App.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+        House house = MainApp.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
         if(house == null){
             return new Result(false, "You need to be in house to use this menu!");
         }
@@ -40,8 +40,8 @@ public class HouseMenuController implements MenuController {
     }
 
     public Result craft(String itemName) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
-        House house = App.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        House house = MainApp.getInstance().getCurrentGame().getMap().getHousePosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
         if(house == null){
             return new Result(false, "You need to be in house to use this menu!");
         }
@@ -80,10 +80,10 @@ public class HouseMenuController implements MenuController {
     }
 
     public Result placeItem(String itemName, String direction) {
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
-        Farm farm = App.getInstance().getCurrentGame().getMap().getFarmByOwner(player);
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player);
         House house = farm.getHouse();
-        Tile[][] map = App.getInstance().getCurrentGame().getMap().getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();
         if(direction.equals("up")) y--;

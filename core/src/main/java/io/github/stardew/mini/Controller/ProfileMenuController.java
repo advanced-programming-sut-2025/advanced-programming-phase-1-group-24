@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Controller;
 
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Menus.ProfileMenuCommands;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -12,7 +12,7 @@ public class ProfileMenuController implements MenuController {
     ProfileMenuCommands command;
 
     public Result changeUsername(String username) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)
@@ -34,7 +34,7 @@ public class ProfileMenuController implements MenuController {
 
 
     public Result changeEmail(String email) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)
@@ -53,7 +53,7 @@ public class ProfileMenuController implements MenuController {
 
 
     public Result changePassword(String newPassword, String oldPassword) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)
@@ -76,7 +76,7 @@ public class ProfileMenuController implements MenuController {
 
 
     public Result changeNickname(String nickname) {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)
@@ -91,7 +91,7 @@ public class ProfileMenuController implements MenuController {
     }
 
     public Result showUserInfo() {
-        App app = App.getInstance();
+        MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
         if (user == null)

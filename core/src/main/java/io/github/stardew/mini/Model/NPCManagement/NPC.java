@@ -1,12 +1,11 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 
@@ -170,7 +169,7 @@ public class NPC {
             if (npc.getDaysLeftToUnlockThirdMission() > 0)
                 npc.setDaysLeftToUnlockThirdMission(npc.getDaysLeftToUnlockThirdMission() - 1);
             for (String username : npc.getTalkedToNPCToday().keySet()) {
-                User user = App.getInstance().getCurrentGame().getPlayerByUsername(username);
+                User user = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
                 npc.getTalkedToNPCToday().put(user.getUsername(), false);
                 npc.getGaveGiftToNPCToday().put(user.getUsername(), false);
                 if (npc.getFriendshipLevels().get(user.getUsername()) == 3) {
@@ -191,7 +190,7 @@ public class NPC {
 
     public void updateFriendshipLevel(User currentPlayer) {
         for (String username : friendshipPoints.keySet()) {
-            User user = App.getInstance().getCurrentGame().getPlayerByUsername(username);
+            User user = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
             if (friendshipPoints.get(user.getUsername()) > 799) friendshipPoints.put(user.getUsername(), 799);
             int previousFriendshipLevel = friendshipLevels.get(user.getUsername());
             int newFriendshipLevel = (int)Math.floor(friendshipPoints.get(user.getUsername()) / 200);
@@ -208,7 +207,7 @@ public class NPC {
         int[] xDirections = {1,1,0,-1,-1,-1,0,1};
         int[] yDirections = {0,-1,-1,-1,0,1,1,1};
         for (int i = 0; i < 8; i++) {
-            if (this.equals(App.getInstance().getCurrentGame().getMap().getTile(userX + xDirections[i], userY + yDirections[i]).getContainedNPC())) {
+            if (this.equals(MainApp.getInstance().getCurrentGame().getMap().getTile(userX + xDirections[i], userY + yDirections[i]).getContainedNPC())) {
                 return true;
             }
         }

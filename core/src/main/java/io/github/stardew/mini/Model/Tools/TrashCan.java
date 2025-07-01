@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Model.Tools;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Things.ToolMaterial;
 
@@ -20,24 +20,24 @@ public class TrashCan extends Tool {
             return;
         }
         else if (material == ToolMaterial.Copper){
-            int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
+            int initialMoney = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 15 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
+            MainApp.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Iron){
-            int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
+            int initialMoney = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 30 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
+            MainApp.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Gold){
-            int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
+            int initialMoney = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 45 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
+            MainApp.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
         else if (material == ToolMaterial.Iridium){
-            int initialMoney = App.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
+            int initialMoney = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney();
             int addedMoney = amount * item.getPrice() * 60 / 100;
-            App.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
+            MainApp.getInstance().getCurrentGame().getCurrentPlayer().addMoney(addedMoney);
         }
     }
 

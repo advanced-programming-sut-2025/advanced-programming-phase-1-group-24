@@ -1,19 +1,15 @@
 package io.github.stardew.mini.View;
 
 
-import jdk.jfr.RecordingState;
 import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.Controller.HouseMenuController;
-import io.github.stardew.mini.Controller.TradeMenuController;
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Menus.StoreMenuCommands;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Menus.HouseMenuCommands;
-import io.github.stardew.mini.Model.Menus.TradeMenuCommands;
 
-import javax.imageio.spi.ImageReaderWriterSpi;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -251,10 +247,10 @@ public class GameMenu implements AppMenu {
             if (itemName1 != null) itemName1 = itemName1.trim();
             String itemName2 = matcher.group("itemName2");
             if (itemName2 != null) itemName2 = itemName2.trim();
-            System.out.println(controller.artisanUse(artisanName, itemName1, itemName2, App.getInstance().getCurrentGame().getMap()));
+            System.out.println(controller.artisanUse(artisanName, itemName1, itemName2, MainApp.getInstance().getCurrentGame().getMap()));
         } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMatcher(input)) != null) {
             String artisanName = matcher.group("artisanName").trim();
-            System.out.println(controller.artisanGet(App.getInstance().getCurrentGame().getMap(), artisanName));
+            System.out.println(controller.artisanGet(MainApp.getInstance().getCurrentGame().getMap(), artisanName));
         }
         else {
             System.out.println("invalid command");

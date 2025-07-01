@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Controller;
 
-import io.github.stardew.mini.Model.App;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
@@ -13,11 +13,11 @@ import java.util.ArrayList;
 
 public class TradeMenuController implements MenuController {
     public Result offerTrade(String username, String type,String item, int amount, int price) {
-        User user = App.getInstance().getUserByUsername(username);
+        User user = MainApp.getInstance().getUserByUsername(username);
         if (user == null) {
             return new Result(false, "There is no user with the given username.");
         }
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Backpack playerBackpack = player.getBackpack();
         if(!type.equalsIgnoreCase("offer")) {
             return new Result(false, "This is not the right trade type.");
@@ -44,11 +44,11 @@ public class TradeMenuController implements MenuController {
     }
 
     public Result requestTrade(String username, String type,String item, int amount, String targetItem, int targetAmount) {
-        User user = App.getInstance().getUserByUsername(username);
+        User user = MainApp.getInstance().getUserByUsername(username);
         if (user == null) {
             return new Result(false, "There is no user with the given username.");
         }
-        User player = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Backpack playerBackpack = player.getBackpack();
         if(!type.equalsIgnoreCase("request")) {
             return new Result(false, "This is not the right trade type.");
@@ -75,7 +75,7 @@ public class TradeMenuController implements MenuController {
     }
 
     public Result showTradeList() {
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         ArrayList<Trade> trades = currentPlayer.getTradingHistory();
 
         if (trades.isEmpty()) {
@@ -113,7 +113,7 @@ public class TradeMenuController implements MenuController {
         }
         User sender = trade.getSender();
         User receiver = trade.getRecipient();
-        Friendship friendship = App.getInstance().getCurrentGame().getFriendship(sender.getUsername(), receiver.getUsername());
+        Friendship friendship = MainApp.getInstance().getCurrentGame().getFriendship(sender.getUsername(), receiver.getUsername());
         trade.setHasBeenAnswered(true);
         if(response.equals("accept")) {
            friendship.addXp(50);
@@ -145,7 +145,7 @@ public class TradeMenuController implements MenuController {
     }
 
     public Result showTradeHistory(){
-        User currentPlayer = App.getInstance().getCurrentGame().getCurrentPlayer();
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         ArrayList<Trade> trades = currentPlayer.getTradingHistory();
 
         if (trades.isEmpty()) {
@@ -177,11 +177,11 @@ public class TradeMenuController implements MenuController {
     }
 
     public void exitTrade(){
-        App.getInstance().setCurrentMenu(Menu.GameMenu);
+        MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
     }
 
     public Trade findTradeByID(int id) {
-        ArrayList<Trade> trades = App.getInstance().getCurrentGame().getCurrentPlayer().getTradingHistory();
+        ArrayList<Trade> trades = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getTradingHistory();
         for (Trade trade : trades) {
             if (trade.getId() == id) {
                 return trade;
