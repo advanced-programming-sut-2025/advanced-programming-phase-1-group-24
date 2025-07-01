@@ -29,7 +29,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
 
 //        // Initialize game data
-       loadGameData();
+       //loadGameData();
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
