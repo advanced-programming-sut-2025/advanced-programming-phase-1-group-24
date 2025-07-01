@@ -33,6 +33,7 @@ import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.NPCManagement.*;
+import io.github.stardew.mini.View.GameView;
 
 import java.awt.*;
 import java.util.*;
@@ -44,18 +45,11 @@ public class GameMenuController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
+    private GameView gameView;
 
-//    public boolean checkEnergy() {
-//        Game game = App.getInstance().getCurrentGame();
-//        if (game == null) {
-//            return true;
-//        }
-//        User player = game.getCurrentPlayer();
-//        if (player.getCurrentTurnEnergy() <= 0 || player.hasFainted()) {
-//            return false;
-//        }
-//        return true;
-//    }
+    public void setGameView(GameView gameView) {
+        this.gameView = gameView;
+    }
 
     public Result checkEnergy() {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -228,7 +222,13 @@ public class GameMenuController implements MenuController {
         app.getActiveGames().add(newGame);
         app.setCurrentGame(newGame);
 
-        handleMapSelection(players, scanner);
+        //handleMapSelection(players, scanner);
+
+        for(User player : players) {
+            pickGameMap(player, 1);
+        }
+
+        printMap("0","0", "150");
 
         return new Result(true, "game created successfully!");
     }

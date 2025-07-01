@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Growables;
 
+import com.badlogic.gdx.graphics.Texture;
+
 public enum FruitType {
     Apricot("Apricot", 1, 59, true, 38),
     Cherry("Cherry", 1, 80, true, 38),
@@ -21,6 +23,7 @@ public enum FruitType {
     private final int fruitBaseSellPrice;
     private final boolean isFruitEdible;
     private final int fruitEnergy;
+    private Texture texture;
 
     FruitType(String name, int fullHarvestCycle, int fruitBaseSellPrice, boolean isFruitEdible, int fruitEnergy){
         this.name = name;
@@ -44,5 +47,12 @@ public enum FruitType {
     }
     public int getFruitEnergy() {
         return fruitEnergy;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+    public void initTexture(){
+
     }
 }
