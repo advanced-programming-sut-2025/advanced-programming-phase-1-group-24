@@ -5,10 +5,15 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.stardew.mini.Controller.MainMenuController;
+import io.github.stardew.mini.Controller.SignupMenuController;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.MainMenuView;
+import io.github.stardew.mini.View.SignupMenuView;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -27,7 +32,8 @@ public class MainApp extends com.badlogic.gdx.Game {
     @Override
     public void create() {
         instance = this;
-
+        GameAssetManager.load();
+setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
 //        // Initialize game data
        //loadGameData();
 
@@ -66,7 +72,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     @Override
     public void dispose() {
         super.dispose();
-        saveGameData();
+        //saveGameData();
     }
 
     private void saveGameData() {

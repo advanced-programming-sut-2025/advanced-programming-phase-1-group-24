@@ -28,6 +28,7 @@ public interface MenuController {
             return new Result(false, "Menu not found!");
         }
         if (matchedMenu != Menu.MainMenu && app.getCurrentMenu() != Menu.MainMenu) {
+
             return new Result(false, "You can't enter menu " + menuName + " go to MainMenu first!");
         }
         MainApp.getInstance().setCurrentMenu(matchedMenu);

@@ -13,7 +13,7 @@ import io.github.stardew.mini.Model.Menus.HouseMenuCommands;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class GameMenu implements AppMenu {
+public class GameMenuView implements AppMenuView {
     GameMenuController controller = new GameMenuController();
     HouseMenuController houseController = new HouseMenuController();
     StoreMenuController storeController = new StoreMenuController();
