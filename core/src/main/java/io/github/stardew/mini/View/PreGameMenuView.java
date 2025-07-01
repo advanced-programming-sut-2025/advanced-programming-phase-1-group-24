@@ -3,32 +3,32 @@ package io.github.stardew.mini.View;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.HouseMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
-import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
-import io.github.stardew.mini.Model.GameAssetManager;
-import io.github.stardew.mini.Model.Menus.GameMenuCommands;
-import io.github.stardew.mini.Model.Menus.HouseMenuCommands;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.Menus.StoreMenuCommands;
 import io.github.stardew.mini.Model.Result;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class PreGameMenuView implements AppMenu, Screen {
+    //     HouseMenuController houseController = new HouseMenuController();
+//    StoreMenuController storeController = new StoreMenuController();
+//    GameController GameController = new GameController();
+
     private PreGameMenuController controller;
     private Stage stage;
     public Table table;
@@ -41,73 +41,102 @@ public class PreGameMenuView implements AppMenu, Screen {
         this.controller = controller;
         controller.setView(this);
     }
-//    HouseMenuController houseController = new HouseMenuController();
-//    StoreMenuController storeController = new StoreMenuController();
-//    GameController GameController = new GameController();
 
     public void createUI() {
         Skin skin = GameAssetManager.skin;
         stage = new Stage(new FitViewport(gameWidth, gameHeight));
         Gdx.input.setInputProcessor(stage);
 
+//         BitmapFont customFont= new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+//        Label.LabelStyle customLabelStyle = new Label.LabelStyle();
+//        customLabelStyle.font = customFont;
+
         Table table = new Table();
         table.setFillParent(true);
 
-        TextButton playButton = new TextButton("Play new game", skin);
-        TextButton settingsButton = new TextButton("Play last game", skin);
-        TextButton exitButton = new TextButton("Exit", skin);
+        // Add title label (new code)
+        Label titleLabel = new Label("PRE GAME MENU", skin);
+        titleLabel.setFontScale(2.5f); // Make title larger
+        titleLabel.setAlignment(Align.center);
+
+        // Create title style from skin or customize
+        Label.LabelStyle titleStyle = new Label.LabelStyle(
+            skin.getFont("custom-font"),
+            Color.GOLD
+        );
+        titleLabel.setStyle(titleStyle);
+
+        TextButton newGameButton = new TextButton("Play new game", skin, "custom-button");
+        TextButton lastGameButton = new TextButton("Play last game", skin, "custom-button");
+        TextButton backButton = new TextButton("Back", skin, "custom-button");
 
         float buttonWidth = (float) gameWidth / 4;
         float buttonHeight = (float) gameHeight / 7;
         float bottomPad = (float) gameHeight / 10;
-        table.add(playButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
+        table.add(titleLabel).colspan(1).padBottom(bottomPad).row();
+        table.add(newGameButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
         table.row();
-        table.add(settingsButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
+        table.add(lastGameButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
         table.row();
-        table.add(exitButton).width(buttonWidth).height(buttonHeight);
+        table.add(backButton).width(buttonWidth).height(buttonHeight);
 
-        playButton.addListener(new ClickListener() {
+        newGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 MainApp.getInstance().setCurrentMenu(Menu.NewGameMenu);
             }
         });
-        playButton.getStyle().over = skin.getDrawable("button-normal-over");
+        newGameButton.getStyle().over = skin.getDrawable("button-normal-over");
 
 
-        settingsButton.addListener(new ClickListener() {
+        lastGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-               // mainController.goToSettings();
+                Result result = controller.loadGame();
+                if (result.isSuccessful()) {
+                    MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+                } else {
+                    showErrorDialog(stage, result.message());
+                }
             }
         });
-        settingsButton.getStyle().over = skin.getDrawable("button-normal-over");
+        lastGameButton.getStyle().over = skin.getDrawable("button-normal-over");
 
-        exitButton.addListener(new ClickListener() {
+        backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-               // mainController.exit();
+                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
             }
         });
-        exitButton.getStyle().over = skin.getDrawable("button-normal-over");
+        backButton.getStyle().over = skin.getDrawable("button-normal-over");
 
         stage.addActor(table);
         background = GameAssetManager.getBackground();
     }
+
     @Override
     public void show() {
 
     }
+
+    //    @Override
+//    public void render(float delta) {
+//        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+//        stage.getBatch().begin();
+//        stage.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
+//        stage.getBatch().end();
+//        stage.act(delta);
+//        stage.draw();
+//    }
     @Override
-    public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-        stage.getBatch().begin();
-        stage.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
-        stage.getBatch().end();
-        stage.act(delta);
+    public void render(float v) {
+        ScreenUtils.clear(0, 0, 0, 1);
+        MainApp.getBatch().begin();
+        MainApp.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
+        MainApp.getBatch().end();
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
-
 
     @Override
     public void resize(int i, int i1) {
@@ -133,6 +162,8 @@ public class PreGameMenuView implements AppMenu, Screen {
     public void dispose() {
 
     }
+
+
 //    public TextButton getPlayButton() {
 //        return playButton;
 //    }

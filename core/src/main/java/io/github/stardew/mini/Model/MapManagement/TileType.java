@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.MapManagement;
 
+import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
+
 public enum TileType {
     EMPTY("E", "\u001B[47m"),          // White background
     LAKE("L", "\u001B[44m"),           // Blue
@@ -20,6 +23,7 @@ public enum TileType {
 
     private final String letterToPrint;
     private final String backgroundColor;
+    private Texture texture;
 
     TileType(String letterToPrint, String backgroundColor) {
         this.letterToPrint = letterToPrint;
@@ -33,4 +37,32 @@ public enum TileType {
     public String coloredSymbol() {
         return "\u001B[37m" + backgroundColor + letterToPrint + "\u001B[0m";
     }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
+
+    public static void initTextures() {
+        EMPTY.setTexture(GameAssetManager.FLOORING_28);
+        LAKE.setTexture(GameAssetManager.FLOORING_26);
+        GREENHOUSE.setTexture(GameAssetManager.GREENHOUSE);
+        WATERCONTAINER.setTexture(GameAssetManager.FLOORING_86);
+        CAGE.setTexture(GameAssetManager.FLOORING_03);
+        BARN.setTexture(GameAssetManager.DARK_GREEN_FLOOR);
+        QUARRY.setTexture(GameAssetManager.FLOORING_55);
+        HOUSE.setTexture(GameAssetManager.FLOORING_17);
+        GRASS.setTexture(GameAssetManager.LIGHT_GREEN_FLOOR);
+        FARM.setTexture(GameAssetManager.FLOORING_29);
+        WALL.setTexture(GameAssetManager.FLOORING_52);
+        NPCLAND.setTexture(GameAssetManager.FLOORING_09);
+        NPCHOUSE.setTexture(GameAssetManager.FLOORING_10);
+        DOOR.setTexture(GameAssetManager.FLOORING_71);
+        SHOP.setTexture(GameAssetManager.FLOORING_84);
+        SHIPPINGBIN.setTexture(GameAssetManager.FLOORING_01);
+    }
+
 }

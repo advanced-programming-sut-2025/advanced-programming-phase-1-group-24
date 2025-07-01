@@ -8,12 +8,16 @@ import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.NewGameMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
-import io.github.stardew.mini.Model.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.GameView;
+import io.github.stardew.mini.View.MapSelectionMenuView;
 import io.github.stardew.mini.View.NewGameMenuView;
 import io.github.stardew.mini.View.PreGameMenuView;
 import java.io.*;
@@ -25,11 +29,11 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames ; // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames =loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
-    private ArrayList<User> users ;
+    private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
-    private User loggedInUser ;// instead of null
+    private User loggedInUser = loadLoggedInUser();// instead of null
 
 
     @Override
@@ -40,10 +44,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         // Initialize game data
         //loadGameData();
         GameAssetManager.load();
-
+        TileType.initTextures();
         // Set initial screen
         PreGameMenuView preGameMenuView =new PreGameMenuView(new PreGameMenuController());
-       // preGameMenuView.createUI();
+
         getInstance().setScreen(preGameMenuView);
     }
     @Override
@@ -218,14 +222,21 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void changeScreen() {
         switch(currentMenu) {
             case GameMenu:
-              //  getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                getInstance().setScreen(new GameView(new GameController()));
                 break;
             case MainMenu:
                 //getInstance().setScreen(new MainMenuScreen(this));
                 break;
+            case PreGameMenu:
+                getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                break;
             case NewGameMenu:
                 getInstance().setScreen(new NewGameMenuView(new NewGameMenuController()));
                 break;
+            case MapSelectionMenu:
+                getInstance().setScreen(new MapSelectionMenuView(new MapSelectionMenuController()));
+                break;
+
 
             // ... other cases
         }
