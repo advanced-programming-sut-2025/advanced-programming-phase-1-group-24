@@ -75,9 +75,19 @@ public class User {
     private boolean buffFishingSkill;
     private boolean buffMiningSkill;
     private int hoursLeftForBuff;
+    private int movingDirection = 0;
 
+
+    public int getMovingDirection() {
+        return movingDirection;
+    }
+
+    public void setMovingDirection(int movingDirection) {
+        this.movingDirection = movingDirection;
+    }
 
     /// /////////////?????????????/
+
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
         this.password = password;

@@ -1,93 +1,53 @@
 package io.github.stardew.mini;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.GameAssetManager;
+import io.github.stardew.mini.Controller.GameMenuController;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.GameView;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class MainApp extends com.badlogic.gdx.Game {
-    // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = null;// instead of null
+    private static SpriteBatch batch;
 
     @Override
     public void create() {
         instance = this;
-
+        batch = new SpriteBatch();
 //        // Initialize game data
        //loadGameData();
         GameAssetManager.load();
+        TileType.initTextures();
+        User logged = getUserByUsername("user208");
+        setLoggedInUser(logged);
+        GameMenuController controller = new GameMenuController();
+        controller.createGame("user207 user206", new Scanner(System.in));
+        setScreen(new GameView(controller));
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
     }
 
-    private void loadGameData() {
-        // LibGDX file handling
-        FileHandle usersFile = Gdx.files.local("data/users.json");
-        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
-        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
-
-        Json json = new Json();
-
-        // Load users
-        if (usersFile.exists()) {
-            users = json.fromJson(ArrayList.class, User.class, usersFile);
-        } else {
-            users = new ArrayList<>();
-        }
-
-        // Load active games
-        if (gamesFile.exists()) {
-            activeGames = json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
-        } else {
-            activeGames = new ArrayList<>();
-        }
-
-        // Load logged in user
-        if (loggedInUserFile.exists()) {
-            loggedInUser = json.fromJson(User.class, loggedInUserFile);
-        }
-    }
-
     @Override
     public void dispose() {
         super.dispose();
-        saveGameData();
-    }
-
-    private void saveGameData() {
-        Json json = new Json();
-        json.setUsePrototypes(false); // For proper serialization
-
-        // Save users
-        Gdx.files.local("data/users.json")
-            .writeString(json.prettyPrint(users), false);
-
-        // Save active games
-        Gdx.files.local("data/active_games.json")
-            .writeString(json.prettyPrint(activeGames), false);
-
-        // Save logged in user
-        if (loggedInUser != null) {
-            Gdx.files.local("data/logged_in_user.json")
-                .writeString(json.toJson(loggedInUser), false);
-        }
+        GameAssetManager.dispose();
     }
 
     private User loadLoggedInUser() {
@@ -194,6 +154,18 @@ public class MainApp extends com.badlogic.gdx.Game {
 
     public void setCurrentMenu(Menu currentMenu) {
         this.currentMenu = currentMenu;
+        changeScreen();
+    }
+    public void changeScreen() {
+        switch(currentMenu) {
+            case GameMenu:
+                //getInstance().setScreen(new GameMenuView(new GameMenuController()));
+                break;
+            case MainMenu:
+                //getInstance().setScreen(new MainMenuScreen(this));
+                break;
+            // ... other cases
+        }
     }
 
     public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
@@ -215,6 +187,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         return null;
     }
 
+    public static SpriteBatch getBatch() {
+        return batch;
+    }
 }
 
 

@@ -2,6 +2,7 @@ package io.github.stardew.mini.Model.Growables;
 
 import java.util.*;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
 
@@ -36,6 +37,7 @@ public enum ForagingCropType {
     private final ArrayList<Season> season;
     private final int baseSellPrice;
     private final int energy;
+    private Texture texture;
 
     ForagingCropType(String name, ArrayList<Season> season, int baseSellPrice, int energy){
         this.name = name;
