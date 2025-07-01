@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
+
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
     public static Skin skin;
@@ -19,12 +20,21 @@ public class GameAssetManager {
         }
         return gameAssetManager;
     }
+    public static Skin getSkin() {
+        if (skin == null) {
+            load(); // Initialize if not loaded
+        }
+        return skin;
+    }
 
     public static void load() {
         // Load skin from file (default libGDX skin)
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-
-        // Load other assets
+        try {
+            skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load skin: ui/uiskin.json", e);
+        }
+            // Load other assets
         menuBackground = new Texture("menu_bg.png");
 
         // Create custom button style if needed
@@ -448,5 +458,5 @@ public class GameAssetManager {
         public static final Texture CAMPFIRE_COOKER = new Texture("Craftable_item/Campfire_Cooker.png");
         public static final Texture CASK = new Texture("Craftable_item/Cask.png");
         public static final Texture CHARCOAL_KILN = new Texture("Craftable_item/Charcoal_Kiln.png");
-        public static final Texture CHARCOAL_KILN_OFF = new Texture("Craftable_item/Charcoal_Kiln_Off");
+      //  public static final Texture CHARCOAL_KILN_OFF = new Texture("Craftable_item/Charcoal_Kiln_Off");
 }
