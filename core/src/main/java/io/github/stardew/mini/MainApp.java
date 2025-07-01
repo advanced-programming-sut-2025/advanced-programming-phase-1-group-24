@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
@@ -29,7 +30,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
 
 //        // Initialize game data
-       loadGameData();
+       //loadGameData();
+        GameAssetManager.load();
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
