@@ -12,4 +12,7 @@ public class ForagingMineral extends Item{
         return new ForagingMineral(this.getProductQuality(), this.type);
     }
 
+    public ForagingMineralType getType() {
+        return type;
+    }
 }
