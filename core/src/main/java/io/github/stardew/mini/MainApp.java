@@ -34,7 +34,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
         GameAssetManager.load();
 setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//        // Initialize game data
+//if(loggedInUser != null) {
+//    setScreen(MainMenuView);
+
+//       // Initialize game data
        //loadGameData();
 
         // Set initial screen
