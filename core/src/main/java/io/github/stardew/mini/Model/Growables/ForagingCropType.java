@@ -58,4 +58,13 @@ public enum ForagingCropType {
     public int getBaseSellPrice() {
         return baseSellPrice;
     }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void initTexture(){
+        String correctedName = this.name.replace(" ", "_");
+        this.texture = new Texture("Foraging/" + correctedName + ".png");
+    }
 }

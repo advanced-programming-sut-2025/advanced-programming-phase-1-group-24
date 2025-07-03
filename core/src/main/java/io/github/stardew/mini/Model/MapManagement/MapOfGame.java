@@ -351,7 +351,7 @@ public class MapOfGame {
         items.add(new ShopItem("Sugar", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.Sugar), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Wheat Flour", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.WheatFlower), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Rice", Integer.MAX_VALUE, new randomStuff(250, randomStuffType.Rice), ShopItemType.RANDOMSTUFF, 250, 250, 250, 250));
-        items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
+        //items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
 
         return items;
     }

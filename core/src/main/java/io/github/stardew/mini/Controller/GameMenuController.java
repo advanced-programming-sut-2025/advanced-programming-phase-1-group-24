@@ -110,64 +110,6 @@ public class GameMenuController implements MenuController {
         }
     }
 
-    //    public Result createGame(String users, Scanner scanner) {
-//        App app = App.getInstance();
-//        User creator = app.getLoggedInUser();
-//
-//        if (creator == null)
-//            return new Result(false, "please login first!");
-//
-//        // Split usernames and clean empty entries (e.g., if user types extra spaces)
-//        List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
-//                .filter(usersString -> !usersString.isEmpty())
-//                .toList();
-//
-//        if (usernames.isEmpty())
-//            return new Result(false, "you must specify at least one username!");
-//
-//        if (usernames.size() > 3)
-//            return new Result(false, "you can specify up to 3 usernames!");
-//
-//        // Check if the creator is already in a game
-//        for (Game game : app.getActiveGames()) {
-//            if (game.hasUser(creator))
-//                return new Result(false, "you are already in another game!");
-//        }
-//
-//        ArrayList<User> players = new ArrayList<>();
-//        players.add(creator); // Add the logged-in user first
-//
-//        for (String username : usernames) {
-//            User user = app.getUserByUsername(username);
-//            if (user == null)
-//                return new Result(false, "invalid username: " + username);
-//
-//            // Check if the user is already in a game
-//            Game game = app.getGameByUser(user);
-//            if (game != null) {
-//                return new Result(false, username + " is already in another game!");
-//            }
-//            players.add(user);
-//        }
-//        for (User player : players) {
-//            player.updateGameFields();
-//        }
-//        // Create and add the game
-//        Game newGame = new Game(players, creator, creator);
-//        //load farm.json            ONLY ONCEEEEEEE
-//        if (FarmTemplateManager.getTemplates() == null) {
-//            FarmTemplateManager.loadTemplates();
-//        }
-//        //create a new game and put it as currentgame in app
-//        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
-//
-//        app.getActiveGames().add(newGame);
-//        app.setCurrentGame(newGame);
-//
-//        handleMapSelection(players, scanner);
-//
-//        return new Result(true, "game created successfully!");
-//    }
     public Result createGame(String users, Scanner scanner) {
         MainApp app = MainApp.getInstance();
         User creator = app.getLoggedInUser();

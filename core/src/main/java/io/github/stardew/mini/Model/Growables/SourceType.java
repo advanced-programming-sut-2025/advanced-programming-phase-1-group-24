@@ -59,8 +59,8 @@ public enum SourceType {
     PineCones("Pine Cones", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MahoganySeeds("Mahogany Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MushroomTreeSeeds("Mushroom Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
-    MysticTreeSeeds("Mystic Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
-    MixedSeeds("Mixed Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)));
+    MysticTreeSeeds("Mystic Tree Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)));
+    //MixedSeeds("Mixed Seeds", false, null, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)));
 
 
     private final String name;
@@ -88,6 +88,11 @@ public enum SourceType {
     public ArrayList<Season> getNormalSeasons() {
         return normalSeasons;
     }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
     public static SourceType fromName(String name) {
         for (SourceType type : values()) {
             if (type.getName().equalsIgnoreCase(name)) {
@@ -95,5 +100,15 @@ public enum SourceType {
             }
         }
         return null;
+    }
+
+    public void initTexture(){
+        String correctedName = this.name.replace(" ", "_");
+        if(this.ordinal() <= SourceType.AncientSeeds.ordinal()) {
+            this.texture = new Texture("Crops/" + correctedName + ".png");
+        }
+        else{
+            this.texture = new Texture("Crafting/" + correctedName + ".png");
+        }
     }
 }

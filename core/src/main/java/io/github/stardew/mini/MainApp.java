@@ -4,7 +4,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.GameMenuController;
+import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
@@ -33,7 +36,24 @@ public class MainApp extends com.badlogic.gdx.Game {
 //        // Initialize game data
        //loadGameData();
         GameAssetManager.load();
+        TreeAssets.load();
+        CropAssets.load();
         TileType.initTextures();
+        for (TreeType treeType : TreeType.values()) {
+            treeType.initTextures();
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            fruitType.initTexture();
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            sourceType.initTexture();
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            foragingCropType.initTexture();
+        }
+        for(CropType cropType : CropType.values()) {
+            cropType.initTexture();
+        }
         User logged = getUserByUsername("user208");
         setLoggedInUser(logged);
         GameMenuController controller = new GameMenuController();
@@ -48,6 +68,8 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void dispose() {
         super.dispose();
         GameAssetManager.dispose();
+        TreeAssets.dispose();
+        CropAssets.dispose();
     }
 
     private User loadLoggedInUser() {
