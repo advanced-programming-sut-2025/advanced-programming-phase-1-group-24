@@ -33,6 +33,7 @@ public enum TreeType {
     private final ArrayList<Season> foragingSeasons;
     private final ArrayList<Season> normalSeasons;
     private List<Texture> textures;
+    //As soon as the saplings are planted the tree will be in stage one (List[0])
     private Texture fruitedTexture;
     private Texture burnTexture;
 
@@ -77,60 +78,60 @@ public enum TreeType {
     public void initTextures() {
         switch (this) {
             case AppleTree -> {
-                textures = TreeAssets.getInstance().appleTextures;
+                textures = TreeAssets.appleTextures;
                 fruitedTexture = new Texture("Trees/Apple_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/AppleTreeLightning.png");
             }
             case OrangeTree -> {
-                textures = TreeAssets.getInstance().orangeTextures;
+                textures = TreeAssets.orangeTextures;
                 fruitedTexture = new Texture("Trees/Orange_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/OrangeTreeLightning.png");
             }
             case OakTree -> {
-                textures = TreeAssets.getInstance().oakTextures;
+                textures = TreeAssets.oakTextures;
             }
             case PeachTree -> {
-                textures = TreeAssets.getInstance().peachTextures;
+                textures = TreeAssets.peachTextures;
                 fruitedTexture = new Texture("Trees/Peach_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/PeachTreeLightning.png");
             }
             case MangoTree -> {
-                textures = TreeAssets.getInstance().mangoTextures;
+                textures = TreeAssets.mangoTextures;
                 fruitedTexture = new Texture("Trees/Mango_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/MangoTreeLightning.png");
             }
             case ApricotTree -> {
-                textures = TreeAssets.getInstance().apricotTextures;
+                textures = TreeAssets.apricotTextures;
                 fruitedTexture = new Texture("Trees/Apricot_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/ApricotTreeLightning.png");
             }
             case BananaTree -> {
-                textures = TreeAssets.getInstance().bananaTextures;
+                textures = TreeAssets.bananaTextures;
                 fruitedTexture = new Texture("Trees/Banana_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/BananaTreeLightning.png");
             }
             case CherryTree -> {
-                textures = TreeAssets.getInstance().cherryTextures;
+                textures = TreeAssets.cherryTextures;
                 fruitedTexture = new Texture("Trees/Cherry_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/CherryTreeLightning.png");
             }
             case MahoganyTree -> {
-                textures = TreeAssets.getInstance().mahoganyTextures;
+                textures = TreeAssets.mahoganyTextures;
             }
             case MapleTree -> {
-                textures = TreeAssets.getInstance().mapleTextures;
+                textures = TreeAssets.mapleTextures;
             }
             case MushroomTree -> {
-                textures = TreeAssets.getInstance().mushroomTreeTextures;
+                textures = TreeAssets.mushroomTreeTextures;
             }
             case MysticTree -> {
-                textures = TreeAssets.getInstance().mysticTreeTextures;
+                textures = TreeAssets.mysticTreeTextures;
             }
             case PineTree -> {
-                textures = TreeAssets.getInstance().pineTextures;
+                textures = TreeAssets.pineTextures;
             }
             case PomegranateTree -> {
-                textures = TreeAssets.getInstance().pomegranateTextures;
+                textures = TreeAssets.pomegranateTextures;
                 fruitedTexture = new Texture("Trees/Pomegranate_Stage_5.png");
                 burnTexture = new Texture("Trees/PomegranateTreeLightning.png");
             }

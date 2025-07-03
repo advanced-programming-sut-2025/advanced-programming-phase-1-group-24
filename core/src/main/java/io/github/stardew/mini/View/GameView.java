@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
@@ -167,20 +168,68 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
 
-        GreenHouse greenHouseTile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getGreenHouse();
+        for(User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            GreenHouse greenHouseTile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player).getGreenHouse();
 
-        int drawX = (greenHouseTile.getX() - 1) * tileSize;
-        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - greenHouseTile.getY() - greenHouseTile.getHeight() - 1) * tileSize;
+            int drawX = (greenHouseTile.getX() - 1) * tileSize;
+            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - greenHouseTile.getY() - greenHouseTile.getHeight() - 1) * tileSize;
 
-        batch.draw(
-            GameAssetManager.greenhouseTexture,
-            drawX,
-            drawY,
-            8 * tileSize,
-            7 * tileSize
-        );
+            batch.draw(
+                GameAssetManager.greenhouseTexture,
+                drawX,
+                drawY,
+                8 * tileSize,
+                7 * tileSize
+            );
+        }
 
+        //TODO : handle Giant Crop
+        //TODO : handle burnt plants
+        for(int y=0; y < rows; y++) {
+            for(int x=0; x < tiles[0].length; x++) {
+                if(tiles[y][x].getContainedGrowable() != null) {
+                    if(tiles[y][x].getContainedGrowable().getTreeType() != null) {
+                        if(tiles[y][x].getProductOfGrowable() != null) {
+                            if(tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture() != null) {
+                                batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture(),
+                                    x * tileSize,
+                                    (rows - y - 1) * tileSize,
+                                    tileSize, tileSize);
+                            }
+                        }
+                        else {
+                            int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
+                            batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getTextures().get(currentStage),
+                                x * tileSize,
+                                (rows - y - 1) * tileSize,
+                                tileSize, tileSize);
+                        }
+                    }
+                    else if(tiles[y][x].getContainedGrowable().getCropType() != null) {
+                        //TODO : handling the products of a crop that can regrow(just like tree)
 
+                    }
+                    else {
+                        //Will it ever go to this else block ??
+                        batch.draw(tiles[y][x].getContainedGrowable().getForagingCropType().getTexture(),
+                            x * tileSize,
+                            (rows - y - 1) * tileSize,
+                            tileSize, tileSize);
+                    }
+                }
+                else if(tiles[y][x].getProductOfGrowable() != null) {
+                    if(tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.ForagingCrop) {
+                        batch.draw(tiles[y][x].getProductOfGrowable().getForagingCropType().getTexture(),
+                            x * tileSize,
+                            (rows - y - 1) * tileSize,
+                            tileSize, tileSize);
+                    }
+                    else if(tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.CropProduct) {
+                        //TODO : Handle products of crops (one time growth)
+                    }
+                }
+            }
+        }
 
         drawPlayer();
         batch.end();

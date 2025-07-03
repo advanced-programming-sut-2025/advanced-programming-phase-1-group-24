@@ -15,23 +15,23 @@ public class TreeAssets {
         return instance;
     }
 
-    public List<Texture> appleTextures = new ArrayList<>();
-    public List<Texture> apricotTextures = new ArrayList<>();
-    public List<Texture> bananaTextures = new ArrayList<>();
-    public List<Texture> cherryTextures = new ArrayList<>();
-    public List<Texture> mahoganyTextures = new ArrayList<>();
-    public List<Texture> mangoTextures = new ArrayList<>();
-    public List<Texture> mapleTextures = new ArrayList<>();
-    public List<Texture> mushroomTreeTextures = new ArrayList<>();
-    public List<Texture> mysticTreeTextures = new ArrayList<>();
-    public List<Texture> oakTextures = new ArrayList<>();
-    public List<Texture> orangeTextures = new ArrayList<>();
-    public List<Texture> peachTextures = new ArrayList<>();
-    public List<Texture> pineTextures = new ArrayList<>();
-    public List<Texture> pomegranateTextures = new ArrayList<>();
+    public static List<Texture> appleTextures = new ArrayList<>();
+    public static List<Texture> apricotTextures = new ArrayList<>();
+    public static List<Texture> bananaTextures = new ArrayList<>();
+    public static List<Texture> cherryTextures = new ArrayList<>();
+    public static List<Texture> mahoganyTextures = new ArrayList<>();
+    public static List<Texture> mangoTextures = new ArrayList<>();
+    public static List<Texture> mapleTextures = new ArrayList<>();
+    public static List<Texture> mushroomTreeTextures = new ArrayList<>();
+    public static List<Texture> mysticTreeTextures = new ArrayList<>();
+    public static List<Texture> oakTextures = new ArrayList<>();
+    public static List<Texture> orangeTextures = new ArrayList<>();
+    public static List<Texture> peachTextures = new ArrayList<>();
+    public static List<Texture> pineTextures = new ArrayList<>();
+    public static List<Texture> pomegranateTextures = new ArrayList<>();
 
 
-    public void load() {
+    public static void load() {
         appleTextures.add(new Texture("Trees/Apple_Stage_1.png"));
         appleTextures.add(new Texture("Trees/Apple_Stage_2.png"));
         appleTextures.add(new Texture("Trees/Apple_Stage_3.png"));
@@ -118,7 +118,7 @@ public class TreeAssets {
         pomegranateTextures.add(new Texture("Trees/Pomegranate_Stage_5.png"));
     }
 
-    public void dispose() {
+    public static void dispose() {
         for (Texture texture : appleTextures) texture.dispose();
         for (Texture texture : apricotTextures) texture.dispose();
         for (Texture texture : bananaTextures) texture.dispose();
