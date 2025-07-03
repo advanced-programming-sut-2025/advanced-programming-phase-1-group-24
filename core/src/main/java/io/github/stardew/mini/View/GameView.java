@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -53,6 +54,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private User currentPlayer;  //should change whenever currentPlayer in Game is changed
     private float stateTime = 0f;
     private boolean showFullMap = false;
+    private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
 
     public GameView(GameMenuController controller) {
         this.controller = controller;
@@ -83,8 +85,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (keycode == Input.Keys.N) {
-            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
-            controller.handleEndOfDay();
+//            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
+//            controller.handleEndOfDay();
+            System.out.println(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             return true;
         }
 
@@ -187,6 +190,15 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         friendsButton.setTouchable(Touchable.enabled);
 
         stage.addActor(friendsButton);
+
+        Timer.schedule(new Timer.Task(){
+            @Override
+            public void run() {
+                MainApp.getInstance().getCurrentGame().advanceTimeByOneHour();
+                controller.handleEndOfDay();
+                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+            }
+        }, 5, 5);
     }
 
     @Override
@@ -207,15 +219,129 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int tileSize = GameAssetManager.TILE_SIZE;
 
         int rows = tiles.length;
+        drawTiles(rows, tiles, tileSize);
+
+        drawGreenHouse(tileSize, rows);
+
+        //TODO : handle Giant Crop
+        //TODO : handle burnt plants
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
-                TileType tile = tiles[y][x].getType();
-                if (tile != null && tile.getTexture() != null) {
-                    batch.draw(tile.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                if (tiles[y][x].getContainedGrowable() != null) {
+                    drawGrowables(tiles, y, x, tileSize, rows);
+                } else if (tiles[y][x].getProductOfGrowable() != null) {
+                    drawProductOfGrowables(tiles, y, x, tileSize, rows);
+                }
+                if (tiles[y][x].getContainedItem() != null) {
+                    drawItems(tiles, y, x, tileSize, rows);
                 }
             }
         }
 
+        drawPlayer();
+        float camX = camera.position.x - camera.viewportWidth / 2f;
+        float camY = camera.position.y - camera.viewportHeight / 2f;
+        batch.setColor(darkOverlayColor);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.setColor(Color.WHITE);
+        batch.end();
+
+        handleInput();
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
+    }
+
+    private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
+        if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
+            batch.draw(foraging.getType().getTexture(),
+                x * tileSize,
+                (rows - y - 1) * tileSize,
+                tileSize, tileSize);
+        }
+    }
+
+    private void drawProductOfGrowables(Tile[][] tiles, int y, int x, int tileSize, int rows) {
+        if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.ForagingCrop) {
+            batch.draw(tiles[y][x].getProductOfGrowable().getForagingCropType().getTexture(),
+                x * tileSize,
+                (rows - y - 1) * tileSize,
+                tileSize, tileSize);
+        } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.CropProduct) {
+            //TODO : Handle products of crops (one time growth)
+            batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
+                x * tileSize,
+                (rows - y - 1) * tileSize,
+                tileSize, tileSize);
+        } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.Giant) {
+            Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
+            int topleftX = point.x;
+            int topleftY = point.y;
+            batch.draw(CropType.fromName(tiles[y][x].getProductOfGrowable().getName()).getGiantTexture(),
+                topleftX * tileSize,
+                topleftY * tileSize,
+                2 * tileSize,
+                2 * tileSize);
+        }
+    }
+
+    private void drawGrowables(Tile[][] tiles, int y, int x, int tileSize, int rows) {
+        if (tiles[y][x].getContainedGrowable().getTreeType() != null) {
+            if (tiles[y][x].getProductOfGrowable() != null && tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture() != null) {
+                batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture(),
+                    x * tileSize,
+                    (rows - y - 1) * tileSize,
+                    tileSize, tileSize);
+            } else if (tiles[y][x].isHasBeenBurt() && tiles[y][x].getContainedGrowable().getTreeType().getBurnTexture() != null) {
+                batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getBurnTexture(),
+                    x * tileSize,
+                    (rows - y - 1) * tileSize,
+                    tileSize, tileSize);
+            } else {
+                int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
+                if (currentStage == 4) {
+                    batch.draw(TreeAssets.getHorizontalSlice(tiles[y][x].getContainedGrowable().getTreeType().getTextures().get(currentStage), 1, 4),
+                        x * tileSize,
+                        (rows - y - 1) * tileSize);
+                } else {
+                    batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getTextures().get(currentStage),
+                        x * tileSize,
+                        (rows - y - 1) * tileSize,
+                        tileSize, tileSize);
+                }
+            }
+        } else if (tiles[y][x].getContainedGrowable().getCropType() != null) {
+            //TODO : handling the products of a crop that can regrow(just like tree)
+            if (tiles[y][x].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
+                int topleftX = point.x;
+                int topleftY = point.y;
+                batch.draw(tiles[y][x].getContainedGrowable().getCropType().getGiantTexture(),
+                    topleftX * tileSize,
+                    topleftY * tileSize,
+                    2 * tileSize,
+                    2 * tileSize);
+            } else if (tiles[y][x].getProductOfGrowable() != null && !tiles[y][x].getContainedGrowable().getCropType().oneTime()) {
+                batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
+                    x * tileSize,
+                    (rows - y - 1) * tileSize,
+                    tileSize, tileSize);
+            } else {
+                int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
+                batch.draw(tiles[y][x].getContainedGrowable().getCropType().getTextures().get(currentStage),
+                    x * tileSize,
+                    (rows - y - 1) * tileSize,
+                    tileSize, tileSize);
+            }
+        } else {
+            //Will it ever go to this else block ??
+            batch.draw(tiles[y][x].getContainedGrowable().getForagingCropType().getTexture(),
+                x * tileSize,
+                (rows - y - 1) * tileSize,
+                tileSize, tileSize);
+        }
+    }
+
+    private void drawGreenHouse(int tileSize, int rows) {
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             GreenHouse greenHouseTile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player).getGreenHouse();
 
@@ -236,106 +362,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 7 * tileSize
             );
         }
+    }
 
-        //TODO : handle Giant Crop
-        //TODO : handle burnt plants
+    private void drawTiles(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
-                if (tiles[y][x].getContainedGrowable() != null) {
-                    if (tiles[y][x].getContainedGrowable().getTreeType() != null) {
-                        if (tiles[y][x].getProductOfGrowable() != null && tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture() != null) {
-                            batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getFruitedTexture(),
-                                x * tileSize,
-                                (rows - y - 1) * tileSize,
-                                tileSize, tileSize);
-                        } else if (tiles[y][x].isHasBeenBurt() && tiles[y][x].getContainedGrowable().getTreeType().getBurnTexture() != null) {
-                            batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getBurnTexture(),
-                                x * tileSize,
-                                (rows - y - 1) * tileSize,
-                                tileSize, tileSize);
-                        } else {
-                            int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
-                            if (currentStage == 4) {
-                                batch.draw(TreeAssets.getHorizontalSlice(tiles[y][x].getContainedGrowable().getTreeType().getTextures().get(currentStage), 1, 4),
-                                    x * tileSize,
-                                    (rows - y - 1) * tileSize);
-                            } else {
-                                batch.draw(tiles[y][x].getContainedGrowable().getTreeType().getTextures().get(currentStage),
-                                    x * tileSize,
-                                    (rows - y - 1) * tileSize,
-                                    tileSize, tileSize);
-                            }
-                        }
-                    } else if (tiles[y][x].getContainedGrowable().getCropType() != null) {
-                        //TODO : handling the products of a crop that can regrow(just like tree)
-                        if (tiles[y][x].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
-                            Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
-                            int topleftX = point.x;
-                            int topleftY = point.y;
-                            batch.draw(tiles[y][x].getContainedGrowable().getCropType().getGiantTexture(),
-                                topleftX * tileSize,
-                                topleftY * tileSize,
-                                2 * tileSize,
-                                2 * tileSize);
-                        } else if (tiles[y][x].getProductOfGrowable() != null && !tiles[y][x].getContainedGrowable().getCropType().oneTime()) {
-                            batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
-                                x * tileSize,
-                                (rows - y - 1) * tileSize,
-                                tileSize, tileSize);
-                        } else {
-                            int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
-                            batch.draw(tiles[y][x].getContainedGrowable().getCropType().getTextures().get(currentStage),
-                                x * tileSize,
-                                (rows - y - 1) * tileSize,
-                                tileSize, tileSize);
-                        }
-                    } else {
-                        //Will it ever go to this else block ??
-                        batch.draw(tiles[y][x].getContainedGrowable().getForagingCropType().getTexture(),
-                            x * tileSize,
-                            (rows - y - 1) * tileSize,
-                            tileSize, tileSize);
-                    }
-                } else if (tiles[y][x].getProductOfGrowable() != null) {
-                    if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.ForagingCrop) {
-                        batch.draw(tiles[y][x].getProductOfGrowable().getForagingCropType().getTexture(),
-                            x * tileSize,
-                            (rows - y - 1) * tileSize,
-                            tileSize, tileSize);
-                    } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.CropProduct) {
-                        //TODO : Handle products of crops (one time growth)
-                        batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
-                            x * tileSize,
-                            (rows - y - 1) * tileSize,
-                            tileSize, tileSize);
-                    } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.Giant) {
-                        Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
-                        int topleftX = point.x;
-                        int topleftY = point.y;
-                        batch.draw(CropType.fromName(tiles[y][x].getProductOfGrowable().getName()).getGiantTexture(),
-                            topleftX * tileSize,
-                            topleftY * tileSize,
-                            2 * tileSize,
-                            2 * tileSize);
-                    }
-                }
-                if (tiles[y][x].getContainedItem() != null) {
-                    if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
-                        batch.draw(foraging.getType().getTexture(),
-                            x * tileSize,
-                            (rows - y - 1) * tileSize,
-                            tileSize, tileSize);
-                    }
+                TileType tile = tiles[y][x].getType();
+                if (tile != null && tile.getTexture() != null) {
+                    batch.draw(tile.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                 }
             }
         }
-
-        drawPlayer();
-        batch.end();
-
-        handleInput();
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
     }
 
     @Override
@@ -536,5 +573,26 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         return x >= actor.getX() && x <= actor.getX() + actor.getWidth() &&
             y >= actor.getY() && y <= actor.getY() + actor.getHeight();
     }
+
+    private void updateLighting(int gameHour) {
+        float alpha = 0f;
+
+        if (gameHour >= 18 && gameHour < 22) {
+            // 18 to 22 => fade from 0 to 0.8
+            alpha = (gameHour - 18) / 4f * 0.8f;
+        } else if (gameHour >= 22 || gameHour < 9) {
+            // Nighttime
+            alpha = 0.8f;
+        } else if (gameHour >= 9 && gameHour < 10) {
+            // 09:00 to 10:00 — fade back to daylight
+            alpha = 0.8f - ((gameHour - 9) / 1f * 0.8f);
+        } else {
+            // Daytime
+            alpha = 0f;
+        }
+
+        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 0.8f); // max darkness = 0.8
+    }
+
 
 }

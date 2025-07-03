@@ -46,6 +46,8 @@ public class GameAssetManager {
     public static Texture FLOORING_86;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
+    public static Texture pixel;
+
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -126,6 +128,11 @@ public class GameAssetManager {
         customWindowStyle.background = solidColorDrawable;
         skin.add("custom-window", customWindowStyle);
 
+        pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        pixel = new Texture(pixmap);
+        pixmap.dispose();
     }
 
     public static void dispose() {
