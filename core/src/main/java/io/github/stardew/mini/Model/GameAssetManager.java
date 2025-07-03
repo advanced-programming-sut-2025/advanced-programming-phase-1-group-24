@@ -3,15 +3,26 @@ package io.github.stardew.mini.Model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Array;
+
+import java.util.ArrayList;
 
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
     public static Skin skin;
     public static Texture menuBackground;
 
-    public static final int TILE_SIZE = 10;
+    public static final int TILE_SIZE = 100;
+
+    public static TextureAtlas playerAtlas;
+    public static final ArrayList<Animation<TextureRegion>> playerAnimations = new ArrayList<>();
 
     // Textures for tiles (load later)
     public static Texture LIGHT_GREEN_FLOOR;
@@ -30,6 +41,7 @@ public class GameAssetManager {
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
     public static Texture GREENHOUSE;
+    public static TextureRegion greenhouseTexture;
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -59,13 +71,42 @@ public class GameAssetManager {
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
+        greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-        buttonStyle.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-        buttonStyle.font = skin.getFont("font");
-        buttonStyle.font.getData().setScale(3f);
-        skin.add("default", buttonStyle);
+        playerAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
+
+        for (int i = 14; i > 9; i--) {
+            Array<TextureRegion> walkFrames = new Array<>();
+            if (i == 14) {
+                for (int j = 0; j < 4; j++) {
+                    String region = "player_" + 13 + "_" + 0;
+                    walkFrames.add(playerAtlas.findRegion(region));
+                }
+            } else {
+                for (int j = 0; j < 4; j++) {
+                    String region = "player_" + i + "_" + j;
+                    walkFrames.add(playerAtlas.findRegion(region));
+                }
+            }
+            playerAnimations.add(new Animation<>(0.15f, walkFrames, Animation.PlayMode.LOOP));
+        }
+        //creating custom font
+        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        skin.add("custom-font", customFont);
+
+        // Create custom-Label
+        Label.LabelStyle customLabelStyle = new Label.LabelStyle();
+        customLabelStyle.font = skin.getFont("custom-font");
+        customLabelStyle.fontColor = Color.WHITE;
+        skin.add("custom-label", customLabelStyle);
+
+        // Create another button style with custom font
+        TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
+        buttonStyle2.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
+        buttonStyle2.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
+        buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
+        buttonStyle2.font.getData().setScale(0.9f);
+        skin.add("custom-button", buttonStyle2);
     }
 
     public static void dispose() {

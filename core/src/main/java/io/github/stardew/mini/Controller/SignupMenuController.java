@@ -1,13 +1,24 @@
 package io.github.stardew.mini.Controller;
 
+import com.google.gson.Gson;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.View.SignupMenuView;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static io.github.stardew.mini.Controller.LoginMenuController.*;
 
@@ -16,14 +27,8 @@ SignupMenuView view;
     public void setView(SignupMenuView view) {
         this.view = view;
     }
-    public Result register(Matcher matcher) {
+    public Result register(String username, String password, String confirm,String nickname, String email,String genderString) {
         MainApp app = MainApp.getInstance();
-        String username = matcher.group("username");
-        String password = matcher.group("password");
-        String confirm = matcher.group("confirm");
-        String nickname = matcher.group("nickname");
-        String email = matcher.group("email");
-        String genderString = matcher.group("gender");
         boolean gender = genderString.equalsIgnoreCase("male") ? false : true;
 
         // Check username duplication
@@ -56,7 +61,7 @@ SignupMenuView view;
             // generate a strong random password
             password = generateStrongRandomPassword();
             // show password to user (you may want to prompt confirmation in a real app)
-            System.out.println("Generated Password: " + password);
+            //System.out.println("Generated Password: " + password);
             // Optionally, wait for confirmation here before continuing
         }
 
@@ -77,6 +82,151 @@ SignupMenuView view;
         }
 
         return new Result(true, questionsList.toString());
+    }
+    public static Result pickQuestion(String answer, String confirm, String question) {
+        MainApp app = MainApp.getInstance();
+        User currentUser = app.getLoggedInUser();
+
+        if (currentUser == null) {
+            return new Result(false, "no pending user registration found!");
+        }
+
+        if (!answer.equals(confirm)) {
+            return new Result(false, "answer and confirmation do not match!");
+        }
+
+        currentUser.setSecurityQuestion(question);
+        currentUser.setSecurityAnswer(answer);
+
+        // Finally save the user
+        app.getUsers().add(currentUser);
+        UserDatabase.saveUsers(app.getUsers());
+        app.setLoggedInUser(null); // clear pending user
+
+        return new Result(true, "user registered successfully. you are now in login menu!");
+    }
+
+
+    public static void saveLoggedInUserToFile(User user) {
+        File file = new File("data/logged_in_user.json");
+        file.getParentFile().mkdirs(); // ensures the 'data' folder exists
+
+        try (Writer writer = new FileWriter(file)) {
+            new Gson().toJson(user, writer);
+        } catch (IOException e) {
+            e.printStackTrace(); // or log the error
+        }
+    }
+
+    public static void clearLoggedInUserFile() {
+        File file = new File("data/logged_in_user.json");
+        if (file.exists()) file.delete();
+    }
+
+
+
+
+    public Result forgetPassword(Matcher matcher, Scanner scanner) {
+        String username = matcher.group("username");
+        MainApp app = MainApp.getInstance();
+        User user = app.getUserByUsername(username);
+
+        if (user == null)
+            return new Result(false, "no user with this username exists!");
+
+        System.out.println("security question: " + user.getSecurityQuestion());
+        String input = scanner.nextLine().trim();
+        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
+        Matcher answerMatcher = answerPattern.matcher(input);
+
+        if (!answerMatcher.matches()) {
+            return new Result(false, "invalid format! expected: answer -a <answer>");
+        }
+
+        String answer = answerMatcher.group("answer").trim();
+        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+            return new Result(false, "incorrect answer! returning to main menu...");
+        }
+
+
+        System.out.print("do you want to choose your own password? (yes/no): ");
+        String choice = scanner.nextLine().trim().toLowerCase();
+
+        String newPassword;
+        if (choice.equals("yes")) {
+            while (true) {
+                System.out.print("enter new password: ");
+                newPassword = scanner.nextLine().trim();
+                if (!isStrongPassword(newPassword)) {
+                    System.out.println("password format is invalid! try again.");
+                } else {
+                    break;
+                }
+            }
+        } else {
+            // generate a random password
+            newPassword = generateStrongRandomPassword();
+            System.out.println("your new password is: " + newPassword);
+        }
+        String hashedPassword = hashSHA256(newPassword);
+        user.setPassword(hashedPassword);
+        UserDatabase.saveUsers(app.getUsers());
+
+        return new Result(true, "password changed successfully! you can now log in.");
+    }
+
+    public static String hashSHA256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static boolean isStrongPassword(String password) {
+        return password.length() >= 8 &&
+            password.matches(".*[a-z].*") &&
+            password.matches(".*[A-Z].*") &&
+            password.matches(".*\\d.*") &&
+            password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
+    }
+
+    public static boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9._-]+@[A-Za-z0-9-]+\\.[A-Za-z]{2,}$") &&
+            !email.contains("..") &&
+            !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
+    }
+
+    public static boolean isValidUsername(String username) {
+        return username.matches("^(?=[A-Za-z0-9])(?!.*\\.\\.)([A-Za-z0-9._-]{3,8})(?<!\\.)$");
+    }
+
+    public static String generateStrongRandomPassword() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "!@#$%^&*()_+=[]{}|:<>?";
+        String all = upper + lower + digits + special;
+
+        SecureRandom rand = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+
+        password.append(upper.charAt(rand.nextInt(upper.length())));
+        password.append(lower.charAt(rand.nextInt(lower.length())));
+        password.append(digits.charAt(rand.nextInt(digits.length())));
+        password.append(special.charAt(rand.nextInt(special.length())));
+
+        for (int i = 0; i < 8; i++) {
+            password.append(all.charAt(rand.nextInt(all.length())));
+        }
+
+        return password.toString();
     }
 
 }
