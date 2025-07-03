@@ -2,12 +2,18 @@ package io.github.stardew.mini.Model.Assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -88,13 +94,38 @@ public class GameAssetManager {
             }
             playerAnimations.add(new Animation<>(0.15f, walkFrames, Animation.PlayMode.LOOP));
         }
+        //creating custom font
+        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        skin.add("custom-font", customFont);
 
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-        buttonStyle.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-        buttonStyle.font = skin.getFont("font");
-        buttonStyle.font.getData().setScale(3f);
-        skin.add("default", buttonStyle);
+        // Create custom-Label
+        Label.LabelStyle customLabelStyle = new Label.LabelStyle();
+        customLabelStyle.font = skin.getFont("custom-font");
+        customLabelStyle.fontColor = Color.WHITE;
+        skin.add("custom-label", customLabelStyle);
+
+        // Create another button style with custom font
+        TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
+        buttonStyle2.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
+        buttonStyle2.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
+        buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
+        buttonStyle2.font.getData().setScale(0.9f);
+        skin.add("custom-button", buttonStyle2);
+
+        Window.WindowStyle customWindowStyle = new Window.WindowStyle();
+        customWindowStyle.titleFont = customFont;
+        customWindowStyle.titleFontColor = Color.WHITE;
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.DARK_GRAY); // Choose your color here
+        pixmap.fill();
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose(); // safe to dispose the pixmap after creating texture
+
+        Drawable solidColorDrawable = new TextureRegionDrawable(new TextureRegion(texture));
+        customWindowStyle.background = solidColorDrawable;
+        skin.add("custom-window", customWindowStyle);
+
     }
 
     public static void dispose() {

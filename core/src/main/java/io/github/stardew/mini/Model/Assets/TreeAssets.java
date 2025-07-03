@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Model.Assets;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,5 +134,10 @@ public class TreeAssets {
         for (Texture t : peachTextures) t.dispose();
         for (Texture t : pineTextures) t.dispose();
         for (Texture t : pomegranateTextures) t.dispose();
+    }
+
+    public static TextureRegion getHorizontalSlice(Texture texture, int index, int totalParts) {
+        int partWidth = texture.getWidth() / totalParts;
+        return new TextureRegion(texture, index * partWidth, 0, partWidth, texture.getHeight());
     }
 }

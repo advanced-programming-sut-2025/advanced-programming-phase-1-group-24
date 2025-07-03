@@ -7,9 +7,12 @@ import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.FriendshipLevels;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.View.GameView;
@@ -53,6 +56,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         for(CropType cropType : CropType.values()) {
             cropType.initTexture();
+        }
+        for(ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
+            foragingMineralType.initTexture();
         }
         User logged = getUserByUsername("user208");
         setLoggedInUser(logged);

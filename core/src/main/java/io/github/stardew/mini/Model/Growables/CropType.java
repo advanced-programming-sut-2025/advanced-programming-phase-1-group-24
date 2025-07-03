@@ -177,4 +177,14 @@ private Texture giantTexture;
             this.giantTexture = new Texture("Crops/Giant_" + key + ".png");
         }
     }
+
+    public static CropType fromName(String name) {
+        for (CropType type : CropType.values()) {
+            if (type.getName().equalsIgnoreCase(name)) {
+                return type;
+            }
+        }
+        return null; // or throw an exception if you prefer
+    }
+
 }
