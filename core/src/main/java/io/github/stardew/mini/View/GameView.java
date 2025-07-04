@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -34,12 +35,17 @@ import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
+import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 
 //import java.awt.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
@@ -55,6 +61,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private float stateTime = 0f;
     private boolean showFullMap = false;
     private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
+    private WeatherType currentWeather;
+    public static List<LightningFlash> scheduledFlashes = new ArrayList<>();
+    private List<LightningFlash> activeFlashes = new ArrayList<>();
 
     public GameView(GameMenuController controller) {
         this.controller = controller;
@@ -203,6 +212,24 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public void render(float v) {
+        for (LightningFlash flash : activeFlashes) {
+            flash.update(v);
+        }
+
+        int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // get current game hour as int
+
+        Iterator<LightningFlash> it = scheduledFlashes.iterator();
+        while (it.hasNext()) {
+            LightningFlash flash = it.next();
+            if (flash.scheduledTime == currentHour) {
+                flash.trigger();
+                activeFlashes.add(flash);
+                it.remove(); // remove from scheduled list
+            }
+        }
+
+        activeFlashes.removeIf(flash -> !flash.isActive());
+
         stateTime += Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -243,6 +270,14 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         float camY = camera.position.y - camera.viewportHeight / 2f;
         batch.setColor(darkOverlayColor);
         batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.setColor(Color.WHITE);
+        for (LightningFlash flash : activeFlashes) {
+            if (flash.isActive()) {
+                batch.setColor(new Color(0, 0, 0, flash.getAlpha())); // use black if preferred
+                batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+                //controller.printMap("0", "0", "150");
+            }
+        }
         batch.setColor(Color.WHITE);
         batch.end();
 
@@ -370,6 +405,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 TileType tile = tiles[y][x].getType();
                 if (tile != null && tile.getTexture() != null) {
                     batch.draw(tile.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                }
+                if(tiles[y][x].isHasBeenBurt()){
+                    batch.draw(GameAssetManager.burntTile, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                 }
             }
         }
