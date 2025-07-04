@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -14,10 +15,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
@@ -27,6 +31,8 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Menus.HouseMenuCommands;
 import io.github.stardew.mini.Model.Places.GreenHouse;
+import io.github.stardew.mini.Model.Places.Shop;
+import io.github.stardew.mini.Model.Places.ShopItem;
 import io.github.stardew.mini.Model.User;
 
 import java.util.Scanner;
@@ -51,8 +57,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
 
+    private Dialog shopMenuDialog;
+    private Shop selectedShop;
+    private Dialog shopPurchaseDialog;
+    private ShopItem selectedShopItem;
+    private int purchaseQuantity = 1;
+
+    private StoreMenuController storeController;
+
     public GameView(GameController controller) {
         this.controller = controller;
+        storeController=new StoreMenuController();
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
@@ -89,6 +104,14 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     Gdx.input.setInputProcessor(stage);
                     return true;
                 }
+                if (tile != null && tile.getType() == TileType.SHOP) {
+                    selectedShop = mapOfGame.getShopAtPosition(tileX, tileY);
+                    if (selectedShop != null) {
+                        Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
+                        showShopMenuDialog(stageCoords.x, stageCoords.y);
+                        return true;
+                    }
+                }
 
 //                if(){
 //
@@ -97,12 +120,139 @@ public class GameView implements Screen, InputProcessor, AppMenu {
       }
         return false;
     }
+    private void showShopMenuDialog(float x, float y) {
+        shopMenuDialog.clear();
+        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
+        Table content = shopMenuDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(5);
+
+        System.out.println(selectedShop.getShopName());
+        for (ShopItem item : selectedShop.getProducts()) {
+            System.out.println(item.getName());
+            boolean isAvailable = item.getDailyLimit()-item.getSoldToday() > 0;
+            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin);
+            itemButton.setDisabled(!isAvailable);
+            itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+            itemButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    selectedShopItem = item;
+                    purchaseQuantity = 1;
+                    showPurchaseDialog();
+                    shopMenuDialog.hide();
+                }
+            });
+            content.add(itemButton).row();
+        }
+        shopMenuDialog.add(content);
+// Add this line to force layout update
+        shopMenuDialog.pack(); // ⬅️ This resizes the dialog to fit the content
+
+// Then set position
+        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+
+// Show the dialog
+        shopMenuDialog.setVisible(true);
+        shopMenuDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+    private void showPurchaseDialog() {
+        shopPurchaseDialog.clear();
+        shopPurchaseDialog.getTitleLabel().setText("Purchase " + selectedShopItem.getName());
+
+        Table content = shopPurchaseDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(10);
+
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin);
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin);
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin);
+        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin);
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+
+        plusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                purchaseQuantity++;
+                quantityLabel.setText("Quantity: " + purchaseQuantity);
+            }
+        });
+
+        minusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (purchaseQuantity > 1) {
+                    purchaseQuantity--;
+                    quantityLabel.setText("Quantity: " + purchaseQuantity);
+                }
+            }
+        });
+
+        buyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                storeController.purchase(selectedShopItem, purchaseQuantity);
+                    //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
+                shopPurchaseDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                shopPurchaseDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        content.add(quantityLabel).colspan(2).row();
+        content.add(minusButton).padRight(5);
+        content.add(plusButton).row();
+        content.add(buyButton).colspan(2).row();
+        content.add(cancelButton).colspan(2);
+
+        shopPurchaseDialog.add(content);
+        shopPurchaseDialog.pack();
+        shopPurchaseDialog.setPosition(
+            (Gdx.graphics.getWidth() - shopPurchaseDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - shopPurchaseDialog.getHeight()) / 2
+        );
+
+        shopPurchaseDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
     public void createUI() {
+        createTerminal();
+
+        createAnimalDialog();
+
+        createShopMenusDialogs();
+    }
+
+    private void createTerminal() {
         terminalWindow = new TerminalWindow(GameAssetManager.skin, this);
         terminalWindow.setVisible(false);
         stage.addActor(terminalWindow);
+    }
 
+    private void createShopMenusDialogs() {
+        shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "dialog");
+        shopMenuDialog.setKeepWithinStage(true);
+        shopMenuDialog.setMovable(false);
+        shopMenuDialog.setVisible(false);
+        stage.addActor(shopMenuDialog);
+
+        shopPurchaseDialog = new Dialog("Purchase", GameAssetManager.skin, "dialog");
+        shopPurchaseDialog.setKeepWithinStage(true);
+        shopPurchaseDialog.setMovable(false);
+        shopPurchaseDialog.setVisible(false);
+        stage.addActor(shopPurchaseDialog);
+    }
+
+    private void createAnimalDialog() {
         // Create the animal menu dialog (initially hidden)
         animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "dialog") {
             @Override
