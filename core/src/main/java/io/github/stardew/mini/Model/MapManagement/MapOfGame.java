@@ -271,7 +271,20 @@ public class MapOfGame {
                 fishShop, marnieRanch, starDropSaloon
         ));
     }
+    public Shop getShopAtPosition(int x, int y) {
+        for (Shop shop : shops) {
+            int shopX = shop.getX();
+            int shopY = shop.getY();
+            int shopWidth = shop.getWidth();
+            int shopHeight = shop.getHeight();
 
+            if (x >= shopX && x < shopX + shopWidth &&
+                y >= shopY && y < shopY + shopHeight) {
+                return shop;
+            }
+        }
+        return null;
+    }
     private ArrayList<ShopItem> createBlacksmithItems() {
         ArrayList<ShopItem> items = new ArrayList<>();
 
@@ -532,20 +545,7 @@ public class MapOfGame {
         return shops;
     }
 
-    public Shop getShopAtPosition(int x, int y) {
-        for (Shop shop : shops) {
-            int shopX = shop.getX();
-            int shopY = shop.getY();
-            int shopWidth = shop.getWidth();
-            int shopHeight = shop.getHeight();
 
-            if (x >= shopX && x < shopX + shopWidth &&
-                    y >= shopY && y < shopY + shopHeight) {
-                return shop;
-            }
-        }
-        return null;
-    }
 
 
 
