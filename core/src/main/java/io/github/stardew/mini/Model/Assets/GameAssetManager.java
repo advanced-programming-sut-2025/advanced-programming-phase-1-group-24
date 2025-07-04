@@ -7,9 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -43,12 +41,24 @@ public class GameAssetManager {
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
 
+
+    // Animals initial textures
+    public static Texture White_Chicken_Texture;
+    public static Texture White_Cow_Texture;
+    public static Texture Duck_Texture;
+    public static Texture Pig_Texture;
+    public static Texture Rabbit_Texture;
+    public static Texture Goat_Texture;
+    public static Texture Dinosaur_Texture;
+    public static Texture Sheep_Texture;
+
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
         }
         return gameAssetManager;
     }
+
     public static void load() {
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
@@ -88,41 +98,77 @@ public class GameAssetManager {
                 }
             }
             playerAnimations.add(new Animation<>(0.15f, walkFrames, Animation.PlayMode.LOOP));
-
-            // Create custom button style if needed
-            TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-            buttonStyle.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-            buttonStyle.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-            buttonStyle.font = skin.getFont("font");
-            buttonStyle.font.getData().setScale(3f);
-            skin.add("default", buttonStyle);
-
-            //creating custom font
-            BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
-            skin.add("custom-font", customFont);
-
-            // Create custom-Label
-            Label.LabelStyle customLabelStyle = new Label.LabelStyle();
-            customLabelStyle.font = skin.getFont("custom-font");
-            customLabelStyle.fontColor = Color.WHITE;
-            skin.add("custom-label", customLabelStyle);
-
-            // Create another button style with custom font
-            TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
-            buttonStyle2.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-            buttonStyle2.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-            buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
-            buttonStyle2.font.getData().setScale(0.9f);
-            skin.add("custom-button", buttonStyle2);
-
         }
+        // NEW: Load petting animation (assuming frames are named "player_pet_0_0" to "player_pet_0_3")
+        Array<TextureRegion> petFrames = new Array<>();
+        for (int j = 0; j < 4; j++) {
+            String region = "player_pet_0_" + j;  // Format: "player_pet_[row]_[frame]"
+            petFrames.add(playerAtlas.findRegion(region));
+        }
+        Animation<TextureRegion> petAnim = new Animation<>(0.15f, petFrames, Animation.PlayMode.NORMAL); // PlayMode.NORMAL for one-time playback
+        playerAnimations.add(petAnim);  // Add to your animations list
 
+        loadAnimals();
+
+        createCustomStyles();
+    }
+
+    private static void createCustomStyles() {
+        // Create custom button style if needed
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
         buttonStyle.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
         buttonStyle.font = skin.getFont("font");
         buttonStyle.font.getData().setScale(3f);
         skin.add("default", buttonStyle);
+
+        //creating custom font
+        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        skin.add("custom-font", customFont);
+
+        // Create custom-Label
+        Label.LabelStyle customLabelStyle = new Label.LabelStyle();
+        customLabelStyle.font = skin.getFont("custom-font");
+        customLabelStyle.fontColor = Color.WHITE;
+        skin.add("custom-label", customLabelStyle);
+
+        //create custom text field
+        TextField.TextFieldStyle customTextField = new TextField.TextFieldStyle();
+        customTextField.font = skin.getFont("custom-font");
+        customTextField.fontColor = Color.WHITE;
+        skin.add("custom-textField", customTextField);
+
+        //create custom window
+        // Get the default style and override the title font
+        Window.WindowStyle baseStyle = skin.get(Window.WindowStyle.class);
+
+        // Clone the style to avoid modifying the default globally
+        Window.WindowStyle customWindow = new Window.WindowStyle(
+            skin.getFont("custom-font"), // your custom font
+            baseStyle.titleFontColor,
+            baseStyle.background
+        );
+        customWindow.titleFontColor = Color.GOLD;
+        skin.add("custom-window",customWindow);
+
+        // Create another button style with custom font
+        TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
+        buttonStyle2.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
+        buttonStyle2.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
+        buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
+        buttonStyle2.font.getData().setScale(0.9f);
+        skin.add("custom-button", buttonStyle2);
+    }
+
+    public static void loadAnimals() {
+        White_Chicken_Texture = new Texture(Gdx.files.internal("Animals/White_Chicken.png"));
+        White_Cow_Texture = new Texture(Gdx.files.internal("Animals/White_Cow.png"));
+        Duck_Texture = new Texture(Gdx.files.internal("Animals/Duck.png"));
+        Pig_Texture = new Texture(Gdx.files.internal("Animals/Pig.png"));
+        Rabbit_Texture = new Texture(Gdx.files.internal("Animals/Rabbit.png"));
+        Goat_Texture = new Texture(Gdx.files.internal("Animals/Goat.png"));
+        Dinosaur_Texture = new Texture(Gdx.files.internal("Animals/Dinosaur.png"));
+        Sheep_Texture = new Texture(Gdx.files.internal("Animals/Sheep.png"));
     }
 
     public static void dispose() {

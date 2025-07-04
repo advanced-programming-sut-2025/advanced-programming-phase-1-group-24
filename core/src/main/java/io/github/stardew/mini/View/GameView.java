@@ -10,18 +10,27 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
+import io.github.stardew.mini.Model.Menus.GameMenuCommands;
+import io.github.stardew.mini.Model.Menus.HouseMenuCommands;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.User;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
@@ -33,12 +42,175 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private float stateTime = 0f;
     private boolean showFullMap = false;
 
+    private TerminalWindow terminalWindow;
+    private boolean terminalVisible = false;
+
+    private Dialog animalMenuDialog;
+    private Animal selectedAnimal;
+
+    private float moveCooldown = 0f;
+    private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
+
+
+//     HouseMenuController houseController = new HouseMenuController();
+//    StoreMenuController storeController = new StoreMenuController();
+//    GameController GameController = new GameController();
+
     public GameView(GameController controller) {
         this.controller = controller;
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+    }
+
+    //    @Override
+//    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+//        if (button == Input.Buttons.RIGHT && !terminalVisible) {
+//            // Convert screen coordinates to world coordinates
+//            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+//
+//            // Convert world coordinates to tile coordinates
+//            int tileX = (int)(worldCoords.x / GameAssetManager.TILE_SIZE);
+//            int tileY = mapOfGame.getHeight() - (int)(worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+//
+//            // Check if click is within map bounds
+//            if (tileX >= 0 && tileY >= 0 && tileX < mapOfGame.getWidth() && tileY < mapOfGame.getHeight()) {
+//                Tile tile = mapOfGame.getMap()[tileY][tileX];
+//                if (tile != null && tile.getContainedAnimal() != null) {
+//                    selectedAnimal = tile.getContainedAnimal();
+//
+//                    // Position the dialog near the mouse
+//                    animalMenuDialog.setPosition(screenX, Gdx.graphics.getHeight() - screenY);
+//                    animalMenuDialog.setVisible(true);
+//
+//                    // Temporarily switch input to stage for dialog interaction
+//                    Gdx.input.setInputProcessor(stage);
+//                    return true;
+//                }
+//            }
+//        }
+//        return false;
+//    }
+    @Override
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+//        if (button == Input.Buttons.RIGHT) {
+            //&& !terminalVisible) {
+            // Convert screen coordinates to world coordinates
+            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+
+            // Convert world coordinates to tile coordinates
+            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+            int tileY = mapOfGame.getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+
+            // Check if click is within map bounds
+            if (tileX >= 0 && tileY >= 0 && tileX < mapOfGame.getWidth() && tileY < mapOfGame.getHeight()) {
+                Tile tile = mapOfGame.getMap()[tileY][tileX];
+                if (tile != null && tile.getContainedAnimal() != null) {
+                    selectedAnimal = tile.getContainedAnimal();
+
+                    // Convert screen coordinates to stage coordinates
+                    Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
+
+                    // Center dialog around mouse position
+                    animalMenuDialog.setPosition(
+                        stageCoords.x - animalMenuDialog.getWidth() / 2,
+                        stageCoords.y - animalMenuDialog.getHeight() / 2
+                    );
+                    animalMenuDialog.setVisible(true);
+                    animalMenuDialog.show(stage);
+                    Gdx.input.setInputProcessor(stage);
+                    return true;
+                }
+
+//                if(){
+//
+//                }
+            }
+       // }
+        return false;
+    }
+
+    public void createUI() {
+        terminalWindow = new TerminalWindow(GameAssetManager.skin, this);
+        terminalWindow.setVisible(false);
+        stage.addActor(terminalWindow);
+
+        // Create the animal menu dialog (initially hidden)
+        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "dialog") {
+            @Override
+            protected void result(Object object) {
+                handleAnimalMenuChoice(object.toString());
+            }
+        };
+
+        animalMenuDialog.getContentTable().defaults().pad(10);
+
+        // Add buttons with their result objects
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin);
+        feedButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("feed");
+            }
+        });
+
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin);
+        petButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("pet");
+            }
+        });
+
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin);
+        releaseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("release");
+            }
+        });
+
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin);
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("sell");
+            }
+        });
+
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin);
+        collectButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("collect");
+            }
+        });
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+            }
+        });
+
+        animalMenuDialog.getContentTable().add(feedButton).row();
+        animalMenuDialog.getContentTable().add(petButton).row();
+        animalMenuDialog.getContentTable().add(releaseButton).row();
+        animalMenuDialog.getContentTable().add(sellButton).row();
+        animalMenuDialog.getContentTable().add(collectButton).row();
+        animalMenuDialog.getContentTable().add(cancelButton);
+
+        animalMenuDialog.setKeepWithinStage(true);
+        animalMenuDialog.setMovable(false);
+        animalMenuDialog.setVisible(false);  // Add this after creation
+        stage.addActor(animalMenuDialog);
     }
 
     @Override
@@ -51,42 +223,42 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         if (showFullMap) return true;
 
-        int x = currentPlayer.getCurrentTile().getX();
-        int y = currentPlayer.getCurrentTile().getY();
-        int dir = 0;
+//        int x = currentPlayer.getCurrentTile().getX();
+//        int y = currentPlayer.getCurrentTile().getY();
+//        int dir = 0;
+//
+//        switch (keycode) {
+//            case Input.Keys.A:
+//                x -= 1;
+//                dir = 4;
+//                break;
+//            case Input.Keys.D:
+//                x += 1;
+//                dir = 2;
+//                break;
+//            case Input.Keys.W:
+//                y -= 1;
+//                dir = 3;
+//                break;
+//            case Input.Keys.S:
+//                y += 1;
+//                dir = 1;
+//                break;
+//        }
+//
+//        if (x >= 0 && y >= 0 && y < mapOfGame.getMap().length && x < mapOfGame.getMap()[0].length && mapOfGame.getMap()[y][x].getisWalkable() &&
+//            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(x, y) != null &&
+//                !(mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getUsername()) ||
+//                    (currentPlayer.getPartner() != null && mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
+//            currentPlayer.setCurrentTile(mapOfGame.getMap()[y][x]);
+//            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+//        }
+//        currentPlayer.setMovingDirection(dir);
 
-        switch (keycode) {
-            case Input.Keys.A:
-                x -= 1;
-                dir = 4;
-                break;
-            case Input.Keys.D:
-                x += 1;
-                dir = 2;
-                break;
-            case Input.Keys.W:
-                y -= 1;
-                dir = 3;
-                break;
-            case Input.Keys.S:
-                y += 1;
-                dir = 1;
-                break;
-        }
-
-        if (x >= 0 && y >= 0 && y < mapOfGame.getMap().length && x < mapOfGame.getMap()[0].length && mapOfGame.getMap()[y][x].getisWalkable() &&
-            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(x, y) != null &&
-                !(mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getUsername()) ||
-                    (currentPlayer.getPartner() != null && mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
-            currentPlayer.setCurrentTile(mapOfGame.getMap()[y][x]);
-            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
-        }
-        currentPlayer.setMovingDirection(dir);
-
-        setCameraPosition();
-        return true;
+        // setCameraPosition();
+        return false;
     }
 
 
@@ -97,11 +269,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public boolean keyTyped(char c) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDown(int i, int i1, int i2, int i3) {
         return false;
     }
 
@@ -140,7 +307,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         camera.update();
         Gdx.input.setInputProcessor(this);
         batch.setProjectionMatrix(camera.combined);
+        createUI();
     }
+
 
     @Override
     public void render(float v) {
@@ -151,6 +320,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         setCameraPosition();
 
         batch.setProjectionMatrix(camera.combined);
+
 
         batch.begin();
 
@@ -180,16 +350,109 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             7 * tileSize
         );
 
-
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                Tile tile = tiles[y][x];
+                if (tile != null && tile.getContainedAnimal() != null) {
+                    batch.draw(tile.getContainedAnimal().getAnimalType().getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                }
+            }
+        }
 
         drawPlayer();
+        if (!showFullMap && !terminalVisible) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
+        setCameraPosition();
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            terminalVisible = !terminalVisible;
+            terminalWindow.setVisible(terminalVisible);
+
+            if (terminalVisible) {
+                Gdx.input.setInputProcessor(stage);
+                stage.setKeyboardFocus(terminalWindow.getInputField());
+                terminalWindow.getInputField().setText("");
+                terminalWindow.getInputField().setCursorPosition(0);
+            } else {
+                Gdx.input.setInputProcessor(this); // return control to game
+            }
+        }
+
         batch.end();
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
     }
 
+    // Check for terminal toggle key (e.g., F1)
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+//            terminalVisible = !terminalVisible;
+//            terminalWindow.setVisible(terminalVisible);
+//
+//            if (terminalVisible) {
+//                // Set focus to input field when terminal opens
+//                Gdx.input.setInputProcessor(terminalWindow.getStage());
+//                terminalWindow.getInputField().setTextFieldFocus(true);
+//            } else {
+//                // Return input to main stage
+//                Gdx.input.setInputProcessor(stage);
+//            }
+//        }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
+//            terminalVisible = !terminalVisible;
+//            terminalWindow.setVisible(terminalVisible);
+//
+//            if (terminalVisible) {
+//                Gdx.input.setInputProcessor(terminalWindow.getTerminalStage());
+//                Gdx.input.setInputProcessor(stage); // enable UI interaction
+//                terminalWindow.getInputField().setText(""); // optional: clear old input
+//                terminalWindow.getInputField().setFocusTraversal(true); // optional
+//                terminalWindow.getInputField().setCursorPosition(0);
+//                terminalWindow.getInputField().setFocusTraversal(true);
+//            } else {
+//                Gdx.input.setInputProcessor(this); // return control to game
+//            }
+//
+//        }
+//            if (terminalVisible) {
+//                Gdx.input.setInputProcessor(stage); // Only this one
+//                terminalWindow.getInputField().setText("");
+//                terminalWindow.getInputField().setCursorPosition(0);
+//                terminalWindow.getInputField().setFocusTraversal(true);
+//            }
+//        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+//            terminalVisible = !terminalVisible;
+//            terminalWindow.setVisible(terminalVisible);
+//            if (terminalVisible)
+//                Gdx.input.setInputProcessor(terminalWindow.getTerminalStage());
+//            else
+//                Gdx.input.setInputProcessor(this);
+//        }
+
+    //    @Override
+//    public void resize(int i, int i1) {
+//        camera.setToOrtho(false, i, i1);
+//        camera.update();
+//    }
     @Override
-    public void resize(int i, int i1) {
-        camera.setToOrtho(false, i, i1);
+    public void resize(int width, int height) {
+        camera.setToOrtho(false, width, height);
         camera.update();
+
+        // Update stage viewport
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -209,11 +472,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public void dispose() {
-
-    }
-
-    @Override
-    public void handleCommand(Scanner scanner) {
 
     }
 
@@ -272,5 +530,363 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             camera.update();
         }
     }
+
+    private void handleAnimalMenuChoice(String choice) {
+        if (selectedAnimal == null) {
+            System.out.println("animal is null");
+            return;
+        }
+        System.out.println(selectedAnimal.getName());
+
+        // Handle choices...
+        switch (choice) {
+            case "feed":
+                controller.feedHay(selectedAnimal.getName());
+                break;
+            case "pet":
+                //controller.petAnimal(selectedAnimal);
+                break;
+            case "release":
+                // controller.releaseAnimal(selectedAnimal);
+                break;
+            case "sell":
+                //controller.sellAnimal(selectedAnimal);
+                break;
+            case "collect":
+                //controller.collectAnimalProduct(selectedAnimal);
+                break;
+            case "cancel":
+                // Do nothing
+                break;
+        }
+        animalMenuDialog.hide();
+        Gdx.input.setInputProcessor(this);  // Return input to game
+        selectedAnimal = null;
+    }
+
+    private boolean tryMove(int dx, int dy, int direction) {
+        int x = currentPlayer.getCurrentTile().getX();
+        int y = currentPlayer.getCurrentTile().getY();
+        int newX = x + dx;
+        int newY = y + dy;
+
+        if (newX >= 0 && newY >= 0 &&
+            newY < mapOfGame.getMap().length &&
+            newX < mapOfGame.getMap()[0].length &&
+            mapOfGame.getMap()[newY][newX].getisWalkable() &&
+            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+                !(mapOfGame.getMap()[newY][newX].getTileOwner().equals(currentPlayer.getUsername()) ||
+                    (currentPlayer.getPartner() != null &&
+                        mapOfGame.getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
+
+            currentPlayer.setCurrentTile(mapOfGame.getMap()[newY][newX]);
+            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+            currentPlayer.setMovingDirection(direction);
+            setCameraPosition();
+            return true;
+        }
+
+        return false;
+    }
+
+    public void handleCommand(Scanner scanner) {
+        String input = scanner.nextLine().trim();
+        Matcher matcher;
+        //        Result canUseCommand = controller.checkEnergy();
+        if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+            System.out.println(controller.showCurrentMenu());
+        } else if ((matcher = GameMenuCommands.WALK.getMatcher(input)) != null) {
+            controller.walkTo(matcher.group("x"), matcher.group("y"), scanner);
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMatcher(input)) != null) {
+            System.out.println(controller.showMoney());
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAddMoney(matcher.group("count")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
+            System.out.println(controller.cheatAnimalFriendship(matcher.group("name"), matcher.group("amount")));
+        } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
+            System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ENERGY.getMatcher(input)) != null) {
+            System.out.println(controller.cheatChangeEnergy(matcher.group("value")));
+        } else if ((matcher = GameMenuCommands.CHEAT_UNLIMITED_ENERGY.getMatcher(input)) != null) {
+            System.out.println(controller.cheatUnlimitedEnergy());
+        } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
+            System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+            String itemName = matcher.group("itemName");
+            int count = Integer.parseInt(matcher.group("count"));
+            System.out.println(controller.cheatAddItem(itemName, count));
+        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+            System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
+        } else if ((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
+            System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")), matcher.group("username")));
+        }
+        ///////////////////////////////////////////////////////////////////////////////////////////
+//        if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
+//            System.out.println(controller.nextTurn(scanner));
+//        } else if ((matcher = GameMenuCommands.TERMINATE_GAME.getMatcher(input)) != null) {
+//            System.out.println(controller.startForceTerminateVote(scanner));
+//        } else if ((matcher = GameMenuCommands.EXIT_GAME.getMatcher(input)) != null) {
+//            System.out.println(controller.exitGame());
+//        } else if ((matcher = GameMenuCommands.LOAD_GAME.getMatcher(input)) != null) {
+//            System.out.println(controller.loadGame());
+//        } else if ((matcher = GameMenuCommands.NEW_GAME.getMatcher(input)) != null) {
+//            System.out.println(controller.createGame(matcher.group("users"), scanner));
+//        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
+//            System.out.println(controller.enterMenu(matcher.group("menuName")));
+//        } else if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+//            System.out.println(controller.showCurrentMenu());
+//        } else if ((matcher = GameMenuCommands.EXIT.getMatcher(input)) != null) {
+//            controller.menuExit();
+//        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
+//        } else if ((matcher = GameMenuCommands.SHOW_MONEY.getMatcher(input)) != null) {
+//            System.out.println(controller.showMoney());
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_DATE.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
+//        } else if (!canUseCommand.isSuccessful()) {  /////////////////////////////////////////////////////////////////////////
+//            System.out.println(canUseCommand);
+//        } else if ((matcher = StoreMenuCommands.BUILD_HABITAT.getMatcher(input)) != null) {
+//            System.out.println(storeController.buyFromCarpenter(matcher.group("name").trim(), matcher.group("x"), matcher.group("y")));
+//        } else if ((matcher = StoreMenuCommands.BUY_ANIMAL.getMatcher(input)) != null) {
+//            System.out.println(storeController.buyAnimal(matcher.group("animal").trim(), matcher.group("name")));
+//        } else if ((matcher = StoreMenuCommands.SHOW_ALL_PRODUCTS.getMatcher(input)) != null) {
+//            System.out.println(storeController.showAllProducts());
+//        } else if ((matcher = StoreMenuCommands.SHOW_ALL_AVAILABLE_PRODUCTS.getMatcher(input)) != null) {
+//            System.out.println(storeController.showAllAvailableProducts());
+//        } else if ((matcher = StoreMenuCommands.PURCHASE.getMatcher(input)) != null) {
+//            String product = matcher.group("product").trim();
+//            String countStr = matcher.group("count");
+//            int count = (countStr != null) ? Integer.parseInt(countStr) : 1;
+//            System.out.println(storeController.purchase(product, count));
+//        }  else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
+//            System.out.println(storeController.upgradeTool(matcher.group("tool").trim()));
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAddMoney(matcher.group("count")));
+//        }
+//        /// ////friendship
+//        else if ((matcher = GameMenuCommands.FRIEND_SHIP.getMatcher(input)) != null) {
+//            System.out.println(controller.showFriendships());
+//        } else if ((matcher = GameMenuCommands.SEND_GIFT.getMatcher(input)) != null) {
+//            System.out.println(controller.sendGift(matcher.group("username"), matcher.group("item").trim(), matcher.group("amount")));
+//        } else if ((matcher = GameMenuCommands.LIST_GIFT.getMatcher(input)) != null) {
+//            System.out.println(controller.listGift());
+//        } else if ((matcher = GameMenuCommands.RATE_GIFTS.getMatcher(input)) != null) {
+//            System.out.println(controller.rateGifts(matcher.group("gift"), matcher.group("rate")));
+//        } else if ((matcher = GameMenuCommands.GIFT_HISTORY.getMatcher(input)) != null) {
+//            System.out.println(controller.giftHistory(matcher.group("username")));
+//        } else if ((matcher = GameMenuCommands.FLOWER_SEND.getMatcher(input)) != null) {
+//            System.out.println(controller.sendFlower(matcher.group("username")));
+//        } else if ((matcher = GameMenuCommands.SELL_ANIMAL.getMatcher(input)) != null) {
+//            System.out.println(controller.sellAnimal(matcher.group("name")));
+//        }else if ((matcher = StoreMenuCommands.SHIPPING_BIN.getMatcher(input)) != null) {
+//            String productString = matcher.group("product").trim();
+//            String countString = matcher.group("count");
+//            int count = (countString != null) ? Integer.parseInt(countString) : -1;
+//            System.out.println(storeController.placeInShippingBin(productString, count));
+//        } else if ((matcher = GameMenuCommands.SHOW_PRODUCTS.getMatcher(input)) != null) {
+//            System.out.println(controller.showAnimalProducts());
+//        } else if ((matcher = GameMenuCommands.COLLECT_PRODUCTS.getMatcher(input)) != null) {
+//            System.out.println(controller.collectProduct(matcher.group("name")));
+//        } else if ((matcher = GameMenuCommands.SHEPHERD_ANIMALS.getMatcher(input)) != null) {
+//            System.out.println(controller.shepherdAnimal(matcher.group("name"), matcher.group("x"), matcher.group("y")));
+//        } else if ((matcher = GameMenuCommands.FEED_HAY.getMatcher(input)) != null) {
+//            System.out.println(controller.feedHay(matcher.group("name")));
+//        } else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAnimalFriendship(matcher.group("name"), matcher.group("amount")));
+//        }
+        else if ((matcher = GameMenuCommands.ANIMALS_INFO.getMatcher(input)) != null) {
+            System.out.println(controller.showOwnedAnimals());
+        }
+//        else if ((matcher = GameMenuCommands.PET.getMatcher(input)) != null) {
+//            System.out.println(controller.petAnimal(matcher.group("name")));
+//        } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));
+//        } else if ((matcher = GameMenuCommands.CHEAT_ENERGY.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatChangeEnergy(matcher.group("value")));
+//        } else if ((matcher = GameMenuCommands.CHEAT_UNLIMITED_ENERGY.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatUnlimitedEnergy());
+//        } else if ((matcher = GameMenuCommands.ENERGY.getMatcher(input)) != null) {
+//            System.out.println(controller.showEnergy());
+//        } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
+//        } else if ((matcher = GameMenuCommands.WEATHER.getMatcher(input)) != null) {
+//            System.out.println(controller.showCurrentWeather());
+//        } else if ((matcher = GameMenuCommands.WEATHER_FORECAST.getMatcher(input)) != null) {
+//            System.out.println(controller.showTomorrowWeather());
+//        } else if (input.equals("season")) {
+//            System.out.println(controller.printSeason());
+//        } else if (input.equals("time")) {
+//            System.out.println(controller.printHour());
+//        } else if (input.equals("date")) {
+//            System.out.println(controller.printDate());
+//        } else if (input.equals("datetime")) {
+//            System.out.println(controller.printDateTime());
+//        } else if (input.matches("^day\\s+of\\s+the\\s+week$")) {
+//            System.out.println(controller.printDayOfWeek());
+//        } else if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
+//            System.out.println(controller.nextTurn(scanner));
+//        } else if ((matcher = GameMenuCommands.TERMINATE_GAME.getMatcher(input)) != null) {
+//            System.out.println(controller.startForceTerminateVote(scanner));
+//        } else if ((matcher = GameMenuCommands.HELP_READ_MAP.getMatcher(input)) != null) {
+//            controller.helpReadMap();
+//        } else if ((matcher = GameMenuCommands.WALK.getMatcher(input)) != null) {
+//            controller.walkTo(matcher.group("x"), matcher.group("y"), scanner);
+//        } else if ((matcher = GameMenuCommands.CAFTINFO.getMatcher(input)) != null) {
+//            controller.printCraftInfo(matcher.group("craftname"));
+//        } else if ((matcher = GameMenuCommands.TREEINFO.getMatcher(input)) != null) {
+//            controller.printTreeInfo(matcher.group("treename"));
+//        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
+//            System.out.println(controller.enterMenu(matcher.group("menuName")));
+//        } else if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+//            System.out.println(controller.showCurrentMenu());
+//        } else if ((matcher = GameMenuCommands.EXIT.getMatcher(input)) != null) {
+//            controller.menuExit();
+//        } else if ((matcher = GameMenuCommands.SHOW_INVENTORY.getMatcher(input)) != null) {
+//            System.out.println(controller.showInventory());
+//        } else if ((matcher = GameMenuCommands.INVENTORY_TRASH.getMatcher(input)) != null) {
+//            String itemName = matcher.group("itemName");
+//            String countString = matcher.group("number");
+//            int count;
+//            if (countString == null) count = 1000;
+//            else count = Integer.parseInt(countString);
+//            System.out.println(controller.trashInventory(itemName, count));
+//        } else if ((matcher = GameMenuCommands.EQUIP_TOOL.getMatcher(input)) != null) {
+//            String toolName = matcher.group("toolName");
+//            System.out.println(controller.equipTool(toolName));
+//        } else if ((matcher = GameMenuCommands.SHOW_CURRENT_TOOL.getMatcher(input)) != null) {
+//            System.out.println(controller.showCurrentTool());
+//        } else if ((matcher = GameMenuCommands.SHOW_AVAILABLE_TOOLS.getMatcher(input)) != null) {
+//            System.out.println(controller.showAllTools());
+//        } else if ((matcher = GameMenuCommands.TOOL_UPGRADE.getMatcher(input)) != null) {
+//            //COMPLETE THIS AFTER MAKING SHOP
+//        } else if ((matcher = GameMenuCommands.USE_TOOL.getMatcher(input)) != null) {
+//            System.out.println(controller.useTool(matcher.group("direction")));
+//        } else if ((matcher = GameMenuCommands.FISH.getMatcher(input)) != null) {
+//            String fishingPole = matcher.group("fishingPole");
+//            System.out.println(controller.fish(fishingPole));
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+//            String itemName = matcher.group("itemName");
+//            int count = Integer.parseInt(matcher.group("count"));
+//            System.out.println(controller.cheatAddItem(itemName, count));
+//        } else if ((matcher = GameMenuCommands.PLANT.getMatcher(input)) != null) {
+//            System.out.println(controller.plantGrowable(matcher.group("seedName"), matcher.group("direction")).message());
+//        } else if ((matcher = GameMenuCommands.SHOWPLANT.getMatcher(input)) != null) {
+//            System.out.println(controller.showPlant(matcher.group("x"), matcher.group("y")).message());
+//        } else if ((matcher = GameMenuCommands.FERTALISE.getMatcher(input)) != null) {
+//            System.out.println(controller.fertalizeGrowable(matcher.group("fertilizer"), matcher.group("direction")).message());
+//        } else if ((matcher = GameMenuCommands.BUILDGREENHOUSE.getMatcher(input)) != null) {
+//            System.out.println(controller.buildGreenHouse().message());
+//        } else if ((matcher = HouseMenuCommands.SHOW_RECIPIES.getMatcher(input)) != null) {
+//            System.out.println(houseController.showRecipes());
+//        } else if ((matcher = HouseMenuCommands.CRAFT.getMatcher(input)) != null) {
+//            System.out.println(houseController.craft(matcher.group("itemName")));
+//        } else if ((matcher = HouseMenuCommands.PLACE_ITEM.getMatcher(input)) != null) {
+//            System.out.println(houseController.placeItem(matcher.group("itemName"), matcher.group("direction")));
+//        } else if ((matcher = GameMenuCommands.TALK.getMatcher(input)) != null) {
+//            System.out.println(controller.talk(matcher.group("username"), matcher.group("message")).message());
+//        } else if ((matcher = GameMenuCommands.SHOW_TALK_HISTORY.getMatcher(input)) != null) {
+//            System.out.println(controller.showTalkHistory(matcher.group("username")));
+//        } else if ((matcher = GameMenuCommands.HUG.getMatcher(input)) != null) {
+//            System.out.println(controller.hug(matcher.group("username")));
+//        } else if ((matcher = GameMenuCommands.ASK_MARRIAGE.getMatcher(input)) != null) {
+//            System.out.println(controller.askMarriage(matcher.group("username"), matcher.group("ring")));
+//        } else if ((matcher = GameMenuCommands.RESPOND.getMatcher(input)) != null) {
+//            System.out.println(controller.respondToMarriage(matcher.group("response"), matcher.group("username")));
+//        } else if ((matcher = GameMenuCommands.START_TRADE.getMatcher(input)) != null) {
+//            controller.startTrade();
+//        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
+//        } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatSetSkill(matcher.group("skill"),matcher.group("number")));
+//        }
+//        else if((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")),matcher.group("username")));
+//        }
+//        else if ((matcher = GameMenuCommands.MEET_NPC.getMatcher(input)) != null) {
+//            String npcName = matcher.group("npcName");
+//            System.out.println(controller.meetNPC(npcName));
+//        } else if ((matcher = GameMenuCommands.GIFT_NPC.getMatcher(input)) != null) {
+//            String npcName = matcher.group("npcName");
+//            String itemName = matcher.group("item");
+//            System.out.println(controller.giftNPC(npcName, itemName));
+//        } else if ((matcher = GameMenuCommands.NPC_FRIENDSHIP_LIST.getMatcher(input)) != null) {
+//            System.out.println(controller.npcFriendshipList());
+//        } else if ((matcher = GameMenuCommands.NPC_QUEST_LIST.getMatcher(input)) != null) {
+//            System.out.println(controller.npcQuestList());
+//        } else if ((matcher = GameMenuCommands.DO_MISSION.getMatcher(input)) != null) {
+//            int missionIndex = Integer.parseInt(matcher.group("index"));
+//            System.out.println(controller.doMission(missionIndex));
+//        } else if ((matcher = GameMenuCommands.PICK_FOOD_FROM_FRIDGE.getMatcher(input)) != null) {
+//            String itemName = matcher.group("item").trim();
+//            System.out.println(controller.pickFoodFromFridge(itemName));
+//        } else if ((matcher = GameMenuCommands.PUT_FOOD_IN_FRIDGE.getMatcher(input)) != null) {
+//            String itemName = matcher.group("item").trim();
+//            System.out.println(controller.putFoodInFridge(itemName));
+//        } else if ((matcher = GameMenuCommands.SHOW_COOKING_RECIPES.getMatcher(input)) != null) {
+//            System.out.println(controller.showCookingRecipes());
+//        } else if ((matcher = GameMenuCommands.COOK.getMatcher(input)) != null) {
+//            String recipeName = matcher.group("recipe").trim();
+//            System.out.println(controller.cook(recipeName));
+//        } else if ((matcher = GameMenuCommands.EAT.getMatcher(input)) != null) {
+//            String food = matcher.group("food").trim();
+//            System.out.println(controller.eat(food));
+//        } else if ((matcher = GameMenuCommands.ARTISAN_USE.getMatcher(input)) != null) {
+//            String artisanName = matcher.group("artisanName").trim();
+//            String itemName1 = matcher.group("itemName1");
+//            if (itemName1 != null) itemName1 = itemName1.trim();
+//            String itemName2 = matcher.group("itemName2");
+//            if (itemName2 != null) itemName2 = itemName2.trim();
+//            System.out.println(controller.artisanUse(artisanName, itemName1, itemName2, MainApp.getInstance().getCurrentGame().getMap()));
+//        } else if ((matcher = GameMenuCommands.ARTISAN_GET.getMatcher(input)) != null) {
+//            String artisanName = matcher.group("artisanName").trim();
+//            System.out.println(controller.artisanGet(MainApp.getInstance().getCurrentGame().getMap(), artisanName));
+//        }
+        else {
+            System.out.println("invalid command");
+        }
+    }
+
+
+    //    public void createUI() {
+//        terminalWindow = new TerminalWindow(GameAssetManager.skin, this);
+//        terminalWindow.setVisible(false);
+//        stage.addActor(terminalWindow);
+//
+//        // Create the animal menu dialog (initially hidden)
+//        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin);
+//        animalMenuDialog.getContentTable().defaults().pad(10);
+//
+//        animalMenuDialog.button("Feed", "feed");
+//        animalMenuDialog.button("Pet", "pet");
+//        animalMenuDialog.button("Release", "release");
+//        animalMenuDialog.button("Sell", "sell");
+//        animalMenuDialog.button("Collect Product", "collect");
+//        animalMenuDialog.button("Cancel", "cancel");
+//
+//        animalMenuDialog.setVisible(false);
+//        stage.addActor(animalMenuDialog);
+//
+//        animalMenuDialog.addListener(new ChangeListener() {
+//            @Override
+//            public void changed(ChangeEvent event, Actor actor) {
+//                String result = animalMenuDialog.getResult().toString();
+//                handleAnimalMenuChoice(result);
+//                animalMenuDialog.setVisible(false);
+//                Gdx.input.setInputProcessor(GameView.this); // Return control to game
+//            }
+//        });
+//    }
 
 }

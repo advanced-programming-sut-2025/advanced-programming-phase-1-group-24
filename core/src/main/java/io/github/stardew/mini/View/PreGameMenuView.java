@@ -25,7 +25,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 
 public class PreGameMenuView implements AppMenu, Screen {
-    //     HouseMenuController houseController = new HouseMenuController();
+//         HouseMenuController houseController = new HouseMenuController();
 //    StoreMenuController storeController = new StoreMenuController();
 //    GameController GameController = new GameController();
 
