@@ -4,12 +4,9 @@ import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -18,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -26,7 +24,6 @@ import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
-import io.github.stardew.mini.Model.FriendshipLevels;
 import io.github.stardew.mini.Model.Growables.CropType;
 import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.Growables.TreeType;
@@ -36,10 +33,9 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
-import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
+import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
 
 //import java.awt.*;
 import java.awt.*;
@@ -64,6 +60,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private WeatherType currentWeather;
     public static List<LightningFlash> scheduledFlashes = new ArrayList<>();
     private List<LightningFlash> activeFlashes = new ArrayList<>();
+    private Array<RainDrop> raindrops = new Array<>();
+    private float spawnTimer = 0f;
+    private static final float DROP_INTERVAL = 0.15f;
+
 
     public GameView(GameMenuController controller) {
         this.controller = controller;
@@ -215,6 +215,26 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         for (LightningFlash flash : activeFlashes) {
             flash.update(v);
         }
+        spawnTimer += v;
+        if (spawnTimer > DROP_INTERVAL) {
+            float viewLeft = camera.position.x - camera.viewportWidth / 2f;
+            float viewRight = camera.position.x + camera.viewportWidth / 2f;
+
+            float x = MathUtils.random(viewLeft, viewRight);
+            float y = camera.position.y + camera.viewportHeight / 2f + 20;
+
+            raindrops.add(new RainDrop(x, y));
+            spawnTimer = 0f;
+        }
+
+
+        for (int i = raindrops.size - 1; i >= 0; i--) {
+            RainDrop drop = raindrops.get(i);
+            drop.update(v, camera);
+            if (drop.finished) {
+                raindrops.removeIndex(i);
+            }
+        }
 
         int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // get current game hour as int
 
@@ -268,6 +288,23 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         drawPlayer();
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
+
+        currentWeather = MainApp.getInstance().getCurrentGame().getCurrentWeatherType();
+        if(currentWeather == WeatherType.STORM) {
+            batch.setColor(1f, 1f, 1f, 0.5f);
+            batch.draw(GameAssetManager.stormOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
+            batch.setColor(Color.WHITE);
+        }
+        else if(currentWeather == WeatherType.SNOW){
+            batch.draw(GameAssetManager.snowOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        }
+        else if(currentWeather == WeatherType.RAIN){
+            for (RainDrop drop : raindrops) {
+                drop.render(batch);
+            }
+        }
+
+
         batch.setColor(darkOverlayColor);
         batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
         batch.setColor(Color.WHITE);
