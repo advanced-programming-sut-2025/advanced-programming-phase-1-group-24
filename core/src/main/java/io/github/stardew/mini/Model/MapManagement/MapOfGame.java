@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Model.MapManagement;
 
+import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.Growable;
@@ -12,6 +13,7 @@ import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
+import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.Places.Farm;
 import io.github.stardew.mini.Model.Places.House;
@@ -19,6 +21,7 @@ import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.View.GameView;
 
 import javax.naming.InsufficientResourcesException;
 import java.util.*;
@@ -161,6 +164,16 @@ public class MapOfGame {
         if (tile.getType() == TileType.GREENHOUSE) {
             return;
         }
+
+        int flashHour = MathUtils.random(9, 18); // Random hour between 9 and 22
+        System.out.println(flashHour);
+
+        LightningFlash flash = new LightningFlash();
+        flash.scheduledTime = flashHour;
+
+        GameView.scheduledFlashes.add(flash);
+
+
         if (tile.getContainedGrowable() != null) {
             tile.setContainedItem(new ForagingMineral(ProductQuality.Normal, ForagingMineralType.Coal));
             tile.getContainedGrowable().setGrowableType(GrowableType.Coal);

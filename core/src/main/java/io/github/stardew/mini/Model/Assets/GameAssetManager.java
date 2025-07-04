@@ -44,6 +44,7 @@ public class GameAssetManager {
     public static Texture FLOORING_71;
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
+    public static Texture burntTile;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
     public static Texture pixel;
@@ -76,6 +77,7 @@ public class GameAssetManager {
         FLOORING_71 = new Texture(Gdx.files.internal("Flooring/Flooring_71.png"));
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
+        burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
 
@@ -153,6 +155,7 @@ public class GameAssetManager {
         if (FLOORING_71 != null) FLOORING_71.dispose();
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
+        if(burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
     }
 

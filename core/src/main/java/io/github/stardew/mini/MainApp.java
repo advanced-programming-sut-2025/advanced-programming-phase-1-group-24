@@ -13,6 +13,7 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
+import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.View.GameView;
