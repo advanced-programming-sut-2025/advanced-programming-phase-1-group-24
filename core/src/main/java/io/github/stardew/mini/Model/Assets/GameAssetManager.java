@@ -48,6 +48,12 @@ public class GameAssetManager {
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
     public static Texture pixel;
+    public static Texture snowOverlay;
+    public static Texture stormOverlay;
+    public static Texture dropTexture;
+    public static TextureRegion[] dropFrames = new TextureRegion[11];
+    public static Animation<TextureRegion> dropAnimation;
+
 
 
     public static GameAssetManager getGameAssetManager() {
@@ -80,7 +86,16 @@ public class GameAssetManager {
         burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
+        snowOverlay = new Texture(Gdx.files.internal("Weather/Snow.png"));
+        stormOverlay = new Texture(Gdx.files.internal("Weather/Storm.png"));
+        dropTexture = new Texture(Gdx.files.internal("Weather/Rain.png"));
+        TextureRegion[][] tmp = TextureRegion.split(dropTexture, dropTexture.getWidth() / 11, dropTexture.getHeight());
 
+        // Only one column
+        System.arraycopy(tmp[0], 0, dropFrames, 0, 11);
+
+        dropAnimation = new Animation<>(0.05f, dropFrames);
+        dropAnimation.setPlayMode(Animation.PlayMode.NORMAL);
         playerAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
 
         for (int i = 14; i > 9; i--) {
@@ -157,6 +172,9 @@ public class GameAssetManager {
         if (FLOORING_86 != null) FLOORING_86.dispose();
         if(burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
+        if(snowOverlay != null) snowOverlay.dispose();
+        if(stormOverlay != null) stormOverlay.dispose();
+        if(dropTexture != null) dropTexture.dispose();
     }
 
     public static Texture getBackground() {
