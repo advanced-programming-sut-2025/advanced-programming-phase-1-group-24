@@ -110,7 +110,6 @@ public class NewGameMenuView implements AppMenu, Screen {
                 }
             }
         });
-
         stage.addActor(table);
     }
 
@@ -121,11 +120,12 @@ public class NewGameMenuView implements AppMenu, Screen {
         playerLabels.clear();
 
         for (String name : playerNames) {
-            Label nameLabel = new Label(name, GameAssetManager.skin);
+            Label nameLabel = new Label(name, GameAssetManager.skin,"custom-label");
             playerLabels.add(nameLabel);
-            table.add(nameLabel).colspan(2).padBottom(10).row();
+            table.add(nameLabel).colspan(2).row();
         }
     }
+
 
     //    @Override
 //    public void render(float delta) {

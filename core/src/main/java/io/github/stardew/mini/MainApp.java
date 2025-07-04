@@ -11,6 +11,8 @@ import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.NewGameMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
+import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
@@ -20,6 +22,7 @@ import io.github.stardew.mini.View.GameView;
 import io.github.stardew.mini.View.MapSelectionMenuView;
 import io.github.stardew.mini.View.NewGameMenuView;
 import io.github.stardew.mini.View.PreGameMenuView;
+
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -29,7 +32,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames =loadActiveGames(); // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
@@ -45,11 +48,14 @@ public class MainApp extends com.badlogic.gdx.Game {
         //loadGameData();
         GameAssetManager.load();
         TileType.initTextures();
+        AnimalType.initTextures();
+
         // Set initial screen
-        PreGameMenuView preGameMenuView =new PreGameMenuView(new PreGameMenuController());
+        PreGameMenuView preGameMenuView = new PreGameMenuView(new PreGameMenuController());
 
         getInstance().setScreen(preGameMenuView);
     }
+
     @Override
     public void render() {
         super.render();
@@ -91,6 +97,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         super.dispose();
         GameAssetManager.dispose();
         batch.dispose();
+        loggedInUser.getOwnedAnimals().clear();
         //saveGameData();
     }
 
@@ -211,6 +218,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
+
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
@@ -219,8 +227,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.currentMenu = currentMenu;
         changeScreen();
     }
+
     public void changeScreen() {
-        switch(currentMenu) {
+        switch (currentMenu) {
             case GameMenu:
                 getInstance().setScreen(new GameView(new GameController()));
                 break;

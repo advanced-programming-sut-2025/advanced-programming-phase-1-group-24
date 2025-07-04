@@ -17,7 +17,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -173,9 +176,12 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         float bottomPad = (float) gameHeight / 10;
 
         table.add(titleLabel).colspan(2).padBottom(bottomPad).row();
-
-        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20);
-        table.add(map2Button).width(buttonWidth).height(buttonHeight).padBottom(bottomPad).row();
+//
+//        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20);
+//        table.add(map2Button).width(buttonWidth).height(buttonHeight).padBottom(bottomPad).row();
+        // Add map selection buttons side by side with consistent padding
+        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20).padBottom(bottomPad);
+        table.add(map2Button).width(buttonWidth).height(buttonHeight).padLeft(20).padBottom(bottomPad).row();
         table.add(confirmButton).colspan(2).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
 
         // Map selection button listeners
@@ -204,7 +210,6 @@ public class MapSelectionMenuView implements AppMenu, Screen {
             public void clicked(InputEvent event, float x, float y) {
                 if (selectedMap != null) {
                     //  controller.notifyMapSelected(selectedMap);
-
                     controller.pickGameMap(MainApp.getInstance().getLoggedInUser(), Integer.parseInt(selectedMap));
                     System.out.println("logged in user " + MainApp.getInstance().getLoggedInUser().getUsername() + " " + selectedMap);
                     for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
@@ -214,6 +219,14 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                             System.out.println( user.getUsername() + " " + number +"\n");
                         }
                     }
+                    /// /////////// hard code ///////////////////////////////////////////////////////////////
+                    Animal moo = new Animal("moo", AnimalType.COW);
+                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
+                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+                    moo.setCurrentTile(new_tile);
+                    new_tile.setContainedAnimal(moo);
+                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
+                    /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
                 }
             }
