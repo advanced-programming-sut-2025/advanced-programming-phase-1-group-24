@@ -51,11 +51,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
 
-
-//     HouseMenuController houseController = new HouseMenuController();
-//    StoreMenuController storeController = new StoreMenuController();
-//    GameController GameController = new GameController();
-
     public GameView(GameController controller) {
         this.controller = controller;
         controller.setView(this);
@@ -64,38 +59,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
     }
 
-    //    @Override
-//    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-//        if (button == Input.Buttons.RIGHT && !terminalVisible) {
-//            // Convert screen coordinates to world coordinates
-//            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
-//
-//            // Convert world coordinates to tile coordinates
-//            int tileX = (int)(worldCoords.x / GameAssetManager.TILE_SIZE);
-//            int tileY = mapOfGame.getHeight() - (int)(worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
-//
-//            // Check if click is within map bounds
-//            if (tileX >= 0 && tileY >= 0 && tileX < mapOfGame.getWidth() && tileY < mapOfGame.getHeight()) {
-//                Tile tile = mapOfGame.getMap()[tileY][tileX];
-//                if (tile != null && tile.getContainedAnimal() != null) {
-//                    selectedAnimal = tile.getContainedAnimal();
-//
-//                    // Position the dialog near the mouse
-//                    animalMenuDialog.setPosition(screenX, Gdx.graphics.getHeight() - screenY);
-//                    animalMenuDialog.setVisible(true);
-//
-//                    // Temporarily switch input to stage for dialog interaction
-//                    Gdx.input.setInputProcessor(stage);
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//        if (button == Input.Buttons.RIGHT) {
-            //&& !terminalVisible) {
+       if ( !terminalVisible) {
+            //&&  button == Input.Buttons.RIGHT) {
             // Convert screen coordinates to world coordinates
             Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
 
@@ -127,7 +94,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //
 //                }
             }
-       // }
+      }
         return false;
     }
 
@@ -197,6 +164,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 animalMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
+                selectedAnimal = null;
             }
         });
 
@@ -222,45 +191,42 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (showFullMap) return true;
-
-//        int x = currentPlayer.getCurrentTile().getX();
-//        int y = currentPlayer.getCurrentTile().getY();
-//        int dir = 0;
-//
-//        switch (keycode) {
-//            case Input.Keys.A:
-//                x -= 1;
-//                dir = 4;
-//                break;
-//            case Input.Keys.D:
-//                x += 1;
-//                dir = 2;
-//                break;
-//            case Input.Keys.W:
-//                y -= 1;
-//                dir = 3;
-//                break;
-//            case Input.Keys.S:
-//                y += 1;
-//                dir = 1;
-//                break;
-//        }
-//
-//        if (x >= 0 && y >= 0 && y < mapOfGame.getMap().length && x < mapOfGame.getMap()[0].length && mapOfGame.getMap()[y][x].getisWalkable() &&
-//            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(x, y) != null &&
-//                !(mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getUsername()) ||
-//                    (currentPlayer.getPartner() != null && mapOfGame.getMap()[y][x].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
-//            currentPlayer.setCurrentTile(mapOfGame.getMap()[y][x]);
-//            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
-//            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
-//            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
-//        }
-//        currentPlayer.setMovingDirection(dir);
-
-        // setCameraPosition();
         return false;
     }
 
+
+    private void handleAnimalMenuChoice(String choice) {
+        if (selectedAnimal == null) {
+            System.out.println("animal is null");
+            return;
+        }
+        System.out.println(selectedAnimal.getName());
+
+        // Handle choices...
+        switch (choice) {
+            case "feed":
+                controller.feedHay(selectedAnimal.getName());
+                break;
+            case "pet":
+                controller.petAnimal(selectedAnimal.getName());
+                break;
+            case "release":
+                 //controller.releaseAnimal(selectedAnimal);
+                break;
+            case "sell":
+                controller.sellAnimal(selectedAnimal.getName());
+                break;
+            case "collect":
+                controller.collectProduct(selectedAnimal.getName());
+                break;
+            case "cancel":
+                // Do nothing
+                break;
+        }
+        animalMenuDialog.hide();
+        Gdx.input.setInputProcessor(this);  // Return input to game
+        selectedAnimal = null;
+    }
 
     @Override
     public boolean keyUp(int i) {
@@ -396,56 +362,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         stage.draw();
     }
 
-    // Check for terminal toggle key (e.g., F1)
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-//            terminalVisible = !terminalVisible;
-//            terminalWindow.setVisible(terminalVisible);
-//
-//            if (terminalVisible) {
-//                // Set focus to input field when terminal opens
-//                Gdx.input.setInputProcessor(terminalWindow.getStage());
-//                terminalWindow.getInputField().setTextFieldFocus(true);
-//            } else {
-//                // Return input to main stage
-//                Gdx.input.setInputProcessor(stage);
-//            }
-//        }
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) {
-//            terminalVisible = !terminalVisible;
-//            terminalWindow.setVisible(terminalVisible);
-//
-//            if (terminalVisible) {
-//                Gdx.input.setInputProcessor(terminalWindow.getTerminalStage());
-//                Gdx.input.setInputProcessor(stage); // enable UI interaction
-//                terminalWindow.getInputField().setText(""); // optional: clear old input
-//                terminalWindow.getInputField().setFocusTraversal(true); // optional
-//                terminalWindow.getInputField().setCursorPosition(0);
-//                terminalWindow.getInputField().setFocusTraversal(true);
-//            } else {
-//                Gdx.input.setInputProcessor(this); // return control to game
-//            }
-//
-//        }
-//            if (terminalVisible) {
-//                Gdx.input.setInputProcessor(stage); // Only this one
-//                terminalWindow.getInputField().setText("");
-//                terminalWindow.getInputField().setCursorPosition(0);
-//                terminalWindow.getInputField().setFocusTraversal(true);
-//            }
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-//            terminalVisible = !terminalVisible;
-//            terminalWindow.setVisible(terminalVisible);
-//            if (terminalVisible)
-//                Gdx.input.setInputProcessor(terminalWindow.getTerminalStage());
-//            else
-//                Gdx.input.setInputProcessor(this);
-//        }
-
-    //    @Override
-//    public void resize(int i, int i1) {
-//        camera.setToOrtho(false, i, i1);
-//        camera.update();
-//    }
     @Override
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
@@ -531,38 +447,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
     }
 
-    private void handleAnimalMenuChoice(String choice) {
-        if (selectedAnimal == null) {
-            System.out.println("animal is null");
-            return;
-        }
-        System.out.println(selectedAnimal.getName());
-
-        // Handle choices...
-        switch (choice) {
-            case "feed":
-                controller.feedHay(selectedAnimal.getName());
-                break;
-            case "pet":
-                //controller.petAnimal(selectedAnimal);
-                break;
-            case "release":
-                // controller.releaseAnimal(selectedAnimal);
-                break;
-            case "sell":
-                //controller.sellAnimal(selectedAnimal);
-                break;
-            case "collect":
-                //controller.collectAnimalProduct(selectedAnimal);
-                break;
-            case "cancel":
-                // Do nothing
-                break;
-        }
-        animalMenuDialog.hide();
-        Gdx.input.setInputProcessor(this);  // Return input to game
-        selectedAnimal = null;
-    }
 
     private boolean tryMove(int dx, int dy, int direction) {
         int x = currentPlayer.getCurrentTile().getX();
