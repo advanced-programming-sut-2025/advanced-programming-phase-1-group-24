@@ -53,6 +53,9 @@ public class GameAssetManager {
     public static Texture dropTexture;
     public static TextureRegion[] dropFrames = new TextureRegion[11];
     public static Animation<TextureRegion> dropAnimation;
+    public static Texture crowSheet;
+    public static TextureRegion[] crowFrames = new TextureRegion[5];
+    public static Animation<TextureRegion> crowAnimation;
 
 
 
@@ -150,6 +153,15 @@ public class GameAssetManager {
         pixmap.fill();
         pixel = new Texture(pixmap);
         pixmap.dispose();
+
+        crowSheet = new Texture("Crow.png");
+        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
+
+        crowFrames = new TextureRegion[7];
+        for (int i = 0; i < 7; i++) {
+            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
+        }
+        crowAnimation = new Animation<>(0.1f, crowFrames);
     }
 
     public static void dispose() {
@@ -175,6 +187,7 @@ public class GameAssetManager {
         if(snowOverlay != null) snowOverlay.dispose();
         if(stormOverlay != null) stormOverlay.dispose();
         if(dropTexture != null) dropTexture.dispose();
+        if(crowSheet != null) crowSheet.dispose();
     }
 
     public static Texture getBackground() {

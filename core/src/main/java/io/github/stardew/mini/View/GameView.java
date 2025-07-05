@@ -195,7 +195,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(200, 200);
         friendsButton.setColor(Color.PURPLE);
-        friendsButton.setPosition(Gdx.graphics.getWidth() - 220, Gdx.graphics.getHeight() - 220);
+        friendsButton.setPosition(Gdx.graphics.getWidth() - 2550, Gdx.graphics.getHeight() - 1450);
         friendsButton.setTouchable(Touchable.enabled);
 
         stage.addActor(friendsButton);
@@ -575,32 +575,29 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
     }
 
-    //TODO : debug
+
     private void toggleFriendsDialog() {
         if (friendsDialog != null && friendsDialog.getStage() != null) {
             friendsDialog.hide();
             friendsDialog = null;
             return;
         }
-
-        friendsDialog = new Dialog("Friends :", GameAssetManager.skin, "custom-window");
-
+        friendsDialog = new Dialog("Friends", GameAssetManager.skin, "custom-window");
         friendsDialog.padTop(40);
-
-        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        //friendsDialog.getContentTable().debug(); // show layout
+        Table content = friendsDialog.getContentTable();
+        content.defaults().pad(10).expandX().fillX();
+        //content.debug();
 
         for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            if(player.getUsername().equals(friend.getUsername())) {
+            if(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(friend.getUsername())) {
                 continue;
             }
             Table row = new Table();
             Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
-            nameLabel.setColor(Color.WHITE);
-            int level = MainApp.getInstance().getCurrentGame().getFriendship(player.getUsername(), friend.getUsername()).getLevel();
+            int level = MainApp.getInstance().getCurrentGame().getFriendship(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername(), friend.getUsername()).getLevel();
             Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
-            levelLabel.setColor(Color.WHITE);
             TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
-            giftButton.setColor(Color.WHITE);
 
             giftButton.addListener(new ClickListener() {
                 @Override
@@ -610,23 +607,15 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 }
             });
 
-            row.add(nameLabel).expandX().left().pad(10);
-            row.add(levelLabel).pad(10);
-            row.add(giftButton).right().pad(10);
-            friendsDialog.getContentTable().add(row).fillX().row();
+            row.add(nameLabel).left().pad(100);
+            row.add(levelLabel).pad(100);
+            row.add(giftButton).right().pad(100);
+            content.add(row).fillX().row();
         }
 
-
         friendsDialog.pack();
-
-        stage.addActor(friendsDialog); // 👈 manually add it
-        friendsDialog.setPosition(
-            friendsButton.getX(),
-            friendsButton.getY() - friendsDialog.getHeight() - 10
-        );
-        friendsDialog.invalidate(); // 👈 force layout update
-
-        System.out.println(friendsDialog.getColor());
+        stage.addActor(friendsDialog);
+        friendsDialog.setPosition(20, 220);
     }
 
 
