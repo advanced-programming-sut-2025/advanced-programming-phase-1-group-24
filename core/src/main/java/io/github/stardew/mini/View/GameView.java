@@ -27,6 +27,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.FriendshipLevels;
 import io.github.stardew.mini.Model.Growables.CropType;
@@ -69,6 +70,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private BitmapFont smallFont;
     private int selectedSlot = 0;
     private Table toolMenuTable;
+    public static float toolUsageStateTime = 0f;
+    public static boolean isToolBeingUsed = false;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -102,11 +105,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
             return true;
         }
-        if (keycode == Input.Keys.LEFT) {
+        if (keycode == Input.Keys.LEFT && showToolsMenu) {
             selectedSlot--;
         }
-        if (keycode == Input.Keys.RIGHT) {
+        if (keycode == Input.Keys.RIGHT && showToolsMenu) {
             selectedSlot++;
+        }
+        if (keycode == Input.Keys.C && showToolsMenu) {
+            Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(mousePos);
+            useSelectedTool(mousePos.x, mousePos.y);
+            return true;
         }
 
         if (keycode == Input.Keys.F) {
@@ -288,14 +297,32 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         drawPlayer();
+
+        /// ////////////////////////////////////////////
+
+        updateToolsMenuTable();
+        if (isToolBeingUsed) {
+            toolUsageStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.toolUsageAnimation.getKeyFrame(toolUsageStateTime);
+            if (currentFrame != null) {
+                // Draw the animation centered on the player's tile
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (mapOfGame.getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
+            }
+            if (InventoryAssets.toolUsageAnimation.isAnimationFinished(toolUsageStateTime)) {
+                isToolBeingUsed = false;
+                toolUsageStateTime = 0f; // Reset for next usage
+            }
+        }
+
+        /// /////////////////////////////////////////////////////////////////////////
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
         batch.setColor(darkOverlayColor);
         batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
         batch.setColor(Color.WHITE);
         batch.end();
-
-        updateToolsMenuTable();
 
         handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
@@ -616,6 +643,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             if (isClickInside(mouseX, mouseY, friendsButton)) {
                 toggleFriendsDialog();
             }
+
+            /// /////////////////////////////////////////////////////////
+            else if (showToolsMenu && !isClickInside(mouseX, mouseY, friendsButton)) {
+                useSelectedTool(mouseX, mouseY);
+            }
+            /// /////////////////////////////////////////////////////////////
         }
     }
 
@@ -677,18 +710,21 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         for (int i = 0; i < tools.size(); i++) {
             Stack slotStack = new Stack();
 
-            Image slotBg = new Image(GameAssetManager.slot);
+            Image slotBg = new Image(InventoryAssets.slot);
             slotBg.setSize(slotImageSize, slotImageSize);
             slotStack.add(slotBg);
 
             Tool tool = tools.get(i);
             String textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
-            Texture itemTex = GameAssetManager.getToolTexture(textureOrigin);
+            Texture itemTex = InventoryAssets.getToolTexture(textureOrigin);
 
-            if (i == selectedSlot && GameAssetManager.highlightedSlot != null) {
-                Image highlightImage = new Image(GameAssetManager.highlightedSlot);
+            if (i == selectedSlot && InventoryAssets.highlightedSlot != null) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
                 highlightImage.setSize(slotImageSize, slotImageSize);
                 slotStack.add(highlightImage);
+                if (!isToolBeingUsed) {
+                    drawSelectedTool(itemTex);
+                }
             }
 
             if (itemTex != null) {
@@ -712,5 +748,95 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         toolMenuTable.pack();
     }
 
+    private void drawSelectedTool(Texture itemTex) {
+        if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
+
+        Tile tile = currentPlayer.getCurrentTile();
+        int tileSize = GameAssetManager.TILE_SIZE;
+
+        int tileX = tile.getX();
+        int tileY = tile.getY();
+
+        int drawX = tileX * tileSize;
+        int drawY = (mapOfGame.getMap().length - tileY - 1) * tileSize;
+
+        batch.draw(itemTex, drawX, drawY, tileSize, tileSize);
+    }
+
+    private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
+        if (!showToolsMenu) {
+            return;
+        }
+
+        ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
+        if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
+            return;
+        }
+
+        Tool toolToUse = tools.get(selectedSlot);
+        currentPlayer.setEquippedTool(toolToUse);
+
+        int tileSize = GameAssetManager.TILE_SIZE;
+
+        float playerTileGridX = currentPlayer.getCurrentTile().getX();
+        float playerTileGridY = currentPlayer.getCurrentTile().getY();
+
+        float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
+        float playerWorldY = (mapOfGame.getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
+
+        Vector3 touchPosOnScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        camera.unproject(touchPosOnScreen);
+        float actualMouseWorldX = touchPosOnScreen.x;
+        float actualMouseWorldY = touchPosOnScreen.y;
+
+        float deltaX = actualMouseWorldX - playerWorldX;
+        float deltaY = actualMouseWorldY - playerWorldY;
+
+        int direction = get4DirectionalAngle(deltaX, deltaY);
+
+        float angleRad = MathUtils.atan2(deltaY, deltaX);
+        float angleDeg = angleRad * MathUtils.radDeg;
+        if (angleDeg < 0) {
+            angleDeg += 360;
+        }
+
+        // Start the tool usage animation
+        isToolBeingUsed = true;
+        toolUsageStateTime = 0f;
+
+        if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
+            controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+        } else {
+            controller.useTool("Down");
+        }
+    }
+
+    private int get4DirectionalAngle(float dx, float dy) {
+        if (dx == 0 && dy == 0) {
+            return 2; // Down
+        }
+
+        float angleRad = MathUtils.atan2(dy, dx);
+        float angleDeg = angleRad * MathUtils.radDeg;
+
+        if (angleDeg < 0) {
+            angleDeg += 360;
+        }
+
+        // Up:     45   to 135  (centered at 90)
+        // Left:  135   to 225  (centered at 180)
+        // Down:  225   to 315  (centered at 270)
+        // Right: 315   to 360  (centered at 0/360) OR 0 to 45
+
+        if (angleDeg >= 45 && angleDeg < 135) {
+            return 0; // Up
+        } else if (angleDeg >= 135 && angleDeg < 225) {
+            return 3; // Left
+        } else if (angleDeg >= 225 && angleDeg < 315) {
+            return 2; // Down
+        } else {
+            return 1; // Right
+        }
+    }
 
 }
