@@ -6,10 +6,12 @@ import io.github.stardew.mini.Model.Menus.ProfileMenuCommands;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.ProfileMenuView;
 
 public class ProfileMenuController implements MenuController {
 
     ProfileMenuCommands command;
+    private ProfileMenuView view;
 
     public Result changeUsername(String username) {
         MainApp app = MainApp.getInstance();
@@ -79,6 +81,9 @@ public class ProfileMenuController implements MenuController {
         MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
+        if (nickname == null){
+            return new Result(false, "nickname is null!");
+        }
         if (user == null)
             return new Result(false, "please login first!");
 
@@ -104,6 +109,12 @@ public class ProfileMenuController implements MenuController {
 
         return new Result(true, info);
     }
+
+    public void setView(ProfileMenuView view) {
+        this.view = view;
+    }
+
+
 //    public Result changeUsername(String newUsername) {
 //    }
 //

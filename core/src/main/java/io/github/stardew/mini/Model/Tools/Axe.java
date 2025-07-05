@@ -9,6 +9,7 @@ import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Skill;
+import io.github.stardew.mini.Model.Things.ToolMaterial;
 import io.github.stardew.mini.Model.User;
 
 public class Axe extends Tool {

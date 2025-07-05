@@ -7,6 +7,7 @@ import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.Things.ToolMaterial;
 import io.github.stardew.mini.Model.User;
 
 public class PickAxe extends Tool{

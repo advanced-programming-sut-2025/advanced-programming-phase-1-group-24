@@ -7,6 +7,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.LoginMenuView;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,85 +17,84 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoginMenuController implements MenuController {
+    LoginMenuView view;
 
-
-    public Result register(Matcher matcher) {
-        MainApp app = MainApp.getInstance();
-        String username = matcher.group("username");
-        String password = matcher.group("password");
-        String confirm = matcher.group("confirm");
-        String nickname = matcher.group("nickname");
-        String email = matcher.group("email");
-        String genderString = matcher.group("gender");
-        boolean gender = genderString.equalsIgnoreCase("male") ? false : true;
-
-        // Check username duplication
-        for (User user : app.getUsers()) {
-            if (user.getUsername().equals(username)) {
-                return new Result(false, "username is already taken! try adding numbers or -");
-            }
-        }
-
-        // Check username format
-        if (!isValidUsername(username)) {
-            return new Result(false, "username format is invalid!");
-        }
-
-        // Check email format
-        if (!isValidEmail(email)) {
-            return new Result(false, "email format is invalid!");
-        }
-
-        // Handle random password
-        boolean isRandomPassword = password.equals("random");
-        if (!isRandomPassword) {
-            if (!password.equals(confirm)) {
-                return new Result(false, "password and confirmation do not match!");
-            }
-            if (!isStrongPassword(password)) {
-                return new Result(false, "password is weak! it must contain lowercase, uppercase, digit, and special character, and be at least 8 chars");
-            }
-        } else {
-            // generate a strong random password
-            password = generateStrongRandomPassword();
-            // show password to user (you may want to prompt confirmation in a real app)
-            System.out.println("Generated Password: " + password);
-            // Optionally, wait for confirmation here before continuing
-        }
-
-        // Hash the password before storing
-        String hashedPassword = hashSHA256(password);
-        User newUser = new User(username, hashedPassword, nickname, email, gender);
-
-        // Save user
-        app.getUsers().add(newUser);
-        UserDatabase.saveUsers(app.getUsers());
-        app.setLoggedInUser(newUser); // not added yet until question is picked
-
-        // Show security questions
-        StringBuilder questionsList = new StringBuilder("choose a security question:\n");
-        List<String> questions = app.getSecurityQuestions();
-        for (int i = 0; i < questions.size(); i++) {
-            questionsList.append((i + 1)).append(". ").append(questions.get(i)).append("\n");
-        }
-
-        return new Result(true, questionsList.toString());
+    public void setView(LoginMenuView view) {
+        this.view = view;
     }
 
+//    public Result register(Matcher matcher) {
+//        MainApp app = MainApp.getInstance();
+//        String username = matcher.group("username");
+//        String password = matcher.group("password");
+//        String confirm = matcher.group("confirm");
+//        String nickname = matcher.group("nickname");
+//        String email = matcher.group("email");
+//        String genderString = matcher.group("gender");
+//        boolean gender = genderString.equalsIgnoreCase("male") ? false : true;
+//
+//        // Check username duplication
+//        for (User user : app.getUsers()) {
+//            if (user.getUsername().equals(username)) {
+//                return new Result(false, "username is already taken! try adding numbers or -");
+//            }
+//        }
+//
+//        // Check username format
+//        if (!isValidUsername(username)) {
+//            return new Result(false, "username format is invalid!");
+//        }
+//
+//        // Check email format
+//        if (!isValidEmail(email)) {
+//            return new Result(false, "email format is invalid!");
+//        }
+//
+//        // Handle random password
+//        boolean isRandomPassword = password.equals("random");
+//        if (!isRandomPassword) {
+//            if (!password.equals(confirm)) {
+//                return new Result(false, "password and confirmation do not match!");
+//            }
+//            if (!isStrongPassword(password)) {
+//                return new Result(false, "password is weak! it must contain lowercase, uppercase, digit, and special character, and be at least 8 chars");
+//            }
+//        } else {
+//            // generate a strong random password
+//            password = generateStrongRandomPassword();
+//            // show password to user (you may want to prompt confirmation in a real app)
+//            System.out.println("Generated Password: " + password);
+//            // Optionally, wait for confirmation here before continuing
+//        }
+//
+//        // Hash the password before storing
+//        String hashedPassword = hashSHA256(password);
+//        User newUser = new User(username, hashedPassword, nickname, email, gender);
+//
+//        // Save user
+//        app.getUsers().add(newUser);
+//        UserDatabase.saveUsers(app.getUsers());
+//        app.setLoggedInUser(newUser); // not added yet until question is picked
+//
+//        // Show security questions
+//        StringBuilder questionsList = new StringBuilder("choose a security question:\n");
+//        List<String> questions = app.getSecurityQuestions();
+//        for (int i = 0; i < questions.size(); i++) {
+//            questionsList.append((i + 1)).append(". ").append(questions.get(i)).append("\n");
+//        }
+//
+//        return new Result(true, questionsList.toString());
+//    }
 
 
 
-    public Result login(Matcher matcher) {
-        String username = matcher.group("username");
-        String enteredPassword = matcher.group("password");
-        boolean stayLoggedIn = matcher.group(3) != null;
 
+    public Result login(String username, String password, boolean stayLoggedIn) {
         MainApp app = MainApp.getInstance();
         List<User> users = app.getUsers();
         User matchedUser = app.getUserByUsername(username);
@@ -103,7 +103,7 @@ public class LoginMenuController implements MenuController {
             return new Result(false, "username does not exist!");
         }
 
-        String hashedInput = hashSHA256(enteredPassword);
+        String hashedInput = hashSHA256(password);
         if (!matchedUser.getPassword().equals(hashedInput)) {
             return new Result(false, "incorrect password!");
         }
@@ -177,53 +177,73 @@ public class LoginMenuController implements MenuController {
         if (file.exists()) file.delete();
     }
 
-    public Result forgetPassword(Matcher matcher, Scanner scanner) {
-        String username = matcher.group("username");
+    public Result forgetPassword(String username, String answer, String newPassword) {
         MainApp app = MainApp.getInstance();
         User user = app.getUserByUsername(username);
 
         if (user == null)
             return new Result(false, "no user with this username exists!");
 
-        System.out.println("security question: " + user.getSecurityQuestion());
-        String input = scanner.nextLine().trim();
-        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
-        Matcher answerMatcher = answerPattern.matcher(input);
-
-        if (!answerMatcher.matches()) {
-            return new Result(false, "invalid format! expected: answer -a <answer>");
-        }
-
-        String answer = answerMatcher.group("answer").trim();
         if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
-            return new Result(false, "incorrect answer! returning to main menu...");
+            return new Result(false, "incorrect answer!");
+        }
+        if (!isStrongPassword(newPassword)) {
+            return new Result(false, "password format is not strong! try again.");
         }
 
-        System.out.print("do you want to choose your own password? (yes/no): ");
-        String choice = scanner.nextLine().trim().toLowerCase();
-
-        String newPassword;
-        if (choice.equals("yes")) {
-            while (true) {
-                System.out.print("enter new password: ");
-                newPassword = scanner.nextLine().trim();
-                if (!isStrongPassword(newPassword)) {
-                    System.out.println("password format is invalid! try again.");
-                } else {
-                    break;
-                }
-            }
-        } else {
-            // generate a random password
-            newPassword = generateStrongRandomPassword();
-            System.out.println("your new password is: " + newPassword);
-        }
         String hashedPassword = hashSHA256(newPassword);
         user.setPassword(hashedPassword);
         UserDatabase.saveUsers(app.getUsers());
 
         return new Result(true, "password changed successfully! you can now log in.");
     }
+//    public Result forgetPassword(Matcher matcher, Scanner scanner) {
+//        String username = matcher.group("username");
+//        MainApp app = MainApp.getInstance();
+//        User user = app.getUserByUsername(username);
+//
+//        if (user == null)
+//            return new Result(false, "no user with this username exists!");
+//
+//        System.out.println("security question: " + user.getSecurityQuestion());
+//        String input = scanner.nextLine().trim();
+//        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
+//        Matcher answerMatcher = answerPattern.matcher(input);
+//
+//        if (!answerMatcher.matches()) {
+//            return new Result(false, "invalid format! expected: answer -a <answer>");
+//        }
+//
+//        String answer = answerMatcher.group("answer").trim();
+//        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+//            return new Result(false, "incorrect answer! returning to main menu...");
+//        }
+//
+//        System.out.print("do you want to choose your own password? (yes/no): ");
+//        String choice = scanner.nextLine().trim().toLowerCase();
+//
+//        String newPassword;
+//        if (choice.equals("yes")) {
+//            while (true) {
+//                System.out.print("enter new password: ");
+//                newPassword = scanner.nextLine().trim();
+//                if (!isStrongPassword(newPassword)) {
+//                    System.out.println("password format is invalid! try again.");
+//                } else {
+//                    break;
+//                }
+//            }
+//        } else {
+//            // generate a random password
+//            newPassword = generateStrongRandomPassword();
+//            System.out.println("your new password is: " + newPassword);
+//        }
+//        String hashedPassword = hashSHA256(newPassword);
+//        user.setPassword(hashedPassword);
+//        UserDatabase.saveUsers(app.getUsers());
+//
+//        return new Result(true, "password changed successfully! you can now log in.");
+//    }
 
     public static String hashSHA256(String input) {
         try {
@@ -241,16 +261,16 @@ public class LoginMenuController implements MenuController {
 
     public static boolean isStrongPassword(String password) {
         return password.length() >= 8 &&
-                password.matches(".*[a-z].*") &&
-                password.matches(".*[A-Z].*") &&
-                password.matches(".*\\d.*") &&
-                password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
+            password.matches(".*[a-z].*") &&
+            password.matches(".*[A-Z].*") &&
+            password.matches(".*\\d.*") &&
+            password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
     }
 
     public static boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9._-]+@[A-Za-z0-9-]+\\.[A-Za-z]{2,}$") &&
-                !email.contains("..") &&
-                !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
+            !email.contains("..") &&
+            !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
     }
 
     public static boolean isValidUsername(String username) {

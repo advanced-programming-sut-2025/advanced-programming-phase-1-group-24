@@ -329,7 +329,6 @@ public class StoreMenuController {
 
 
 //    public Result buyFromCarpenter(String name, String x, String y) {
-//        Game game = MainApp.getInstance().getCurrentGame();
 //        User player = game.getCurrentPlayer();
 //        MapOfGame map = game.getMap();
 //        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());

@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.TimeManagement;
 
+import io.github.stardew.mini.Model.Growables.SourceType;
+
 import java.util.List;
 
 public enum Season {

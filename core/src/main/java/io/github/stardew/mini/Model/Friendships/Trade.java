@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Model.Friendships;
 
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
 
 public class Trade {

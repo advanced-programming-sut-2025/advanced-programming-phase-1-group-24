@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Menus;
 
+import java.util.regex.Matcher;
+
 public enum LoginMenuCommands implements Commands {
     FORGET_PASSWORD("^forget\\s+password\\s+-u\\s+(?<username>\\S+)$"),
     LOGIN("^login\\s+-u\\s+(?<username>\\S+)\\s+-p\\s+(?<password>\\S+)\\s*(?<loginFlag>–stay-logged-in)?$"),

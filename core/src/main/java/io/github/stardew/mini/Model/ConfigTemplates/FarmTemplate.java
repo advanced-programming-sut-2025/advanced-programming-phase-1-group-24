@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Model.ConfigTemplates;
 
+import java.util.*;
 import java.util.List;
 
 public class FarmTemplate {

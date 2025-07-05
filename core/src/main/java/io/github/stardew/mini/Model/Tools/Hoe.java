@@ -4,6 +4,7 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.Things.ToolMaterial;
 import io.github.stardew.mini.Model.User;
 
 public class Hoe extends Tool{
