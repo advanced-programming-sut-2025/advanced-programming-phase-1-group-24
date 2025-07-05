@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.FriendshipLevels;
 import io.github.stardew.mini.Model.Growables.*;
@@ -41,6 +42,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         GameAssetManager.load();
         TreeAssets.load();
         CropAssets.load();
+        InventoryAssets.load();
         TileType.initTextures();
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
@@ -76,6 +78,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         GameAssetManager.dispose();
         TreeAssets.dispose();
         CropAssets.dispose();
+        InventoryAssets.dispose();
     }
 
     private User loadLoggedInUser() {

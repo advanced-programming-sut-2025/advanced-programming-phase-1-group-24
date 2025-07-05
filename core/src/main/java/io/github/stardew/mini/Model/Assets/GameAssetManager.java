@@ -49,24 +49,6 @@ public class GameAssetManager {
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
     public static Texture pixel;
-    public static Texture slot;
-    public static Texture highlightedSlot;
-    public static Texture InitialHOE;
-    public static Texture CopperHOE;
-    public static Texture IronHOE;
-    public static Texture GoldHOE;
-    public static Texture IridiumHOE;
-    public static Texture InitialPICKAXE;
-    public static Texture InitialAXE;
-    public static Texture InitialWATERINGCAN;
-    public static Texture InitialFISHINGPOLE;
-    public static Texture InitialSCYTHE;
-    public static Texture InitialMILKPAIL;
-    public static Texture InitialTRASHCAN;
-    public static Texture InitialSHEAR;
-
-    private static Map<String, Texture> toolMap;
-
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -97,39 +79,6 @@ public class GameAssetManager {
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
-
-        slot = new Texture(Gdx.files.internal("game/tiles/slot.png"));
-        highlightedSlot = new Texture(Gdx.files.internal("game/tiles/highlight.png"));
-        if (toolMap == null) {
-            toolMap = new HashMap<>();
-        }
-        InitialHOE = new Texture(Gdx.files.internal("Hoe/Hoe.png"));
-        CopperHOE = new Texture(Gdx.files.internal("Hoe/Copper_Hoe.png"));
-        IronHOE = new Texture(Gdx.files.internal("Hoe/Steel_Hoe.png"));
-        GoldHOE = new Texture(Gdx.files.internal("Hoe/Gold_Hoe.png"));
-        IridiumHOE = new Texture(Gdx.files.internal("Hoe/Iridium_Hoe.png"));
-        InitialPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Pickaxe.png"));
-        InitialAXE = new Texture(Gdx.files.internal("Tools/Axe/Axe.png"));
-        InitialSCYTHE = new Texture(Gdx.files.internal("Tools/Scythe.png"));
-        InitialFISHINGPOLE = new Texture(Gdx.files.internal("Fishing_Pole/Training_Rod.png"));
-        InitialMILKPAIL = new Texture(Gdx.files.internal("Tools/Milk_Pail.png"));
-        InitialSHEAR = new Texture(Gdx.files.internal("Tools/Shears.png"));
-        InitialWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Watering_Can.png"));
-        InitialTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
-        toolMap.put("INITIALHOE", InitialHOE);
-        toolMap.put("COPPERHOE", CopperHOE);
-        toolMap.put("IRONHOE", IronHOE);
-        toolMap.put("GOLDHOE", GoldHOE);
-        toolMap.put("IRIDIUMHOE", IridiumHOE);
-        toolMap.put("INITIALPICKAXE", InitialPICKAXE);
-        toolMap.put("INITIALAXE", InitialAXE);
-        toolMap.put("INITIALWATERINGCAN", InitialWATERINGCAN);
-        toolMap.put("INITIALFISHINGPOLE", InitialFISHINGPOLE);
-        toolMap.put("INITIALSCYTHE", InitialSCYTHE);
-        toolMap.put("INITIALMILKPAIL", InitialMILKPAIL);
-        toolMap.put("INITIALTRASHCAN", InitialTRASHCAN);
-        toolMap.put("INITIALSHEAR", InitialSHEAR);
-
 
         playerAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
 
@@ -206,36 +155,10 @@ public class GameAssetManager {
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
-        if (slot != null) slot.dispose();
-        if (highlightedSlot != null) highlightedSlot.dispose();
-        disposeToolTextures();
     }
 
     public static Texture getBackground() {
         return menuBackground;
     }
 
-    public static Texture getToolTexture(String textureKey) {
-        return toolMap.get(textureKey);
-    }
-
-    public static void disposeToolTextures() {
-        if (InitialHOE != null) InitialHOE.dispose();
-        if (CopperHOE != null) CopperHOE.dispose();
-        if (IronHOE != null) IronHOE.dispose();
-        if (GoldHOE != null) GoldHOE.dispose();
-        if (IridiumHOE != null) IridiumHOE.dispose();
-        if (InitialPICKAXE != null) InitialPICKAXE.dispose();
-        if (InitialAXE != null) InitialAXE.dispose();
-        if (InitialWATERINGCAN != null) InitialWATERINGCAN.dispose();
-        if (InitialFISHINGPOLE != null) InitialFISHINGPOLE.dispose();
-        if (InitialSCYTHE != null) InitialSCYTHE.dispose();
-        if (InitialMILKPAIL != null) InitialMILKPAIL.dispose();
-        if (InitialTRASHCAN != null) InitialTRASHCAN.dispose();
-        if (InitialSHEAR != null) InitialSHEAR.dispose();
-
-        if (toolMap != null) {
-            toolMap.clear();
-        }
-    }
 }
