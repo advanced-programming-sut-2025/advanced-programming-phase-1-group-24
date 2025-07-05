@@ -51,7 +51,6 @@ public enum FruitType {
     public Texture getTexture() {
         return texture;
     }
-
     public void initTexture(){
         String correctedName = this.name.replace(" ", "_");
         this.texture = new Texture("Trees/" + correctedName + ".png");

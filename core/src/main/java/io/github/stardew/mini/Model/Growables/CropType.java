@@ -5,6 +5,10 @@ import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import java.util.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public enum CropType {
 BlueJazz("Blue Jazz",SourceType.JazzSeeds, 7, true, 0, 50, true, 45,
     new ArrayList<>(List.of(Season.SPRING)), false, List.of(1, 2, 2, 2)),

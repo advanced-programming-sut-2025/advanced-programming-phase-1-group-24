@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 public class StoreMenuController {
-    public Result purchase(String productName, int count) {
+    public Result purchase(ShopItem item, int count) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
@@ -34,8 +34,8 @@ public class StoreMenuController {
             return new Result(false, "the store is closed");
         }
 
-        for (ShopItem item : shop.getProducts()) {
-            if (item.getName().equalsIgnoreCase(productName)) {
+//        for (ShopItem item : shop.getProducts()) {
+//            if (item.getName().equalsIgnoreCase(productName)) {
                 int price = getCurrentSeasonPrice(item);
                 if (price == 0) {
                     return new Result(false, "This item is not available in the current season.");
@@ -78,11 +78,11 @@ public class StoreMenuController {
 
                 item.sell(count);
                 player.decreaseMoney(totalCost);
-                return new Result(true, "Successfully purchased " + count + " " + productName + (count > 1 ? "s." : "."));
-            }
-        }
+                return new Result(true, "Successfully purchased " + count + " " + item.getName() + (count > 1 ? "s." : "."));
+//            }
+//        }
 
-        return new Result(false, "Product '" + productName + "' not found in this store.");
+       // return new Result(false, "Product '" + productName + "' not found in this store.");
     }
 
 
@@ -329,7 +329,6 @@ public class StoreMenuController {
 
 
 //    public Result buyFromCarpenter(String name, String x, String y) {
-//        Game game = App.getInstance().getCurrentGame();
 //        User player = game.getCurrentPlayer();
 //        MapOfGame map = game.getMap();
 //        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());

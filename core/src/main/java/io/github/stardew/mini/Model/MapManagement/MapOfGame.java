@@ -8,6 +8,8 @@ import io.github.stardew.mini.Model.Growables.GrowableFactory;
 import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.Growables.SourceType;
 import io.github.stardew.mini.Model.Places.*;
+import io.github.stardew.mini.Model.Places.Farm;
+import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
@@ -20,6 +22,7 @@ import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
+import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.View.GameView;
 
@@ -286,7 +289,20 @@ public class MapOfGame {
                 fishShop, marnieRanch, starDropSaloon
         ));
     }
+    public Shop getShopAtPosition(int x, int y) {
+        for (Shop shop : shops) {
+            int shopX = shop.getX();
+            int shopY = shop.getY();
+            int shopWidth = shop.getWidth();
+            int shopHeight = shop.getHeight();
 
+            if (x >= shopX && x < shopX + shopWidth &&
+                y >= shopY && y < shopY + shopHeight) {
+                return shop;
+            }
+        }
+        return null;
+    }
     private ArrayList<ShopItem> createBlacksmithItems() {
         ArrayList<ShopItem> items = new ArrayList<>();
 
@@ -547,20 +563,7 @@ public class MapOfGame {
         return shops;
     }
 
-    public Shop getShopAtPosition(int x, int y) {
-        for (Shop shop : shops) {
-            int shopX = shop.getX();
-            int shopY = shop.getY();
-            int shopWidth = shop.getWidth();
-            int shopHeight = shop.getHeight();
 
-            if (x >= shopX && x < shopX + shopWidth &&
-                    y >= shopY && y < shopY + shopHeight) {
-                return shop;
-            }
-        }
-        return null;
-    }
 
 
 
