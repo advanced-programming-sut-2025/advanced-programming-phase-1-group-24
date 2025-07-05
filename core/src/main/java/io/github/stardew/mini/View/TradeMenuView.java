@@ -7,7 +7,7 @@ import io.github.stardew.mini.Model.Menus.TradeMenuCommands;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class TradeMenuView implements AppMenuView {
+public class TradeMenuView implements AppMenu {
     TradeMenuController tradeController = new TradeMenuController();
     public void handleCommand(Scanner scanner){
         String input = scanner.nextLine().trim();

@@ -18,9 +18,10 @@ import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Result;
 
+import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class SignupMenuView implements Screen {
+public class SignupMenuView implements Screen,AppMenu {
     private final SignupMenuController controller;
     private final Skin skin;
     private Stage stage;
@@ -141,10 +142,11 @@ public class SignupMenuView implements Screen {
                 Result result = controller.register(username, password, confirm, nickname, email, gender);
                 errorLabel.setText(result.message());
                 if (result.isSuccessful()) {
+
                     Gdx.app.postRunnable(() ->
-                            MainApp.getInstance().setScreen(
-                                new SecurityQuestionView(skin)
-                            )
+                        MainApp.getInstance().setScreen(
+                            new SecurityQuestionView(skin)
+                        )
                     );
                     //MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), skin));
                 }
@@ -173,7 +175,7 @@ public class SignupMenuView implements Screen {
 
     }
 
-        @Override public void render(float delta) {
+    @Override public void render(float delta) {
         Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
@@ -192,8 +194,13 @@ public class SignupMenuView implements Screen {
         skin.dispose();
     }
 
+    @Override
+    public void handleCommand(Scanner scanner) {
 
-    class SecurityQuestionView implements Screen {
+    }
+
+
+    class SecurityQuestionView implements Screen,AppMenu {
         private static final String[] QUESTIONS = new String[]{
             "What is your favorite food?",
             "What is your first pet's name?",
@@ -235,7 +242,7 @@ public class SignupMenuView implements Screen {
             answerField.setMessageText("Answer");
             confirmField = new TextField("", skin);
             confirmField.setMessageText("Confirm Answer");
-            submitButton = new TextButton("Submit", skin,"custom-label");
+            submitButton = new TextButton("Submit", skin,"custom-button");
             errorLabel = new Label("", skin,"custom-label");
             errorLabel.setColor(Color.ROYAL);
             table.add(questionSelect).colspan(2).width(300).pad(10).row();
@@ -253,7 +260,7 @@ public class SignupMenuView implements Screen {
                     errorLabel.setText(res.message());
                     if (res.isSuccessful()) {
                         MainApp.getInstance().setScreen(
-                            new MainMenuView(new MainMenuController(), skin)
+                            new LoginMenuView(new LoginMenuController(), skin)
                         );
                     }
                 }
@@ -266,5 +273,10 @@ public class SignupMenuView implements Screen {
         @Override public void resume() {}
         @Override public void hide() {}
         @Override public void dispose() { stage.dispose(); skin.dispose(); }
+
+        @Override
+        public void handleCommand(Scanner scanner) {
+
+        }
     }
 }

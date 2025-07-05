@@ -5,6 +5,8 @@ import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;;
+
+;
 public class Tile {
     private TileType type;
     private boolean isWalkable;

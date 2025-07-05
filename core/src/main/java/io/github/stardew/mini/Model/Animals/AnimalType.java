@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Animals;
 
+import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Things.StorageType;
 
 import java.util.List;
@@ -33,6 +35,7 @@ public enum AnimalType {
     private final int daysToProduce;
     private final AnimalProductType primaryProduct;
     private final AnimalProductType secondaryProduct;
+    private Texture texture;
 
     AnimalType(int basePrice, String habitat, List<StorageType> storageTypes, int daysToProduce,
                AnimalProductType primaryProduct, AnimalProductType secondaryProduct) {
@@ -69,6 +72,24 @@ public enum AnimalType {
     }
     public boolean hasSecondaryProduct(){
         return secondaryProduct != null;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void setTexture(Texture texture) {
+        this.texture = texture;
+    }
+    public static void initTextures() {
+        CHICKEN.setTexture(GameAssetManager.White_Chicken_Texture);
+        COW.setTexture(GameAssetManager.White_Cow_Texture);
+        DUCK.setTexture(GameAssetManager.Duck_Texture);
+        DINOSAUR.setTexture(GameAssetManager.Dinosaur_Texture);
+        PIG.setTexture(GameAssetManager.Pig_Texture);
+        GOAT.setTexture(GameAssetManager.Goat_Texture);
+        SHEEP.setTexture(GameAssetManager.Sheep_Texture);
+        BUNNY.setTexture(GameAssetManager.Rabbit_Texture);
     }
 }
 

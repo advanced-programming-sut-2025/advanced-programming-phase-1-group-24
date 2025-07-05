@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.Places;
 
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Things.Food;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
