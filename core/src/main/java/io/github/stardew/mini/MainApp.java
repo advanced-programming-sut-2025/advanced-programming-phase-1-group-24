@@ -64,8 +64,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         User logged = getUserByUsername("user208");
         setLoggedInUser(logged);
         GameMenuController controller = new GameMenuController();
-        controller.createGame("user207 user206", new Scanner(System.in));
-        currentGame.setCurrentWeatherType(WeatherType.RAIN);
+        controller.createGame("user207 user206 user205", new Scanner(System.in));
         setScreen(new GameView(controller));
 
         // Set initial screen
