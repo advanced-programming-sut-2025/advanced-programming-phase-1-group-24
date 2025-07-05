@@ -1,5 +1,10 @@
 package io.github.stardew.mini.Model.Reccepies;
 
+import io.github.stardew.mini.Model.Growables.CropType;
+import io.github.stardew.mini.Model.Growables.ForagingCropType;
+import io.github.stardew.mini.Model.Things.FishType;
+import io.github.stardew.mini.Model.Things.FoodType;
+
 import java.util.Map;
 
 public enum FoodRecipe {

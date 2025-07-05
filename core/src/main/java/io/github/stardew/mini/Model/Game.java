@@ -14,6 +14,7 @@ import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 
 import java.util.*;
+import io.github.stardew.mini.Model.MapManagement.*;
 
 public class Game {
     private MapOfGame map;

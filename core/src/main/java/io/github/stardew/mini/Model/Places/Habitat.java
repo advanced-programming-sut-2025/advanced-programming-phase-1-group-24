@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Places;
 
+import java.util.ArrayList;
+
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Things.StorageType;
 

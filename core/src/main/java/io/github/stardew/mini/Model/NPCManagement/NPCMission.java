@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import io.github.stardew.mini.Model.Things.Item;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

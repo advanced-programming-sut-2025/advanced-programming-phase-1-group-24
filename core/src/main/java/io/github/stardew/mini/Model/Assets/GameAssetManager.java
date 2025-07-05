@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -196,67 +199,3 @@ public class GameAssetManager {
         return menuBackground;
     }
 }
-
-
-//public class GameAssetManager {
-//    private static io.github.stardew.mini.Model.GameAssetManager gameAssetManager;
-//    public static Skin skin;
-//    public static Texture menuBackground;
-//
-//    private GameAssetManager() {
-//    }
-//
-//    public static io.github.stardew.mini.Model.GameAssetManager getGameAssetManager() {
-//        if (gameAssetManager == null) {
-//            gameAssetManager = new io.github.stardew.mini.Model.GameAssetManager();
-//        }
-//        return gameAssetManager;
-//    }
-//
-//    public static void load() {
-//        // Load skin from file (default libGDX skin)
-//        try {
-//            skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to load skin: ui/uiskin.json", e);
-//        }
-//        // Load other assets
-//        menuBackground = new Texture("menu_bg.png");
-//
-//        // Create custom button style if needed
-//        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-//        buttonStyle.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-//        buttonStyle.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-//        buttonStyle.font = skin.getFont("font");
-//        buttonStyle.font.getData().setScale(3f);
-//        skin.add("default", buttonStyle);
-//
-//        //creating custom font
-//        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
-//        skin.add("custom-font", customFont);
-//
-//        // Create custom-Label
-//        Label.LabelStyle customLabelStyle = new Label.LabelStyle();
-//        customLabelStyle.font = skin.getFont("custom-font");
-//        customLabelStyle.fontColor = Color.WHITE;
-//        skin.add("custom-label", customLabelStyle);
-//
-//        // Create another button style with custom font
-//        TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
-//        buttonStyle2.up = skin.newDrawable("button-normal", Color.LIGHT_GRAY);
-//        buttonStyle2.down = skin.newDrawable("button-normal", Color.DARK_GRAY);
-//        buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
-//        buttonStyle2.font.getData().setScale(0.9f);
-//        skin.add("custom-button", buttonStyle2);
-//
-//    }
-//
-//    public static void dispose() {
-//        skin.dispose();
-//        menuBackground.dispose();
-//    }
-//
-//    public static Texture getBackground() {
-//        return menuBackground;
-//    }
-//}

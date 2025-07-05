@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.Reccepies;
 
+import io.github.stardew.mini.Model.Growables.SourceType;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public enum randomStuffType {

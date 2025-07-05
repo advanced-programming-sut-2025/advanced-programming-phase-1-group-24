@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 
 import java.util.ArrayList;

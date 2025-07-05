@@ -4,6 +4,7 @@ import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.Things.Item;
+import io.github.stardew.mini.Model.User;;
 
 ;
 public class Tile {

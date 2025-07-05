@@ -1,12 +1,14 @@
 package io.github.stardew.mini;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.stardew.mini.Controller.MainMenuController;
+import io.github.stardew.mini.Controller.SignupMenuController;
+import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.NewGameMenuController;
@@ -18,6 +20,8 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.View.MainMenuView;
+import io.github.stardew.mini.View.SignupMenuView;
 import io.github.stardew.mini.View.GameView;
 import io.github.stardew.mini.View.MapSelectionMenuView;
 import io.github.stardew.mini.View.NewGameMenuView;
@@ -47,13 +51,45 @@ public class MainApp extends com.badlogic.gdx.Game {
         // Initialize game data
         //loadGameData();
         GameAssetManager.load();
+setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+//if(loggedInUser != null) {
+//    setScreen(MainMenuView);
+
+//       // Initialize game data
+       //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
 
         // Set initial screen
-        PreGameMenuView preGameMenuView = new PreGameMenuView(new PreGameMenuController());
+        //getInstance().setScreen(new LoginView(this));
+    }
 
-        getInstance().setScreen(preGameMenuView);
+    private void loadGameData() {
+        // LibGDX file handling
+        FileHandle usersFile = Gdx.files.local("data/users.json");
+        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
+        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
+
+        Json json = new Json();
+
+        // Load users
+        if (usersFile.exists()) {
+            users = json.fromJson(ArrayList.class, User.class, usersFile);
+        } else {
+            users = new ArrayList<>();
+        }
+
+        // Load active games
+        if (gamesFile.exists()) {
+            activeGames = json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
+        } else {
+            activeGames = new ArrayList<>();
+        }
+
+        // Load logged in user
+        if (loggedInUserFile.exists()) {
+            loggedInUser = json.fromJson(User.class, loggedInUserFile);
+        }
     }
 
     @Override
@@ -101,24 +137,24 @@ public class MainApp extends com.badlogic.gdx.Game {
         //saveGameData();
     }
 
-//    private void saveGameData() {
-//        Json json = new Json();
-//        json.setUsePrototypes(false); // For proper serialization
-//
-//        // Save users
-//        Gdx.files.local("data/users.json")
-//            .writeString(json.prettyPrint(users), false);
-//
-//        // Save active games
-//        Gdx.files.local("data/active_games.json")
-//            .writeString(json.prettyPrint(activeGames), false);
-//
-//        // Save logged in user
-//        if (loggedInUser != null) {
-//            Gdx.files.local("data/logged_in_user.json")
-//                .writeString(json.toJson(loggedInUser), false);
-//        }
-//    }
+    private void saveGameData() {
+        Json json = new Json();
+        json.setUsePrototypes(false); // For proper serialization
+
+        // Save users
+        Gdx.files.local("data/users.json")
+            .writeString(json.prettyPrint(users), false);
+
+        // Save active games
+        Gdx.files.local("data/active_games.json")
+            .writeString(json.prettyPrint(activeGames), false);
+
+        // Save logged in user
+        if (loggedInUser != null) {
+            Gdx.files.local("data/logged_in_user.json")
+                .writeString(json.toJson(loggedInUser), false);
+        }
+    }
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -218,7 +254,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
-
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }

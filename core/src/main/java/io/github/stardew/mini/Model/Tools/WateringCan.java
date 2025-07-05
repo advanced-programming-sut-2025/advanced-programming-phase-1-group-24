@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Model.Tools;
 
 import io.github.stardew.mini.Model.Growables.Growable;
+import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;

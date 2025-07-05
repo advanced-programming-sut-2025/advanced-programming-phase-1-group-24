@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Tools;
 
+import io.github.stardew.mini.Model.Skill;
+
 public enum ToolType {
     HOE("hoe"),
     PICKAXE("pick axe"),

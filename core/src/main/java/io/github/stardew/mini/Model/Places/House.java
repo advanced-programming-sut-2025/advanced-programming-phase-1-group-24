@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
+import io.github.stardew.mini.Model.Things.Food;
+
 public class House extends Place{
   ArrayList<Machine> machines;
   Map<Food, Integer> fridge;
