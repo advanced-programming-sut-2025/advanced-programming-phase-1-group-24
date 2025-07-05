@@ -715,6 +715,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
+
     private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
         if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
             batch.draw(foraging.getType().getTexture(),
@@ -1083,7 +1084,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         while (it.hasNext()) {
             int scheduledHour = it.next();
             if (scheduledHour == currentHour) {
-                activeCrows.add(new CrowFlight(Gdx.graphics.getHeight(), GameAssetManager.crowAnimation));
+                float startX = camera.position.x + camera.viewportWidth / 2f; // spawn just off the right side
+                float screenHeight = camera.viewportHeight;
+
+                activeCrows.add(new CrowFlight(camera, GameAssetManager.crowAnimation));
                 it.remove(); // Prevent retriggering the same attack
             }
         }
@@ -1091,24 +1095,29 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
 
     private void renderCrowFlights(SpriteBatch batch, float deltaTime) {
+        float screenLeft = camera.position.x - camera.viewportWidth / 2f;
+
         Iterator<CrowFlight> iterator = activeCrows.iterator();
         while (iterator.hasNext()) {
             CrowFlight crow = iterator.next();
             crow.time += deltaTime;
-            crow.x -= (Gdx.graphics.getWidth() / crow.duration) * deltaTime;
+
+            // Move based on duration to cross screen
+            crow.x -= (camera.viewportWidth / crow.duration) * deltaTime;
 
             TextureRegion frame = crow.animation.getKeyFrame(crow.time, true);
-            if (crow.flipped && !frame.isFlipX()) {
-                frame.flip(true, false);
-            }
 
-            batch.draw(frame, crow.x, crow.y);
+            float crowWidth = 128;
+            float crowHeight = 128;
 
-            if (crow.isFinished()) {
+            batch.draw(frame, crow.x, crow.y, crowWidth, crowHeight);
+
+            if (crow.isFinished(screenLeft)) {
                 iterator.remove();
             }
         }
     }
+
 
 
 
