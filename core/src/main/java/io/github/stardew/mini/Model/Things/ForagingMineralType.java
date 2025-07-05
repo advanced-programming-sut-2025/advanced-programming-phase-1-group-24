@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Things;
 
+import com.badlogic.gdx.graphics.Texture;
+
 public enum ForagingMineralType {
     Quartz("Quartz", "A clear crystal commonly found in caves and mines.", 25),
     Earth_Crystal("Earth Crystal", "A resinous substance found near the surface.", 50),
@@ -23,6 +25,7 @@ public enum ForagingMineralType {
     private final String name;
     private final String description;
     private final int sellPrice;
+    private Texture texture;
 
     ForagingMineralType(String name, String description, int sellPrice) {
         this.name = name;
@@ -40,5 +43,14 @@ public enum ForagingMineralType {
 
     public int getSellPrice() {
         return sellPrice;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void initTexture(){
+        String correctedName = this.name.replace(" ", "_");
+        this.texture = new Texture("Mineral/" + correctedName + ".png");
     }
 }

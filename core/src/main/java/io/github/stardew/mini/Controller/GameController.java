@@ -327,7 +327,7 @@ public class GameController implements MenuController {
         return new Result(true, "your vote is recorded as YES.");
     }
 
-    private void handleEndOfDay() {
+    public void handleEndOfDay() {
         MainApp app = MainApp.getInstance();
         Game game = app.getCurrentGame();
         Tile[][] map = game.getMap().getMap();
@@ -395,6 +395,7 @@ public class GameController implements MenuController {
             for (User user : game.getPlayers()) {
                 game.handleFoodRecipe(user);
             }
+            printMap("0","0","150");
         }
     }
 
@@ -1593,6 +1594,7 @@ public class GameController implements MenuController {
             if (tile.getContainedGrowable().getDaysLeftToDie() <= 0) {
                 tile.setContainedGrowable(null);
                 tile.setProductOfGrowable(null);
+                tile.setWalkable(true); // new
                 return;
             }
             if (!tile.getContainedGrowable().getIsWateredToday() && !tile.getContainedGrowable().hasBeenFertalized()) {
