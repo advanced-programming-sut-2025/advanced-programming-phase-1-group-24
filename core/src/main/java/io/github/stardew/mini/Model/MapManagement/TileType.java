@@ -24,6 +24,7 @@ public enum TileType {
     private final String letterToPrint;
     private final String backgroundColor;
     private Texture texture;
+
     TileType(String letterToPrint, String backgroundColor) {
         this.letterToPrint = letterToPrint;
         this.backgroundColor = backgroundColor;
