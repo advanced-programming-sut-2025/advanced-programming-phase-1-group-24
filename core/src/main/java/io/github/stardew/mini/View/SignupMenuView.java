@@ -14,7 +14,7 @@ import io.github.stardew.mini.Controller.LoginMenuController;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.SignupMenuController;
 import io.github.stardew.mini.MainApp;
-import io.github.stardew.mini.Model.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Result;
 

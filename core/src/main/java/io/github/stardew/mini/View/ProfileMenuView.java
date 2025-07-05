@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.ProfileMenuController;
 import io.github.stardew.mini.MainApp;
-import io.github.stardew.mini.Model.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Result;
 
 public class ProfileMenuView implements Screen {
