@@ -23,7 +23,7 @@ public class MainMenuController implements MenuController {
         app.setCurrentMenu(Menu.LoginMenu);
         // switch screen
         app.setScreen(new io.github.stardew.mini.View.LoginMenuView(
-            new LoginMenuController(), io.github.stardew.mini.Model.GameAssetManager.skin));
+            new LoginMenuController(), io.github.stardew.mini.Model.Assets.GameAssetManager.skin));
     }
 
     // Navigate to Profile Menu

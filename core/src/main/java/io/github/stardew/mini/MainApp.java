@@ -8,7 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.SignupMenuController;
 import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
