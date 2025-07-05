@@ -9,13 +9,16 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -33,13 +36,18 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.GreenHouse;
+import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
+import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 
 //import java.awt.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Scanner;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
@@ -56,12 +64,27 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private boolean showFullMap = false;
     private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
 
+    private boolean showToolsMenu = false;
+    private boolean  showInventoryMenu = false;
+    private BitmapFont smallFont;
+    private int selectedSlot = 0;
+    private Table toolMenuTable;
+
+    private void loadFont() {
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 16;
+        smallFont = generator.generateFont(parameter);
+        generator.dispose();
+    }
+
     public GameView(GameMenuController controller) {
         this.controller = controller;
         controller.setGameView(this);
         this.batch = MainApp.getBatch();
         this.mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        loadFont();
     }
 
     @Override
@@ -70,6 +93,20 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             showFullMap = !showFullMap;  // toggle map mode
             setCameraPosition();         // update camera immediately
             return true;
+        }
+        if (keycode == Input.Keys.T) {
+            showToolsMenu = !showToolsMenu;
+            selectedSlot = 0;
+            if (toolMenuTable != null) {
+                toolMenuTable.setVisible(showToolsMenu);
+            }
+            return true;
+        }
+        if (keycode == Input.Keys.LEFT) {
+            selectedSlot--;
+        }
+        if (keycode == Input.Keys.RIGHT) {
+            selectedSlot++;
         }
 
         if (keycode == Input.Keys.F) {
@@ -175,7 +212,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(this);
+
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(this);
+        Gdx.input.setInputProcessor(multiplexer);
+
         mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -191,6 +233,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         stage.addActor(friendsButton);
 
+        this.toolMenuTable = new Table();
+        toolMenuTable.bottom().center();
+        toolMenuTable.padBottom(GameAssetManager.TILE_SIZE * 0.75f);
+        toolMenuTable.setVisible(showToolsMenu);
+        stage.addActor(toolMenuTable);
+
         Timer.schedule(new Timer.Task(){
             @Override
             public void run() {
@@ -199,6 +247,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
         }, 5, 5);
+
     }
 
     @Override
@@ -245,6 +294,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
         batch.setColor(Color.WHITE);
         batch.end();
+
+        updateToolsMenuTable();
 
         handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
@@ -398,7 +449,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public void dispose() {
-
+        stage.dispose();
     }
 
     @Override
@@ -592,6 +643,73 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 0.8f); // max darkness = 0.8
+    }
+
+    private void updateToolsMenuTable() {
+        toolMenuTable.clearChildren();
+
+        if (!showToolsMenu) {
+            return;
+        }
+
+        Backpack backpack = currentPlayer.getBackpack();
+        ArrayList<Tool> tools = backpack.getTools();
+
+        if (tools == null || tools.isEmpty()) {
+            return;
+        }
+
+        Label.LabelStyle labelStyle;
+        if (GameAssetManager.skin.has("default-label", Label.LabelStyle.class)) {
+            labelStyle = GameAssetManager.skin.get("default-label", Label.LabelStyle.class);
+        } else if (GameAssetManager.skin.has("custom-label", Label.LabelStyle.class)) {
+            labelStyle = GameAssetManager.skin.get("custom-label", Label.LabelStyle.class);
+        } else {
+            labelStyle = new Label.LabelStyle(smallFont, Color.WHITE);
+        }
+
+        float slotImageSize = GameAssetManager.TILE_SIZE * 1.0f;
+        float labelPad = 2f;
+
+        if (selectedSlot >= tools.size()) { selectedSlot = 0;}
+        if (selectedSlot < 0) { selectedSlot = tools.size() - 1;}
+
+        for (int i = 0; i < tools.size(); i++) {
+            Stack slotStack = new Stack();
+
+            Image slotBg = new Image(GameAssetManager.slot);
+            slotBg.setSize(slotImageSize, slotImageSize);
+            slotStack.add(slotBg);
+
+            Tool tool = tools.get(i);
+            String textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
+            Texture itemTex = GameAssetManager.getToolTexture(textureOrigin);
+
+            if (i == selectedSlot && GameAssetManager.highlightedSlot != null) {
+                Image highlightImage = new Image(GameAssetManager.highlightedSlot);
+                highlightImage.setSize(slotImageSize, slotImageSize);
+                slotStack.add(highlightImage);
+            }
+
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(slotImageSize, slotImageSize);
+                slotStack.add(itemImage);
+            } else {
+                Gdx.app.error("GameView", "Texture for tool " + textureOrigin + " is null!");
+            }
+
+            Label slotNumLabel = new Label(String.valueOf(i + 1), labelStyle);
+            Container<Label> labelContainer = new Container<>(slotNumLabel);
+            labelContainer.align(com.badlogic.gdx.utils.Align.topLeft);
+            labelContainer.pad(labelPad);
+            labelContainer.fill();
+            slotStack.add(labelContainer);
+
+            toolMenuTable.add(slotStack).size(slotImageSize, slotImageSize).pad(2f);
+        }
+
+        toolMenuTable.pack();
     }
 
 
