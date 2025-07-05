@@ -55,7 +55,7 @@ public class GameAssetManager {
     public static TextureRegion[] dropFrames = new TextureRegion[11];
     public static Animation<TextureRegion> dropAnimation;
     public static Texture crowSheet;
-    public static TextureRegion[] crowFrames = new TextureRegion[5];
+    public static TextureRegion[] crowFrames;
     public static Animation<TextureRegion> crowAnimation;
 
 
@@ -134,14 +134,26 @@ public class GameAssetManager {
         }
         Animation<TextureRegion> petAnim = new Animation<>(0.15f, petFrames, Animation.PlayMode.NORMAL); // PlayMode.NORMAL for one-time playback
         playerAnimations.add(petAnim);  // Add to your animations list
-        crowSheet = new Texture("Crow.png");
-        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
 
-        crowFrames = new TextureRegion[7];
-        for (int i = 0; i < 7; i++) {
-            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
-        }
-        crowAnimation = new Animation<>(0.1f, crowFrames);
+//        crowSheet = new Texture("Crow.png");
+//        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
+
+//        crowFrames = new TextureRegion[7];
+//        for (int i = 0; i < 7; i++) {
+//            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
+//        }
+//        crowAnimation = new Animation<>(0.1f, crowFrames);
+
+        crowSheet = new Texture("Birds.png"); // renamed file accordingly
+        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 16, 16);
+
+        crowFrames = new TextureRegion[2];
+
+        crowFrames[0] = tmp1[4][2];
+        crowFrames[1] = tmp1[4][3];
+
+        crowAnimation = new Animation<>(0.1f, crowFrames); // 0.1s per frame, looping
+
 
         loadAnimals();
 
@@ -190,7 +202,7 @@ public class GameAssetManager {
             baseStyle.background
         );
         customWindow.titleFontColor = Color.GOLD;
-        skin.add("custom-window",customWindow);
+        skin.add("custom-window", customWindow);
 
         // Create another button style with custom font
         TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
@@ -230,12 +242,12 @@ public class GameAssetManager {
         if (FLOORING_71 != null) FLOORING_71.dispose();
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
-        if(burntTile != null) burntTile.dispose();
+        if (burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
-        if(snowOverlay != null) snowOverlay.dispose();
-        if(stormOverlay != null) stormOverlay.dispose();
-        if(dropTexture != null) dropTexture.dispose();
-        if(crowSheet != null) crowSheet.dispose();
+        if (snowOverlay != null) snowOverlay.dispose();
+        if (stormOverlay != null) stormOverlay.dispose();
+        if (dropTexture != null) dropTexture.dispose();
+        if (crowSheet != null) crowSheet.dispose();
     }
 
     public static Texture getBackground() {
