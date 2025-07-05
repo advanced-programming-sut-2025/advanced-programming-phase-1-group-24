@@ -6,26 +6,18 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.stardew.mini.Controller.MainMenuController;
-import io.github.stardew.mini.Controller.SignupMenuController;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.MapSelectionMenuController;
-import io.github.stardew.mini.Controller.NewGameMenuController;
-import io.github.stardew.mini.Controller.PreGameMenuController;
-import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Controller.*;
+import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
-import io.github.stardew.mini.View.MainMenuView;
-import io.github.stardew.mini.View.SignupMenuView;
-import io.github.stardew.mini.View.GameView;
-import io.github.stardew.mini.View.MapSelectionMenuView;
-import io.github.stardew.mini.View.NewGameMenuView;
-import io.github.stardew.mini.View.PreGameMenuView;
+import io.github.stardew.mini.View.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -47,18 +39,39 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void create() {
         instance = this;
         batch = new SpriteBatch();
-
-        // Initialize game data
         //loadGameData();
         GameAssetManager.load();
-setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//if(loggedInUser != null) {
-//    setScreen(MainMenuView);
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        if(loggedInUser == null) {
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        }
+        else
+            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
 //       // Initialize game data
        //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
+        TreeAssets.load();
+        CropAssets.load();
+        for (TreeType treeType : TreeType.values()) {
+            treeType.initTextures();
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            fruitType.initTexture();
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            sourceType.initTexture();
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            foragingCropType.initTexture();
+        }
+        for(CropType cropType : CropType.values()) {
+            cropType.initTexture();
+        }
+        for(ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
+            foragingMineralType.initTexture();
+        }
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
@@ -132,6 +145,8 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
     public void dispose() {
         super.dispose();
         GameAssetManager.dispose();
+        TreeAssets.dispose();
+        CropAssets.dispose();
         batch.dispose();
         loggedInUser.getOwnedAnimals().clear();
         //saveGameData();
@@ -262,7 +277,6 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
         this.currentMenu = currentMenu;
         changeScreen();
     }
-
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:

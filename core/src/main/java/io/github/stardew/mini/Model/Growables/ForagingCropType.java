@@ -3,6 +3,7 @@ package io.github.stardew.mini.Model.Growables;
 import com.badlogic.gdx.graphics.Texture;
 import java.util.*;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
 import java.util.ArrayList;
@@ -60,5 +61,14 @@ public enum ForagingCropType {
     }
     public int getBaseSellPrice() {
         return baseSellPrice;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public void initTexture(){
+        String correctedName = this.name.replace(" ", "_");
+        this.texture = new Texture("Foraging/" + correctedName + ".png");
     }
 }
