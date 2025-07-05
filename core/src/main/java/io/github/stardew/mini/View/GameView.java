@@ -63,7 +63,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog friendsDialog;
     private GameController controller;
     private SpriteBatch batch;
-    private MapOfGame mapOfGame;
     private OrthographicCamera camera;
     private User currentPlayer;  //should change whenever currentPlayer in Game is changed
     private float stateTime = 0f;
@@ -102,7 +101,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         storeController = new StoreMenuController();
         controller.setView(this);
         this.batch = MainApp.getBatch();
-        this.mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
     }
 
@@ -115,7 +113,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             return true;
         }
         if (keycode == Input.Keys.F) {
-            Tile[][] map = mapOfGame.getMap();
+            Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
             for (int i = 0; i < map.length; i++) {
                 for (int j = 0; j < map[0].length; j++) {
                     if (map[i][j].getContainedGrowable() != null) {
@@ -151,11 +149,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
             // Convert world coordinates to tile coordinates
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
-            int tileY = mapOfGame.getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
 
             // Check if click is within map bounds
-            if (tileX >= 0 && tileY >= 0 && tileX < mapOfGame.getWidth() && tileY < mapOfGame.getHeight()) {
-                Tile tile = mapOfGame.getMap()[tileY][tileX];
+            if (tileX >= 0 && tileY >= 0 && tileX < MainApp.getInstance().getCurrentGame().getMap().getWidth() && tileY < MainApp.getInstance().getCurrentGame().getMap().getHeight()) {
+                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
                 if (tile != null && tile.getContainedAnimal() != null) {
                     selectedAnimal = tile.getContainedAnimal();
 
@@ -173,7 +171,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     return true;
                 }
                 if (tile != null && tile.getType() == TileType.SHOP) {
-                    selectedShop = mapOfGame.getShopAtPosition(tileX, tileY);
+                    selectedShop = MainApp.getInstance().getCurrentGame().getMap().getShopAtPosition(tileX, tileY);
                     if (selectedShop != null) {
                         Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
                         showShopMenuDialog(stageCoords.x, stageCoords.y);
@@ -500,7 +498,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(this);
-        mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
+
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         setCameraPosition();
@@ -591,7 +589,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         batch.begin();
 
         // --- DRAW GAME WORLD ---
-        Tile[][] tiles = mapOfGame.getMap();
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
         int tileSize = GameAssetManager.TILE_SIZE;
 
         int rows = tiles.length;
@@ -856,7 +854,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         // Flip the Y-axis to match rendering coordinates
         int drawX = tileX * tileSize;
-        int drawY = (mapOfGame.getMap().length - tileY - 1) * tileSize;
+        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tileY - 1) * tileSize;
 
         // Clamp moveDirection to valid index range
         int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, GameAssetManager.playerAnimations.size() - 1);
@@ -893,7 +891,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             // Get player's tile position
             Tile tile = currentPlayer.getCurrentTile();
             float drawX = tile.getX() * tileSize + tileSize / 2f;
-            float drawY = (mapOfGame.getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
 
             // Set camera to center on that position
             camera.position.set(drawX, drawY, 0);
@@ -931,7 +929,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
     public boolean isGiantCrop(int x, int y, boolean isProduct) {
-        Tile[][] map = mapOfGame.getMap();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
         if (isProduct) {
             return map[y][x].getProductOfGrowable().getGrowableType() == GrowableType.Giant;
         } else {
@@ -1029,15 +1027,15 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int newY = y + dy;
 
         if (newX >= 0 && newY >= 0 &&
-            newY < mapOfGame.getMap().length &&
-            newX < mapOfGame.getMap()[0].length &&
-            mapOfGame.getMap()[newY][newX].getisWalkable() &&
+            newY < MainApp.getInstance().getCurrentGame().getMap().getMap().length &&
+            newX < MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length &&
+            MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getisWalkable() &&
             !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(newX, newY) != null &&
-                !(mapOfGame.getMap()[newY][newX].getTileOwner().equals(currentPlayer.getUsername()) ||
+                !(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getUsername()) ||
                     (currentPlayer.getPartner() != null &&
-                        mapOfGame.getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
+                        MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
 
-            currentPlayer.setCurrentTile(mapOfGame.getMap()[newY][newX]);
+            currentPlayer.setCurrentTile(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX]);
             currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
             int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
             currentPlayer.setCurrentTurnEnergy(newTurnEnergy);

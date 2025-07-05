@@ -395,6 +395,7 @@ public class GameController implements MenuController {
             for (User user : game.getPlayers()) {
                 game.handleFoodRecipe(user);
             }
+            printMap("0","0","150");
         }
     }
 
@@ -1593,6 +1594,7 @@ public class GameController implements MenuController {
             if (tile.getContainedGrowable().getDaysLeftToDie() <= 0) {
                 tile.setContainedGrowable(null);
                 tile.setProductOfGrowable(null);
+                tile.setWalkable(true); // new
                 return;
             }
             if (!tile.getContainedGrowable().getIsWateredToday() && !tile.getContainedGrowable().hasBeenFertalized()) {
