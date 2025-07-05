@@ -327,7 +327,7 @@ public class GameController implements MenuController {
         return new Result(true, "your vote is recorded as YES.");
     }
 
-    private void handleEndOfDay() {
+    public void handleEndOfDay() {
         MainApp app = MainApp.getInstance();
         Game game = app.getCurrentGame();
         Tile[][] map = game.getMap().getMap();

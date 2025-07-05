@@ -2,6 +2,7 @@ package io.github.stardew.mini.Model.Assets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -11,6 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
@@ -41,8 +45,18 @@ public class GameAssetManager {
     public static Texture FLOORING_71;
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
+    public static Texture burntTile;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
+    public static Texture pixel;
+    public static Texture snowOverlay;
+    public static Texture stormOverlay;
+    public static Texture dropTexture;
+    public static TextureRegion[] dropFrames = new TextureRegion[11];
+    public static Animation<TextureRegion> dropAnimation;
+    public static Texture crowSheet;
+    public static TextureRegion[] crowFrames = new TextureRegion[5];
+    public static Animation<TextureRegion> crowAnimation;
 
 
     // Animals initial textures
@@ -82,9 +96,19 @@ public class GameAssetManager {
         FLOORING_71 = new Texture(Gdx.files.internal("Flooring/Flooring_71.png"));
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
+        burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
+        snowOverlay = new Texture(Gdx.files.internal("Weather/Snow.png"));
+        stormOverlay = new Texture(Gdx.files.internal("Weather/Storm.png"));
+        dropTexture = new Texture(Gdx.files.internal("Weather/Rain.png"));
+        TextureRegion[][] tmp = TextureRegion.split(dropTexture, dropTexture.getWidth() / 11, dropTexture.getHeight());
 
+        // Only one column
+        System.arraycopy(tmp[0], 0, dropFrames, 0, 11);
+
+        dropAnimation = new Animation<>(0.05f, dropFrames);
+        dropAnimation.setPlayMode(Animation.PlayMode.NORMAL);
         playerAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
 
         for (int i = 14; i > 9; i--) {
@@ -110,6 +134,14 @@ public class GameAssetManager {
         }
         Animation<TextureRegion> petAnim = new Animation<>(0.15f, petFrames, Animation.PlayMode.NORMAL); // PlayMode.NORMAL for one-time playback
         playerAnimations.add(petAnim);  // Add to your animations list
+        crowSheet = new Texture("Crow.png");
+        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
+
+        crowFrames = new TextureRegion[7];
+        for (int i = 0; i < 7; i++) {
+            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
+        }
+        crowAnimation = new Animation<>(0.1f, crowFrames);
 
         loadAnimals();
 
@@ -192,7 +224,12 @@ public class GameAssetManager {
         if (FLOORING_71 != null) FLOORING_71.dispose();
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
+        if(burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
+        if(snowOverlay != null) snowOverlay.dispose();
+        if(stormOverlay != null) stormOverlay.dispose();
+        if(dropTexture != null) dropTexture.dispose();
+        if(crowSheet != null) crowSheet.dispose();
     }
 
     public static Texture getBackground() {

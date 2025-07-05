@@ -1,17 +1,12 @@
 package io.github.stardew.mini.Model.Growables;
 
-import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.TreeAssets;
 import java.util.*;
 
+import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public enum TreeType {
-
     ApricotTree("Apricot Tree", SourceType.ApricotSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Apricot, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     CherryTree("Cherry Tree", SourceType.CherrySapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Cherry, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     BananaTree("Banana Tree", SourceType.BananaSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Banana, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),
@@ -27,6 +22,8 @@ public enum TreeType {
     MushroomTree("Mushroom Tree", SourceType.MushroomTreeSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.CommonMushroom, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MysticTree("Mystic Tree", SourceType.MysticTreeSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.MysticSyrup, false, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), null);
 
+
+
     private final String name;
     private final SourceType source;
     private final List<Integer> satges;
@@ -35,6 +32,10 @@ public enum TreeType {
     private final boolean isForagingTree;
     private final ArrayList<Season> foragingSeasons;
     private final ArrayList<Season> normalSeasons;
+    private List<Texture> textures;
+    //As soon as the saplings are planted the tree will be in stage one (List[0])
+    private Texture fruitedTexture;
+    private Texture burnTexture;
 
     TreeType(String name, SourceType source, List<Integer> stages, int totalHarvestTime,
              FruitType fruitType, boolean isForagingTree, ArrayList<Season> normalSeasons, ArrayList<Season> foragingSeasons){
@@ -72,5 +73,80 @@ public enum TreeType {
     }
     public ArrayList<Season> getNormalSeasons() {
         return normalSeasons;
+    }
+
+    public void initTextures() {
+        switch (this) {
+            case AppleTree -> {
+                textures = TreeAssets.appleTextures;
+                fruitedTexture = new Texture("Trees/Apple_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/AppleTreeLightning.png");
+            }
+            case OrangeTree -> {
+                textures = TreeAssets.orangeTextures;
+                fruitedTexture = new Texture("Trees/Orange_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/OrangeTreeLightning.png");
+            }
+            case OakTree -> {
+                textures = TreeAssets.oakTextures;
+            }
+            case PeachTree -> {
+                textures = TreeAssets.peachTextures;
+                fruitedTexture = new Texture("Trees/Peach_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/PeachTreeLightning.png");
+            }
+            case MangoTree -> {
+                textures = TreeAssets.mangoTextures;
+                fruitedTexture = new Texture("Trees/Mango_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/MangoTreeLightning.png");
+            }
+            case ApricotTree -> {
+                textures = TreeAssets.apricotTextures;
+                fruitedTexture = new Texture("Trees/Apricot_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/ApricotTreeLightning.png");
+            }
+            case BananaTree -> {
+                textures = TreeAssets.bananaTextures;
+                fruitedTexture = new Texture("Trees/Banana_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/BananaTreeLightning.png");
+            }
+            case CherryTree -> {
+                textures = TreeAssets.cherryTextures;
+                fruitedTexture = new Texture("Trees/Cherry_Stage_5_Fruit.png");
+                burnTexture = new Texture("Trees/CherryTreeLightning.png");
+            }
+            case MahoganyTree -> {
+                textures = TreeAssets.mahoganyTextures;
+            }
+            case MapleTree -> {
+                textures = TreeAssets.mapleTextures;
+            }
+            case MushroomTree -> {
+                textures = TreeAssets.mushroomTreeTextures;
+            }
+            case MysticTree -> {
+                textures = TreeAssets.mysticTreeTextures;
+            }
+            case PineTree -> {
+                textures = TreeAssets.pineTextures;
+            }
+            case PomegranateTree -> {
+                textures = TreeAssets.pomegranateTextures;
+                fruitedTexture = new Texture("Trees/Pomegranate_Stage_5.png");
+                burnTexture = new Texture("Trees/PomegranateTreeLightning.png");
+            }
+        }
+    }
+
+    public List<Texture> getTextures() {
+        return textures;
+    }
+
+    public Texture getFruitedTexture() {
+        return fruitedTexture;
+    }
+
+    public Texture getBurnTexture() {
+        return burnTexture;
     }
 }

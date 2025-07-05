@@ -48,11 +48,11 @@ public enum FruitType {
     public int getFruitEnergy() {
         return fruitEnergy;
     }
-
     public Texture getTexture() {
         return texture;
     }
     public void initTexture(){
-
+        String correctedName = this.name.replace(" ", "_");
+        this.texture = new Texture("Trees/" + correctedName + ".png");
     }
 }

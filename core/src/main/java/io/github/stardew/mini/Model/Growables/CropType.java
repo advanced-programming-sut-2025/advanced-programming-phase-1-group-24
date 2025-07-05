@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Model.Growables;
 
 import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import java.util.*;
 
@@ -90,8 +91,8 @@ SweetGemBerry("Sweet Gem Berry", SourceType.RareSeed, 24, true, 0, 3000, false, 
 Powdermelon("Powdermelon", SourceType.PowdermelonSeeds, 7, true, 0, 60, true, 63,
     new ArrayList<>(List.of(Season.WINTER)), true, List.of(1, 2, 1, 2, 1)),
 AncientFruit("Ancient Fruit", SourceType.AncientSeeds, 28, false, 7, 550, false, 0,
-    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5)),
-    MixedCrop("Mixed Crop", SourceType.MixedSeeds, 0, false, 0, 50, false, 0, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), false, List.of(2, 7, 7, 7, 5));
+    new ArrayList<>(List.of(Season.SPRING, Season.SUMMER, Season.AUTUMN)), false, List.of(2, 7, 7, 7, 5));
+    //MixedCrop("Mixed Crop", SourceType.MixedSeeds, 0, false, 0, 50, false, 0, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), false, List.of(2, 7, 7, 7, 5));
 
 private final String name;
 private final SourceType source;
@@ -105,6 +106,8 @@ private final ArrayList<Season> seasons;
 private final boolean canBeGiant;
 private final List<Integer> stages;
 private List<Texture> textures;
+private Texture cropProductTexture;
+private Texture giantTexture;
 
     CropType(String name, SourceType source, int totalHarvestTime, boolean oneTime, int regrowthTime, int baseSellPrice,
     boolean isEdible, int energy, ArrayList<Season> seasons, boolean canBeGiant, List<Integer> stages){
@@ -154,4 +157,38 @@ private List<Texture> textures;
     public boolean oneTime(){
         return oneTime;
     }
+
+    public List<Texture> getTextures() {
+        return textures;
+    }
+
+    public Texture getCropProductTexture() {
+        return cropProductTexture;
+    }
+
+    public Texture getGiantTexture() {
+        return giantTexture;
+    }
+
+    public void initTexture(){
+        String key = name.replace(" ", "_");
+
+        this.textures = CropAssets.cropTextures.get(key);
+
+        this.cropProductTexture = new Texture("Crops/" + key + ".png");
+
+        if (canBeGiant && (key.equals("Powdermelon") || key.equals("Melon") || key.equals("Pumpkin") || key.equals("Cauliflower"))) {
+            this.giantTexture = new Texture("Crops/Giant_" + key + ".png");
+        }
+    }
+
+    public static CropType fromName(String name) {
+        for (CropType type : CropType.values()) {
+            if (type.getName().equalsIgnoreCase(name)) {
+                return type;
+            }
+        }
+        return null; // or throw an exception if you prefer
+    }
+
 }
