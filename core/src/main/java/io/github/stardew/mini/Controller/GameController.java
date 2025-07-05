@@ -787,7 +787,7 @@ public class GameController implements MenuController {
 
         if (isAdjacent(playerTile, animalTile)) {
             animal.pet();
-            return new Result(false, "You petted " + animalName + ". Friendship is now: " + animal.getFriendship());
+            return new Result(true, "You petted " + animalName + ". Friendship is now: " + animal.getFriendship());
         } else {
             return new Result(false, "Error: You must be in one of the 8 tiles around the animal to pet it.");
         }
