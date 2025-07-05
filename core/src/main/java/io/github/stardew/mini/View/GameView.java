@@ -111,6 +111,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         if (keycode == Input.Keys.M) {
             showFullMap = !showFullMap;  // toggle map mode
             setCameraPosition();         // update camera immediately
+            controller.printMap("0","0","150");
             return true;
         }
         if (keycode == Input.Keys.F) {
@@ -510,7 +511,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(200, 200);
         friendsButton.setColor(Color.PURPLE);
-        friendsButton.setPosition(Gdx.graphics.getWidth() - 2550, Gdx.graphics.getHeight() - 1450);
+        friendsButton.setPosition(0, 10);
         friendsButton.setTouchable(Touchable.enabled);
 
         stage.addActor(friendsButton);
@@ -525,6 +526,20 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }, 5, 5);
     }
 
+
+
+//    @Override
+//    public void show() {
+//        stage = new Stage(new ScreenViewport());
+//        mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
+//        camera = new OrthographicCamera();
+//        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        setCameraPosition();
+//        camera.update();
+//        Gdx.input.setInputProcessor(this);
+//        batch.setProjectionMatrix(camera.combined);
+//        createUI();
+//    }
     @Override
     public void render(float v) {
         for (LightningFlash flash : activeFlashes) {
@@ -565,6 +580,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         activeFlashes.removeIf(flash -> !flash.isActive());
 
+
         stateTime += Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -573,18 +589,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.draw(TreeAssets.getHorizontalSlice(TreeType.AppleTree.getTextures().get(4), 1, 4),
-            0, 0);
 
+        // --- DRAW GAME WORLD ---
         Tile[][] tiles = mapOfGame.getMap();
         int tileSize = GameAssetManager.TILE_SIZE;
 
         int rows = tiles.length;
-        drawTiles(rows, tiles, tileSize);
+        drawTiles(rows,tiles,tileSize);
+        drawGreenHouse(tileSize,rows);
 
-        drawGreenHouse(tileSize, rows);
-
-        //TODO : handle Giant Crop
+//TODO : handle Giant Crop
         //TODO : handle burnt plants
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -600,9 +614,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
 
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                Tile tile = tiles[y][x];
+                if (tile != null && tile.getContainedAnimal() != null) {
+                    batch.draw(tile.getContainedAnimal().getAnimalType().getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                }
+            }
+        }
 
         drawPlayer();
-
         if (!showFullMap && !terminalVisible) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
@@ -619,31 +640,23 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
+
         currentWeather = MainApp.getInstance().getCurrentGame().getCurrentWeatherType();
-        if (currentWeather == WeatherType.STORM) {
+        if(currentWeather == WeatherType.STORM) {
             batch.setColor(1f, 1f, 1f, 0.5f);
             batch.draw(GameAssetManager.stormOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
             batch.setColor(Color.WHITE);
-        } else if (currentWeather == WeatherType.SNOW) {
+        }
+        else if(currentWeather == WeatherType.SNOW){
             batch.draw(GameAssetManager.snowOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
-        } else if (currentWeather == WeatherType.RAIN) {
+        }
+        else if(currentWeather == WeatherType.RAIN){
             for (RainDrop drop : raindrops) {
                 drop.render(batch);
             }
         }
 
 
-        batch.setColor(darkOverlayColor);
-        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
-        batch.setColor(Color.WHITE);
-        for (LightningFlash flash : activeFlashes) {
-            if (flash.isActive()) {
-                batch.setColor(new Color(0, 0, 0, flash.getAlpha())); // use black if preferred
-                batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
-                //controller.printMap("0", "0", "150");
-            }
-        }
-        batch.setColor(Color.WHITE);
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             terminalVisible = !terminalVisible;
             terminalWindow.setVisible(terminalVisible);
@@ -657,15 +670,25 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Gdx.input.setInputProcessor(this);
             }
         }
+        batch.setColor(darkOverlayColor);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.setColor(Color.WHITE);
+        for (LightningFlash flash : activeFlashes) {
+            if (flash.isActive()) {
+                batch.setColor(new Color(0, 0, 0, flash.getAlpha())); // use black if preferred
+                batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+                //controller.printMap("0", "0", "150");
+            }
+        }
+       batch.setColor(Color.WHITE);
 
+        batch.end(); // ✅ this must come BEFORE stage rendering
 
-        batch.end();
-
+        // --- DRAW UI ---
         handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
-
     private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
         if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
             batch.draw(foraging.getType().getTexture(),
@@ -799,7 +822,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         camera.update();
 
         // Update stage viewport
-        stage.getViewport().update(width, height, true);
+        //stage.getViewport().update(width, height, true);
     }
 
     @Override

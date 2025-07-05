@@ -49,7 +49,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         batch = new SpriteBatch();
         //loadGameData();
         GameAssetManager.load();
-setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
 //if(loggedInUser != null) {
 //    setScreen(MainMenuView);
 

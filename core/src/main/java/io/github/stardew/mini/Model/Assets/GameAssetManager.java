@@ -146,6 +146,12 @@ public class GameAssetManager {
         loadAnimals();
 
         createCustomStyles();
+
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        pixel = new Texture(pixmap);
+        pixmap.dispose();
     }
 
     private static void createCustomStyles() {
