@@ -3,6 +3,8 @@ package io.github.stardew.mini.Model.ConfigTemplates;
 import java.util.List;
 import com.google.gson.Gson;
 
+import java.util.List;
+
 
 public class FarmTemplateManager {
     private static List<FarmTemplate> templates;
