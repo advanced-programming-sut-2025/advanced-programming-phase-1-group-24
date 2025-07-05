@@ -1,7 +1,12 @@
 package io.github.stardew.mini.Model.Growables;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public enum CropType {
 BlueJazz("Blue Jazz",SourceType.JazzSeeds, 7, true, 0, 50, true, 45,
@@ -99,6 +104,7 @@ private final int energy;
 private final ArrayList<Season> seasons;
 private final boolean canBeGiant;
 private final List<Integer> stages;
+private List<Texture> textures;
 
     CropType(String name, SourceType source, int totalHarvestTime, boolean oneTime, int regrowthTime, int baseSellPrice,
     boolean isEdible, int energy, ArrayList<Season> seasons, boolean canBeGiant, List<Integer> stages){

@@ -19,9 +19,10 @@ import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 
+import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class LoginMenuView implements Screen {
+public class LoginMenuView implements Screen,AppMenu {
     private final LoginMenuController controller;
     private final Skin skin;
     private Stage stage;
@@ -145,6 +146,10 @@ public class LoginMenuView implements Screen {
             skin.dispose();
         }
 
+    @Override
+    public void handleCommand(Scanner scanner) {
+
+    }
 
 
     class forgetPasswordView implements Screen {

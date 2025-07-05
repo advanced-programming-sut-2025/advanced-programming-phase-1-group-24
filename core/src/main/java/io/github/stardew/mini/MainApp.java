@@ -2,18 +2,30 @@ package io.github.stardew.mini;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.SignupMenuController;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.MapSelectionMenuController;
+import io.github.stardew.mini.Controller.NewGameMenuController;
+import io.github.stardew.mini.Controller.PreGameMenuController;
+import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.View.MainMenuView;
 import io.github.stardew.mini.View.SignupMenuView;
+import io.github.stardew.mini.View.GameView;
+import io.github.stardew.mini.View.MapSelectionMenuView;
+import io.github.stardew.mini.View.NewGameMenuView;
+import io.github.stardew.mini.View.PreGameMenuView;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -23,15 +35,21 @@ import java.util.List;
 public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
+    private static SpriteBatch batch;
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
-    private User loggedInUser = null;// instead of null
+    private User loggedInUser = loadLoggedInUser();// instead of null
+
 
     @Override
     public void create() {
         instance = this;
+        batch = new SpriteBatch();
+
+        // Initialize game data
+        //loadGameData();
         GameAssetManager.load();
 setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
 //if(loggedInUser != null) {
@@ -39,6 +57,8 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
 
 //       // Initialize game data
        //loadGameData();
+        TileType.initTextures();
+        AnimalType.initTextures();
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
@@ -73,8 +93,47 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
     }
 
     @Override
+    public void render() {
+        super.render();
+    }
+
+//    private void loadGameData() {
+//        // LibGDX file handling
+//        FileHandle usersFile = Gdx.files.local("data/users.json");
+//        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
+//        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
+//
+//        Json json = new Json();
+//
+//        // Load users
+//        if (usersFile.exists()) {
+//            users = UserDatabase.loadUsers();
+//                //json.fromJson(ArrayList.class, User.class, usersFile);
+//        } else {
+//            users = new ArrayList<>();
+//        }
+//
+//        // Load active games
+//        if (gamesFile.exists()) {
+//            activeGames =loadActiveGames();
+//                //json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
+//        } else {
+//            activeGames = new ArrayList<>();
+//        }
+//
+//        // Load logged in user
+//        if (loggedInUserFile.exists()) {
+//            loggedInUser = loadLoggedInUser();
+//                //json.fromJson(User.class, loggedInUserFile);
+//        }
+//    }
+
+    @Override
     public void dispose() {
         super.dispose();
+        GameAssetManager.dispose();
+        batch.dispose();
+        loggedInUser.getOwnedAnimals().clear();
         //saveGameData();
     }
 
@@ -201,6 +260,30 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
 
     public void setCurrentMenu(Menu currentMenu) {
         this.currentMenu = currentMenu;
+        changeScreen();
+    }
+
+    public void changeScreen() {
+        switch (currentMenu) {
+            case GameMenu:
+                getInstance().setScreen(new GameView(new GameController()));
+                break;
+            case MainMenu:
+                //getInstance().setScreen(new MainMenuScreen(this));
+                break;
+            case PreGameMenu:
+                getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                break;
+            case NewGameMenu:
+                getInstance().setScreen(new NewGameMenuView(new NewGameMenuController()));
+                break;
+            case MapSelectionMenu:
+                getInstance().setScreen(new MapSelectionMenuView(new MapSelectionMenuController()));
+                break;
+
+
+            // ... other cases
+        }
     }
 
     public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
@@ -222,6 +305,7 @@ setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin))
         return null;
     }
 
+    public static SpriteBatch getBatch() {
+        return batch;
+    }
 }
-
-

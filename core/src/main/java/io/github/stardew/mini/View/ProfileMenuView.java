@@ -16,7 +16,9 @@ import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Result;
 
-public class ProfileMenuView implements Screen {
+import java.util.Scanner;
+
+public class ProfileMenuView implements Screen,AppMenu {
     private final ProfileMenuController controller;
     private final Skin skin;
     private Stage stage;
@@ -152,4 +154,9 @@ public class ProfileMenuView implements Screen {
     @Override public void resume() {}
     @Override public void hide() {}
     @Override public void dispose() { stage.dispose(); skin.dispose(); }
+
+    @Override
+    public void handleCommand(Scanner scanner) {
+
+    }
 }

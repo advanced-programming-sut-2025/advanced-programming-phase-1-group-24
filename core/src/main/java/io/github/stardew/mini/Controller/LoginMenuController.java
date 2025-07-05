@@ -261,16 +261,16 @@ public class LoginMenuController implements MenuController {
 
     public static boolean isStrongPassword(String password) {
         return password.length() >= 8 &&
-                password.matches(".*[a-z].*") &&
-                password.matches(".*[A-Z].*") &&
-                password.matches(".*\\d.*") &&
-                password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
+            password.matches(".*[a-z].*") &&
+            password.matches(".*[A-Z].*") &&
+            password.matches(".*\\d.*") &&
+            password.matches(".*[!@#$%^&*()+=\\[\\]{}|\\\\:;\"'<>,.?/].*");
     }
 
     public static boolean isValidEmail(String email) {
         return email.matches("^[A-Za-z0-9._-]+@[A-Za-z0-9-]+\\.[A-Za-z]{2,}$") &&
-                !email.contains("..") &&
-                !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
+            !email.contains("..") &&
+            !email.matches(".*[!#%^&*()+={}\\[\\]|\\\\:;\"',<>?].*");
     }
 
     public static boolean isValidUsername(String username) {

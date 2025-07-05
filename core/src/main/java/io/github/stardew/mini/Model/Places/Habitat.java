@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Things.StorageType;
 
+import java.util.ArrayList;
+
 public class Habitat extends Place{
     //type of cage and barn delux and ...
     ArrayList<Animal> livingAnimals = new ArrayList<>();

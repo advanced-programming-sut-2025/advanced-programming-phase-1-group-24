@@ -1,7 +1,11 @@
 package io.github.stardew.mini.Model.Growables;
+
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public enum SourceType {
     JazzSeeds("Jazz Seeds", true, new ArrayList<>(Arrays.asList(Season.SPRING)), new ArrayList<>(Arrays.asList(Season.SPRING))),
@@ -66,6 +70,7 @@ public enum SourceType {
     private final boolean isForagingseed;
     private final ArrayList<Season> foragingSeedSeason; // this field will be only filled for foraging seeds
     private final ArrayList<Season> normalSeasons;
+    private Texture texture;
 
     SourceType(String name, boolean isForagingseed, ArrayList<Season> foragingSeedSeason, ArrayList<Season> normSeasons){
         this.name = name;

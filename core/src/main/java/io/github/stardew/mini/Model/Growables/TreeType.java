@@ -1,10 +1,17 @@
 package io.github.stardew.mini.Model.Growables;
 
+import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.TreeAssets;
 import java.util.*;
 
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public enum TreeType {
+
     ApricotTree("Apricot Tree", SourceType.ApricotSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Apricot, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     CherryTree("Cherry Tree", SourceType.CherrySapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Cherry, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     BananaTree("Banana Tree", SourceType.BananaSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Banana, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),
@@ -19,8 +26,6 @@ public enum TreeType {
     MahoganyTree("Mahogany Tree", SourceType.MahoganySeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.Sap, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MushroomTree("Mushroom Tree", SourceType.MushroomTreeSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.CommonMushroom, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MysticTree("Mystic Tree", SourceType.MysticTreeSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.MysticSyrup, false, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), null);
-
-
 
     private final String name;
     private final SourceType source;

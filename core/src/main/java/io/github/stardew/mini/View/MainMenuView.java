@@ -11,11 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.LoginMenuController;
 import io.github.stardew.mini.Controller.MainMenuController;
+import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.ProfileMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 
-public class MainMenuView implements Screen {
+import java.util.Scanner;
+
+public class MainMenuView implements Screen,AppMenu {
     private final MainMenuController controller;
     private final Skin skin;
     private Stage stage;
@@ -70,12 +73,12 @@ public class MainMenuView implements Screen {
             }
         });
 
-//        pregameButton.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//            MainApp.getInstance().setScreen(new PreGameView(new PreGameController(), skin));
-//            }
-//        });
+        pregameButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+            }
+        });
 
         logoutButton.addListener(new ClickListener() {
             @Override
@@ -102,5 +105,10 @@ public class MainMenuView implements Screen {
     @Override public void dispose() {
         stage.dispose();
         skin.dispose();
+    }
+
+    @Override
+    public void handleCommand(Scanner scanner) {
+
     }
 }

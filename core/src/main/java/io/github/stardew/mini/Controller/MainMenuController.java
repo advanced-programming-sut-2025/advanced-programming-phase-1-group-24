@@ -25,20 +25,4 @@ public class MainMenuController implements MenuController {
         app.setScreen(new io.github.stardew.mini.View.LoginMenuView(
             new LoginMenuController(), io.github.stardew.mini.Model.Assets.GameAssetManager.skin));
     }
-
-    // Navigate to Profile Menu
-//    public void goToProfileMenu() {
-//        MainApp app = MainApp.getInstance();
-//        app.setCurrentMenu(Menu.ProfileMenu);
-//        app.setScreen(new io.github.stardew.mini.View.ProfileMenuView(
-//            new ProfileMenuController(), io.github.stardew.mini.Model.GameAssetManager.skin));
-//    }
-
-    // Navigate to Pre-Game Menu
-//    public void goToPreGameMenu() {
-//        MainApp app = MainApp.getInstance();
-//        app.setCurrentMenu(Menu.PreGameMenu);
-//        app.setScreen(new io.github.stardew.mini.View.PreGameMenuView(
-//            new PreGameMenuController(), io.github.stardew.mini.Model.GameAssetManager.skin));
-//    }
 }
