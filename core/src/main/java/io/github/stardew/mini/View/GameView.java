@@ -29,6 +29,7 @@ import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.CrowFlight;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.CropType;
@@ -95,6 +96,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private int gameWidth = Gdx.graphics.getWidth();
     private int gameHeight = Gdx.graphics.getHeight();
 
+    public List<Integer> crowAttacks = new ArrayList<>();
+    private List<CrowFlight> activeCrows = new ArrayList<>();
+
+
 
     public GameView(GameController controller) {
         this.controller = controller;
@@ -109,7 +114,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         if (keycode == Input.Keys.M) {
             showFullMap = !showFullMap;  // toggle map mode
             setCameraPosition();         // update camera immediately
-            controller.printMap("0","0","150");
+            //controller.printMap("0","0","150");
             return true;
         }
         if (keycode == Input.Keys.F) {
@@ -131,6 +136,23 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             return true;
         }
 
+        if(keycode == Input.Keys.L) {
+            currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+            Tile tile = currentPlayer.getCurrentTile();
+            Tile neededTile = MainApp.getInstance().getCurrentGame().getMap().getTile(tile.getX() - 1, tile.getY());
+            System.out.println(neededTile);
+            System.out.println(neededTile.getContainedGrowable());
+            System.out.println(neededTile.getContainedItem());
+            System.out.println(neededTile.getContainedNPC());
+            System.out.println(neededTile.getProductOfGrowable());
+            System.out.println(neededTile.isHasBeenBurt());
+            System.out.println(neededTile.getisWalkable());
+            System.out.println(neededTile.getContainedAnimal());
+        }
+
+        if(keycode == Input.Keys.C){
+            controller.crowAttack();
+        }
 
         if (showFullMap) return true;
 
@@ -578,12 +600,14 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         activeFlashes.removeIf(flash -> !flash.isActive());
 
+        updateCrowFlightSpawn();
 
         stateTime += Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         setCameraPosition();
+        camera.update();
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -654,6 +678,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
 
+        renderCrowFlights(batch, v);
+
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             terminalVisible = !terminalVisible;
@@ -668,8 +694,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Gdx.input.setInputProcessor(this);
             }
         }
+        setCameraPosition();
+        camera.update();
         batch.setColor(darkOverlayColor);
-        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth * 50 , camera.viewportHeight * 50);
         batch.setColor(Color.WHITE);
         for (LightningFlash flash : activeFlashes) {
             if (flash.isActive()) {
@@ -1041,11 +1069,48 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.setMovingDirection(direction);
             setCameraPosition();
+            camera.update();
             return true;
         }
 
         return false;
     }
+
+    private void updateCrowFlightSpawn() {
+        int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour();
+
+        Iterator<Integer> it = crowAttacks.iterator();
+        while (it.hasNext()) {
+            int scheduledHour = it.next();
+            if (scheduledHour == currentHour) {
+                activeCrows.add(new CrowFlight(Gdx.graphics.getHeight(), GameAssetManager.crowAnimation));
+                it.remove(); // Prevent retriggering the same attack
+            }
+        }
+    }
+
+
+    private void renderCrowFlights(SpriteBatch batch, float deltaTime) {
+        Iterator<CrowFlight> iterator = activeCrows.iterator();
+        while (iterator.hasNext()) {
+            CrowFlight crow = iterator.next();
+            crow.time += deltaTime;
+            crow.x -= (Gdx.graphics.getWidth() / crow.duration) * deltaTime;
+
+            TextureRegion frame = crow.animation.getKeyFrame(crow.time, true);
+            if (crow.flipped && !frame.isFlipX()) {
+                frame.flip(true, false);
+            }
+
+            batch.draw(frame, crow.x, crow.y);
+
+            if (crow.isFinished()) {
+                iterator.remove();
+            }
+        }
+    }
+
+
 
     public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
