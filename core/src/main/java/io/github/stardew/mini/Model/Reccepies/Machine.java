@@ -15,7 +15,7 @@ public class Machine extends Item {
     private Boolean isActivated;
     private Boolean isReady;
     private Item preparedProduct;
-
+    private int maxProcessTime;
     public Machine(MachineType type) {
         super(type.getName(), true, type.getSellPrice(), true, ProductQuality.Normal, false);
         this.type = type;
@@ -24,6 +24,7 @@ public class Machine extends Item {
         }
         this.preparedProduct = null;
         this.hoursLeft = 0;
+        this.maxProcessTime = 0;
         this.isActivated = false;
         this.isReady = false;
     }
@@ -64,6 +65,14 @@ public class Machine extends Item {
         return isReady;
     }
 
+    public int getMaxProcessTime() {
+        return maxProcessTime;
+    }
+
+    public void setMaxProcessTime(int maxProcessTime) {
+        this.maxProcessTime = maxProcessTime;
+    }
+
     public void setReady(Boolean ready) {
         isReady = ready;
     }
@@ -83,6 +92,7 @@ public class Machine extends Item {
                 }
                 setActivated(true);
                 setHoursLeft(item.getProcessingTime());
+                setMaxProcessTime(item.getProcessingTime());
                 preparedProduct = Item.getRandomItem(item.getName());
                 return new Result(true,"Process started successfully.");
             }
@@ -99,6 +109,7 @@ public class Machine extends Item {
                     if (machine.getHoursLeft() == 0) {
                         machine.setActivated(false);
                         machine.setReady(true);
+                        machine.setMaxProcessTime(0);
                     }
                 }
             }

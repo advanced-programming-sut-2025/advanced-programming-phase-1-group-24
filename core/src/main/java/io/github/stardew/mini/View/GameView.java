@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -41,6 +42,7 @@ import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
+import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
@@ -130,7 +132,24 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             System.out.println(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             return true;
         }
+        if(keycode == Input.Keys.K) {
+            Tile tile = currentPlayer.getCurrentTile();
+            Machine machine = (Machine) tile.getContainedItem();
+            machine.setHoursLeft(machine.getHoursLeft() - 10);
 
+        }
+        if (keycode == Input.Keys.Z) {
+            Tile tile = currentPlayer.getCurrentTile();
+            Machine machine = (Machine) tile.getContainedItem();
+            machine.useMachine("Coffee",currentPlayer);
+            MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse().getMachines().add(machine);
+        }
+        if (keycode == Input.Keys.X) {
+            Tile tile = currentPlayer.getCurrentTile();
+            Machine machine = (Machine) tile.getContainedItem();
+            System.out.println(machine.getHoursLeft());
+            System.out.println(machine.getMaxProcessTime());
+        }
 
         if (showFullMap) return true;
 
@@ -310,10 +329,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                storeController.purchase(selectedShopItem, purchaseQuantity);
+                Result result = storeController.purchase(selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
                 shopPurchaseDialog.hide();
-                Gdx.input.setInputProcessor(GameView.this);
+                showErrorDialog(stage, result.message());
+                //Gdx.input.setInputProcessor(GameView.this);
             }
         });
 
@@ -337,7 +357,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             (Gdx.graphics.getWidth() - shopPurchaseDialog.getWidth()) / 2,
             (Gdx.graphics.getHeight() - shopPurchaseDialog.getHeight()) / 2
         );
-
+        shopPurchaseDialog.setVisible(true);
         shopPurchaseDialog.show(stage);
         Gdx.input.setInputProcessor(stage);
     }
@@ -517,7 +537,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                MainApp.getInstance().getCurrentGame().advanceTimeByOneHour();
+                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
                 controller.handleEndOfDay();
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
@@ -595,6 +615,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int rows = tiles.length;
         drawTiles(rows,tiles,tileSize);
         drawGreenHouse(tileSize,rows);
+        drawShops(tileSize,rows);
 
 //TODO : handle Giant Crop
         //TODO : handle burnt plants
@@ -693,6 +714,28 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
+        }
+        else if(tiles[y][x].getContainedItem() instanceof Machine machine) {
+            batch.draw(GameAssetManager.FLOORING_01,x * tileSize,
+                (rows - y - 1) * tileSize,
+                tileSize, tileSize);
+
+            float drawX = x * tileSize;
+            float drawY = (rows - y - 1) * tileSize + tileSize + 4;
+
+            if (machine.getActivated() && !machine.getReady()) {
+                float progress = 1f - (machine.getHoursLeft() / (float)machine.getMaxProcessTime());
+                float barWidth = tileSize;
+                float barHeight = 10f;
+
+                batch.setColor(Color.DARK_GRAY); // پس‌زمینه نوار
+                batch.draw(GameAssetManager.pixel, drawX, drawY, barWidth, barHeight);
+                batch.setColor(Color.GREEN); // نوار پر شده
+                batch.draw(GameAssetManager.pixel, drawX, drawY, barWidth * progress, barHeight);
+                batch.setColor(Color.WHITE);
+            } else if (machine.getReady()) {
+                GameAssetManager.customFont.draw(batch, "Done!", drawX + tileSize / 2f - 50, drawY + 20);
+            }
         }
     }
 
@@ -798,8 +841,29 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 7 * tileSize
             );
         }
-    }
 
+    }
+    private void drawShops(int tileSize, int rows) {
+        List<Shop> shops = MainApp.getInstance().getCurrentGame().getMap().getShops(); // <-- Ensure you have this method
+        for (Shop shop : shops) {
+            for (int i = shop.getX(); i < shop.getX() + shop.getWidth(); i++) {
+                for (int j = shop.getY(); j < shop.getY() + shop.getHeight(); j++) {
+                    batch.draw(TileType.NPCLAND.getTexture(), i * tileSize, (rows-j-1) * tileSize, tileSize, tileSize);
+                }
+            }
+        }
+        for (Shop shop : shops) {
+
+
+            int drawX = shop.getX() * tileSize;
+            int drawY = (rows - shop.getY() - shop.getHeight()) * tileSize;
+
+            Texture texture = shop.getShopType().getTexture();
+            if (texture != null) {
+                batch.draw(texture, drawX, drawY, shop.getWidth() * tileSize, shop.getHeight() * tileSize);
+            }
+        }
+    }
     private void drawTiles(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {

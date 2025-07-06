@@ -10,6 +10,7 @@ import io.github.stardew.mini.Controller.*;
 import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.ShopAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
@@ -34,6 +35,8 @@ public class MainApp extends com.badlogic.gdx.Game {
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
 
+    private GameView currentGameView;
+
 
     @Override
     public void create() {
@@ -54,6 +57,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         AnimalType.initTextures();
         TreeAssets.load();
         CropAssets.load();
+        ShopAssets.load();
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
@@ -147,6 +151,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         GameAssetManager.dispose();
         TreeAssets.dispose();
         CropAssets.dispose();
+        ShopAssets.dispose();
         batch.dispose();
         loggedInUser.getOwnedAnimals().clear();
         //saveGameData();
