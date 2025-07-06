@@ -189,8 +189,12 @@ public class GameAssetManager {
             baseStyle.titleFontColor,
             baseStyle.background
         );
+
+
+
         customWindow.titleFontColor = Color.GOLD;
-        skin.add("custom-window",customWindow);
+        skin.add("custom-window", customWindow);
+
 
         // Create another button style with custom font
         TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
@@ -200,61 +204,29 @@ public class GameAssetManager {
         buttonStyle2.font.getData().setScale(0.9f);
         skin.add("custom-button", buttonStyle2);
 
+
         //Create custom select box
-//        // Assuming you already loaded a BitmapFont named "custom-font" into your skin
-//        SelectBox.SelectBoxStyle customStyle = new SelectBox.SelectBoxStyle();
-//
-//// Font for the select box
-//        customStyle.font = skin.getFont("custom-font");
-//        customStyle.fontColor = Color.WHITE;
-//
-//// Required drawables from skin
-//        customStyle.background = skin.getDrawable("default-selectbox");
-//        customStyle.backgroundOpen = skin.getDrawable("default-selectbox-open");
-//        customStyle.scrollStyle = new ScrollPane.ScrollPaneStyle();
-//        customStyle.listStyle = new List.ListStyle();
-//
-//// List style (used for dropdown items)
-//        customStyle.listStyle.font = skin.getFont("custom-font");
-//        customStyle.listStyle.fontColorSelected = Color.WHITE;
-//        customStyle.listStyle.fontColorUnselected = Color.LIGHT_GRAY;
-//        customStyle.listStyle.selection = skin.getDrawable("default-select-selection");
-//
-//// Optional: Scroll bar styling
-//        customStyle.scrollStyle.vScroll = skin.getDrawable("default-scroll");
-//        customStyle.scrollStyle.vScrollKnob = skin.getDrawable("default-scroll-knob");
-//
-//// Add to skin if you want to reuse it elsewhere
-//        skin.add("custom-selectbox", customStyle);
-
         SelectBox.SelectBoxStyle customStyle = new SelectBox.SelectBoxStyle();
-
-// Font
+        // Font
         customStyle.font = skin.getFont("custom-font");
         customStyle.fontColor = Color.WHITE;
-
-// Safe drawable references based on your skin
+        // Safe drawable references based on your skin
         customStyle.background = skin.getDrawable("selectBox");
         customStyle.backgroundOpen = skin.getDrawable("selectDown");
-
-// List style (dropdown appearance)
+        // List style (dropdown appearance)
         List.ListStyle listStyle = new List.ListStyle();
         listStyle.font = skin.getFont("custom-font");
         listStyle.fontColorSelected = Color.WHITE;
         listStyle.fontColorUnselected = Color.LIGHT_GRAY;
         listStyle.selection = skin.getDrawable("selection");
         customStyle.listStyle = listStyle;
-
-// Scroll style (required, even if minimal)
+        // Scroll style (required, even if minimal)
         ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
         scrollStyle.vScroll = skin.getDrawable("scrollVertical");
         scrollStyle.vScrollKnob = skin.getDrawable("scrollKnobVertical");
         customStyle.scrollStyle = scrollStyle;
-
-// Add to skin
+        // Add to skin
         skin.add("custom-selectbox", customStyle);
-
-
     }
 
     public static void loadAnimals() {
@@ -286,12 +258,12 @@ public class GameAssetManager {
         if (FLOORING_71 != null) FLOORING_71.dispose();
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
-        if(burntTile != null) burntTile.dispose();
+        if (burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
-        if(snowOverlay != null) snowOverlay.dispose();
-        if(stormOverlay != null) stormOverlay.dispose();
-        if(dropTexture != null) dropTexture.dispose();
-        if(crowSheet != null) crowSheet.dispose();
+        if (snowOverlay != null) snowOverlay.dispose();
+        if (stormOverlay != null) stormOverlay.dispose();
+        if (dropTexture != null) dropTexture.dispose();
+        if (crowSheet != null) crowSheet.dispose();
 
         disposeAnimals();
     }
