@@ -57,7 +57,6 @@ public class GameAssetManager {
     public static Texture crowSheet;
     public static TextureRegion[] crowFrames;
     public static Animation<TextureRegion> crowAnimation;
-    public static BitmapFont customFont;
 
     public static Texture CLOCK_ALL;
     public static TextureRegion CLOCK_MAIN;
@@ -74,6 +73,7 @@ public class GameAssetManager {
     public static Texture Goat_Texture;
     public static Texture Dinosaur_Texture;
     public static Texture Sheep_Texture;
+    public static BitmapFont customFont;
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
