@@ -142,7 +142,6 @@ private void initializeUI() {
             executeCommand();
         }
     });
-
 }
 //    public void createUI() {
 //        Skin skin = GameAssetManager.skin;
