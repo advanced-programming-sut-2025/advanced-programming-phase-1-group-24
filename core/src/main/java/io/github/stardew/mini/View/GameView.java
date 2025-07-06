@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -39,11 +40,10 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
-import io.github.stardew.mini.Model.Places.GreenHouse;
-import io.github.stardew.mini.Model.Places.Shop;
-import io.github.stardew.mini.Model.Places.ShopItem;
+import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
@@ -60,7 +60,6 @@ import java.util.regex.Matcher;
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
     private TextButton friendsButton;
-    //private Window friendsWindow;
     private Dialog friendsDialog;
     private GameController controller;
     private SpriteBatch batch;
@@ -92,10 +91,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private int purchaseQuantity = 1;
 
     private StoreMenuController storeController;
-    // private boolean isShowingErrorDialog = false;
     private int gameWidth = Gdx.graphics.getWidth();
     private int gameHeight = Gdx.graphics.getHeight();
 
+    private boolean isPlacingBuilding = false;
+    private Habitat buildingToPlace = null;
+    private Farm currentFarm = null;
 
     public GameView(GameController controller) {
         this.controller = controller;
@@ -105,13 +106,288 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
     }
 
+    public void startPlacingBuilding(Habitat building) {
+        this.isPlacingBuilding = true;
+        this.buildingToPlace = building;
+        this.currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+        setCameraPosition();
+        camera.update();
+        Gdx.input.setInputProcessor(this);
+        showErrorDialog(stage, "Select a tile inside your farm to build a ");
+        //+ building.getDisplayName());
+    }
+
+    private void setCameraPosition() {
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (showFullMap) {
+            // Full map view
+            float mapWidth = MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length * GameAssetManager.TILE_SIZE;
+            float mapHeight = MainApp.getInstance().getCurrentGame().getMap().getMap().length * GameAssetManager.TILE_SIZE;
+
+            camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
+
+            // Zoom out to fit entire map
+            float zoomX = mapWidth / camera.viewportWidth;
+            float zoomY = mapHeight / camera.viewportHeight;
+            camera.zoom = Math.max(zoomX, zoomY);
+        } else if (isPlacingBuilding) {
+            // Focus on current player's farm
+            if (currentFarm == null) {
+                currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+            }
+            if (currentFarm != null) {
+                setCameraToFarm(currentFarm);  //  use your clean method
+                return;  // camera already updated
+            }
+        } else {
+            // Focus on player
+            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
+
+            camera.zoom = 1f;
+            int tileSize = GameAssetManager.TILE_SIZE;
+
+            // Get player's tile position
+            Tile tile = currentPlayer.getCurrentTile();
+            float drawX = tile.getX() * tileSize + tileSize / 2f;
+            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+
+            camera.position.set(drawX, drawY, 0);
+        }
+
+        camera.update();  //  always update unless you return early
+    }
+
+    private void setCameraToFarm(Farm farm) {
+        int tileSize = GameAssetManager.TILE_SIZE;
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        Tile tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
+        float centerX = tile.getX() * tileSize + tileSize / 2f;
+        float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+
+        camera.position.set(centerX, centerY, 0);
+        float zoomX = (float) farm.getWidth() * GameAssetManager.TILE_SIZE / camera.viewportWidth;
+        float zoomY = (float) farm.getHeight() * GameAssetManager.TILE_SIZE / camera.viewportHeight;
+        camera.zoom = Math.max(zoomX, zoomY);
+    }
+
+
+    @Override
+    public void show() {
+        stage = new Stage(new ScreenViewport());
+        Gdx.input.setInputProcessor(this);
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        setCameraPosition();
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+        createUI();
+
+        friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
+        friendsButton.setSize(200, 200);
+        friendsButton.setColor(Color.PURPLE);
+        friendsButton.setPosition(0, 10);
+        friendsButton.setTouchable(Touchable.enabled);
+
+        stage.addActor(friendsButton);
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+                controller.handleEndOfDay();
+                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+            }
+        }, 5, 5);
+    }
+
+    @Override
+    public void render(float v) {
+        for (LightningFlash flash : activeFlashes) {
+            flash.update(v);
+        }
+        spawnTimer += v;
+        if (spawnTimer > DROP_INTERVAL) {
+            float viewLeft = camera.position.x - camera.viewportWidth / 2f;
+            float viewRight = camera.position.x + camera.viewportWidth / 2f;
+
+            float x = MathUtils.random(viewLeft, viewRight);
+            float y = camera.position.y + camera.viewportHeight / 2f + 20;
+
+            raindrops.add(new RainDrop(x, y));
+            spawnTimer = 0f;
+        }
+
+
+        for (int i = raindrops.size - 1; i >= 0; i--) {
+            RainDrop drop = raindrops.get(i);
+            drop.update(v, camera);
+            if (drop.finished) {
+                raindrops.removeIndex(i);
+            }
+        }
+
+        int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // get current game hour as int
+
+        Iterator<LightningFlash> it = scheduledFlashes.iterator();
+        while (it.hasNext()) {
+            LightningFlash flash = it.next();
+            if (flash.scheduledTime == currentHour) {
+                flash.trigger();
+                activeFlashes.add(flash);
+                it.remove(); // remove from scheduled list
+            }
+        }
+
+        activeFlashes.removeIf(flash -> !flash.isActive());
+
+
+        stateTime += Gdx.graphics.getDeltaTime();
+        Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        setCameraPosition();
+        camera.update();
+
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        // --- DRAW GAME WORLD ---
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        int tileSize = GameAssetManager.TILE_SIZE;
+
+        int rows = tiles.length;
+        drawTiles(rows, tiles, tileSize);
+        drawGreenHouse(tileSize, rows);
+
+         //TODO : handle Giant Crop
+        //TODO : handle burnt plants
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                if (tiles[y][x].getContainedGrowable() != null) {
+                    drawGrowables(tiles, y, x, tileSize, rows);
+                } else if (tiles[y][x].getProductOfGrowable() != null) {
+                    drawProductOfGrowables(tiles, y, x, tileSize, rows);
+                }
+                if (tiles[y][x].getContainedItem() != null) {
+                    drawItems(tiles, y, x, tileSize, rows);
+                }
+            }
+        }
+
+        drawAnimals(rows, tiles, tileSize);
+        drawPlayer();
+
+        float camX = camera.position.x - camera.viewportWidth / 2f;
+        float camY = camera.position.y - camera.viewportHeight / 2f;
+
+        currentWeather = MainApp.getInstance().getCurrentGame().getCurrentWeatherType();
+        if (currentWeather == WeatherType.STORM) {
+            batch.setColor(1f, 1f, 1f, 0.5f);
+            batch.draw(GameAssetManager.stormOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
+            batch.setColor(Color.WHITE);
+        } else if (currentWeather == WeatherType.SNOW) {
+            batch.draw(GameAssetManager.snowOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        } else if (currentWeather == WeatherType.RAIN) {
+            for (RainDrop drop : raindrops) {
+                drop.render(batch);
+            }
+        }
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            terminalVisible = !terminalVisible;
+            terminalWindow.setVisible(terminalVisible);
+
+            if (terminalVisible) {
+                Gdx.input.setInputProcessor(stage);
+                stage.setKeyboardFocus(terminalWindow.getInputField());
+                terminalWindow.getInputField().setText("");
+                terminalWindow.getInputField().setCursorPosition(0);
+            } else {
+                Gdx.input.setInputProcessor(this);
+            }
+        }
+        setCameraPosition();
+        camera.update();
+        batch.setColor(darkOverlayColor);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth * 50, camera.viewportHeight * 50);
+        batch.setColor(Color.WHITE);
+        for (LightningFlash flash : activeFlashes) {
+            if (flash.isActive()) {
+                batch.setColor(new Color(0, 0, 0, flash.getAlpha())); // use black if preferred
+                batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+                //controller.printMap("0", "0", "150");
+            }
+        }
+        batch.setColor(Color.WHITE);
+
+
+        if (!showFullMap && !terminalVisible) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
+
+        batch.end(); // ✅ this must come BEFORE stage rendering
+        drawShapeRenderer(tiles, tileSize);
+
+        // --- DRAW UI ---
+        handleInput();
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
+    }
+
+    private void drawShapeRenderer(Tile[][] tiles, int tileSize) {
+        if (isPlacingBuilding && currentFarm != null) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            ShapeRenderer shapeRenderer = new ShapeRenderer();
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            for (int y = currentFarm.getY(); y < currentFarm.getY() + currentFarm.getHeight(); y++) {
+                for (int x = currentFarm.getX(); x < currentFarm.getX() + currentFarm.getWidth(); x++) {
+                    Tile tile = tiles[y][x];
+
+                    float drawX = x * tileSize;
+                    float drawY = (tiles.length - y - 1) * tileSize;
+
+                    if (tile != null && tile.isBuildable()) {
+                        shapeRenderer.setColor(1f, 1f, 1f, 0.0f);
+                    } else {
+                        shapeRenderer.setColor(0f, 0f, 0f, 0.35f);
+                    }
+                    shapeRenderer.rect(drawX, drawY, tileSize, tileSize);
+                }
+            }
+
+            shapeRenderer.end();
+            shapeRenderer.dispose();
+
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+    }
+
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.M) {
             showFullMap = !showFullMap;  // toggle map mode
             setCameraPosition();
             camera.update();// update camera immediately
-            controller.printMap("0","0","150");
+            controller.printMap("0", "0", "150");
             return true;
         }
         if (keycode == Input.Keys.F) {
@@ -132,13 +408,77 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             System.out.println(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             return true;
         }
+        if (keycode == Input.Keys.X) {
+            showFullMap = false;  // ✅ disable full map so farm zoom works
+            buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL);
+            isPlacingBuilding = true;
+            startPlacingBuilding(buildingToPlace);
+            return true;
+        }
 
         if (showFullMap) return true;
         return false;
     }
 
+    private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
+        for (int y = 0; y < rows; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                Tile tile = tiles[y][x];
+                if (tile != null && tile.getContainedAnimal() != null) {
+                    batch.draw(tile.getContainedAnimal().getAnimalType().getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                }
+            }
+        }
+    }
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+//        if (isPlacingBuilding && !terminalVisible) {
+//            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+//            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+//            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+//
+//            if (tileX >= 0 && tileY >= 0 && tileX < MainApp.getInstance().getCurrentGame().getMap().getWidth() && tileY < MainApp.getInstance().getCurrentGame().getMap().getHeight()) {
+//                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+//
+//                if (tile != null && tile.isBuildable() && tile.getType()==TileType.FARM) {
+//                    tile.setType(TileType.CAGE);
+//                    //new Building(buildingToPlace)
+//                    isPlacingBuilding = false;
+//                    buildingToPlace = null;
+//                    showErrorDialog(stage, "Building placed!");
+//                    return true;
+//                } else {
+//                    showErrorDialog(stage, "Can't build here. Try another tile.");
+//                }
+//            }
+//            return true;
+//        }
+        if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
+            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+
+            if (tileX >= currentFarm.getX() && tileX < currentFarm.getX() + currentFarm.getWidth() &&
+                tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight()) {
+
+                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+                if (tile != null && tile.isBuildable()) {
+                    tile.setType(TileType.CAGE);
+                    //setBuilding(new Building(buildingToPlace));
+                    showErrorDialog(stage, "Building placed!");
+                    isPlacingBuilding = false;
+                    buildingToPlace = null;
+                    currentFarm = null;
+                } else {
+                    showErrorDialog(stage, "Tile is not buildable.");
+                }
+            } else {
+                showErrorDialog(stage, "Please click inside your farm.");
+            }
+            return true;
+        }
+
         if (!terminalVisible) {
             //&&  button == Input.Buttons.RIGHT) {
             // Convert screen coordinates to world coordinates
@@ -183,6 +523,51 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
         return false;
     }
+
+
+//    private void setCameraPosition() {
+//        if (showFullMap) {
+//            // Full map view
+//            float mapWidth = MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length * GameAssetManager.TILE_SIZE;
+//            float mapHeight = MainApp.getInstance().getCurrentGame().getMap().getMap().length * GameAssetManager.TILE_SIZE;
+//
+//            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//            camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
+//
+//            // Zoom out to fit entire map
+//            float zoomX = mapWidth / camera.viewportWidth;
+//            float zoomY = mapHeight / camera.viewportHeight;
+//            camera.zoom = Math.max(zoomX, zoomY);
+//
+//        } if(isPlacingBuilding){
+//            this.currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+//            float framWidth = currentFarm.getWidth()* GameAssetManager.TILE_SIZE;
+//            float farmHeight = currentFarm.getHeight() * GameAssetManager.TILE_SIZE;
+//
+//            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//            camera.position.set(currentFarm.getWidth() / 2f, currentFarm.getHeight() / 2f, 0);
+//
+//            // Zoom out to fit entire map
+//            float zoomX = framWidth / camera.viewportWidth;
+//            float zoomY = farmHeight / camera.viewportHeight;
+//            camera.zoom = Math.max(zoomX, zoomY);
+//        } else {
+//            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
+//
+//            camera.zoom = 1f;
+//            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//            int tileSize = GameAssetManager.TILE_SIZE;
+//
+//            // Get player's tile position
+//            Tile tile = currentPlayer.getCurrentTile();
+//            float drawX = tile.getX() * tileSize + tileSize / 2f;
+//            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+//
+//            // Set camera to center on that position
+//            camera.position.set(drawX, drawY, 0);
+//            camera.update();
+//        }
+//    }
 
 
     @Override
@@ -271,7 +656,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //        Gdx.input.setInputProcessor(stage);
 //    }
 
-//    private void showShopMenuDialog(float x, float y) {
+    //    private void showShopMenuDialog(float x, float y) {
 //        shopMenuDialog.getContentTable().clear(); // safer than .clear()
 //        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 //
@@ -362,84 +747,84 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //        shopMenuDialog.show(stage);
 //        Gdx.input.setInputProcessor(stage);
 //    }
-private void showShopMenuDialog(float x, float y) {
-    shopMenuDialog.getContentTable().clear();
-    shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+    private void showShopMenuDialog(float x, float y) {
+        shopMenuDialog.getContentTable().clear();
+        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
-    Table content = shopMenuDialog.getContentTable();
-    content.defaults().pad(10);
-    content.clear();
+        Table content = shopMenuDialog.getContentTable();
+        content.defaults().pad(10);
+        content.clear();
 
-    // Filter dropdown (SelectBox)
-    Table filterTable = new Table();
-    SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
-    filterSelectBox.setItems("All Products", "Available Products");
-    filterSelectBox.setSelected("All Products"); // default selection
-    filterTable.add(new Label("Filter:", GameAssetManager.skin,"custom-label")).padRight(10);
-    filterTable.add(filterSelectBox).left();
+        // Filter dropdown (SelectBox)
+        Table filterTable = new Table();
+        SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
+        filterSelectBox.setItems("All Products", "Available Products");
+        filterSelectBox.setSelected("All Products"); // default selection
+        filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
+        filterTable.add(filterSelectBox).left();
 
-    content.add(filterTable).left().row();
+        content.add(filterTable).left().row();
 
-    // Item list table
-    final Table itemTable = new Table();
-    itemTable.top();
-    itemTable.defaults().pad(5).fillX();
+        // Item list table
+        final Table itemTable = new Table();
+        itemTable.top();
+        itemTable.defaults().pad(5).fillX();
 
-    // Refresh logic for filtering
-    Runnable refreshItems = () -> {
-        itemTable.clear();
-        boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
+        // Refresh logic for filtering
+        Runnable refreshItems = () -> {
+            itemTable.clear();
+            boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
 
-        for (final ShopItem item : selectedShop.getProducts()) {
-            boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+            for (final ShopItem item : selectedShop.getProducts()) {
+                boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
 
-            if (onlyAvailable && !isAvailable) continue;
+                if (onlyAvailable && !isAvailable) continue;
 
-            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
-            itemButton.setDisabled(!isAvailable);
-            itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+                TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
+                itemButton.setDisabled(!isAvailable);
+                itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
 
-            itemButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    selectedShopItem = item;
-                    purchaseQuantity = 1;
-                    showPurchaseDialog();
-                    shopMenuDialog.hide();
-                }
-            });
+                itemButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        selectedShopItem = item;
+                        purchaseQuantity = 1;
+                        showPurchaseDialog();
+                        shopMenuDialog.hide();
+                    }
+                });
 
-            itemTable.add(itemButton).expandX().fillX().row();
-        }
-    };
+                itemTable.add(itemButton).expandX().fillX().row();
+            }
+        };
 
-    // Listener for dropdown change
-    filterSelectBox.addListener(new ChangeListener() {
-        @Override
-        public void changed(ChangeEvent event, Actor actor) {
-            refreshItems.run();
-        }
-    });
+        // Listener for dropdown change
+        filterSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                refreshItems.run();
+            }
+        });
 
-    // Scrollable list for items
-    ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
-    scrollPane.setFadeScrollBars(false);
-    scrollPane.setScrollingDisabled(true, false);
-    scrollPane.setForceScroll(false, true);
-    scrollPane.layout();
+        // Scrollable list for items
+        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.layout();
 
-    content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
+        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
 
-    // Initial load
-    refreshItems.run();
+        // Initial load
+        refreshItems.run();
 
-    shopMenuDialog.pack();
-    shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+        shopMenuDialog.pack();
+        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
 
-    shopMenuDialog.setVisible(true);
-    shopMenuDialog.show(stage);
-    Gdx.input.setInputProcessor(stage);
-}
+        shopMenuDialog.setVisible(true);
+        shopMenuDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
 
 
     private void showPurchaseDialog() {
@@ -450,11 +835,11 @@ private void showShopMenuDialog(float x, float y) {
         content.clear();
         content.defaults().pad(10);
 
-        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin,"custom-label");
-        TextButton plusButton = new TextButton("+", GameAssetManager.skin,"custom-button");
-        TextButton minusButton = new TextButton("-", GameAssetManager.skin,"custom-button");
-        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin,"custom-button");
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin,"custom-button");
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
+        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
 
 
         plusButton.addListener(new ClickListener() {
@@ -478,7 +863,7 @@ private void showShopMenuDialog(float x, float y) {
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-              Result result=  storeController.purchase(selectedShopItem, purchaseQuantity);
+                Result result = storeController.purchase(selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
                 shopPurchaseDialog.hide();
                 showErrorDialog(stage, result.message());
@@ -554,7 +939,7 @@ private void showShopMenuDialog(float x, float y) {
         animalMenuDialog.getContentTable().defaults().pad(10);
 
         // Add buttons with their result objects
-        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin,"custom-button");
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
         feedButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -563,7 +948,7 @@ private void showShopMenuDialog(float x, float y) {
             }
         });
 
-        TextButton petButton = new TextButton("Pet", GameAssetManager.skin,"custom-button");
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
         petButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -572,7 +957,7 @@ private void showShopMenuDialog(float x, float y) {
             }
         });
 
-        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin,"custom-button");
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
         releaseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -581,7 +966,7 @@ private void showShopMenuDialog(float x, float y) {
             }
         });
 
-        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin,"custom-button");
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
         sellButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -590,7 +975,7 @@ private void showShopMenuDialog(float x, float y) {
             }
         });
 
-        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin,"custom-button");
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
         collectButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -599,7 +984,7 @@ private void showShopMenuDialog(float x, float y) {
             }
         });
 
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin,"custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -621,7 +1006,6 @@ private void showShopMenuDialog(float x, float y) {
         animalMenuDialog.setVisible(false);  // Add this after creation
         stage.addActor(animalMenuDialog);
     }
-
 
 
     private void handleAnimalMenuChoice(String choice) {
@@ -666,190 +1050,6 @@ private void showShopMenuDialog(float x, float y) {
         selectedAnimal = null;
     }
 
-    @Override
-    public void show() {
-        stage = new Stage(new ScreenViewport());
-        Gdx.input.setInputProcessor(this);
-
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        setCameraPosition();
-        camera.update();
-        batch.setProjectionMatrix(camera.combined);
-        createUI();
-
-        friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
-        friendsButton.setSize(200, 200);
-        friendsButton.setColor(Color.PURPLE);
-        friendsButton.setPosition(0, 10);
-        friendsButton.setTouchable(Touchable.enabled);
-
-        stage.addActor(friendsButton);
-
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                MainApp.getInstance().getCurrentGame().advanceTimeByOneHour();
-                controller.handleEndOfDay();
-                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
-            }
-        }, 5, 5);
-    }
-    @Override
-    public void render(float v) {
-        for (LightningFlash flash : activeFlashes) {
-            flash.update(v);
-        }
-        spawnTimer += v;
-        if (spawnTimer > DROP_INTERVAL) {
-            float viewLeft = camera.position.x - camera.viewportWidth / 2f;
-            float viewRight = camera.position.x + camera.viewportWidth / 2f;
-
-            float x = MathUtils.random(viewLeft, viewRight);
-            float y = camera.position.y + camera.viewportHeight / 2f + 20;
-
-            raindrops.add(new RainDrop(x, y));
-            spawnTimer = 0f;
-        }
-
-
-        for (int i = raindrops.size - 1; i >= 0; i--) {
-            RainDrop drop = raindrops.get(i);
-            drop.update(v, camera);
-            if (drop.finished) {
-                raindrops.removeIndex(i);
-            }
-        }
-
-        int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // get current game hour as int
-
-        Iterator<LightningFlash> it = scheduledFlashes.iterator();
-        while (it.hasNext()) {
-            LightningFlash flash = it.next();
-            if (flash.scheduledTime == currentHour) {
-                flash.trigger();
-                activeFlashes.add(flash);
-                it.remove(); // remove from scheduled list
-            }
-        }
-
-        activeFlashes.removeIf(flash -> !flash.isActive());
-
-
-        stateTime += Gdx.graphics.getDeltaTime();
-        Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        setCameraPosition();
-        camera.update();
-
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-
-        // --- DRAW GAME WORLD ---
-        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
-        int tileSize = GameAssetManager.TILE_SIZE;
-
-        int rows = tiles.length;
-        drawTiles(rows,tiles,tileSize);
-        drawGreenHouse(tileSize,rows);
-
-//TODO : handle Giant Crop
-        //TODO : handle burnt plants
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < tiles[0].length; x++) {
-                if (tiles[y][x].getContainedGrowable() != null) {
-                    drawGrowables(tiles, y, x, tileSize, rows);
-                } else if (tiles[y][x].getProductOfGrowable() != null) {
-                    drawProductOfGrowables(tiles, y, x, tileSize, rows);
-                }
-                if (tiles[y][x].getContainedItem() != null) {
-                    drawItems(tiles, y, x, tileSize, rows);
-                }
-            }
-        }
-
-
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < tiles[0].length; x++) {
-                Tile tile = tiles[y][x];
-                if (tile != null && tile.getContainedAnimal() != null) {
-                    batch.draw(tile.getContainedAnimal().getAnimalType().getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                }
-            }
-        }
-
-        drawPlayer();
-
-        float camX = camera.position.x - camera.viewportWidth / 2f;
-        float camY = camera.position.y - camera.viewportHeight / 2f;
-
-        currentWeather = MainApp.getInstance().getCurrentGame().getCurrentWeatherType();
-        if(currentWeather == WeatherType.STORM) {
-            batch.setColor(1f, 1f, 1f, 0.5f);
-            batch.draw(GameAssetManager.stormOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
-            batch.setColor(Color.WHITE);
-        }
-        else if(currentWeather == WeatherType.SNOW){
-            batch.draw(GameAssetManager.snowOverlay, camX, camY, camera.viewportWidth, camera.viewportHeight);
-        }
-        else if(currentWeather == WeatherType.RAIN){
-            for (RainDrop drop : raindrops) {
-                drop.render(batch);
-            }
-        }
-
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            terminalVisible = !terminalVisible;
-            terminalWindow.setVisible(terminalVisible);
-
-            if (terminalVisible) {
-                Gdx.input.setInputProcessor(stage);
-                stage.setKeyboardFocus(terminalWindow.getInputField());
-                terminalWindow.getInputField().setText("");
-                terminalWindow.getInputField().setCursorPosition(0);
-            } else {
-                Gdx.input.setInputProcessor(this);
-            }
-        }
-        setCameraPosition();
-        camera.update();
-        batch.setColor(darkOverlayColor);
-        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth*50, camera.viewportHeight*50);
-        batch.setColor(Color.WHITE);
-        for (LightningFlash flash : activeFlashes) {
-            if (flash.isActive()) {
-                batch.setColor(new Color(0, 0, 0, flash.getAlpha())); // use black if preferred
-                batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
-                //controller.printMap("0", "0", "150");
-            }
-        }
-       batch.setColor(Color.WHITE);
-
-
-        if (!showFullMap && !terminalVisible) {
-            moveCooldown -= v;
-            if (moveCooldown <= 0f) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
-                }
-            }
-        }
-
-        batch.end(); // ✅ this must come BEFORE stage rendering
-
-        // --- DRAW UI ---
-        handleInput();
-        stage.act(Gdx.graphics.getDeltaTime());
-        stage.draw();
-    }
     private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
         if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
             batch.draw(foraging.getType().getTexture(),
@@ -1030,38 +1230,6 @@ private void showShopMenuDialog(float x, float y) {
     }
 
 
-    private void setCameraPosition() {
-        if (showFullMap) {
-            // Full map view
-            float mapWidth = MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length * GameAssetManager.TILE_SIZE;
-            float mapHeight = MainApp.getInstance().getCurrentGame().getMap().getMap().length * GameAssetManager.TILE_SIZE;
-
-            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
-
-            // Zoom out to fit entire map
-            float zoomX = mapWidth / camera.viewportWidth;
-            float zoomY = mapHeight / camera.viewportHeight;
-            camera.zoom = Math.max(zoomX, zoomY);
-
-        } else {
-            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
-
-            camera.zoom = 1f;
-            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            int tileSize = GameAssetManager.TILE_SIZE;
-
-            // Get player's tile position
-            Tile tile = currentPlayer.getCurrentTile();
-            float drawX = tile.getX() * tileSize + tileSize / 2f;
-            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
-
-            // Set camera to center on that position
-            camera.position.set(drawX, drawY, 0);
-            camera.update();
-        }
-    }
-
     public Point findTopLeftOfGiantCropSquare(int x, int y, int rows, int cols, boolean isProduct) {
         // 4 possible 2x2 square orientations around (x, y)
         int[][] offsets = {
@@ -1203,8 +1371,8 @@ private void showShopMenuDialog(float x, float y) {
             int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
             currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.setMovingDirection(direction);
-            setCameraPosition();
-            camera.update();
+//            setCameraPosition();
+//            camera.update();
             return true;
         }
         return false;
