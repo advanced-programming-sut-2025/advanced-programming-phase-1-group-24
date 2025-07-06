@@ -19,7 +19,7 @@ public enum randomStuffType {
         Goat_Cheese("Goat Cheese",400,100,3,Map.of("Goat Milk",1),true),
         Beer("Beer",200,50,24,Map.of("Wheat",1),true),
         Vinegar("Vinegar",100,13,10,Map.of("Rice",1),true),
-        Coffee("Coffee",150,75,2, Map.of("Coffee Beans",5),true),
+        Coffee("Coffee",150,75,2, Map.of("Coffee Bean",5),true),
         Juice("Juice",225,80,96,Map.of("Orange",1),true),
         Mead("Mead",300,100,10,Map.of("Honey",1),true),
         Pale_Ale("Pale Ale",300,50,72,Map.of("Hops",1),true),

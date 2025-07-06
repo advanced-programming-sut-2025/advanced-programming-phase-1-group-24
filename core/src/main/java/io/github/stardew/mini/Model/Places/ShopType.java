@@ -1,12 +1,22 @@
 package io.github.stardew.mini.Model.Places;
 
+import com.badlogic.gdx.graphics.Texture;
+import io.github.stardew.mini.Model.Assets.ShopAssets;
+
 public enum ShopType {
-    BLACKSMITH,
-    JOJA_MART,
-    PIERRE_GENERAL_SHOP,
-    PIERRE_STORE,
-    CARPENTER_SHOP,
-    FISH_SHOP,
-    MARNIE_RANCH,
-    STAR_DROP_SALOON
+    BLACKSMITH(ShopAssets.Blacksmith),
+    JOJA_MART(ShopAssets.Jojamart),
+    PIERRE_GENERAL_SHOP(ShopAssets.PierresGeneral),
+    CARPENTER_SHOP(ShopAssets.Carpenter),
+    FISH_SHOP(ShopAssets.Fish),
+    MARNIE_RANCH(ShopAssets.Marnie),
+    STAR_DROP_SALOON(ShopAssets.StardropSaloon);
+    private Texture texture;
+    ShopType(Texture texture) {
+        this.texture = texture;
+    }
+    public Texture getTexture() {
+        return texture;
+    }
 }
+

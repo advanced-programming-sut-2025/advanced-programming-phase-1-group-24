@@ -59,6 +59,7 @@ public class GameAssetManager {
     public static Animation<TextureRegion> crowAnimation;
 
 
+
     // Animals initial textures
     public static Texture White_Chicken_Texture;
     public static Texture White_Cow_Texture;
@@ -68,6 +69,8 @@ public class GameAssetManager {
     public static Texture Goat_Texture;
     public static Texture Dinosaur_Texture;
     public static Texture Sheep_Texture;
+
+    public static BitmapFont customFont;
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -80,6 +83,7 @@ public class GameAssetManager {
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
         menuBackground = new Texture(Gdx.files.internal("menu_bg.png"));
+
 
         LIGHT_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_44.png"));
         DARK_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
@@ -164,7 +168,7 @@ public class GameAssetManager {
         skin.add("default", buttonStyle);
 
         //creating custom font
-        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
         skin.add("custom-font", customFont);
 
         // Create custom-Label
