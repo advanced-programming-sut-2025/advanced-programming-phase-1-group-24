@@ -30,6 +30,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     private static SpriteBatch batch;
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
+    private GameView currentGameView;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
@@ -321,5 +322,13 @@ public class MainApp extends com.badlogic.gdx.Game {
 
     public static SpriteBatch getBatch() {
         return batch;
+    }
+
+    public GameView getCurrentGameView() {
+        return currentGameView;
+    }
+
+    public void setCurrentGameView(GameView currentGameView) {
+        this.currentGameView = currentGameView;
     }
 }

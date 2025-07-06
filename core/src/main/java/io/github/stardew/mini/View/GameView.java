@@ -18,6 +18,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
@@ -82,7 +83,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Animal selectedAnimal;
 
     private float moveCooldown = 0f;
-    private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
+    private static final float MOVE_INTERVAL = 0.05f; // seconds between steps
 
     private Dialog shopMenuDialog;
     private Shop selectedShop;
@@ -108,7 +109,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.M) {
             showFullMap = !showFullMap;  // toggle map mode
-            setCameraPosition();         // update camera immediately
+            setCameraPosition();
+            camera.update();// update camera immediately
             controller.printMap("0","0","150");
             return true;
         }
@@ -131,13 +133,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             return true;
         }
 
-
         if (showFullMap) return true;
-
-
         return false;
-
-
     }
 
     @Override
@@ -223,19 +220,182 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         return false;
     }
 
-    private void showShopMenuDialog(float x, float y) {
-        shopMenuDialog.clear();
-        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+//    private void showShopMenuDialog(float x, float y) {
+//        shopMenuDialog.clear();
+//        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+//
+//        // Create a table for item buttons
+//        Table itemTable = new Table();
+//        itemTable.top(); // align buttons to the top
+//        itemTable.defaults().pad(5).fillX();
+//
+//        for (ShopItem item : selectedShop.getProducts()) {
+//            boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+//
+//            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin,"custom-button");
+//            itemButton.setDisabled(!isAvailable);
+//            itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+//
+//            itemButton.addListener(new ClickListener() {
+//                @Override
+//                public void clicked(InputEvent event, float x, float y) {
+//                    selectedShopItem = item;
+//                    purchaseQuantity = 1;
+//                    showPurchaseDialog();
+//                    shopMenuDialog.hide();
+//                }
+//            });
+//
+//            itemTable.add(itemButton).expandX().fillX().row();
+//        }
+//
+//        // Wrap the table in a ScrollPane
+//        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+//        scrollPane.setFadeScrollBars(false);
+//        scrollPane.setScrollingDisabled(true, false); // only vertical scroll
+//        scrollPane.setForceScroll(false, true);
+//        scrollPane.layout(); // force layout of scrollPane
+//
+//        // Add scrollPane to dialog content
+//        Table content = shopMenuDialog.getContentTable();
+//        content.clear();
+//        content.defaults().pad(10);
+//        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2); // adjust as needed
+//
+//        shopMenuDialog.add(content);
+//        shopMenuDialog.pack();
+//        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+//
+//        shopMenuDialog.setVisible(true);
+//        shopMenuDialog.show(stage);
+//        Gdx.input.setInputProcessor(stage);
+//    }
 
-        // Create a table for item buttons
-        Table itemTable = new Table();
-        itemTable.top(); // align buttons to the top
-        itemTable.defaults().pad(5).fillX();
+//    private void showShopMenuDialog(float x, float y) {
+//        shopMenuDialog.getContentTable().clear(); // safer than .clear()
+//        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+//
+//        Table content = shopMenuDialog.getContentTable();
+//        content.defaults().pad(10);
+//        content.clear();
+//
+//        // Filter buttons at the top
+//        Table filterTable = new Table();
+//        final TextButton allButton = new TextButton("all the products", GameAssetManager.skin, "toggle");
+//        final TextButton availableButton = new TextButton("all the available products", GameAssetManager.skin, "toggle");
+//
+//        final ButtonGroup<TextButton> filterGroup = new ButtonGroup<>(allButton, availableButton);
+//        filterGroup.setMaxCheckCount(1);
+//        filterGroup.setMinCheckCount(1);
+//        filterGroup.setUncheckLast(true);
+//        allButton.setChecked(true); // Default to showing all
+//
+//        filterTable.add(allButton).padRight(10);
+//        filterTable.add(availableButton).left();
+//
+//        content.add(filterTable).left().row();
+//
+//        // Item list table
+//        final Table itemTable = new Table();
+//        itemTable.top();
+//        itemTable.defaults().pad(5).fillX();
+//
+//        // Refresh logic for filtering
+//        Runnable refreshItems = () -> {
+//            itemTable.clear();
+//            boolean onlyAvailable = availableButton.isChecked();
+//
+//            for (final ShopItem item : selectedShop.getProducts()) {
+//                boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+//
+//                if (onlyAvailable && !isAvailable) continue;
+//
+//                TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
+//                itemButton.setDisabled(!isAvailable);
+//                itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+//
+//                itemButton.addListener(new ClickListener() {
+//                    @Override
+//                    public void clicked(InputEvent event, float x, float y) {
+//                        selectedShopItem = item;
+//                        purchaseQuantity = 1;
+//                        showPurchaseDialog();
+//                        shopMenuDialog.hide();
+//                    }
+//                });
+//
+//                itemTable.add(itemButton).expandX().fillX().row();
+//            }
+//        };
+//
+//        // Add filter button listeners
+//        allButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                refreshItems.run();
+//            }
+//        });
+//
+//        availableButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                refreshItems.run();
+//            }
+//        });
+//
+//        // Scrollable list for items
+//        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+//        scrollPane.setFadeScrollBars(false);
+//        scrollPane.setScrollingDisabled(true, false);
+//        scrollPane.setForceScroll(false, true);
+//        scrollPane.layout();
+//
+//        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
+//
+//        // Initial load
+//        refreshItems.run();
+//
+//        shopMenuDialog.pack();
+//        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+//
+//        shopMenuDialog.setVisible(true);
+//        shopMenuDialog.show(stage);
+//        Gdx.input.setInputProcessor(stage);
+//    }
+private void showShopMenuDialog(float x, float y) {
+    shopMenuDialog.getContentTable().clear();
+    shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
-        for (ShopItem item : selectedShop.getProducts()) {
+    Table content = shopMenuDialog.getContentTable();
+    content.defaults().pad(10);
+    content.clear();
+
+    // Filter dropdown (SelectBox)
+    Table filterTable = new Table();
+    SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
+    filterSelectBox.setItems("All Products", "Available Products");
+    filterSelectBox.setSelected("All Products"); // default selection
+    filterTable.add(new Label("Filter:", GameAssetManager.skin,"custom-label")).padRight(10);
+    filterTable.add(filterSelectBox).left();
+
+    content.add(filterTable).left().row();
+
+    // Item list table
+    final Table itemTable = new Table();
+    itemTable.top();
+    itemTable.defaults().pad(5).fillX();
+
+    // Refresh logic for filtering
+    Runnable refreshItems = () -> {
+        itemTable.clear();
+        boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
+
+        for (final ShopItem item : selectedShop.getProducts()) {
             boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
 
-            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin);
+            if (onlyAvailable && !isAvailable) continue;
+
+            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
             itemButton.setDisabled(!isAvailable);
             itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
 
@@ -251,28 +411,35 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
             itemTable.add(itemButton).expandX().fillX().row();
         }
+    };
 
-        // Wrap the table in a ScrollPane
-        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
-        scrollPane.setFadeScrollBars(false);
-        scrollPane.setScrollingDisabled(true, false); // only vertical scroll
-        scrollPane.setForceScroll(false, true);
-        scrollPane.layout(); // force layout of scrollPane
+    // Listener for dropdown change
+    filterSelectBox.addListener(new ChangeListener() {
+        @Override
+        public void changed(ChangeEvent event, Actor actor) {
+            refreshItems.run();
+        }
+    });
 
-        // Add scrollPane to dialog content
-        Table content = shopMenuDialog.getContentTable();
-        content.clear();
-        content.defaults().pad(10);
-        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2); // adjust as needed
+    // Scrollable list for items
+    ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+    scrollPane.setFadeScrollBars(false);
+    scrollPane.setScrollingDisabled(true, false);
+    scrollPane.setForceScroll(false, true);
+    scrollPane.layout();
 
-        shopMenuDialog.add(content);
-        shopMenuDialog.pack();
-        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+    content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
 
-        shopMenuDialog.setVisible(true);
-        shopMenuDialog.show(stage);
-        Gdx.input.setInputProcessor(stage);
-    }
+    // Initial load
+    refreshItems.run();
+
+    shopMenuDialog.pack();
+    shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+
+    shopMenuDialog.setVisible(true);
+    shopMenuDialog.show(stage);
+    Gdx.input.setInputProcessor(stage);
+}
 
 
     private void showPurchaseDialog() {
@@ -283,11 +450,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         content.clear();
         content.defaults().pad(10);
 
-        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin);
-        TextButton plusButton = new TextButton("+", GameAssetManager.skin);
-        TextButton minusButton = new TextButton("-", GameAssetManager.skin);
-        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin);
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin,"custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin,"custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin,"custom-button");
+        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin,"custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin,"custom-button");
+
 
         plusButton.addListener(new ClickListener() {
             @Override
@@ -310,10 +478,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                storeController.purchase(selectedShopItem, purchaseQuantity);
+              Result result=  storeController.purchase(selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
                 shopPurchaseDialog.hide();
-                Gdx.input.setInputProcessor(GameView.this);
+                showErrorDialog(stage, result.message());
+                //Gdx.input.setInputProcessor(GameView.this);
             }
         });
 
@@ -338,6 +507,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             (Gdx.graphics.getHeight() - shopPurchaseDialog.getHeight()) / 2
         );
 
+        shopPurchaseDialog.setVisible(true);
         shopPurchaseDialog.show(stage);
         Gdx.input.setInputProcessor(stage);
     }
@@ -357,13 +527,15 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
     private void createShopMenusDialogs() {
-        shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "dialog");
+        shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "custom-window");
+        shopMenuDialog.padTop(40f);
         shopMenuDialog.setKeepWithinStage(true);
         shopMenuDialog.setMovable(false);
         shopMenuDialog.setVisible(false);
         stage.addActor(shopMenuDialog);
 
-        shopPurchaseDialog = new Dialog("Purchase", GameAssetManager.skin, "dialog");
+        shopPurchaseDialog = new Dialog("Purchase", GameAssetManager.skin, "custom-window");
+        shopPurchaseDialog.padTop(40f);
         shopPurchaseDialog.setKeepWithinStage(true);
         shopPurchaseDialog.setMovable(false);
         shopPurchaseDialog.setVisible(false);
@@ -372,17 +544,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private void createAnimalDialog() {
         // Create the animal menu dialog (initially hidden)
-        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "dialog") {
+        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
             @Override
             protected void result(Object object) {
                 handleAnimalMenuChoice(object.toString());
             }
         };
-
+        animalMenuDialog.padTop(40);
         animalMenuDialog.getContentTable().defaults().pad(10);
 
         // Add buttons with their result objects
-        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin);
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin,"custom-button");
         feedButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -391,7 +563,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
-        TextButton petButton = new TextButton("Pet", GameAssetManager.skin);
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin,"custom-button");
         petButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -400,7 +572,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
-        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin);
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin,"custom-button");
         releaseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -409,7 +581,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
-        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin);
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin,"custom-button");
         sellButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -418,7 +590,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
-        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin);
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin,"custom-button");
         collectButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -427,7 +599,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin,"custom-button");
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -523,21 +695,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }, 5, 5);
     }
-
-
-
-//    @Override
-//    public void show() {
-//        stage = new Stage(new ScreenViewport());
-//        mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
-//        camera = new OrthographicCamera();
-//        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        setCameraPosition();
-//        camera.update();
-//        Gdx.input.setInputProcessor(this);
-//        batch.setProjectionMatrix(camera.combined);
-//        createUI();
-//    }
     @Override
     public void render(float v) {
         for (LightningFlash flash : activeFlashes) {
@@ -584,6 +741,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         setCameraPosition();
+        camera.update();
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -622,20 +780,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         drawPlayer();
-        if (!showFullMap && !terminalVisible) {
-            moveCooldown -= v;
-            if (moveCooldown <= 0f) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
-                }
-            }
-        }
+
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -668,8 +813,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Gdx.input.setInputProcessor(this);
             }
         }
+        setCameraPosition();
+        camera.update();
         batch.setColor(darkOverlayColor);
-        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth*50, camera.viewportHeight*50);
         batch.setColor(Color.WHITE);
         for (LightningFlash flash : activeFlashes) {
             if (flash.isActive()) {
@@ -679,6 +826,22 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
        batch.setColor(Color.WHITE);
+
+
+        if (!showFullMap && !terminalVisible) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
 
         batch.end(); // ✅ this must come BEFORE stage rendering
 
@@ -1041,9 +1204,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.setMovingDirection(direction);
             setCameraPosition();
+            camera.update();
             return true;
         }
-
         return false;
     }
 

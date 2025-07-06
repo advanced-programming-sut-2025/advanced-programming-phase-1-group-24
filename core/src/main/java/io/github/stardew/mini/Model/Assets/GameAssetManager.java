@@ -199,6 +199,62 @@ public class GameAssetManager {
         buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
         buttonStyle2.font.getData().setScale(0.9f);
         skin.add("custom-button", buttonStyle2);
+
+        //Create custom select box
+//        // Assuming you already loaded a BitmapFont named "custom-font" into your skin
+//        SelectBox.SelectBoxStyle customStyle = new SelectBox.SelectBoxStyle();
+//
+//// Font for the select box
+//        customStyle.font = skin.getFont("custom-font");
+//        customStyle.fontColor = Color.WHITE;
+//
+//// Required drawables from skin
+//        customStyle.background = skin.getDrawable("default-selectbox");
+//        customStyle.backgroundOpen = skin.getDrawable("default-selectbox-open");
+//        customStyle.scrollStyle = new ScrollPane.ScrollPaneStyle();
+//        customStyle.listStyle = new List.ListStyle();
+//
+//// List style (used for dropdown items)
+//        customStyle.listStyle.font = skin.getFont("custom-font");
+//        customStyle.listStyle.fontColorSelected = Color.WHITE;
+//        customStyle.listStyle.fontColorUnselected = Color.LIGHT_GRAY;
+//        customStyle.listStyle.selection = skin.getDrawable("default-select-selection");
+//
+//// Optional: Scroll bar styling
+//        customStyle.scrollStyle.vScroll = skin.getDrawable("default-scroll");
+//        customStyle.scrollStyle.vScrollKnob = skin.getDrawable("default-scroll-knob");
+//
+//// Add to skin if you want to reuse it elsewhere
+//        skin.add("custom-selectbox", customStyle);
+
+        SelectBox.SelectBoxStyle customStyle = new SelectBox.SelectBoxStyle();
+
+// Font
+        customStyle.font = skin.getFont("custom-font");
+        customStyle.fontColor = Color.WHITE;
+
+// Safe drawable references based on your skin
+        customStyle.background = skin.getDrawable("selectBox");
+        customStyle.backgroundOpen = skin.getDrawable("selectDown");
+
+// List style (dropdown appearance)
+        List.ListStyle listStyle = new List.ListStyle();
+        listStyle.font = skin.getFont("custom-font");
+        listStyle.fontColorSelected = Color.WHITE;
+        listStyle.fontColorUnselected = Color.LIGHT_GRAY;
+        listStyle.selection = skin.getDrawable("selection");
+        customStyle.listStyle = listStyle;
+
+// Scroll style (required, even if minimal)
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = skin.getDrawable("scrollVertical");
+        scrollStyle.vScrollKnob = skin.getDrawable("scrollKnobVertical");
+        customStyle.scrollStyle = scrollStyle;
+
+// Add to skin
+        skin.add("custom-selectbox", customStyle);
+
+
     }
 
     public static void loadAnimals() {
@@ -236,6 +292,18 @@ public class GameAssetManager {
         if(stormOverlay != null) stormOverlay.dispose();
         if(dropTexture != null) dropTexture.dispose();
         if(crowSheet != null) crowSheet.dispose();
+
+        disposeAnimals();
+    }
+
+    private static void disposeAnimals() {
+        if (White_Chicken_Texture != null) White_Chicken_Texture.dispose();
+        if (White_Cow_Texture != null) White_Cow_Texture.dispose();
+        if (Duck_Texture != null) Duck_Texture.dispose();
+        if (Pig_Texture != null) Pig_Texture.dispose();
+        if (Rabbit_Texture != null) Rabbit_Texture.dispose();
+        if (Goat_Texture != null) Goat_Texture.dispose();
+        if (Dinosaur_Texture != null) Dinosaur_Texture.dispose();
     }
 
     public static Texture getBackground() {

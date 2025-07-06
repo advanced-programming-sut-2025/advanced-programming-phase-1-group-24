@@ -240,7 +240,7 @@ public class MapOfGame {
         );
 
         Shop pierreStore = new Shop(
-                ShopType.PIERRE_STORE,
+                ShopType.PIERRE_GENERAL_SHOP,
                 "Pierre’s General Store",
                 "Pierre",
                 9, 17,
@@ -586,5 +586,6 @@ public class MapOfGame {
         return x >= houseX && x < houseX + width &&
                 y >= houseY && y < houseY + height;
     }
+
 
 }
