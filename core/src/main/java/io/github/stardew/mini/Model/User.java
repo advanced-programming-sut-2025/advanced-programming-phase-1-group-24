@@ -461,7 +461,7 @@ public class User {
     }
 
     public void handleFainting() {
-        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+        if (this.energy <= 0) { //deleted turn enrgy
             this.energy = 0;
             this.currentTurnEnergy = 0;
             System.out.println("not enough energy! You faiented!");

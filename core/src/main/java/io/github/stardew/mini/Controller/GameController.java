@@ -2072,9 +2072,9 @@ public class GameController implements MenuController {
             return new Result(false, "You don't have enough level!");
         }
 
-        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) {
-            return new Result(false, "Players are not adjacent.");
-        }
+//        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) {
+//            return new Result(false, "Players are not adjacent.");
+//        }
 
         int availableCount = sender.getBackpack().getItemCount(item);
         if (availableCount < amount) {

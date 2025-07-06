@@ -26,6 +26,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.sun.tools.javac.Main;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
@@ -33,6 +34,8 @@ import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.CrowFlight;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Growables.CropType;
 import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.Growables.TreeType;
@@ -43,6 +46,8 @@ import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
+import io.github.stardew.mini.Model.Reccepies.randomStuff;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.*;
@@ -55,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
@@ -155,6 +161,19 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             controller.crowAttack();
         }
 
+        if(keycode == Input.Keys.E){
+            System.out.println(currentPlayer.getEnergy());
+        }
+        if(keycode == Input.Keys.I){
+            currentPlayer.setEnergy(200);
+            currentPlayer.setFainted(false);
+        }
+        if(keycode == Input.Keys.Q){
+            MainApp.getInstance().getCurrentGame().getFriendship("user181", "john").setLevel(3);
+            currentPlayer.getRecievedGift().add(new Gift("john", "user181", new randomStuff(10, randomStuffType.Stone),5));
+            controller.sendGift("john", "Stone", "10");
+        }
+
         if (showFullMap) return true;
 
 
@@ -205,6 +224,21 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //                if(){
 //
 //                }
+            }
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            stage.getCamera().unproject(touchPos); // convert to stage coords
+            float mouseX = touchPos.x;
+            float mouseY = touchPos.y;
+
+            if(isClickInside(mouseX, mouseY, friendsButton)){
+                if (friendsDialog != null) {
+                    friendsDialog.remove();
+                }
+                createFriendsDialog();
+                friendsDialog.setVisible(true);
+                friendsDialog.show(stage);
+                Gdx.input.setInputProcessor(stage);
+                return true;
             }
         }
         return false;
@@ -473,6 +507,195 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         stage.addActor(animalMenuDialog);
     }
 
+    private void createFriendsDialog() {
+        friendsDialog = new Dialog("Friends", GameAssetManager.skin, "custom-window");
+        friendsDialog.padTop(40);
+        //friendsDialog.getContentTable().debug(); // show layout
+        Table content = friendsDialog.getContentTable();
+        content.defaults().pad(10).expandX().fillX();
+        //content.debug();
+
+        for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(friend.getUsername())) {
+                continue;
+            }
+            Table row = new Table();
+            Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
+            int level = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), friend.getUsername()).getLevel();
+            System.out.println(level);
+            Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
+            TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
+            TextButton receivedButton = new TextButton("Received", GameAssetManager.skin, "custom-button");
+            TextButton sentButton = new TextButton("Sent", GameAssetManager.skin, "custom-button");
+
+            giftButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    //TODO : send gift via inventory (sendGift method)
+                    //send a notif for the friend that we sent the gift for
+                }
+            });
+            receivedButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    showReceivedGifts(friend);
+
+                }
+            });
+            sentButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    List<Gift> sentGifts = new ArrayList<>();
+                    for(User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()) {
+                        if(otherPlayer.getUsername().equals(currentPlayer.getUsername())) {
+                            continue;
+                        }
+                        Friendship friendship = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), otherPlayer.getUsername());
+                        List<Gift> allGits = friendship.getGifts();
+                        for(Gift gift : allGits) {
+                            if(gift.getSender().equals(currentPlayer.getUsername())) {
+                                sentGifts.add(gift);
+                            }
+                        }
+                    }
+                    showSentGiftsDialog(sentGifts);
+                }
+            });
+
+            row.add(nameLabel).left().pad(100);
+            row.add(levelLabel).pad(100);
+            row.add(giftButton).pad(100);
+            row.add(receivedButton).pad(100);
+            row.add(sentButton).right().pad(100);
+            content.add(row).fillX().row();
+        }
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                friendsDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        content.add(closeButton).row();
+
+        friendsDialog.pack();
+        friendsDialog.setPosition(20, 220);
+        friendsDialog.setVisible(false);
+        stage.addActor(friendsDialog);
+    }
+
+    private void showReceivedGifts(User friend) {
+        Dialog receivedGiftsDialog = new Dialog("Received Gifts from " + friend.getUsername(), GameAssetManager.skin, "custom-window");
+        receivedGiftsDialog.padTop(40);
+        Table giftTable = receivedGiftsDialog.getContentTable();
+        giftTable.defaults().pad(10).expandX().fillX();
+
+        List<Gift> receivedGifts = MainApp.getInstance().getCurrentGame()
+            .getCurrentPlayer().getRecievedGift()
+            .stream().filter(g -> g.getSender().equals(friend.getUsername()))
+            .collect(Collectors.toList());
+
+        if (receivedGifts.isEmpty()) {
+            giftTable.add(new Label("No gifts received from " + friend.getUsername(), GameAssetManager.skin, "custom-label")).row();
+        } else {
+            int index = 1;
+            for (Gift gift : receivedGifts) {
+                final int giftIndex = index;
+
+                Label giftLabel = new Label(gift.getItem().getName() + "(from :" + gift.getSender() + ")",
+                    GameAssetManager.skin, "custom-label");
+
+                // Create a dropdown or rating selector
+                SelectBox<String> ratingBox = new SelectBox<>(GameAssetManager.skin);
+                ratingBox.setItems("1", "2", "3", "4", "5");
+                ratingBox.setSelected("3");
+
+                TextButton rateButton = new TextButton("Rate", GameAssetManager.skin, "custom-button");
+                rateButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        String resultMessage;
+                        try {
+                            Result result = controller.rateGifts(String.valueOf(giftIndex), ratingBox.getSelected());
+                            resultMessage = result.getMessage();
+                        } catch (Exception e) {
+                            resultMessage = "Error rating gift: " + e.getMessage();
+                        }
+
+                        Dialog resultDialog = new Dialog("Result", GameAssetManager.skin, "custom-window");
+                        Label resultLabel = new Label(resultMessage, GameAssetManager.skin, "custom-label");
+                        resultDialog.getContentTable().add(resultLabel).pad(20).row();
+                        TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+                        resultDialog.button(okButton, true);
+                        resultDialog.show(stage);
+                    }
+                });
+
+                Table giftRow = new Table();
+                giftRow.add(giftLabel).pad(10).left();
+                giftRow.add(ratingBox).pad(10).width(80);
+                giftRow.add(rateButton).pad(10).right();
+                giftTable.add(giftRow).row();
+
+                index++;
+            }
+        }
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                receivedGiftsDialog.hide();
+            }
+        });
+
+        giftTable.add(closeButton).colspan(3).center().row();
+
+        receivedGiftsDialog.pack();
+        receivedGiftsDialog.setPosition(100, 200);
+        receivedGiftsDialog.show(stage);
+    }
+
+    public void showSentGiftsDialog(List<Gift> sentGifts) {
+        Dialog sentDialog = new Dialog("Sent Gifts", GameAssetManager.skin, "custom-window");
+        sentDialog.padTop(40);
+
+        Table content = sentDialog.getContentTable();
+        content.defaults().pad(10).expandX().fillX();
+
+        if (sentGifts == null || sentGifts.isEmpty()) {
+            Label emptyLabel = new Label("You haven't sent any gifts yet.", GameAssetManager.skin, "custom-label");
+            content.add(emptyLabel).center().row();
+        } else {
+            int index = 1;
+            for (Gift gift : sentGifts) {
+                Label giftLabel = new Label("Gift #" + index + " → " + gift.getReceiver()
+                    + " (" + gift.getItem().getName() + ")", GameAssetManager.skin, "custom-label");
+
+                content.add(giftLabel).left().padBottom(5).row();
+                index++;
+            }
+        }
+
+        // Add OK button with custom style
+        TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                sentDialog.hide();
+            }
+        });
+
+        content.add(okButton).center().padTop(20).row();
+
+        sentDialog.pack();
+        sentDialog.setPosition(100, 200);
+        sentDialog.show(stage);
+    }
+
+
 
 
     private void handleAnimalMenuChoice(String choice) {
@@ -541,7 +764,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                MainApp.getInstance().getCurrentGame().advanceTimeByOneHour();
+                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
                 controller.handleEndOfDay();
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
@@ -686,7 +909,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
 //            Integer.toString(currentPlayer.getMoney()));
 
-        if (!showFullMap && !terminalVisible) {
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted()) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
@@ -706,7 +929,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         drawClock(v);
 
         // --- DRAW UI ---
-        handleInput();
+        //handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
@@ -897,14 +1120,19 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int drawX = tileX * tileSize;
         int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tileY - 1) * tileSize;
 
-        // Clamp moveDirection to valid index range
-        int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, GameAssetManager.playerAnimations.size() - 1);
+        if(!currentPlayer.hasFainted()) {
+            // Clamp moveDirection to valid index range
+            int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, GameAssetManager.playerAnimations.size() - 1);
 
-        Animation<TextureRegion> currentAnimation = GameAssetManager.playerAnimations.get(moveDirection);
-        TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
+            Animation<TextureRegion> currentAnimation = GameAssetManager.playerAnimations.get(moveDirection);
+            TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 
-        // Draw player with height of 2 tiles
-        batch.draw(currentFrame, drawX, drawY, tileSize, tileSize * 2);
+            // Draw player with height of 2 tiles
+            batch.draw(currentFrame, drawX, drawY, tileSize, tileSize * 2);
+        }
+        else{
+            batch.draw(GameAssetManager.playerAtlas.findRegion("player_0_1"), drawX, drawY, tileSize, tileSize * 2);
+        }
     }
 
 
@@ -978,64 +1206,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
     }
 
-
-    private void toggleFriendsDialog() {
-        if (friendsDialog != null && friendsDialog.getStage() != null) {
-            friendsDialog.hide();
-            friendsDialog = null;
-            return;
-        }
-        friendsDialog = new Dialog("Friends", GameAssetManager.skin, "custom-window");
-        friendsDialog.padTop(40);
-        //friendsDialog.getContentTable().debug(); // show layout
-        Table content = friendsDialog.getContentTable();
-        content.defaults().pad(10).expandX().fillX();
-        //content.debug();
-
-        for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(friend.getUsername())) {
-                continue;
-            }
-            Table row = new Table();
-            Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
-            int level = MainApp.getInstance().getCurrentGame().getFriendship(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername(), friend.getUsername()).getLevel();
-            Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
-            TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
-
-            giftButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    System.out.println("Gifting " + friend.getUsername());
-                    // Your gift logic here
-                }
-            });
-
-            row.add(nameLabel).left().pad(100);
-            row.add(levelLabel).pad(100);
-            row.add(giftButton).right().pad(100);
-            content.add(row).fillX().row();
-        }
-
-        friendsDialog.pack();
-        stage.addActor(friendsDialog);
-        friendsDialog.setPosition(20, 220);
-    }
-
-
-    private void handleInput() {
-        if (Gdx.input.justTouched()) {
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            stage.getCamera().unproject(touchPos); // convert to stage coords
-            float mouseX = touchPos.x;
-            float mouseY = touchPos.y;
-
-            if (isClickInside(mouseX, mouseY, friendsButton)) {
-                toggleFriendsDialog();
-            }
-        }
-    }
-
-
     private boolean isClickInside(float x, float y, Actor actor) {
         return x >= actor.getX() && x <= actor.getX() + actor.getWidth() &&
             y >= actor.getY() && y <= actor.getY() + actor.getHeight();
@@ -1077,9 +1247,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                         MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
 
             currentPlayer.setCurrentTile(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX]);
-            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+//            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+            currentPlayer.reduceEnergy(5);
             currentPlayer.setMovingDirection(direction);
             setCameraPosition();
             camera.update();
