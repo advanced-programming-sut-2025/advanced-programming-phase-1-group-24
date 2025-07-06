@@ -57,6 +57,12 @@ public class GameAssetManager {
     public static Texture crowSheet;
     public static TextureRegion[] crowFrames;
     public static Animation<TextureRegion> crowAnimation;
+    public static BitmapFont customFont;
+
+    public static Texture CLOCK_ALL;
+    public static TextureRegion CLOCK_MAIN;
+    public static TextureRegion CLOCK_ARROW;
+    public static TextureRegion[] ClOCK_MANNERS = new TextureRegion[12];
 
 
     // Animals initial textures
@@ -133,16 +139,7 @@ public class GameAssetManager {
             petFrames.add(playerAtlas.findRegion(region));
         }
         Animation<TextureRegion> petAnim = new Animation<>(0.15f, petFrames, Animation.PlayMode.NORMAL); // PlayMode.NORMAL for one-time playback
-        playerAnimations.add(petAnim);  // Add to your animations list
-
-//        crowSheet = new Texture("Crow.png");
-//        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
-
-//        crowFrames = new TextureRegion[7];
-//        for (int i = 0; i < 7; i++) {
-//            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
-//        }
-//        crowAnimation = new Animation<>(0.1f, crowFrames);
+        playerAnimations.add(petAnim);
 
         crowSheet = new Texture("Birds.png"); // renamed file accordingly
         TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 16, 16);
@@ -152,7 +149,15 @@ public class GameAssetManager {
         crowFrames[0] = tmp1[4][2];
         crowFrames[1] = tmp1[4][3];
 
-        crowAnimation = new Animation<>(0.1f, crowFrames); // 0.1s per frame, looping
+        crowAnimation = new Animation<>(0.1f, crowFrames);
+
+
+        CLOCK_ALL = new Texture("Clock/Clock_All.png");
+        CLOCK_MAIN = new TextureRegion(CLOCK_ALL, 0, 0, 72, 59);
+        CLOCK_ARROW = new TextureRegion(CLOCK_ALL, 72, 0, 8, 18);
+        for (int i = 0; i < 12; i++) {
+            ClOCK_MANNERS[i] = new TextureRegion(CLOCK_ALL, 80 + i % 4 * 13, i / 4 * 9, 13, 9);
+        }
 
 
         loadAnimals();
@@ -176,7 +181,7 @@ public class GameAssetManager {
         skin.add("default", buttonStyle);
 
         //creating custom font
-        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
         skin.add("custom-font", customFont);
 
         // Create custom-Label
