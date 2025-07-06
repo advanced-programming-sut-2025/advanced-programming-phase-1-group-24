@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -44,9 +45,7 @@ import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
-import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
-import io.github.stardew.mini.Model.TimeManagement.RainDrop;
-import io.github.stardew.mini.Model.TimeManagement.WeatherType;
+import io.github.stardew.mini.Model.TimeManagement.*;
 import io.github.stardew.mini.Model.User;
 
 //import java.awt.*;
@@ -98,6 +97,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     public List<Integer> crowAttacks = new ArrayList<>();
     private List<CrowFlight> activeCrows = new ArrayList<>();
+
+    private ClockHud clockHud;
 
 
 
@@ -528,6 +529,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         batch.setProjectionMatrix(camera.combined);
         createUI();
 
+        clockHud = new ClockHud(stage);
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(200, 200);
         friendsButton.setColor(Color.PURPLE);
@@ -547,19 +549,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
 
-
-//    @Override
-//    public void show() {
-//        stage = new Stage(new ScreenViewport());
-//        mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
-//        camera = new OrthographicCamera();
-//        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        setCameraPosition();
-//        camera.update();
-//        Gdx.input.setInputProcessor(this);
-//        batch.setProjectionMatrix(camera.combined);
-//        createUI();
-//    }
     @Override
     public void render(float v) {
         for (LightningFlash flash : activeFlashes) {
@@ -646,20 +635,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         drawPlayer();
-        if (!showFullMap && !terminalVisible) {
-            moveCooldown -= v;
-            if (moveCooldown <= 0f) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
-                }
-            }
-        }
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -707,13 +682,50 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
        batch.setColor(Color.WHITE);
+//        TimeAndDate timeAndDate = MainApp.getInstance().getCurrentGame().getTimeAndDate();
+//        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
+//            Integer.toString(currentPlayer.getMoney()));
+
+        if (!showFullMap && !terminalVisible) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
 
         batch.end(); // ✅ this must come BEFORE stage rendering
+
+        drawClock(v);
 
         // --- DRAW UI ---
         handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
+    }
+
+    private void drawClock(float v) {
+        int hour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // 0 to 23
+
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+
+        String timeStr = displayHour + (hour >= 12 ? " p.m." : " a.m.");
+        clockHud.updateTime(hour, timeStr);
+        clockHud.updateDate(MainApp.getInstance().getCurrentGame().getTimeAndDate().getDayOfWeek().name() +
+            MainApp.getInstance().getCurrentGame().getTimeAndDate().getDay());
+        clockHud.updateMoney(currentPlayer.getMoney());
+        clockHud.updateWeather(MainApp.getInstance().getCurrentGame().getCurrentWeatherType());
+        clockHud.updateSeason(MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason());
+
+        clockHud.draw(v);
     }
 
     private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
@@ -847,7 +859,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
         camera.update();
-
+        clockHud.resize(width, height);
         // Update stage viewport
         //stage.getViewport().update(width, height, true);
     }
@@ -869,7 +881,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public void dispose() {
-
+        clockHud.dispose();
     }
 
     private void drawPlayer() {
@@ -1117,8 +1129,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
     }
-
-
 
 
     public void handleCommand(Scanner scanner) {
