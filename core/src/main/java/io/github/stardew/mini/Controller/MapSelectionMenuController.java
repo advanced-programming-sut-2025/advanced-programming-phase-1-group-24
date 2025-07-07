@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-public class MapSelectionMenuController implements MenuController{
+public class MapSelectionMenuController implements MenuController {
     private MapSelectionMenuView view;
+
     public void setView(MapSelectionMenuView view) {
         this.view = view;
     }
+
     private static final Random RANDOM = new Random();
+
     public void handleMapSelection(List<User> players, Scanner scanner) {
         for (User player : players) {
             System.out.println("hey " + player.getUsername() + " choose between map 1 or map 2");
@@ -89,7 +92,7 @@ public class MapSelectionMenuController implements MenuController{
                 }
 
                 Quarry quarry = playerFarm.getQuarry();
-                Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL);
+                Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL, Habitat.HabitatType.Barn);
 
                 if (!foundSpecial && isInHabitat(x, y, quarryHabitat)) {
                     tile.setType(TileType.QUARRY);
@@ -98,7 +101,7 @@ public class MapSelectionMenuController implements MenuController{
                 }
 
                 House house = playerFarm.getHouse();
-                Habitat houseHabitat = new Habitat(house.getX(), house.getY(), house.getWidth(), house.getHeight(), StorageType.INITIAL);
+                Habitat houseHabitat = new Habitat(house.getX(), house.getY(), house.getWidth(), house.getHeight(), StorageType.INITIAL, Habitat.HabitatType.Barn);
                 if (!foundSpecial && isInHabitat(x, y, houseHabitat)) {
                     tile.setType(TileType.HOUSE);
                     tile.setWalkable(true);
@@ -110,7 +113,8 @@ public class MapSelectionMenuController implements MenuController{
                     house.getY() - 1,
                     house.getWidth() + 2,
                     house.getHeight() + 2,
-                    StorageType.INITIAL
+                    StorageType.INITIAL,
+                    Habitat.HabitatType.Barn
                 );
 
                 if (isOnHabitatBorder(x, y, houseWallHabitat, houseHabitat)) {
@@ -130,7 +134,7 @@ public class MapSelectionMenuController implements MenuController{
                     player.setHomeTile(tile);
                 }
                 GreenHouse greenHouse = playerFarm.getGreenHouse();
-                Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight(), StorageType.INITIAL);
+                Habitat greenHouseHabitat = new Habitat(greenHouse.getX(), greenHouse.getY(), greenHouse.getWidth(), greenHouse.getHeight(), StorageType.INITIAL, Habitat.HabitatType.Barn);
                 if (!foundSpecial && isInHabitat(x, y, greenHouseHabitat)) {
                     tile.setType(TileType.GREENHOUSE);
                     tile.setWalkable(false);  // it is false because it is not fixed yet
@@ -143,6 +147,7 @@ public class MapSelectionMenuController implements MenuController{
                     greenHouse.getWidth() + 2,
                     greenHouse.getHeight() + 2,
                     StorageType.INITIAL
+                    , Habitat.HabitatType.Barn
                 );
 
                 if (isOnHabitatBorder(x, y, greenHouseWallHabitat, greenHouseHabitat)) {
@@ -172,7 +177,7 @@ public class MapSelectionMenuController implements MenuController{
         }
 
         Quarry quarry = playerFarm.getQuarry();
-        Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL);
+        Habitat quarryHabitat = new Habitat(quarry.getX(), quarry.getY(), quarry.getWidth(), quarry.getHeight(), StorageType.INITIAL, Habitat.HabitatType.Barn);
         List<Tile> quarryTiles = new ArrayList<>();
 
         for (int y = playerFarm.getY(); y < playerFarm.getY() + playerFarm.getHeight(); y++) {
@@ -229,6 +234,7 @@ public class MapSelectionMenuController implements MenuController{
         player.setCurrentTile(playerFarm.getRandomFarmTile(map));
         System.out.println("You are starting at coordinates " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
     }
+
     public TreeType findTreeBySourceName(String sourceName) {
         for (TreeType tree : TreeType.values()) {
             if (tree.getSource().getName().equalsIgnoreCase(sourceName)) {
@@ -237,6 +243,7 @@ public class MapSelectionMenuController implements MenuController{
         }
         return null;
     }
+
     public Result buildGreenHouse() {
         Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
         if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
@@ -255,7 +262,6 @@ public class MapSelectionMenuController implements MenuController{
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
         return new Result(true, "green house build successful");
     }
-
 
 
     public Result exitGame() {
@@ -282,10 +288,12 @@ public class MapSelectionMenuController implements MenuController{
         app.setCurrentGame(null);
         return new Result(true, "game exited and saved successfully. returning to game menu...");
     }
+
     private ForagingMineralType getRandomForagingMineral() {
         ForagingMineralType[] minerals = ForagingMineralType.values();
         return minerals[new Random().nextInt(minerals.length)];
     }
+
     private TreeType getRandomForagingTree() {
         List<TreeType> valid = Arrays.stream(TreeType.values())
             .filter(TreeType::getIsForagingTree)
@@ -296,6 +304,7 @@ public class MapSelectionMenuController implements MenuController{
         }
         return valid.get(RANDOM.nextInt(valid.size()));
     }
+
     public static Point isCornerAvailable(Tile[][] map, int width, int height) {
         int mapHeight = map.length;
         int mapWidth = map[0].length;
@@ -331,6 +340,7 @@ public class MapSelectionMenuController implements MenuController{
 
         return null;
     }
+
     private ForagingCropType getRandomForagingCropBySeason(Season currentSeason) {
         List<ForagingCropType> valid = Arrays.stream(ForagingCropType.values())
             .filter(crop -> crop.getSeason().contains(currentSeason))
@@ -341,10 +351,12 @@ public class MapSelectionMenuController implements MenuController{
         }
         return valid.get(RANDOM.nextInt(valid.size()));
     }
+
     private boolean isOnHabitatBorder(int x, int y, Habitat wallHabitat, Habitat mainHabitat) {
         // Tile is inside wallHabitat but NOT inside mainHabitat
         return isInHabitat(x, y, wallHabitat) && !isInHabitat(x, y, mainHabitat);
     }
+
     private boolean isInHabitat(int x, int y, Habitat h) {
         return x >= h.getX() && x < h.getX() + h.getWidth()
             && y >= h.getY() && y < h.getY() + h.getHeight();

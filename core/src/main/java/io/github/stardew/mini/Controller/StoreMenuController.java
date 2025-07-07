@@ -457,14 +457,13 @@ public class StoreMenuController {
             }
         }
 
-        if (item.getShopItemType() == ShopItemType.BARN) {
-            farm.getBarn().add(newHabitat);
-        }
-        if (item.getShopItemType() == ShopItemType.CAGE) {
-            farm.getCage().add(newHabitat);
-        }
-
-        map.getFarmByOwner(player).getBarn().add(newHabitat); // You may want to separate barns vs coops by type
+//        if (item.getShopItemType() == ShopItemType.BARN) {
+//            farm.getBarn().add(newHabitat);
+//        }
+//        if (item.getShopItemType() == ShopItemType.CAGE) {
+//            farm.getCage().add(newHabitat);
+//        }
+// You may want to separate barns vs coops by type
         return new Result(true, "Successfully built " + name + " at (" + xCoord + ", " + yCoord + ")");
     }
 
@@ -511,7 +510,7 @@ public class StoreMenuController {
     public boolean isOccupied(int x, int y) {
         MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
         Tile tile = map.getTile(x, y);
-        return tile != null && (
+        return tile != null && tile.isBuildable() && (
                 tile.getContainedGrowable() != null ||
                         tile.getProductOfGrowable() != null ||
                         tile.getContainedItem() != null

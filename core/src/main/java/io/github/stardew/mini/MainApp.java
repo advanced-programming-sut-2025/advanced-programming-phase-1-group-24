@@ -14,6 +14,7 @@ import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
@@ -55,6 +56,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         AnimalType.initTextures();
         TreeAssets.load();
         CropAssets.load();
+        Habitat.HabitatType.initTextures();
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
