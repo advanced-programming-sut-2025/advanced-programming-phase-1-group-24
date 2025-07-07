@@ -99,6 +99,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Habitat buildingToPlace = null;
     private Farm currentFarm = null;
 
+    private final Array<HeartEffect> heartEffects = new Array<>();
+
     public GameView(GameController controller) {
         this.controller = controller;
         storeController = new StoreMenuController();
@@ -417,11 +419,44 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             startPlacingBuilding(buildingToPlace);
             return true;
         }
+         if (keycode == Input.Keys.P) {
+            Animal animal = getAnimalNearPlayer();
+            if (animal != null) {
+                Result Result = controller.petAnimal(animal.getName());
+                    heartEffects.add(new HeartEffect(animal.getCurrentTile().getX() * App.tileWidth,
+                        animal.getTiles().get(0).getY() * App.tileHeight));
+            }
+        }
 
         if (showFullMap) return true;
         return false;
     }
+    private Animal getAnimalNearPlayer() {
+        for (Animal animal : currentPlayer.getOwnedAnimals()) {
 
+        }
+        return null;
+    }
+    private void handleAnimalMovement(Animal animal) {
+        if (animal.getIsAnimalStayOutAllNight()) {
+            Random random = new Random();
+            if (random.nextInt(1, 1000) == 1) {
+                moveAnimal(animal);
+            }
+        }
+    }
+    private void moveAnimal(Animal animal) {
+        Random random = new Random();
+        int dx = random.nextInt(-5, 5);
+        int dy = (int) Math.sqrt(Math.pow(5, 2) - Math.pow(dx, 2));
+        if (random.nextInt() % 2 == 0) dy = -dy;
+        Tile tile = getTileByXAndY(animal.getTiles().get(0).getX() + dx, animal.getTiles().get(0).getY() + dy);
+        if (tile != null && !tile.getIsFilled() &&
+            getPlayerMainFarm(App.getInstance().getCurrentGame().getCurrentPlayer()).getTiles().contains(tile)) {
+            animal.getTiles().get(0).setX(animal.getTiles().get(0).getX() + dx);
+            animal.getTiles().get(0).setY(animal.getTiles().get(0).getY() + dy);
+        }
+    }
     private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -435,27 +470,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-//        if (isPlacingBuilding && !terminalVisible) {
-//            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
-//            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
-//            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
-//
-//            if (tileX >= 0 && tileY >= 0 && tileX < MainApp.getInstance().getCurrentGame().getMap().getWidth() && tileY < MainApp.getInstance().getCurrentGame().getMap().getHeight()) {
-//                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
-//
-//                if (tile != null && tile.isBuildable() && tile.getType()==TileType.FARM) {
-//                    tile.setType(TileType.CAGE);
-//                    //new Building(buildingToPlace)
-//                    isPlacingBuilding = false;
-//                    buildingToPlace = null;
-//                    showErrorDialog(stage, "Building placed!");
-//                    return true;
-//                } else {
-//                    showErrorDialog(stage, "Can't build here. Try another tile.");
-//                }
-//            }
-//            return true;
-//        }
         if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
             Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
@@ -533,10 +547,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                         return true;
                     }
                 }
+                if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
+                    //TODO: open inventory
+                    //TODO: open a very similar dialog to purchase window
+                    //TODO: call storeController.placingInShippingBin
+                }
 
-//                if(){
-//
-//                }
             }
         }
         return false;
@@ -1237,11 +1253,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 );
             }
             for (Habitat cage : farm.getCage()) {
-                int drawX = (cage.getX() - 1) * tileSize;
-                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - cage.getY() - cage.getHeight() - 1) * tileSize;
+                int drawX = (cage.getX()) * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - cage.getY() - cage.getHeight()) * tileSize;
 
-                for (int j = cage.getX() - 1; j < cage.getX() + cage.getWidth() + 1; j++) {
-                    for (int i = cage.getY() - 1; i < cage.getY() + cage.getHeight() + 1; i++) {
+                for (int j = cage.getX() ; j < cage.getX() + cage.getWidth() ; j++) {
+                    for (int i = cage.getY() ; i < cage.getY() + cage.getHeight() ; i++) {
                         batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
                     }
                 }
