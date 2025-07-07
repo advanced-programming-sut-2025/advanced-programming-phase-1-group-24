@@ -29,7 +29,6 @@ public class HeartEffect {
         float alpha = 1f - (time / duration);
         Color old = batch.getColor();
         batch.setColor(1, 1, 1, alpha);
-        //batch.draw(GameAsset.SECRET_HEART, x, y, 32, 32);
         batch.setColor(old);
     }
 }
