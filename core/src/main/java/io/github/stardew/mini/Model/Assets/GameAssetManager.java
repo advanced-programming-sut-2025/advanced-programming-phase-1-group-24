@@ -77,6 +77,8 @@ public class GameAssetManager {
     public static Texture Deluxe_Coop;
     public static Texture Shipping_Bin;
 
+    public static Texture SECRET_HEART ;
+
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
@@ -255,6 +257,7 @@ public class GameAssetManager {
 
         Shipping_Bin = new Texture(Gdx.files.internal("Habitat/Shipping_Bin.png"));
 
+        SECRET_HEART =  new Texture("Heart/Secret_Heart.png");
 
     }
 
@@ -302,6 +305,8 @@ public class GameAssetManager {
         if(Coop != null) Coop.dispose();
         if(Big_Coop != null) Big_Coop.dispose();
         if(Deluxe_Coop != null) Deluxe_Coop.dispose();
+
+        if(SECRET_HEART != null) SECRET_HEART.dispose();
     }
 
     public static Texture getBackground() {

@@ -263,7 +263,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int rows = tiles.length;
         drawTiles(rows, tiles, tileSize);
         drawGreenHouse(tileSize, rows);
-        drawHabitats( tileSize,rows);
+        drawHabitats(tileSize, rows);
 
         //TODO : handle Giant Crop
         //TODO : handle burnt plants
@@ -282,6 +282,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         drawAnimals(rows, tiles, tileSize);
         drawPlayer();
+        // --- DRAW HEART EFFECTS ---
+        Iterator<HeartEffect> iterator = heartEffects.iterator();
+        while (iterator.hasNext()) {
+            HeartEffect effect = iterator.next();
+            effect.update(Gdx.graphics.getDeltaTime());
+            effect.draw(batch);
+            if (effect.isFinished()) {
+                iterator.remove();
+            }
+        }
+
 
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
@@ -419,44 +430,53 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             startPlacingBuilding(buildingToPlace);
             return true;
         }
-         if (keycode == Input.Keys.P) {
+//         if (keycode == Input.Keys.P) {
+//            Animal animal = getAnimalNearPlayer();
+//            if (animal != null) {
+//                Result Result = controller.petAnimal(animal.getName());
+////                    heartEffects.add(new HeartEffect(animal.getCurrentTile().getX() * App.tileWidth,
+////                        animal.getTiles().get(0).getY() * App.tileHeight));
+//            }
+//        }
+        if (keycode == Input.Keys.P) {
             Animal animal = getAnimalNearPlayer();
             if (animal != null) {
-                Result Result = controller.petAnimal(animal.getName());
-                    heartEffects.add(new HeartEffect(animal.getCurrentTile().getX() * App.tileWidth,
-                        animal.getTiles().get(0).getY() * App.tileHeight));
+                Result result = controller.petAnimal(animal.getName());
+                if (result.isSuccessful()) {
+                    Tile tile = animal.getCurrentTile();
+                    Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                    int tileSize = GameAssetManager.TILE_SIZE;
+                    int rows = tiles.length;
+                    float heartX = tile.getX() * tileSize + (tileSize/2);
+                    float heartY = (rows - tile.getY() - 1) * tileSize + (tileSize);
+                    //float drawY = (rows - y - 1) * tileSize + tileSize + 4;
+//                    float heartX = tile.getX() * TILE_SIZE;
+//                    float heartY = tile.getY() * TILE_SIZE + 32;
+                    heartEffects.add(new HeartEffect(heartX, heartY));
+                }
             }
         }
 
         if (showFullMap) return true;
         return false;
     }
-    private Animal getAnimalNearPlayer() {
-        for (Animal animal : currentPlayer.getOwnedAnimals()) {
 
+    private Animal getAnimalNearPlayer() {
+        int playerX = currentPlayer.getCurrentTile().getX();
+        int playerY = currentPlayer.getCurrentTile().getY();
+
+        for (Animal animal : currentPlayer.getOwnedAnimals()) {
+            Tile tile = animal.getCurrentTile();
+            int dx = Math.abs(tile.getX() - playerX);
+            int dy = Math.abs(tile.getY() - playerY);
+            if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
+                return animal;
+            }
         }
         return null;
     }
-    private void handleAnimalMovement(Animal animal) {
-        if (animal.getIsAnimalStayOutAllNight()) {
-            Random random = new Random();
-            if (random.nextInt(1, 1000) == 1) {
-                moveAnimal(animal);
-            }
-        }
-    }
-    private void moveAnimal(Animal animal) {
-        Random random = new Random();
-        int dx = random.nextInt(-5, 5);
-        int dy = (int) Math.sqrt(Math.pow(5, 2) - Math.pow(dx, 2));
-        if (random.nextInt() % 2 == 0) dy = -dy;
-        Tile tile = getTileByXAndY(animal.getTiles().get(0).getX() + dx, animal.getTiles().get(0).getY() + dy);
-        if (tile != null && !tile.getIsFilled() &&
-            getPlayerMainFarm(App.getInstance().getCurrentGame().getCurrentPlayer()).getTiles().contains(tile)) {
-            animal.getTiles().get(0).setX(animal.getTiles().get(0).getX() + dx);
-            animal.getTiles().get(0).setY(animal.getTiles().get(0).getY() + dy);
-        }
-    }
+
+
     private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -1238,8 +1258,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 int drawX = (barn.getX()) * tileSize;
                 int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - barn.getY() - barn.getHeight()) * tileSize;
 
-                for (int j = barn.getX() ; j < barn.getX() + barn.getWidth() ; j++) {
-                    for (int i = barn.getY() ; i < barn.getY() + barn.getHeight() ; i++) {
+                for (int j = barn.getX(); j < barn.getX() + barn.getWidth(); j++) {
+                    for (int i = barn.getY(); i < barn.getY() + barn.getHeight(); i++) {
                         batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
                     }
                 }
@@ -1256,8 +1276,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 int drawX = (cage.getX()) * tileSize;
                 int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - cage.getY() - cage.getHeight()) * tileSize;
 
-                for (int j = cage.getX() ; j < cage.getX() + cage.getWidth() ; j++) {
-                    for (int i = cage.getY() ; i < cage.getY() + cage.getHeight() ; i++) {
+                for (int j = cage.getX(); j < cage.getX() + cage.getWidth(); j++) {
+                    for (int i = cage.getY(); i < cage.getY() + cage.getHeight(); i++) {
                         batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
                     }
                 }
@@ -1274,7 +1294,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             for (int y = 0; y < rows; y++) {
                 for (int x = 0; x < tiles[0].length; x++) {
                     Tile tile = tiles[y][x];
-                    if (tile != null && tile.getType()==TileType.SHIPPINGBIN) {
+                    if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
                         batch.draw(TileType.FARM.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                         batch.draw(GameAssetManager.Shipping_Bin, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                     }
