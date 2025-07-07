@@ -457,28 +457,28 @@ public class MapOfGame {
 
         // Barn upgrades
         items.add(new ShopItem("Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.INITIAL),
+                new Habitat(0, 0, 4, 3, StorageType.INITIAL, Habitat.HabitatType.Barn),
                 ShopItemType.BARN, 6000, 6000, 6000, 6000));
 
         items.add(new ShopItem("Big Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.BIG),
+                new Habitat(0, 0, 4, 3, StorageType.BIG, Habitat.HabitatType.Big_Barn),
                 ShopItemType.BARN, 12000, 12000, 12000, 12000));
 
         items.add(new ShopItem("Deluxe Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.DELUX),
+                new Habitat(0, 0, 4, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Barn),
                 ShopItemType.BARN, 25000, 25000, 25000, 25000));
 
         // Coop upgrades
         items.add(new ShopItem("Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.INITIAL),
+                new Habitat(0, 0, 3, 3, StorageType.INITIAL, Habitat.HabitatType.CAGE),
                 ShopItemType.CAGE, 4000, 4000, 4000, 4000));
 
         items.add(new ShopItem("Big Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.BIG),
+                new Habitat(0, 0, 3, 3, StorageType.BIG,Habitat.HabitatType.Big_Cage),
                 ShopItemType.CAGE, 10000, 10000, 10000, 10000));
 
         items.add(new ShopItem("Deluxe Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.DELUX),
+                new Habitat(0, 0, 3, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Cage),
                 ShopItemType.CAGE, 20000, 20000, 20000, 20000));
 
         // Other buildings

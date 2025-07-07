@@ -7,6 +7,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -113,7 +114,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         setCameraPosition();
         camera.update();
         Gdx.input.setInputProcessor(this);
-        showErrorDialog(stage, "Select a tile inside your farm to build a ");
+        showErrorDialog(stage, "Select a tile inside your farm to build");
         //+ building.getDisplayName());
     }
 
@@ -260,8 +261,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int rows = tiles.length;
         drawTiles(rows, tiles, tileSize);
         drawGreenHouse(tileSize, rows);
+        drawHabitats( tileSize,rows);
 
-         //TODO : handle Giant Crop
+        //TODO : handle Giant Crop
         //TODO : handle burnt plants
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -410,7 +412,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
         if (keycode == Input.Keys.X) {
             showFullMap = false;  // ✅ disable full map so farm zoom works
-            buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL);
+            buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL, Habitat.HabitatType.Barn);
             isPlacingBuilding = true;
             startPlacingBuilding(buildingToPlace);
             return true;
@@ -459,23 +461,39 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
             int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
 
-            if (tileX >= currentFarm.getX() && tileX < currentFarm.getX() + currentFarm.getWidth() &&
-                tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight()) {
+            if (isInsideFarm(tileX, tileY)) {
 
                 Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+
                 if (tile != null && tile.isBuildable()) {
-                    tile.setType(TileType.CAGE);
-                    //setBuilding(new Building(buildingToPlace));
-                    showErrorDialog(stage, "Building placed!");
-                    isPlacingBuilding = false;
-                    buildingToPlace = null;
-                    currentFarm = null;
+                    if (buildingToPlace == null || storeController.isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
+                        Result result;
+                        if (buildingToPlace == null) {
+                            result = storeController.buyFromCarpenter("Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+                        } else {
+                            buildingToPlace.setX(tileX);
+                            buildingToPlace.setY(tileY);
+                            result = storeController.buyFromCarpenter(buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+                        }
+                        if (result.isSuccessful()) {
+                            //updateHabitatTiles();
+                            showErrorDialog(stage, "Building placed!");
+                        } else {
+                            showErrorDialog(stage, result.message());
+                        }
+                    } else {
+                        showErrorDialog(stage, "Building doesnt fit here!");
+                    }
                 } else {
                     showErrorDialog(stage, "Tile is not buildable.");
                 }
             } else {
                 showErrorDialog(stage, "Please click inside your farm.");
             }
+            //setBuilding(new Building(buildingToPlace));
+            isPlacingBuilding = false;
+            buildingToPlace = null;
+            currentFarm = null;
             return true;
         }
 
@@ -524,6 +542,28 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         return false;
     }
 
+    public void updateHabitatTiles() {
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        for (int y = buildingToPlace.getY(); y < buildingToPlace.getY() + buildingToPlace.getHeight(); y++) {
+            for (int x = buildingToPlace.getX(); x < buildingToPlace.getX() + buildingToPlace.getWidth(); x++) {
+                Tile tile = tiles[y][x];
+                if (tile != null) {
+                    if (buildingToPlace.getHabitatType() == Habitat.HabitatType.Barn ||
+                        buildingToPlace.getHabitatType() == Habitat.HabitatType.Big_Barn ||
+                        buildingToPlace.getHabitatType() == Habitat.HabitatType.Deluxe_Barn) {
+                        tile.setType(TileType.BARN);
+                    } else {
+                        tile.setType(TileType.CAGE);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isInsideFarm(int tileX, int tileY) {
+        return tileX >= currentFarm.getX() && tileX < currentFarm.getX() + currentFarm.getWidth() &&
+            tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight();
+    }
 
 //    private void setCameraPosition() {
 //        if (showFullMap) {
@@ -788,8 +828,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         selectedShopItem = item;
-                        purchaseQuantity = 1;
-                        showPurchaseDialog();
+                        if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
+                            || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
+                            showFullFarm(item);
+                        } else {
+                            purchaseQuantity = 1;
+                            showPurchaseDialog();
+                        }
                         shopMenuDialog.hide();
                     }
                 });
@@ -826,6 +871,14 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         Gdx.input.setInputProcessor(stage);
     }
 
+    public void showFullFarm(ShopItem item) {
+        showFullMap = false;  // ✅ disable full map so farm zoom works
+        if (item.getShopItemType() != ShopItemType.SHIPPING_BIN) {
+            buildingToPlace = (Habitat) item.getItem();
+        }
+        isPlacingBuilding = true;
+        startPlacingBuilding(buildingToPlace);
+    }
 
     private void showPurchaseDialog() {
         shopPurchaseDialog.clear();
@@ -1160,6 +1213,58 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 8 * tileSize,
                 7 * tileSize
             );
+        }
+    }
+
+    private void drawHabitats(int tileSize, int rows) {
+        for (Farm farm : MainApp.getInstance().getCurrentGame().getMap().getFarms()) {
+            for (Habitat barn : farm.getBarn()) {
+                int drawX = (barn.getX()) * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - barn.getY() - barn.getHeight()) * tileSize;
+
+                for (int j = barn.getX() ; j < barn.getX() + barn.getWidth() ; j++) {
+                    for (int i = barn.getY() ; i < barn.getY() + barn.getHeight() ; i++) {
+                        batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+                Texture texture = barn.getHabitatType().getTexture();
+                batch.draw(
+                    texture,
+                    drawX,
+                    drawY,
+                    barn.getWidth() * tileSize,
+                    barn.getHeight() * tileSize
+                );
+            }
+            for (Habitat cage : farm.getCage()) {
+                int drawX = (cage.getX() - 1) * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - cage.getY() - cage.getHeight() - 1) * tileSize;
+
+                for (int j = cage.getX() - 1; j < cage.getX() + cage.getWidth() + 1; j++) {
+                    for (int i = cage.getY() - 1; i < cage.getY() + cage.getHeight() + 1; i++) {
+                        batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+                Texture texture = cage.getHabitatType().getTexture();
+                batch.draw(
+                    texture,
+                    drawX,
+                    drawY,
+                    cage.getWidth() * tileSize,
+                    cage.getHeight() * tileSize
+                );
+            }
+            Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < tiles[0].length; x++) {
+                    Tile tile = tiles[y][x];
+                    if (tile != null && tile.getType()==TileType.SHIPPINGBIN) {
+                        batch.draw(TileType.FARM.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                        batch.draw(GameAssetManager.Shipping_Bin, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+
         }
     }
 

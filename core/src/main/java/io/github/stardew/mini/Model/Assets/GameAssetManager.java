@@ -68,6 +68,14 @@ public class GameAssetManager {
     public static Texture Goat_Texture;
     public static Texture Dinosaur_Texture;
     public static Texture Sheep_Texture;
+    //Habitat Textures
+    public static Texture Barn;
+    public static Texture Big_Barn;
+    public static Texture Deluxe_Barn;
+    public static Texture Coop;
+    public static Texture Big_Coop;
+    public static Texture Deluxe_Coop;
+    public static Texture Shipping_Bin;
 
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
@@ -191,7 +199,6 @@ public class GameAssetManager {
         );
 
 
-
         customWindow.titleFontColor = Color.GOLD;
         skin.add("custom-window", customWindow);
 
@@ -238,6 +245,17 @@ public class GameAssetManager {
         Goat_Texture = new Texture(Gdx.files.internal("Animals/Goat.png"));
         Dinosaur_Texture = new Texture(Gdx.files.internal("Animals/Dinosaur.png"));
         Sheep_Texture = new Texture(Gdx.files.internal("Animals/Sheep.png"));
+
+        Barn = new Texture(Gdx.files.internal("Habitat/Barn.png"));
+        Big_Barn = new Texture(Gdx.files.internal("Habitat/Big_Barn.png"));
+        Deluxe_Barn = new Texture(Gdx.files.internal("Habitat/Deluxe_Barn.png"));
+        Coop = new Texture(Gdx.files.internal("Habitat/Coop.png"));
+        Big_Coop = new Texture(Gdx.files.internal("Habitat/Big_Coop.png"));
+        Deluxe_Coop = new Texture(Gdx.files.internal("Habitat/Deluxe_Coop.png"));
+
+        Shipping_Bin = new Texture(Gdx.files.internal("Habitat/Shipping_Bin.png"));
+
+
     }
 
     public static void dispose() {
@@ -269,6 +287,7 @@ public class GameAssetManager {
     }
 
     private static void disposeAnimals() {
+
         if (White_Chicken_Texture != null) White_Chicken_Texture.dispose();
         if (White_Cow_Texture != null) White_Cow_Texture.dispose();
         if (Duck_Texture != null) Duck_Texture.dispose();
@@ -276,6 +295,13 @@ public class GameAssetManager {
         if (Rabbit_Texture != null) Rabbit_Texture.dispose();
         if (Goat_Texture != null) Goat_Texture.dispose();
         if (Dinosaur_Texture != null) Dinosaur_Texture.dispose();
+
+        if(Barn != null) Barn.dispose();
+        if(Big_Barn != null) Big_Barn.dispose();
+        if(Deluxe_Barn != null) Deluxe_Barn.dispose();
+        if(Coop != null) Coop.dispose();
+        if(Big_Coop != null) Big_Coop.dispose();
+        if(Deluxe_Coop != null) Deluxe_Coop.dispose();
     }
 
     public static Texture getBackground() {
