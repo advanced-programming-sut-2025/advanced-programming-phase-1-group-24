@@ -20,6 +20,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -42,6 +45,7 @@ import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.Tools.Tool;
+import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 
@@ -66,10 +70,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
 
     private boolean showToolsMenu = false;
-    private boolean  showInventoryMenu = false;
+    private boolean showInventoryMenu = false;
+    private boolean showBackpackMenu = false;
     private BitmapFont smallFont;
     private int selectedSlot = 0;
     private Table toolMenuTable;
+    private Table inventoryMenuTable;
+    private Table backpackMenuTable;
     public static float toolUsageStateTime = 0f;
     public static boolean isToolBeingUsed = false;
 
@@ -92,12 +99,45 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ESCAPE) {
+            if (showBackpackMenu) {
+                showBackpackMenu = false;
+                backpackMenuTable.setVisible(false);
+                inventoryMenuTable.setVisible(true);
+                showInventoryMenu = true;
+            } else {
+                showInventoryMenu = !showInventoryMenu;
+                if (inventoryMenuTable != null) {
+                    inventoryMenuTable.setVisible(showInventoryMenu);
+
+                    if (showInventoryMenu) {
+                        showToolsMenu = false;
+                        if (toolMenuTable != null) toolMenuTable.setVisible(false);
+                        // showBackpackMenu is handled above for direct close
+                        if (friendsDialog != null && friendsDialog.getStage() != null) {
+                            friendsDialog.hide();
+                            friendsDialog = null;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
         if (keycode == Input.Keys.M) {
-            showFullMap = !showFullMap;  // toggle map mode
-            setCameraPosition();         // update camera immediately
+            if (showInventoryMenu) {
+                showFullMap = !showFullMap;
+                setCameraPosition();
+                showInventoryMenu = false;
+                if (inventoryMenuTable != null) inventoryMenuTable.setVisible(false);
+                return true;
+            }
+            if (showBackpackMenu) return false;
+            showFullMap = !showFullMap;
+            setCameraPosition();
             return true;
         }
         if (keycode == Input.Keys.T) {
+            if (showInventoryMenu || showBackpackMenu) return false;
             showToolsMenu = !showToolsMenu;
             selectedSlot = 0;
             if (toolMenuTable != null) {
@@ -105,13 +145,42 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
             return true;
         }
+        if (showBackpackMenu) { // Handle selection movement in backpack
+            int totalItems = currentPlayer.getBackpack().getInventoryItems().size();
+            int maxItemsPerRow = 6;
+
+            if (keycode == Input.Keys.LEFT) {
+                selectedSlot--;
+                if (selectedSlot < 0) selectedSlot = totalItems - 1;
+                return true;
+            }
+            if (keycode == Input.Keys.RIGHT) {
+                selectedSlot++;
+                if (selectedSlot >= totalItems) selectedSlot = 0;
+                return true;
+            }
+            if (keycode == Input.Keys.UP) {
+                selectedSlot -= maxItemsPerRow;
+                if (selectedSlot < 0) selectedSlot = Math.max(0, totalItems - 1);
+                return true;
+            }
+            if (keycode == Input.Keys.DOWN) {
+                selectedSlot += maxItemsPerRow;
+                if (selectedSlot >= totalItems)
+                    selectedSlot = Math.min(totalItems - 1, selectedSlot % maxItemsPerRow); // Wrap to first row, maintaining column
+                return true;
+            }
+        }
         if (keycode == Input.Keys.LEFT && showToolsMenu) {
+            if (showInventoryMenu || showBackpackMenu) return false;
             selectedSlot--;
         }
         if (keycode == Input.Keys.RIGHT && showToolsMenu) {
+            if (showInventoryMenu || showBackpackMenu) return false;
             selectedSlot++;
         }
         if (keycode == Input.Keys.C && showToolsMenu) {
+            if (showInventoryMenu || showBackpackMenu) return false;
             Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(mousePos);
             useSelectedTool(mousePos.x, mousePos.y);
@@ -119,6 +188,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (keycode == Input.Keys.F) {
+            if (showInventoryMenu || showBackpackMenu) return false;
             Tile[][] map = mapOfGame.getMap();
             for (int i = 0; i < map.length; i++) {
                 for (int j = 0; j < map[0].length; j++) {
@@ -131,6 +201,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (keycode == Input.Keys.N) {
+            if (showInventoryMenu || showBackpackMenu) return false;
 //            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
 //            controller.handleEndOfDay();
             System.out.println(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
@@ -138,6 +209,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (showFullMap) return true;
+        if (showInventoryMenu || showBackpackMenu) return false;
 
         int x = currentPlayer.getCurrentTile().getX();
         int y = currentPlayer.getCurrentTile().getY();
@@ -190,31 +262,49 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public boolean touchDown(int i, int i1, int i2, int i3) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.touchDown(i, i1, i2, i3);
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int i, int i1, int i2, int i3) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.touchUp(i, i1, i2, i3);
+        }
         return false;
     }
 
     @Override
     public boolean touchCancelled(int i, int i1, int i2, int i3) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.touchCancelled(i, i1, i2, i3);
+        }
         return false;
     }
 
     @Override
     public boolean touchDragged(int i, int i1, int i2) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.touchDragged(i, i1, i2);
+        }
         return false;
     }
 
     @Override
     public boolean mouseMoved(int i, int i1) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.mouseMoved(i, i1);
+        }
         return false;
     }
 
     @Override
     public boolean scrolled(float v, float v1) {
+        if (showInventoryMenu || showBackpackMenu) {
+            return stage.scrolled(v, v1);
+        }
         return false;
     }
 
@@ -248,7 +338,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         toolMenuTable.setVisible(showToolsMenu);
         stage.addActor(toolMenuTable);
 
-        Timer.schedule(new Timer.Task(){
+        Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
                 MainApp.getInstance().getCurrentGame().advanceTimeByOneHour();
@@ -256,6 +346,81 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
         }, 5, 5);
+
+        inventoryMenuTable = new Table(GameAssetManager.skin);
+        inventoryMenuTable.setWidth(Gdx.graphics.getWidth() * 0.4f);
+        inventoryMenuTable.setHeight(Gdx.graphics.getHeight() * 0.6f);
+        inventoryMenuTable.setPosition(
+            (Gdx.graphics.getWidth() - inventoryMenuTable.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - inventoryMenuTable.getHeight()) / 2
+        );
+        inventoryMenuTable.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+
+        TextButton inventoryBtn = new TextButton("Inventory", GameAssetManager.skin, "custom-button");
+        inventoryBtn.setColor(Color.LIME);
+        TextButton skillsBtn = new TextButton("Skills", GameAssetManager.skin, "custom-button");
+        skillsBtn.setColor(Color.CORAL);
+        TextButton socialBtn = new TextButton("Social", GameAssetManager.skin, "custom-button");
+        socialBtn.setColor(Color.OLIVE);
+        TextButton missionsBtn = new TextButton("Missions", GameAssetManager.skin, "custom-button");
+        missionsBtn.setColor(Color.TEAL);
+        TextButton mapBtn = new TextButton("Map", GameAssetManager.skin, "custom-button");
+        mapBtn.setColor(Color.YELLOW);
+
+        inventoryBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showBackpack();
+            }
+        });
+        skillsBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        socialBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        missionsBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+            }
+        });
+        mapBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showFullMap = !showFullMap;
+                setCameraPosition();
+                showInventoryMenu = false;
+                if (inventoryMenuTable != null) inventoryMenuTable.setVisible(false);
+            }
+        });
+
+        float buttonPad = 10f;
+        float buttonWidth = 250f;
+        float buttonHeight = 60f;
+
+        inventoryMenuTable.add(inventoryBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+        inventoryMenuTable.add(skillsBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+        inventoryMenuTable.add(socialBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+        inventoryMenuTable.add(missionsBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+        inventoryMenuTable.add(mapBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+
+        inventoryMenuTable.setVisible(false);
+        stage.addActor(inventoryMenuTable);
+
+        backpackMenuTable = new Table(GameAssetManager.skin);
+        backpackMenuTable.setWidth(Gdx.graphics.getWidth() * 0.4f);
+        backpackMenuTable.setHeight(Gdx.graphics.getHeight() * 0.6f);
+        backpackMenuTable.setPosition(
+            (Gdx.graphics.getWidth() - backpackMenuTable.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - backpackMenuTable.getHeight()) / 2
+        );
+        backpackMenuTable.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+        backpackMenuTable.setVisible(false);
+        stage.addActor(backpackMenuTable);
 
     }
 
@@ -457,6 +622,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public void resize(int i, int i1) {
         camera.setToOrtho(false, i, i1);
         camera.update();
+        stage.getViewport().update(i, i1, true);
     }
 
     @Override
@@ -593,7 +759,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
 
         for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            if(player.getUsername().equals(friend.getUsername())) {
+            if (player.getUsername().equals(friend.getUsername())) {
                 continue;
             }
             Table row = new Table();
@@ -634,11 +800,28 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
 
     private void handleInput() {
+        /// ///////////////////////////////////////////////////////
+        if (showInventoryMenu || showBackpackMenu) {
+        }
+        /// /////////////////////////////////////////////////////////
+
         if (Gdx.input.justTouched()) {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             stage.getCamera().unproject(touchPos); // convert to stage coords
             float mouseX = touchPos.x;
             float mouseY = touchPos.y;
+
+            /// ////////////////////////////////////////////////////////////////////////////
+            // Prevent game world clicks if any menu is active, unless it's the friends button which is always allowed (for now)
+            if (showInventoryMenu || showBackpackMenu) {
+                // If a menu is open, only allow clicks on stage actors (handled by stage.touchDown etc.)
+                // and explicitly check if friends button is clicked, as it's separate from other menus.
+                if (isClickInside(mouseX, mouseY, friendsButton)) {
+                    toggleFriendsDialog();
+                }
+                return;
+            }
+            /// /////////////////////////////////////////////////////////////////////////////
 
             if (isClickInside(mouseX, mouseY, friendsButton)) {
                 toggleFriendsDialog();
@@ -681,7 +864,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private void updateToolsMenuTable() {
         toolMenuTable.clearChildren();
 
-        if (!showToolsMenu) {
+        if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+            if (toolMenuTable != null) toolMenuTable.setVisible(false);
             return;
         }
 
@@ -704,8 +888,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         float slotImageSize = GameAssetManager.TILE_SIZE * 1.0f;
         float labelPad = 2f;
 
-        if (selectedSlot >= tools.size()) { selectedSlot = 0;}
-        if (selectedSlot < 0) { selectedSlot = tools.size() - 1;}
+        if (selectedSlot >= tools.size()) {
+            selectedSlot = 0;
+        }
+        if (selectedSlot < 0) {
+            selectedSlot = tools.size() - 1;
+        }
 
         for (int i = 0; i < tools.size(); i++) {
             Stack slotStack = new Stack();
@@ -764,7 +952,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
     private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
-        if (!showToolsMenu) {
+        if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+            if (toolMenuTable != null) toolMenuTable.setVisible(false);
             return;
         }
 
@@ -837,6 +1026,159 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         } else {
             return 1; // Right
         }
+    }
+
+    private void showBackpack() {
+        inventoryMenuTable.setVisible(false);
+        showInventoryMenu = false;
+
+        backpackMenuTable.clearChildren();
+
+        Backpack backpack = currentPlayer.getBackpack();
+        Map<Item, Integer> items = backpack.getInventoryItems();
+        int totalSlots = backpack.getMaxSize();
+
+        Table itemsContainer = new Table(GameAssetManager.skin);
+        itemsContainer.center();
+        itemsContainer.pad(10);
+
+        float slotSize = GameAssetManager.TILE_SIZE;
+        float itemImageSize = slotSize * 0.8f;
+        float labelOffset = 5f;
+
+        ArrayList<Item> sortedItems = new ArrayList<>(items.keySet());
+
+        int currentSlotIndex = 0;
+
+        for (Item item : sortedItems) {
+            Integer count = items.get(item);
+            if (count == null || count <= 0) continue;
+
+            Stack itemSlotStack = new Stack();
+
+            Image slotBg = new Image(InventoryAssets.slot);
+            slotBg.setSize(slotSize, slotSize);
+            itemSlotStack.add(slotBg);
+
+            Texture itemTex = null;  //fix later
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(itemImageSize, itemImageSize);
+                itemImage.setOrigin(itemImage.getWidth() / 2, itemImage.getHeight() / 2);
+                itemSlotStack.add(itemImage);
+            } else {
+                Gdx.app.error("GameView", "Texture for item " + item.getName() + " is null!");
+            }
+
+            Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+            Container<Label> labelContainer = new Container<>(countLabel);
+            labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
+            labelContainer.padRight(labelOffset);
+            labelContainer.padBottom(labelOffset);
+            labelContainer.fill();
+            itemSlotStack.add(labelContainer);
+
+            if (currentSlotIndex == selectedSlot) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotSize, slotSize);
+                itemSlotStack.add(highlightImage);
+            }
+
+            itemsContainer.add(itemSlotStack).size(slotSize).pad(5);
+
+            currentSlotIndex++;
+
+            if (currentSlotIndex % 6 == 0) {
+                itemsContainer.row();
+            }
+        }
+
+        for (int i = sortedItems.size(); i < totalSlots; i++) {
+            Stack emptySlotStack = new Stack();
+            Image slotBg = new Image(InventoryAssets.slot);
+            slotBg.setSize(slotSize, slotSize);
+            emptySlotStack.add(slotBg);
+
+            if (currentSlotIndex == selectedSlot) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotSize, slotSize);
+                emptySlotStack.add(highlightImage);
+            }
+
+            itemsContainer.add(emptySlotStack).size(slotSize).pad(5);
+            currentSlotIndex++;
+            if (currentSlotIndex % 6 == 0) {
+                itemsContainer.row();
+            }
+        }
+
+        if (selectedSlot >= currentSlotIndex) {
+            selectedSlot = Math.max(0, currentSlotIndex - 1);
+        }
+        if (currentSlotIndex == 0) {
+            selectedSlot = -1;
+        }
+
+        ScrollPane scrollPane = new ScrollPane(itemsContainer, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+
+        backpackMenuTable.padTop(20f);
+        backpackMenuTable.row();
+        backpackMenuTable.add(scrollPane).expand().fill().row();
+
+        TextButton trashcanButton = new TextButton("", GameAssetManager.skin, "custom-button");
+        trashcanButton.setSize(slotSize, slotSize);
+        trashcanButton.setColor(Color.DARK_GRAY);
+        TrashCan trashcan = backpack.getTrashcan();
+        String textureOrigin = trashcan.getMaterial().name().toUpperCase() + trashcan.getType().name().toUpperCase();
+        Texture trashcanTex = InventoryAssets.getToolTexture(textureOrigin);
+        if (trashcanTex != null) {
+            Image trashcanImage = new Image(trashcanTex);
+            trashcanButton.clearChildren();
+            trashcanButton.add(trashcanImage).expand().fill().center();
+        } else {
+            trashcanButton.setText("TRASH");
+            Gdx.app.error("GameView", "Trashcan texture is null. Using text fallback.");
+        }
+
+        trashcanButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Trashcan button clicked!");
+                if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                    Item itemToTrash = sortedItems.get(selectedSlot);
+                    trashcan.useTrashCan(itemToTrash, 1);
+                    showBackpack();
+                } else {
+                    System.out.println("No item selected to trash.");
+                }
+            }
+        });
+
+        Table controlButtonsTable = new Table();
+        controlButtonsTable.defaults().pad(10);
+
+        TextButton backButton = new TextButton("Back", GameAssetManager.skin, "custom-button");
+        backButton.setColor(Color.RED);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                System.out.println("Back button clicked!");
+                showBackpackMenu = false;
+                backpackMenuTable.setVisible(false);
+                inventoryMenuTable.setVisible(true);
+                showInventoryMenu = true;
+                selectedSlot = 0;
+            }
+        });
+        controlButtonsTable.add(backButton).width(100).height(40);
+        controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
+
+        backpackMenuTable.add(controlButtonsTable).bottom().center().row();
+
+        backpackMenuTable.setVisible(true);
+        showBackpackMenu = true;
     }
 
 }

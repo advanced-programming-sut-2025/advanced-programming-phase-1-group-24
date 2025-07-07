@@ -27,6 +27,7 @@ public class InventoryAssets {
 
     public static Texture slot;
     public static Texture highlightedSlot;
+    public static Texture inventoryMenuBackground;
     public static Texture InitialHOE;
     public static Texture CopperHOE;
     public static Texture IronHOE;
@@ -38,14 +39,19 @@ public class InventoryAssets {
     public static Texture InitialFISHINGPOLE;
     public static Texture InitialSCYTHE;
     public static Texture InitialMILKPAIL;
-    public static Texture InitialTRASHCAN;
     public static Texture InitialSHEAR;
+    public static Texture InitialTRASHCAN;
+    public static Texture CopperTRASHCAN;
+    public static Texture IronTRASHCAN;
+    public static Texture GoldTRASHCAN;
+    public static Texture IridiumTRASHCAN;
 
     public static final Map<String, Texture> toolMap = new HashMap<>();
 
     public static void load() {
-        slot = new Texture(Gdx.files.internal("game/tiles/slot.png"));
-        highlightedSlot = new Texture(Gdx.files.internal("game/tiles/highlight.png"));
+        slot = new Texture(Gdx.files.internal("NewInventory/slot.jpg"));
+        highlightedSlot = new Texture(Gdx.files.internal("NewInventory/highlight.png"));
+        inventoryMenuBackground = new Texture(Gdx.files.internal("NewInventory/inventoryMenu.png"));
         InitialHOE = new Texture(Gdx.files.internal("Hoe/Hoe.png"));
         CopperHOE = new Texture(Gdx.files.internal("Hoe/Copper_Hoe.png"));
         IronHOE = new Texture(Gdx.files.internal("Hoe/Steel_Hoe.png"));
@@ -59,6 +65,10 @@ public class InventoryAssets {
         InitialSHEAR = new Texture(Gdx.files.internal("Tools/Shears.png"));
         InitialWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Watering_Can.png"));
         InitialTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
+        CopperTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Copper.png"));
+        IronTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
+        GoldTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Gold.png"));
+        IridiumTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Iridium.png"));
         toolMap.put("INITIALHOE", InitialHOE);
         toolMap.put("COPPERHOE", CopperHOE);
         toolMap.put("IRONHOE", IronHOE);
@@ -71,6 +81,10 @@ public class InventoryAssets {
         toolMap.put("INITIALSCYTHE", InitialSCYTHE);
         toolMap.put("INITIALMILKPAIL", InitialMILKPAIL);
         toolMap.put("INITIALTRASHCAN", InitialTRASHCAN);
+        toolMap.put("COPPERTRASHCAN", CopperTRASHCAN);
+        toolMap.put("IRONTRASHCAN", IronTRASHCAN);
+        toolMap.put("GOLDTRASHCAN", GoldTRASHCAN);
+        toolMap.put("IRIDIUMTRASHCAN", IridiumTRASHCAN);
         toolMap.put("INITIALSHEAR", InitialSHEAR);
 
         Texture toolUsage1 = new Texture(Gdx.files.internal("Tools/use/1.png"));
@@ -83,6 +97,7 @@ public class InventoryAssets {
     public static void dispose() {
         if (slot != null) slot.dispose();
         if (highlightedSlot != null) highlightedSlot.dispose();
+        if (inventoryMenuBackground != null) inventoryMenuBackground.dispose();
         disposeToolTextures();
     }
 
@@ -104,6 +119,10 @@ public class InventoryAssets {
         if (InitialSCYTHE != null) InitialSCYTHE.dispose();
         if (InitialMILKPAIL != null) InitialMILKPAIL.dispose();
         if (InitialTRASHCAN != null) InitialTRASHCAN.dispose();
+        if (CopperTRASHCAN != null) CopperTRASHCAN.dispose();
+        if (IronTRASHCAN != null) IronTRASHCAN.dispose();
+        if (GoldTRASHCAN != null) GoldTRASHCAN.dispose();
+        if (IridiumTRASHCAN != null) IridiumTRASHCAN.dispose();
         if (InitialSHEAR != null) InitialSHEAR.dispose();
 
         if (toolMap != null) {
