@@ -18,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
@@ -25,9 +27,6 @@ public class GameAssetManager {
     public static Texture menuBackground;
 
     public static final int TILE_SIZE = 100;
-
-    public static TextureAtlas playerAtlas;
-    public static final ArrayList<Animation<TextureRegion>> playerAnimations = new ArrayList<>();
 
     // Textures for tiles (load later)
     public static Texture LIGHT_GREEN_FLOOR;
@@ -55,8 +54,13 @@ public class GameAssetManager {
     public static TextureRegion[] dropFrames = new TextureRegion[11];
     public static Animation<TextureRegion> dropAnimation;
     public static Texture crowSheet;
-    public static TextureRegion[] crowFrames = new TextureRegion[5];
+    public static TextureRegion[] crowFrames;
     public static Animation<TextureRegion> crowAnimation;
+
+    public static Texture CLOCK_ALL;
+    public static TextureRegion CLOCK_MAIN;
+    public static TextureRegion CLOCK_ARROW;
+    public static TextureRegion[] ClOCK_MANNERS = new TextureRegion[12];
 
 
     // Animals initial textures
@@ -76,6 +80,19 @@ public class GameAssetManager {
     public static Texture Big_Coop;
     public static Texture Deluxe_Coop;
     public static Texture Shipping_Bin;
+    public static BitmapFont customFont;
+    public static Texture abigailTexture;
+    public static TextureRegion[][] abigailFrames;
+    public static ArrayList<Animation<TextureRegion>> abigailAnimations = new ArrayList<>();
+    public static Texture alexTexture;
+    public static TextureRegion[][] alexFrames;
+    public static ArrayList<Animation<TextureRegion>> alexAnimations = new ArrayList<>();
+    public static Texture haleyTexture;
+    public static TextureRegion[][] haleyFrames;
+    public static ArrayList<Animation<TextureRegion>> haleyAnimations = new ArrayList<>();
+    public static Texture shaneTexture;
+    public static TextureRegion[][] shaneFrames;
+    public static ArrayList<Animation<TextureRegion>> shaneAnimations = new ArrayList<>();
 
     public static Texture SECRET_HEART ;
 
@@ -119,38 +136,14 @@ public class GameAssetManager {
 
         dropAnimation = new Animation<>(0.05f, dropFrames);
         dropAnimation.setPlayMode(Animation.PlayMode.NORMAL);
-        playerAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
+        crowSheet = new Texture("Birds.png"); // renamed file accordingly
+        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 16, 16);
 
-        for (int i = 14; i > 9; i--) {
-            Array<TextureRegion> walkFrames = new Array<>();
-            if (i == 14) {
-                for (int j = 0; j < 4; j++) {
-                    String region = "player_" + 13 + "_" + 0;
-                    walkFrames.add(playerAtlas.findRegion(region));
-                }
-            } else {
-                for (int j = 0; j < 4; j++) {
-                    String region = "player_" + i + "_" + j;
-                    walkFrames.add(playerAtlas.findRegion(region));
-                }
-            }
-            playerAnimations.add(new Animation<>(0.15f, walkFrames, Animation.PlayMode.LOOP));
-        }
-        // NEW: Load petting animation (assuming frames are named "player_pet_0_0" to "player_pet_0_3")
-        Array<TextureRegion> petFrames = new Array<>();
-        for (int j = 0; j < 4; j++) {
-            String region = "player_pet_0_" + j;  // Format: "player_pet_[row]_[frame]"
-            petFrames.add(playerAtlas.findRegion(region));
-        }
-        Animation<TextureRegion> petAnim = new Animation<>(0.15f, petFrames, Animation.PlayMode.NORMAL); // PlayMode.NORMAL for one-time playback
-        playerAnimations.add(petAnim);  // Add to your animations list
-        crowSheet = new Texture("Crow.png");
-        TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 32, 32);
+        crowFrames = new TextureRegion[2];
 
-        crowFrames = new TextureRegion[7];
-        for (int i = 0; i < 7; i++) {
-            crowFrames[i] = tmp1[2][i]; // row 2 = third row (index 2)
-        }
+        crowFrames[0] = tmp1[4][2];
+        crowFrames[1] = tmp1[4][3];
+
         crowAnimation = new Animation<>(0.1f, crowFrames);
 
         loadAnimals();
@@ -162,6 +155,36 @@ public class GameAssetManager {
         pixmap.fill();
         pixel = new Texture(pixmap);
         pixmap.dispose();
+
+        loadClock();
+
+        loadPlayer();
+    }
+
+    private static void loadPlayer() {
+        alexTexture = new Texture(Gdx.files.internal("game/character/Alex.png"));
+        haleyTexture = new Texture(Gdx.files.internal("game/character/Haley.png"));
+        shaneTexture = new Texture(Gdx.files.internal("game/character/Shane.png"));
+        abigailTexture = new Texture(Gdx.files.internal("game/character/Abigail.png"));
+
+        alexFrames = TextureRegion.split(alexTexture, 16, 32);
+        haleyFrames = TextureRegion.split(haleyTexture, 16, 32);
+        shaneFrames = TextureRegion.split(shaneTexture, 16, 32);
+        abigailFrames = TextureRegion.split(abigailTexture, 16, 32);
+
+        alexAnimations = generatePlayerAnimations(alexFrames, 0);
+        haleyAnimations = generatePlayerAnimations(haleyFrames, 1);
+        shaneAnimations = generatePlayerAnimations(shaneFrames, 0);
+        abigailAnimations = generatePlayerAnimations(abigailFrames, 0);
+    }
+
+    private static void loadClock() {
+        CLOCK_ALL = new Texture("Clock/Clock_All.png");
+        CLOCK_MAIN = new TextureRegion(CLOCK_ALL, 0, 0, 72, 59);
+        CLOCK_ARROW = new TextureRegion(CLOCK_ALL, 72, 0, 8, 18);
+        for (int i = 0; i < 12; i++) {
+            ClOCK_MANNERS[i] = new TextureRegion(CLOCK_ALL, 80 + i % 4 * 13, i / 4 * 9, 13, 9);
+        }
     }
 
     private static void createCustomStyles() {
@@ -174,7 +197,7 @@ public class GameAssetManager {
         skin.add("default", buttonStyle);
 
         //creating custom font
-        BitmapFont customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
+        customFont = new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
         skin.add("custom-font", customFont);
 
         // Create custom-Label
@@ -199,11 +222,8 @@ public class GameAssetManager {
             baseStyle.titleFontColor,
             baseStyle.background
         );
-
-
         customWindow.titleFontColor = Color.GOLD;
         skin.add("custom-window", customWindow);
-
 
         // Create another button style with custom font
         TextButton.TextButtonStyle buttonStyle2 = new TextButton.TextButtonStyle();
@@ -312,4 +332,33 @@ public class GameAssetManager {
     public static Texture getBackground() {
         return menuBackground;
     }
+
+    public enum Direction {
+        DOWN, RIGHT, LEFT, UP
+    }
+
+    public static ArrayList<Animation<TextureRegion>> generatePlayerAnimations(TextureRegion[][] miniTextures, int offset) {
+        ArrayList<Animation<TextureRegion>> animations = new ArrayList<Animation<TextureRegion>>();
+
+        Map<Direction, Integer> directions = new HashMap<Direction, Integer>();
+        directions.put(Direction.LEFT, 1 + offset);
+        directions.put(Direction.RIGHT, offset);
+        directions.put(Direction.DOWN, 3 + offset);
+        directions.put(Direction.UP, 2 + offset);
+        for (Direction direction : Direction.values()) {
+            int row = directions.get(direction);
+            Animation<TextureRegion> animation = new Animation<TextureRegion>(
+                0.1f,
+                miniTextures[row][1],
+                miniTextures[row][2],
+                miniTextures[row][3],
+                miniTextures[row][0]
+            );
+            animations.add(animation);
+        }
+
+        return animations;
+    }
+
+
 }

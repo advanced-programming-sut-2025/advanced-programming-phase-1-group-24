@@ -7,7 +7,6 @@ import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;;
 
 ;
-
 public class Tile {
     private TileType type;
     private boolean isWalkable;
@@ -27,31 +26,24 @@ public class Tile {
     public TileType getType() {
         return type;
     }
-
     public Item getContainedItem() {
         return containedItem;
     }
-
     public Growable getContainedGrowable() {
         return containedGrowable;
     }
-
-    public boolean getisWalkable() {
+    public boolean getisWalkable(){
         return isWalkable;
     }
-
     public Growable getProductOfGrowable() {
         return productOfGrowable;
     }
-
     public String getTileOwner() {
         return tileOwner;
     }
-
     public boolean getIsPlowed() {
         return isPlowed;
     }
-
     public boolean isHasBeenBurt() {
         return hasBeenBurt;
     }
@@ -67,7 +59,6 @@ public class Tile {
     public int getX() {
         return x;
     }
-
     public int getY() {
         return y;
     }
@@ -83,23 +74,18 @@ public class Tile {
     public void setWalkable(boolean isWalkable) {
         this.isWalkable = isWalkable;
     }
-
     public void setType(TileType type) {
         this.type = type;
     }
-
     public void setContainedItem(Item containedItem) {
         this.containedItem = containedItem;
     }
-
     public void setContainedGrowable(Growable containedGrowable) {
         this.containedGrowable = containedGrowable;
     }
-
     public void setProductOfGrowable(Growable productOfGrowable) {
         this.productOfGrowable = productOfGrowable;
     }
-
     public void setTileOwner(String tileOwner) {
         this.tileOwner = tileOwner;
     }

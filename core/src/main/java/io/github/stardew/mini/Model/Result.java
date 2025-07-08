@@ -11,5 +11,9 @@ public record Result(boolean isSuccessful, String message) {
     public String toString() {
         return message;
     }
+
+    public String getMessage() {
+        return message;
+    }
 }
 
