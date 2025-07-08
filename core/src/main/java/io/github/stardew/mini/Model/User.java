@@ -2,25 +2,17 @@ package io.github.stardew.mini.Model;
 
 
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
-import io.github.stardew.mini.Model.Reccepies.Craft;
-import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Tools.Tool;
-import io.github.stardew.mini.Model.Tools.ToolType;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Growables.*;
@@ -621,21 +613,21 @@ public class User {
             return new Result(false, "You cant eat this item!");
         else if (item instanceof Food) {
             addEnergy(((Food) item).getEnergy());
-            if (item.getName().equals(FoodType.TripleShotEspresso.getName())) {
+            if (item.getName().equals(FoodType.Triple_Shot_Espresso.getName())) {
                 cancelAllBuffs();
                 this.maxEnergy = 300;
                 this.energy += 100;
                 this.hoursLeftForBuff = 5;
                 this.buffMaxEnergy = true;
             }
-            else if (item.getName().equals(FoodType.RedPlate.getName())) {
+            else if (item.getName().equals(FoodType.Red_Plate.getName())) {
                 cancelAllBuffs();
                 this.maxEnergy = 250;
                 this.energy += 50;
                 this.hoursLeftForBuff = 3;
                 this.buffMaxEnergy = true;
             }
-            else if (item.getName().equals(FoodType.HashBrown.getName())) {
+            else if (item.getName().equals(FoodType.Hashbrowns.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 5;
                 this.buffFarmingSkill = true;
@@ -645,28 +637,28 @@ public class User {
                 this.hoursLeftForBuff = 11;
                 this.buffForagingSkill = true;
             }
-            else if (item.getName().equals(FoodType.SurvivalBurger.getName())) {
+            else if (item.getName().equals(FoodType.Survival_Burger.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 5;
                 this.buffForagingSkill = true;
             }
-            else if (item.getName().equals(FoodType.FarmersLaunch.getName())) {
+            else if (item.getName().equals(FoodType.Farmers_Lunch.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 5;
                 this.buffFarmingSkill = true;
             }
-            else if (item.getName().equals(FoodType.DishOtheSea.getName())) {
+            else if (item.getName().equals(FoodType.Dish_O_The_Sea.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 5;
                 this.buffFishingSkill = true;
 
             }
-            else if (item.getName().equals(FoodType.SeaformPudding.getName())) {
+            else if (item.getName().equals(FoodType.Seafoam_Pudding.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 10;
                 this.buffFishingSkill = true;
             }
-            else if (item.getName().equals(FoodType.MinersTreat.getName())) {
+            else if (item.getName().equals(FoodType.Miners_Treat.getName())) {
                 cancelAllBuffs();
                 this.hoursLeftForBuff = 5;
                 this.buffMiningSkill = true;

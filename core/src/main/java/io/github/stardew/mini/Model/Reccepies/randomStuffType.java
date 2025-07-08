@@ -1,12 +1,13 @@
 package io.github.stardew.mini.Model.Reccepies;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.Growables.SourceType;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum randomStuffType {
-        WheatFlower("Wheat Flower", 125,0,0,Map.of(),false),
+        WheatFlower("Wheat Flour", 125,0,0,Map.of(),false),
         Sugar("Sugar",125,0,0,Map.of(),false),
         Rice("Rice",250,0,0,Map.of(),false),
         Fiber("Fiber",200,0,0,Map.of(),false),
@@ -19,12 +20,12 @@ public enum randomStuffType {
         Goat_Cheese("Goat Cheese",400,100,3,Map.of("Goat Milk",1),true),
         Beer("Beer",200,50,24,Map.of("Wheat",1),true),
         Vinegar("Vinegar",100,13,10,Map.of("Rice",1),true),
-        Coffee("Coffee",150,75,2, Map.of("Coffee Beans",5),true),
+        Coffee("Coffee",150,75,2, Map.of("Coffee Bean",5),true),
         Juice("Juice",225,80,96,Map.of("Orange",1),true),
         Mead("Mead",300,100,10,Map.of("Honey",1),true),
         Pale_Ale("Pale Ale",300,50,72,Map.of("Hops",1),true),
         Wine("Wine",240,80,168,Map.of("Grapes",1),true),
-        Dried_Mushroom("Dried Mushroom",325,50,10,Map.of("Common Mushroom",5),true),
+        Dried_Mushroom("Dried Mushrooms",325,50,10,Map.of("Common Mushroom",5),true),
         Dried_Fruit("Dried Fruit",350,75,10,Map.of("Apricot",5),true),
         Raisins("Raisins",600,125,10,Map.of("Grapes",5),true),
         Cloth("Cloth",470,0,4,Map.of("Wool",1),false),
@@ -58,6 +59,7 @@ public enum randomStuffType {
         private final int processingTime;
         private final Map<String ,Integer> ingredients;
         private final Boolean isEatable;
+        private Texture texture;
 
         randomStuffType(String name, int sellPrice, int energy, int processingTime,
                         Map<String ,Integer> ingredients, Boolean isEatable) {
@@ -101,4 +103,33 @@ public enum randomStuffType {
                 }
                 return null;
         }
+
+        public Texture getTexture() { return texture; }
+
+    public void initTexture() {
+        String correctedName = this.name.replace(" ", "_");
+        String[] texturePaths = {
+            "Artisan_good/",
+            "Special_item/",
+            "Concessions/",
+            "Crafting/",
+            "Farming/",
+            "Crops/",
+            "game/tiles/",
+            "Ingredient/",
+            "Fish/",
+            "Fertilizer/"
+        };
+
+        for (String path : texturePaths) {
+            try {
+                this.texture = new Texture(path + correctedName + ".png");
+                return;
+            } catch (Exception e) {
+                // Continue to the next path if loading fails
+            }
+        }
+
+        System.err.println("Failed to load texture for: " + this.name + " from any known path.");
+    }
 }
