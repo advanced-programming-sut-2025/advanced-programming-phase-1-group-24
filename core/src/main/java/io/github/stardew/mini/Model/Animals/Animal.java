@@ -8,6 +8,10 @@ import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Things.ProductQuality;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class Animal {
     private  String name;
     private final AnimalType animalType;
@@ -20,10 +24,19 @@ public class Animal {
     private AnimalProduct product = null;
     private int daysLeftToProduce;
 
-    private Vector2 position;       // pixel position on screen
-    private Vector2 targetPosition; // where it's moving to
-    private float moveSpeed = 100f; // pixels per second
-    private boolean isMoving = true;
+    private float movementCooldown = 0f;
+    private final float MOVE_INTERVAL = 5f; // or set via constructor for customization
+
+    private Queue<Tile> pathToTarget = new LinkedList<>();
+    private Tile movingFrom = null;
+    private Tile movingTo = null;
+    private float moveProgress = 0f; // 0.0 -> 1.0
+    private float moveSpeed = 2f; // tiles per second
+
+//    private Vector2 position;       // pixel position on screen
+//    private Vector2 targetPosition; // where it's moving to
+//    private float moveSpeed = 100f; // pixels per second
+//    private boolean isMoving = true;
 
     public Animal(String name, AnimalType animalType) {
         this.name = name;
@@ -31,7 +44,6 @@ public class Animal {
         this.currentTile = null;
         this.livingPlace = null;
         this.daysLeftToProduce = animalType.getDaysToProduce();
-
     }
 
     public void pet() {
@@ -136,19 +148,19 @@ public class Animal {
         return currentTile;
     }
 
-//    public void setCurrentTile(Tile currentTile) {
-//        this.currentTile = currentTile;
-//    }
-    public void setCurrentTile(Tile tile) {
-        this.currentTile = tile;
-
-        int tileSize = GameAssetManager.TILE_SIZE;
-        int drawX = tile.getX() * tileSize;
-        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize;
-
-        if (position == null) position = new Vector2(drawX, drawY);
-        if (targetPosition == null) targetPosition = new Vector2(drawX, drawY);
+    public void setCurrentTile(Tile currentTile) {
+        this.currentTile = currentTile;
     }
+//    public void setCurrentTile(Tile tile) {
+//        this.currentTile = tile;
+//
+//        int tileSize = GameAssetManager.TILE_SIZE;
+//        int drawX = tile.getX() * tileSize;
+//        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize;
+//
+//        if (position == null) position = new Vector2(drawX, drawY);
+//        if (targetPosition == null) targetPosition = new Vector2(drawX, drawY);
+//    }
 
     public Habitat getLivingPlace() {
         return livingPlace;
@@ -208,36 +220,57 @@ public class Animal {
 
         return copy;
     }
-
-    public Vector2 getPosition() {
-        return position;
-    }
-
-    public void setPosition(Vector2 position) {
-        this.position = position;
-    }
-
-    public Vector2 getTargetPosition() {
-        return targetPosition;
-    }
-
-    public void setTargetPosition(Vector2 targetPosition) {
-        this.targetPosition = targetPosition;
-    }
-
-    public float getMoveSpeed() {
-        return moveSpeed;
-    }
-
-    public void setMoveSpeed(float moveSpeed) {
-        this.moveSpeed = moveSpeed;
-    }
-
     public boolean isMoving() {
-        return isMoving;
+        return movingTo != null;
     }
 
-    public void setMoving(boolean moving) {
-        isMoving = moving;
+    public void startMove(Tile from, Tile to) {
+        this.movingFrom = from;
+        this.movingTo = to;
+        this.moveProgress = 0f;
     }
+
+    public void updateMovement(float delta) {
+        if (movingTo != null) {
+            moveProgress += moveSpeed * delta;
+            if (moveProgress >= 1f) {
+                moveProgress = 0f;
+                currentTile.setContainedAnimal(null);
+                currentTile = movingTo;
+                currentTile.setContainedAnimal(this);
+                movingFrom = null;
+                movingTo = null;
+
+                if (!pathToTarget.isEmpty()) {
+                    startMove(currentTile, pathToTarget.poll());
+                }
+            }
+        }
+    }
+
+    public void setPathToTarget(List<Tile> path) {
+        this.pathToTarget.clear();
+        this.pathToTarget.addAll(path);
+        if (!this.pathToTarget.isEmpty()) {
+            startMove(currentTile, this.pathToTarget.poll());
+        }
+    }
+
+    public Tile getMovingFrom() { return movingFrom; }
+    public Tile getMovingTo() { return movingTo; }
+    public float getMoveProgress() { return moveProgress; }
+
+
+    public float getMovementCooldown() {
+        return movementCooldown;
+    }
+
+    public void reduceCooldown(float delta) {
+        movementCooldown -= delta;
+    }
+
+    public void resetCooldown() {
+        movementCooldown = MOVE_INTERVAL;
+    }
+
 }

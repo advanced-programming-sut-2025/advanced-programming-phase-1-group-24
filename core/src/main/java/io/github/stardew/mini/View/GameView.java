@@ -101,8 +101,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Habitat buildingToPlace = null;
     private Farm currentFarm = null;
 
-    private float animalMoveCooldown = 0f;
-
     private final Array<HeartEffect> heartEffects = new Array<>();
 
     public GameView(GameController controller) {
@@ -177,7 +175,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         float zoomY = (float) farm.getHeight() * GameAssetManager.TILE_SIZE / camera.viewportHeight;
         camera.zoom = Math.max(zoomX, zoomY);
     }
-
 
     @Override
     public void show() {
@@ -366,40 +363,251 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
-    private void updateAnimals(float delta) {
-        animalMoveCooldown -= delta;
+//    private void updateAnimals(float delta) {
+//        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//            for (Animal animal : player.getOwnedAnimals()) {
+//                animal.updateMovement(delta);
+//            }
+//        }
+//
+//        animalMoveCooldown -= delta;
+//        if (animalMoveCooldown <= 0f) {
+//            for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//                for (Animal animal : player.getOwnedAnimals()) {
+//                    if (!animal.isMoving() && animal.isInHabitat()) {
+//                        List<Tile> path = generateStepwisePath(animal);
+//
+//                        // ✅ Add Euclidean distance check here
+//                        if (!path.isEmpty()) {
+//                            Tile first = animal.getCurrentTile();
+//                            Tile last = path.get(path.size() - 1);
+//
+//                            double distance = Math.sqrt(Math.pow(first.getX() - last.getX(), 2) +
+//                                Math.pow(first.getY() - last.getY(), 2));
+//                            if (distance > 5) {
+//                                path.clear(); // Invalid path; ignore
+//                            }
+//                        }
+//
+//                        // ✅ Only assign valid paths
+//                        if (!path.isEmpty()) {
+//                            animal.setPathToTarget(path);
+//                        }
+//                    }
+//                }
+//            }
+//            animalMoveCooldown = 5f;
+//        }
+//    }
+private void updateAnimals(float delta) {
+    for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+        for (Animal animal : player.getOwnedAnimals()) {
+            animal.updateMovement(delta);
 
-        // Step 1: initiate a move every 3 seconds
-        if (animalMoveCooldown <= 0f) {
-            for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-                for (Animal animal : player.getOwnedAnimals()) {
-                    if (animal.isInHabitat() && !animal.isMoving()) {
-                        moveAnimal(animal); // initiate a new move
+            // Only try to assign a new path if animal is not moving
+            // and its personal cooldown allows it
+            if (!animal.isMoving() && animal.isInHabitat()) {
+                animal.reduceCooldown(delta);
+
+                if (animal.getMovementCooldown() <= 0f) {
+                    List<Tile> path = generateStepwisePath(animal);
+
+                    // ✅ Check Euclidean distance
+                    if (!path.isEmpty()) {
+                        Tile first = animal.getCurrentTile();
+                        Tile last = path.get(path.size() - 1);
+                        double distance = Math.sqrt(Math.pow(first.getX() - last.getX(), 2) +
+                            Math.pow(first.getY() - last.getY(), 2));
+                        if (distance > 5) {
+                            path.clear(); // Ignore
+                        }
                     }
-                }
-            }
-            animalMoveCooldown = 3f;
-        }
 
-        // Step 2: smooth transition toward target position (already correct)
-        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            for (Animal animal : player.getOwnedAnimals()) {
-                if (animal.isMoving()) {
-                    Vector2 pos = animal.getPosition();
-                    Vector2 target = animal.getTargetPosition();
-                    float speed = animal.getMoveSpeed() * delta;
-
-                    if (pos.dst(target) < speed) {
-                        pos.set(target);
-                        animal.setMoving(false);
-                    } else {
-                        Vector2 direction = new Vector2(target).sub(pos).nor();
-                        pos.add(direction.scl(speed));
+                    if (!path.isEmpty()) {
+                        animal.setPathToTarget(path);
+                        animal.resetCooldown(); // reset after assigning path
                     }
                 }
             }
         }
     }
+}
+
+
+    //    private void updateAnimals(float delta) {
+//        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//            for (Animal animal : player.getOwnedAnimals()) {
+//                animal.updateMovement(delta);
+//            }
+//        }
+//
+//        animalMoveCooldown -= delta;
+//        if (animalMoveCooldown <= 0f) {
+//            for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//                for (Animal animal : player.getOwnedAnimals()) {
+//                    if (!animal.isMoving() && animal.isInHabitat()) {
+//                        List<Tile> path = generateStepwisePath(animal);
+//                        animal.setPathToTarget(path);
+//                    }
+//                }
+//            }
+//            animalMoveCooldown = 5f;
+//        }
+//    }
+//    private List<Tile> generateStepwisePath(Animal animal) {
+//        List<Tile> path = new ArrayList<>();
+//        Tile current = animal.getCurrentTile();
+//        Random random = new Random();
+//
+//        int maxSteps = 5;
+//        for (int i = 0; i < maxSteps; i++) {
+//            int dx = random.nextInt(-1, 2);
+//            int dy = random.nextInt(-1, 2);
+//            if (dx == 0 && dy == 0) continue;
+//
+//            int nx = current.getX() + dx;
+//            int ny = current.getY() + dy;
+//
+//            Tile next = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
+//            if (next != null && next.isBuildable() && next.getContainedAnimal() == null) {
+//                path.add(next);
+//                current = next;
+//            }
+//        }
+//        return path;
+//    }
+    private List<Tile> generateStepwisePath(Animal animal) {
+        Tile start = animal.getCurrentTile();
+        Tile target = findRandomTargetTileWithinDistance(start, 5);
+        if (target == null) return new ArrayList<>();
+
+        return findShortestPath(start, target, 5);
+    }
+    private Tile findRandomTargetTileWithinDistance(Tile start, int maxDistance) {
+        List<Tile> candidates = new ArrayList<>();
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+
+        for (int dx = -maxDistance; dx <= maxDistance; dx++) {
+            for (int dy = -maxDistance; dy <= maxDistance; dy++) {
+                int nx = start.getX() + dx;
+                int ny = start.getY() + dy;
+                double distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > maxDistance || distance == 0) continue;
+
+                Tile candidate = map.getTile(nx, ny);
+                if (candidate != null && candidate.isBuildable() &&
+                    candidate.getContainedAnimal() == null) {
+                    candidates.add(candidate);
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) return null;
+
+        return candidates.get(new Random().nextInt(candidates.size()));
+    }
+    private List<Tile> findShortestPath(Tile start, Tile goal, int maxSteps) {
+        Queue<Tile> queue = new LinkedList<>();
+        Map<Tile, Tile> cameFrom = new HashMap<>();
+        Set<Tile> visited = new HashSet<>();
+
+        queue.add(start);
+        visited.add(start);
+        cameFrom.put(start, null);
+
+        while (!queue.isEmpty()) {
+            Tile current = queue.poll();
+
+            if (current.equals(goal)) break;
+
+            for (Tile neighbor : getWalkableNeighbors(current)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    cameFrom.put(neighbor, current);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        // Reconstruct path
+        List<Tile> path = new LinkedList<>();
+        Tile step = goal;
+        while (step != null && !step.equals(start)) {
+            path.add(0, step);
+            step = cameFrom.get(step);
+        }
+
+        if (path.size() > maxSteps) return new ArrayList<>();
+        return path;
+    }
+    private List<Tile> getWalkableNeighbors(Tile tile) {
+        List<Tile> neighbors = new ArrayList<>();
+        int[][] directions = { {1,0}, {-1,0}, {0,1}, {0,-1} }; // 4-directional
+
+        for (int[] dir : directions) {
+            int nx = tile.getX() + dir[0];
+            int ny = tile.getY() + dir[1];
+            Tile neighbor = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
+            if (neighbor != null && neighbor.isBuildable() && neighbor.getContainedAnimal() == null) {
+                neighbors.add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+
+
+//    private void updateAnimals(float delta) {
+//        animalMoveCooldown -= delta;
+//
+//        // Step 1: initiate a move every 3 seconds
+//        if (animalMoveCooldown <= 0f) {
+//            for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//                for (Animal animal : player.getOwnedAnimals()) {
+//                    if (animal.isInHabitat()) {
+//                        moveAnimal(animal); // initiate a new move
+//                    }
+//                }
+//            }
+//            animalMoveCooldown = 3f;
+//        }
+//    }
+//        private void updateAnimals(float delta) {
+//        animalMoveCooldown -= delta;
+//
+//        // Step 1: initiate a move every 3 seconds
+//        if (animalMoveCooldown <= 0f) {
+//            for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//                for (Animal animal : player.getOwnedAnimals()) {
+//                    if (animal.isInHabitat() && !animal.isMoving()) {
+//                        moveAnimal(animal); // initiate a new move
+//                    }
+//                }
+//            }
+//            animalMoveCooldown = 3f;
+//        }
+//
+//        // Step 2: smooth transition toward target position (already correct)
+//        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//            for (Animal animal : player.getOwnedAnimals()) {
+//                if (animal.isMoving()) {
+//                    Vector2 pos = animal.getPosition();
+//                    Vector2 target = animal.getTargetPosition();
+//                    float speed = animal.getMoveSpeed() * delta;
+//
+//                    if (pos.dst(target) < speed) {
+//                        pos.set(target);
+//                        animal.setMoving(false);
+//                    } else {
+//                        Vector2 direction = new Vector2(target).sub(pos).nor();
+//                        pos.add(direction.scl(speed));
+//                    }
+//                }
+//            }
+//        }
+//    }
 //    private void updateAnimals(float delta) {
 ////        animalMoveCooldown -= delta;
 ////        if (animalMoveCooldown > 0) return;
@@ -461,27 +669,27 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
 
-//        if (newTile != null) {
-//            currentTile.setContainedAnimal(null);
-//            animal.setCurrentTile(newTile);
-//            newTile.setContainedAnimal(animal);
-//        }
         if (newTile != null) {
             currentTile.setContainedAnimal(null);
             animal.setCurrentTile(newTile);
             newTile.setContainedAnimal(animal);
-
-            // Update target position for animation
-            int tileSize = GameAssetManager.TILE_SIZE;
-            int drawX = newTile.getX() * tileSize;
-            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - newTile.getY() - 1) * tileSize;
-            animal.setTargetPosition(new Vector2(drawX, drawY));
-            animal.setMoving(true);
         }
+//        if (newTile != null) {
+//            currentTile.setContainedAnimal(null);
+//            animal.setCurrentTile(newTile);
+//            newTile.setContainedAnimal(animal);
+//
+//            // Update target position for animation
+//            int tileSize = GameAssetManager.TILE_SIZE;
+//            int drawX = newTile.getX() * tileSize;
+//            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - newTile.getY() - 1) * tileSize;
+//            animal.setTargetPosition(new Vector2(drawX, drawY));
+//            animal.setMoving(true);
+//        }
 
     }
 
-    private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
+//    private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
 //        for (int y = 0; y < rows; y++) {
 //            for (int x = 0; x < tiles[0].length; x++) {
 //                Tile tile = tiles[y][x];
@@ -490,13 +698,40 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //                }
 //            }
 //        }
+////        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+////            for (Animal animal : player.getOwnedAnimals()) {
+////                Vector2 pos = animal.getPosition();
+////                batch.draw(animal.getAnimalType().getTexture(), pos.x, pos.y, tileSize, tileSize );
+////            }
+////        }
+//    }
+
+    private void drawAnimals(int rows, Tile[][] tiles, int tileSize) {
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             for (Animal animal : player.getOwnedAnimals()) {
-                Vector2 pos = animal.getPosition();
-                batch.draw(animal.getAnimalType().getTexture(), pos.x, pos.y, tileSize, tileSize );
+                float x, y;
+
+                if (animal.isMoving()) {
+                    Tile from = animal.getMovingFrom();
+                    Tile to = animal.getMovingTo();
+                    float p = animal.getMoveProgress();
+
+                    x = MathUtils.lerp(from.getX(), to.getX(), p) * tileSize;
+                    y = MathUtils.lerp(
+                        rows - from.getY() - 1,
+                        rows - to.getY() - 1,
+                        p
+                    ) * tileSize;
+                } else {
+                    x = animal.getCurrentTile().getX() * tileSize;
+                    y = (rows - animal.getCurrentTile().getY() - 1) * tileSize;
+                }
+
+                batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
             }
         }
     }
+
 //    private void handleAnimalMovement(Animal animal) {
 //        //if (animal.getIsAnimalStayOutAllNight()) {
 //        Random random = new Random();
@@ -581,9 +816,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
         if (keycode == Input.Keys.X) {
             showFullMap = false;  // ✅ disable full map so farm zoom works
-            buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL, Habitat.HabitatType.Barn);
-            isPlacingBuilding = true;
-            startPlacingBuilding(buildingToPlace);
+           // buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL, Habitat.HabitatType.Barn);
+            isPlacingBuilding = !isPlacingBuilding;
+            //startPlacingBuilding(buildingToPlace);
             return true;
         }
 //         if (keycode == Input.Keys.P) {
