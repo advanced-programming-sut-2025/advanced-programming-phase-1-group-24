@@ -7,14 +7,20 @@ import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import io.github.stardew.mini.Controller.*;
+import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Assets.CropAssets;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.ShopAssets;
+import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Places.Habitat;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
@@ -56,7 +62,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         AnimalType.initTextures();
         TreeAssets.load();
         CropAssets.load();
+        InventoryAssets.load();
+        TileType.initTextures();
         Habitat.HabitatType.initTextures();
+        ShopAssets.load();
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
@@ -74,6 +83,15 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         for(ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
             foragingMineralType.initTexture();
+        }
+        for(MachineType machineType : MachineType.values()) {
+            machineType.initTexture();
+        }
+        for(io.github.stardew.mini.Model.Reccepies.randomStuffType randomStuffType : randomStuffType.values()) {
+            randomStuffType.initTexture();
+        }
+        for(AnimalProductType animalProductType : AnimalProductType.values()) {
+            animalProductType.initTexture();
         }
 
         // Set initial screen
@@ -150,6 +168,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         GameAssetManager.dispose();
         TreeAssets.dispose();
         CropAssets.dispose();
+        InventoryAssets.dispose();
+        ShopAssets.dispose();
         batch.dispose();
         loggedInUser.getOwnedAnimals().clear();
         //saveGameData();

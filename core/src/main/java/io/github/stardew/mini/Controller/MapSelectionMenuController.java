@@ -264,6 +264,7 @@ public class MapSelectionMenuController implements MenuController {
     }
 
 
+
     public Result exitGame() {
         MainApp app = MainApp.getInstance();
         User currentUser = app.getLoggedInUser();
