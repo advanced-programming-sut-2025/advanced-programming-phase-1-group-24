@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Controller;
 
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Avatar;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Game;
@@ -29,6 +30,10 @@ public class NewGameMenuController implements MenuController{
     public void setView(NewGameMenuView view) {
         this.view = view;
     }
+    private static final Avatar[] FEMALE_AVATARS = {Avatar.Abigail, Avatar.Haley};
+    private static final Avatar[] MALE_AVATARS = {Avatar.Shane, Avatar.Alex};
+
+    private static final Random random = new Random();
 
     public Result createGame(String users) {
         MainApp app = MainApp.getInstance();
@@ -72,6 +77,12 @@ public class NewGameMenuController implements MenuController{
 
         for (User player : players) {
             player.updateGameFields(); // whatever this does
+            if(player.isGender()){
+                player.setAvatar(FEMALE_AVATARS[random.nextInt(FEMALE_AVATARS.length)]);
+            }
+            else{
+                player.setAvatar(MALE_AVATARS[random.nextInt(MALE_AVATARS.length)]);
+            }
         }
 
         Game newGame = new Game(players, creator, creator);

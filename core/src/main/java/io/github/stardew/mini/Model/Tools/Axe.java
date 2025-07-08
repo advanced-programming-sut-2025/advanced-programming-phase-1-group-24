@@ -44,6 +44,7 @@ public class Axe extends Tool {
             //}
             nextTile.setProductOfGrowable(null);
             nextTile.setContainedGrowable(null);
+            nextTile.setWalkable(true);
             currentPlayer.addSkillExperience(Skill.FORAGING);
             return new Result(true, "The tree was cut successfully.");
         }
