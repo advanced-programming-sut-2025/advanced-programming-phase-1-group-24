@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Model.Animals;
 
 
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.Queue;
 
 public class Animal {
-    private  String name;
+    private String name;
     private final AnimalType animalType;
     private Tile currentTile;
     private Habitat livingPlace;
@@ -24,19 +25,13 @@ public class Animal {
     private AnimalProduct product = null;
     private int daysLeftToProduce;
 
+    //new fields added
     private float movementCooldown = 0f;
-    private final float MOVE_INTERVAL = 5f; // or set via constructor for customization
-
     private Queue<Tile> pathToTarget = new LinkedList<>();
     private Tile movingFrom = null;
     private Tile movingTo = null;
     private float moveProgress = 0f; // 0.0 -> 1.0
     private float moveSpeed = 2f; // tiles per second
-
-//    private Vector2 position;       // pixel position on screen
-//    private Vector2 targetPosition; // where it's moving to
-//    private float moveSpeed = 100f; // pixels per second
-//    private boolean isMoving = true;
 
     public Animal(String name, AnimalType animalType) {
         this.name = name;
@@ -60,18 +55,34 @@ public class Animal {
         }
     }
 
+//    public void endOfDayUpdate() {
+//        // in controller update the sleptOutSide
+//        //if (!isInHabitat()) sleptOutside = true;
+//        if (!fedToday) friendship -= 20;
+//        if (!isInHabitat) friendship -= 20;
+//        if (!pettedToday) friendship -= 10;
+//        //(200 / Math.max(friendship, 1)); ?????????
+//        if (friendship <= 0) friendship = 0;
+//
+//        fedToday = false;
+//        pettedToday = false;
+//        //isInHabitat = false;
+//    }
     public void endOfDayUpdate() {
-        // in controller update the sleptOutSide
-        //if (!isInHabitat()) sleptOutside = true;
         if (!fedToday) friendship -= 20;
         if (!isInHabitat) friendship -= 20;
         if (!pettedToday) friendship -= 10;
-        //(200 / Math.max(friendship, 1)); ?????????
-        if (friendship <= 0) friendship = 0;
+        if (friendship < 0) friendship = 0;
 
         fedToday = false;
         pettedToday = false;
-        //isInHabitat = false;
+
+        // Reset movement state if animals sleep at night
+        pathToTarget.clear();
+        movingFrom = null;
+        movingTo = null;
+        moveProgress = 0f;
+        movementCooldown = 0f; // Optional
     }
 
     public void updateProductEndDay() {
@@ -139,7 +150,7 @@ public class Animal {
         int habitatWidth = livingPlace.getWidth();
         int habitatHeight = livingPlace.getHeight();
         isInHabitat = (tileX >= habitatX && tileX < habitatX + habitatWidth &&
-                tileY >= habitatY && tileY < habitatY + habitatHeight);
+            tileY >= habitatY && tileY < habitatY + habitatHeight);
         return isInHabitat;
     }
 
@@ -151,16 +162,6 @@ public class Animal {
     public void setCurrentTile(Tile currentTile) {
         this.currentTile = currentTile;
     }
-//    public void setCurrentTile(Tile tile) {
-//        this.currentTile = tile;
-//
-//        int tileSize = GameAssetManager.TILE_SIZE;
-//        int drawX = tile.getX() * tileSize;
-//        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize;
-//
-//        if (position == null) position = new Vector2(drawX, drawY);
-//        if (targetPosition == null) targetPosition = new Vector2(drawX, drawY);
-//    }
 
     public Habitat getLivingPlace() {
         return livingPlace;
@@ -220,6 +221,7 @@ public class Animal {
 
         return copy;
     }
+
     public boolean isMoving() {
         return movingTo != null;
     }
@@ -256,9 +258,17 @@ public class Animal {
         }
     }
 
-    public Tile getMovingFrom() { return movingFrom; }
-    public Tile getMovingTo() { return movingTo; }
-    public float getMoveProgress() { return moveProgress; }
+    public Tile getMovingFrom() {
+        return movingFrom;
+    }
+
+    public Tile getMovingTo() {
+        return movingTo;
+    }
+
+    public float getMoveProgress() {
+        return moveProgress;
+    }
 
 
     public float getMovementCooldown() {
@@ -270,7 +280,7 @@ public class Animal {
     }
 
     public void resetCooldown() {
-        movementCooldown = MOVE_INTERVAL;
+        movementCooldown = (3f + MathUtils.random(2f));
     }
 
 }
