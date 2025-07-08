@@ -44,12 +44,14 @@ public class Axe extends Tool {
             //}
             nextTile.setProductOfGrowable(null);
             nextTile.setContainedGrowable(null);
+            nextTile.setWalkable(true);
             currentPlayer.addSkillExperience(Skill.FORAGING);
             return new Result(true, "The tree was cut successfully.");
         }
         else if(nextTile.getContainedItem() != null && nextTile.getContainedItem() instanceof randomStuff &&
                 ((randomStuff) nextTile.getContainedItem()).getType() == randomStuffType.Wood) {
             nextTile.setContainedItem(null);
+            nextTile.setWalkable(true);
             return new Result(true, "The woods on the ground have been destroyed.");
         }
 

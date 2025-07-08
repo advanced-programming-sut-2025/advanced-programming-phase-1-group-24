@@ -14,6 +14,9 @@ import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 
 import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class FishingPole extends Tool {
     FishingPoleMaterial poleMaterial;

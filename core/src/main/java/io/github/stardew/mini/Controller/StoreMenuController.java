@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Random;
 
 public class StoreMenuController {
-    public Result purchase(String productName, int count) {
+    public Result purchase(ShopItem item, int count) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
@@ -34,55 +34,55 @@ public class StoreMenuController {
             return new Result(false, "the store is closed");
         }
 
-        for (ShopItem item : shop.getProducts()) {
-            if (item.getName().equalsIgnoreCase(productName)) {
-                int price = getCurrentSeasonPrice(item);
-                if (price == 0) {
-                    return new Result(false, "This item is not available in the current season.");
-                }
-
-                int available = item.getDailyLimit() - item.getSoldToday();
-                if (!item.isAvailable(count)) {
-                    return new Result(false, "Not enough stock. Only " + available + " left for today.");
-                }
-
-                int totalCost = price * count;
-                if (player.getMoney() < totalCost) {
-                    return new Result(false, "Not enough coins. You need " + totalCost + " coins.");
-                }
-
-
-                // Handle special carpenter shop cases
-                if (shop.getShopType() == ShopType.CARPENTER_SHOP &&
-                        (item.getShopItemType() == ShopItemType.CAGE || item.getShopItemType() == ShopItemType.BARN)) {
-                    /////?????????????????????????????????????????????????????
-                    return new Result(false, "use the command for building cage or barn!(build -a <name> -l <x , y>)");
-                    // return handleCarpenterSources(player, item);
-                }
-                if (shop.getShopType() == ShopType.MARNIE_RANCH &&
-                        (item.getShopItemType() == ShopItemType.ANIMAL)) {
-                    ///// ?????
-                    return new Result(false, "use the command for buying animals!(buy animal -a <animal> -n <name>)");
-                }
-                if (shop.getShopType() == ShopType.BLACKSMITH &&
-                        (item.getShopItemType() == ShopItemType.TOOL_UPGRADE || item.getShopItemType() == ShopItemType.TRASHCAN)) {
-                    ///// ?????
-                    return new Result(false, "use the command for upgrading tools!(tools upgrade <tool_name>)");
-                }
-
-                // Regular item purchase
-                Result itemResult = buyItem(player, item, count);
-                if (!itemResult.isSuccessful()) {
-                    return new Result(false, "Purchase failed: " + itemResult.message());
-                }
-
-                item.sell(count);
-                player.decreaseMoney(totalCost);
-                return new Result(true, "Successfully purchased " + count + " " + productName + (count > 1 ? "s." : "."));
-            }
+//        for (ShopItem item : shop.getProducts()) {
+//            if (item.getName().equalsIgnoreCase(productName)) {
+        int price = getCurrentSeasonPrice(item);
+        if (price == 0) {
+            return new Result(false, "This item is not available in the current season.");
         }
 
-        return new Result(false, "Product '" + productName + "' not found in this store.");
+        int available = item.getDailyLimit() - item.getSoldToday();
+        if (!item.isAvailable(count)) {
+            return new Result(false, "Not enough stock. Only " + available + " left for today.");
+        }
+
+        int totalCost = price * count;
+        if (player.getMoney() < totalCost) {
+            return new Result(false, "Not enough coins. You need " + totalCost + " coins.");
+        }
+
+
+        // Handle special carpenter shop cases
+        if (shop.getShopType() == ShopType.CARPENTER_SHOP &&
+            (item.getShopItemType() == ShopItemType.CAGE || item.getShopItemType() == ShopItemType.BARN)) {
+            /////?????????????????????????????????????????????????????
+            return new Result(false, "use the command for building cage or barn!(build -a <name> -l <x , y>)");
+            // return handleCarpenterSources(player, item);
+        }
+        if (shop.getShopType() == ShopType.MARNIE_RANCH &&
+            (item.getShopItemType() == ShopItemType.ANIMAL)) {
+            ///// ?????
+            return new Result(false, "use the command for buying animals!(buy animal -a <animal> -n <name>)");
+        }
+        if (shop.getShopType() == ShopType.BLACKSMITH &&
+            (item.getShopItemType() == ShopItemType.TOOL_UPGRADE || item.getShopItemType() == ShopItemType.TRASHCAN)) {
+            ///// ?????
+            return new Result(false, "use the command for upgrading tools!(tools upgrade <tool_name>)");
+        }
+
+        // Regular item purchase
+        Result itemResult = buyItem(player, item, count);
+        if (!itemResult.isSuccessful()) {
+            return new Result(false, "Purchase failed: " + itemResult.message());
+        }
+
+        item.sell(count);
+        player.decreaseMoney(totalCost);
+        return new Result(true, "Successfully purchased " + count + " " + item.getName() + (count > 1 ? "s." : "."));
+//            }
+//        }
+
+        // return new Result(false, "Product '" + productName + "' not found in this store.");
     }
 
 
@@ -213,7 +213,7 @@ public class StoreMenuController {
         } else if (item instanceof FishingPole) {
             FishingPole fishingPolePailCopy = ((FishingPole) item).copy();
             if ((fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.Iridium && player.getSkillsLevel().get(Skill.FISHING) < 4) ||
-                    (fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.FiberGlass && player.getSkillsLevel().get(Skill.FISHING) < 2)) {
+                (fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.FiberGlass && player.getSkillsLevel().get(Skill.FISHING) < 2)) {
                 result = new Result(false, "You dont have the required fishing level to buy this fishing pole!");
             } else {
                 if (player.getBackpack().hasTool("fishingpole")) {
@@ -278,7 +278,7 @@ public class StoreMenuController {
 //        }
         else if (item instanceof ForagingMineral) {
             ForagingMineral foragingMineralCopy = ((ForagingMineral) item).copy();
-            result =  player.getBackpack().addItem(foragingMineralCopy,count);
+            result = player.getBackpack().addItem(foragingMineralCopy, count);
         }
 //        else if (item instanceof TrashCan) {
 //            TrashCan trashCanCopy = ((TrashCan) item).copy();
@@ -317,7 +317,7 @@ public class StoreMenuController {
 
             // Check if the tile is of type FARM, growable is true, and item is null
             if (tile.getType() == TileType.FARM && tile.getContainedItem() == null &&
-                    tile.getProductOfGrowable() == null && tile.getContainedGrowable() == null) {
+                tile.getProductOfGrowable() == null && tile.getContainedGrowable() == null) {
                 // Set the tile's type to SHIPPING_BIN
                 tile.setType(TileType.SHIPPINGBIN);
                 return true; // Indicating that we successfully found and updated a tile
@@ -329,7 +329,6 @@ public class StoreMenuController {
 
 
 //    public Result buyFromCarpenter(String name, String x, String y) {
-//        Game game = App.getInstance().getCurrentGame();
 //        User player = game.getCurrentPlayer();
 //        MapOfGame map = game.getMap();
 //        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
@@ -458,14 +457,13 @@ public class StoreMenuController {
             }
         }
 
-        if (item.getShopItemType() == ShopItemType.BARN) {
-            farm.getBarn().add(newHabitat);
-        }
-        if (item.getShopItemType() == ShopItemType.CAGE) {
-            farm.getCage().add(newHabitat);
-        }
-
-        map.getFarmByOwner(player).getBarn().add(newHabitat); // You may want to separate barns vs coops by type
+//        if (item.getShopItemType() == ShopItemType.BARN) {
+//            farm.getBarn().add(newHabitat);
+//        }
+//        if (item.getShopItemType() == ShopItemType.CAGE) {
+//            farm.getCage().add(newHabitat);
+//        }
+// You may want to separate barns vs coops by type
         return new Result(true, "Successfully built " + name + " at (" + xCoord + ", " + yCoord + ")");
     }
 
@@ -475,11 +473,11 @@ public class StoreMenuController {
         Tile[][] map = game.getMap().getMap();
         Tile tile = map[yCoord][xCoord];
         if (xCoord < farm.getX() || yCoord < farm.getY() || xCoord > farm.getX() + farm.getWidth()
-                || yCoord > farm.getY() + farm.getHeight()) {
+            || yCoord > farm.getY() + farm.getHeight()) {
             return new Result(false, "You cant create a shipping bin inside other player's farm");
         }
         if (tile.getType() == TileType.FARM && tile.getContainedItem() == null &&
-                tile.getProductOfGrowable() == null && tile.getContainedGrowable() == null) {
+            tile.getProductOfGrowable() == null && tile.getContainedGrowable() == null) {
             tile.setType(TileType.SHIPPINGBIN);
             return new Result(true, "Shipping bin created");
         }
@@ -496,11 +494,15 @@ public class StoreMenuController {
             for (int j = y; j < y + height; j++) {
                 // Check bounds
                 if (i < farm.getX() || i >= farm.getX() + farm.getWidth() ||
-                        j < farm.getY() || j >= farm.getY() + farm.getHeight()) {
+                    j < farm.getY() || j >= farm.getY() + farm.getHeight()) {
                     return false;
                 }
                 // Check occupation
                 if (isOccupied(i, j)) {
+                    return false;
+                }
+                Tile tile = map.getTile(x, y);
+                if (tile.getType() != TileType.FARM) {
                     return false;
                 }
             }
@@ -513,9 +515,9 @@ public class StoreMenuController {
         MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
         Tile tile = map.getTile(x, y);
         return tile != null && (
-                tile.getContainedGrowable() != null ||
-                        tile.getProductOfGrowable() != null ||
-                        tile.getContainedItem() != null
+            tile.getContainedGrowable() != null ||
+                tile.getProductOfGrowable() != null ||
+                tile.getContainedItem() != null
         ); // or tile.isBlocked() if such a method exists
     }
 
@@ -560,14 +562,14 @@ public class StoreMenuController {
         // 4. Check for suitable habitat
         AnimalType animalType = newAnimal.getAnimalType();
         List<Habitat> habitats = animalType.getHabitat().equalsIgnoreCase("Barn")
-                ? map.getFarmByOwner(player).getBarn()
-                : map.getFarmByOwner(player).getCage();
+            ? map.getFarmByOwner(player).getBarn()
+            : map.getFarmByOwner(player).getCage();
 
         boolean placed = false;
         for (Habitat habitat : habitats) {
             // Check if this habitat type matches any of the animal's allowed storage types AND has space
             if (animalType.getStorageTypes().contains(habitat.getStorageType()) &&
-                    habitat.getLivingAnimals().size() < habitat.getStorageType().getHabitatCapacity()) {
+                habitat.getLivingAnimals().size() < habitat.getStorageType().getHabitatCapacity()) {
                 habitat.getLivingAnimals().add(newAnimal);
                 newAnimal.setLivingPlace(habitat);
                 placed = true;
@@ -600,7 +602,7 @@ public class StoreMenuController {
         freeTile.setContainedAnimal(newAnimal);
         selectedItem.sell(1);
         return new Result(true, "Successfully bought " + name + " the " + animal +
-                "! now it is on " + freeTile.getX() + "," + freeTile.getY());
+            "! now it is on " + freeTile.getX() + "," + freeTile.getY());
     }
 
     public Result showAllProducts() {
@@ -619,12 +621,12 @@ public class StoreMenuController {
 
         for (ShopItem product : shop.getProducts()) { // assumed method
             result.append(String.format("- %s | Price: %d | %s\n",
-                    product.getName(),
-                    getCurrentSeasonPrice(product),
-                    product.getDailyLimit() - product.getSoldToday() > 0 ? "Available" : "Out of stock"));
-                    if(getCurrentSeasonPrice(product) == 0) {
-                        result.append("- (Not Available in this Season)");
-                    }
+                product.getName(),
+                getCurrentSeasonPrice(product),
+                product.getDailyLimit() - product.getSoldToday() > 0 ? "Available" : "Out of stock"));
+            if (getCurrentSeasonPrice(product) == 0) {
+                result.append("- (Not Available in this Season)");
+            }
         }
 
         return new Result(true, result.toString());
@@ -647,9 +649,9 @@ public class StoreMenuController {
         for (ShopItem product : shop.getProducts()) {
             if (product.isAvailable(1) && getCurrentSeasonPrice(product) > 0) {
                 result.append(String.format("- %s | Price: %d | In stock: %d\n",
-                        product.getName(),
-                        getCurrentSeasonPrice(product),
-                        product.getDailyLimit() - product.getSoldToday()));
+                    product.getName(),
+                    getCurrentSeasonPrice(product),
+                    product.getDailyLimit() - product.getSoldToday()));
             }
         }
 
