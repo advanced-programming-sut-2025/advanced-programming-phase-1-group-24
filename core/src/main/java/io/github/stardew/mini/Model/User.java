@@ -77,6 +77,15 @@ public class User {
     private int hoursLeftForBuff;
     private int movingDirection = 0;
 
+    private Avatar avatar;
+
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
 
     public int getMovingDirection() {
         return movingDirection;
