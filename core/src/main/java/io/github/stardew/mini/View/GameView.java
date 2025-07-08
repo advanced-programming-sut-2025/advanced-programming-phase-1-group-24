@@ -21,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Timer;
@@ -34,7 +35,7 @@ import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
-import io.github.stardew.mini.Model.FriendshipLevels;
+import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
@@ -63,6 +64,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private TextButton friendsButton;
     //private Window friendsWindow;
     private Dialog friendsDialog;
+    private Dialog skillsDialog;
     private GameMenuController controller;
     private SpriteBatch batch;
     private MapOfGame mapOfGame;
@@ -120,6 +122,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                         if (friendsDialog != null && friendsDialog.getStage() != null) {
                             friendsDialog.hide();
                             friendsDialog = null;
+                        }
+                        if (skillsDialog != null && skillsDialog.getStage() != null) {
+                            skillsDialog.hide();
+                            skillsDialog = null;
                         }
                     }
                 }
@@ -272,12 +278,18 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchDown(i, i1, i2, i3);
         }
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
+            return stage.touchDown(i, i1, i2, i3);
+        }
         return false;
     }
 
     @Override
     public boolean touchUp(int i, int i1, int i2, int i3) {
         if (showInventoryMenu || showBackpackMenu) {
+            return stage.touchUp(i, i1, i2, i3);
+        }
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
             return stage.touchUp(i, i1, i2, i3);
         }
         return false;
@@ -288,6 +300,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchCancelled(i, i1, i2, i3);
         }
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
+            return stage.touchUp(i, i1, i2, i3);
+        }
         return false;
     }
 
@@ -296,12 +311,15 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchDragged(i, i1, i2);
         }
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
+            return stage.touchDragged(i, i1, i2);
+        }
         return false;
     }
 
     @Override
     public boolean mouseMoved(int i, int i1) {
-        if (showInventoryMenu || showBackpackMenu) {
+        if (showInventoryMenu || showBackpackMenu || (skillsDialog != null && skillsDialog.getStage() != null)) {
             return stage.mouseMoved(i, i1);
         }
         return false;
@@ -310,6 +328,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     @Override
     public boolean scrolled(float v, float v1) {
         if (showInventoryMenu || showBackpackMenu) {
+            return stage.scrolled(v, v1);
+        }
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
             return stage.scrolled(v, v1);
         }
         return false;
@@ -383,6 +404,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         skillsBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                toggleSkillsDialog();
             }
         });
         socialBtn.addListener(new ClickListener() {
@@ -650,6 +672,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     @Override
     public void dispose() {
         stage.dispose();
+        if (smallFont != null) {
+            smallFont.dispose();
+        }
     }
 
     @Override
@@ -820,9 +845,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
             /// ////////////////////////////////////////////////////////////////////////////
             // Prevent game world clicks if any menu is active, unless it's the friends button which is always allowed (for now)
-            if (showInventoryMenu || showBackpackMenu) {
-                // If a menu is open, only allow clicks on stage actors (handled by stage.touchDown etc.)
-                // and explicitly check if friends button is clicked, as it's separate from other menus.
+            if (showInventoryMenu || showBackpackMenu || (skillsDialog != null && skillsDialog.getStage() != null)) {
+                // If any of these menus are open, only allow clicks on stage actors (handled by stage.touchDown etc.)
+                // and explicitly check if friends button is clicked, as it's separate.
                 if (isClickInside(mouseX, mouseY, friendsButton)) {
                     toggleFriendsDialog();
                 }
@@ -1241,6 +1266,143 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
         return null;
+    }
+
+    private void toggleSkillsDialog() {
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
+            skillsDialog.hide();
+            skillsDialog = null;
+            return;
+        }
+
+        if (showInventoryMenu) {
+            showInventoryMenu = false;
+            inventoryMenuTable.setVisible(false);
+        }
+        if (showBackpackMenu) {
+            showBackpackMenu = false;
+            backpackMenuTable.setVisible(false);
+        }
+        if (friendsDialog != null && friendsDialog.getStage() != null) {
+            friendsDialog.hide();
+            friendsDialog = null;
+        }
+
+        skillsDialog = new Dialog("Skills", GameAssetManager.skin, "custom-window");
+        skillsDialog.padTop(120);
+        skillsDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
+
+
+        skillsDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+
+        float dialogWidth = Gdx.graphics.getWidth() * 0.4f;
+        float dialogHeight = Gdx.graphics.getHeight() * 0.6f;
+        skillsDialog.setSize(dialogWidth, dialogHeight);
+
+        Table skillsTable = new Table();
+        skillsTable.defaults().pad(5);
+
+
+        Map<String, String> skillDescriptions = Map.of(
+            "Farming", "Improves your ability to grow crops and raise animals.",
+            "Mining", "Enhances your efficiency when gathering ores and minerals.",
+            "Foraging", "Increases your chances of finding rare items and improves gathering wild plants.",
+            "Fishing", "Makes it easier to catch fish and improves the quality of your catches."
+        );
+
+        Map<String, Color> skillColors = Map.of(
+            "Farming", new Color(0.8f, 0.6f, 0.2f, 2f),
+            "Mining", new Color(0.6f, 0.6f, 0.6f, 2f),
+            "Foraging", new Color(0.3f, 0.5f, 0.2f, 3f),
+            "Fishing", new Color(0.2f, 0.5f, 0.8f, 2f)
+        );
+
+
+        TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
+
+        TooltipManager tooltipManager = TooltipManager.getInstance();
+        tooltipManager.initialTime = 0.1f;
+        tooltipManager.resetTime = 0.5f;
+        tooltipManager.hideAll();
+
+
+        for (Map.Entry<String, String> entry : skillDescriptions.entrySet()) {
+            String skillName = entry.getKey();
+            String description = entry.getValue();
+            int currentLevel = 0;
+            int currentXP = 0;
+
+            for (Skill skill : Skill.values()) {
+                if (skill.name().equalsIgnoreCase(skillName)) {
+                    currentXP = currentPlayer.getSkillExperience().get(skill);
+                    currentLevel = currentPlayer.getSkillsLevel().get(skill);
+                }
+            }
+            int maxXPForLevel = currentLevel * 100 + 50;
+
+            Label skillLabel = new Label(skillName + ": Lvl " + currentLevel, GameAssetManager.skin, "custom-label");
+            skillLabel.setColor(skillColors.getOrDefault(skillName, Color.WHITE));
+
+            skillsTable.add(skillLabel).width(240).center().colspan(3).row();
+
+
+            ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+
+            Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
+            progressBarStyle.background = progressBarBackground;
+            progressBarStyle.background.setMinHeight(20);
+
+            progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
+            progressBarStyle.knob.setMinWidth(0);
+
+            Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(new Color(0.2f, 0.8f, 0.2f, 1)); // Green
+            progressBarStyle.knobBefore = progressBarKnobBefore;
+            progressBarStyle.knobBefore.setMinHeight(20);
+
+            ProgressBar xpBar = new ProgressBar(0, maxXPForLevel, 1, false, progressBarStyle);
+            xpBar.setValue(currentXP);
+
+            Label xpTextLabel = new Label(currentXP + "/" + maxXPForLevel, GameAssetManager.skin, "custom-label");
+            xpTextLabel.setFontScale(0.7f);
+            xpTextLabel.setColor(Color.LIGHT_GRAY);
+
+            skillsTable.add().width(20);
+            skillsTable.add(xpBar).width(150).height(20);
+            skillsTable.add(xpTextLabel).width(70).row();
+
+            Label tooltipLabelContent = new Label(description, GameAssetManager.skin, "custom-label");
+            tooltipLabelContent.setFontScale(0.6f);
+            tooltipLabelContent.setWrap(true);
+            tooltipLabelContent.setAlignment(com.badlogic.gdx.utils.Align.center);
+
+            final Tooltip<Label> tooltip = new Tooltip<>(tooltipLabelContent, tooltipManager);
+
+            Drawable tooltipBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.GOLDENROD);
+            tooltip.getContainer().width(200).pad(5).background(tooltipBackground);
+
+            skillLabel.addListener(tooltip);
+        }
+
+        skillsDialog.getContentTable().add(skillsTable).expand().fill().center().row();
+
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.setColor(Color.RED);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                skillsDialog.hide();
+                skillsDialog = null;
+            }
+        });
+        skillsDialog.getButtonTable().add(closeButton).pad(10);
+
+
+        skillsDialog.setPosition(
+            (Gdx.graphics.getWidth() - skillsDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - skillsDialog.getHeight()) / 2
+        );
+        stage.addActor(skillsDialog);
     }
 
 }
