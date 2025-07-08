@@ -28,10 +28,9 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import io.github.stardew.mini.Controller.GameMenuController;
+import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
-import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
@@ -42,16 +41,12 @@ import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
-import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
-import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.Tools.FishingPole;
 import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
 
 //import java.awt.*;
 import java.awt.*;
@@ -65,7 +60,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     //private Window friendsWindow;
     private Dialog friendsDialog;
     private Dialog skillsDialog;
-    private GameMenuController controller;
+    private GameController controller;
     private SpriteBatch batch;
     private MapOfGame mapOfGame;
     private OrthographicCamera camera;
@@ -93,7 +88,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         generator.dispose();
     }
 
-    public GameView(GameMenuController controller) {
+    public GameView(GameController controller) {
         this.controller = controller;
         controller.setGameView(this);
         this.batch = MainApp.getBatch();

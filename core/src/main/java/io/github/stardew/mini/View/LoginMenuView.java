@@ -7,7 +7,7 @@ import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class LoginMenu implements AppMenu {
+public class LoginMenuView implements AppMenu {
     private final LoginMenuController controller = new LoginMenuController();
 
     public void handleCommand(Scanner scanner) {

@@ -2,13 +2,12 @@ package io.github.stardew.mini.View;
 
 
 import io.github.stardew.mini.Controller.ProfileMenuController;
-import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Menus.ProfileMenuCommands;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class ProfileMenu implements AppMenu {
+public class ProfileMenuView implements AppMenu {
     ProfileMenuController controller = new ProfileMenuController();
 
     public void handleCommand(Scanner scanner) {
