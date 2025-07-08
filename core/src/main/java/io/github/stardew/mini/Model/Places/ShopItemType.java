@@ -31,7 +31,7 @@ public enum ShopItemType {
     DELUXE_BACKPACK,
 
     SHIPPING_BIN,
-FORAGINGMINERAL,
+    FORAGINGMINERAL,
     TOOL_UPGRADE,
 
 

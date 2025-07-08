@@ -1,6 +1,9 @@
 package io.github.stardew.mini.Model.Animals;
 
 
+import com.badlogic.gdx.math.Vector2;
+import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Things.ProductQuality;
@@ -16,6 +19,11 @@ public class Animal {
     private boolean isInHabitat = true;
     private AnimalProduct product = null;
     private int daysLeftToProduce;
+
+    private Vector2 position;       // pixel position on screen
+    private Vector2 targetPosition; // where it's moving to
+    private float moveSpeed = 100f; // pixels per second
+    private boolean isMoving = true;
 
     public Animal(String name, AnimalType animalType) {
         this.name = name;
@@ -128,8 +136,18 @@ public class Animal {
         return currentTile;
     }
 
-    public void setCurrentTile(Tile currentTile) {
-        this.currentTile = currentTile;
+//    public void setCurrentTile(Tile currentTile) {
+//        this.currentTile = currentTile;
+//    }
+    public void setCurrentTile(Tile tile) {
+        this.currentTile = tile;
+
+        int tileSize = GameAssetManager.TILE_SIZE;
+        int drawX = tile.getX() * tileSize;
+        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize;
+
+        if (position == null) position = new Vector2(drawX, drawY);
+        if (targetPosition == null) targetPosition = new Vector2(drawX, drawY);
     }
 
     public Habitat getLivingPlace() {
@@ -191,4 +209,35 @@ public class Animal {
         return copy;
     }
 
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector2 position) {
+        this.position = position;
+    }
+
+    public Vector2 getTargetPosition() {
+        return targetPosition;
+    }
+
+    public void setTargetPosition(Vector2 targetPosition) {
+        this.targetPosition = targetPosition;
+    }
+
+    public float getMoveSpeed() {
+        return moveSpeed;
+    }
+
+    public void setMoveSpeed(float moveSpeed) {
+        this.moveSpeed = moveSpeed;
+    }
+
+    public boolean isMoving() {
+        return isMoving;
+    }
+
+    public void setMoving(boolean moving) {
+        isMoving = moving;
+    }
 }
