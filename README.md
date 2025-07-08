@@ -2,4 +2,3 @@
 403110239 Nikki Rashidian
 403172294 Zahra Amirbeigy
 403170966 Parnia Heidari
-403170955 Kimia Heidarpour
