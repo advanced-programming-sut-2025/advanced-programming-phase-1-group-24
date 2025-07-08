@@ -44,10 +44,12 @@ public class PickAxe extends Tool{
                     playerBackPack.addItem(foragingMineral, 20);
                 }
                 currentPlayer.addSkillExperience(Skill.MINING);
+                nextTile.setWalkable(true);
                 return new Result(true, "successfully picked mineral!");
             }
             else if(nextTile.getContainedItem() != null){
                 nextTile.setContainedItem(null);
+                nextTile.setWalkable(true);
                 return new Result(true, "The item on this tile has been destroyed!");
             }
             else {
@@ -58,10 +60,12 @@ public class PickAxe extends Tool{
             if(nextTile.getIsPlowed()){
                 nextTile.setIsPlowed(false);
                 System.out.println(map.getMap()[currentY + yDirection][currentX + xDirection].getIsPlowed());
+                nextTile.setWalkable(true);
                 return new Result(true, "The tile isn't plowed anymore!");
             }
             else if(nextTile.getContainedItem() != null){
                 nextTile.setContainedItem(null);
+                nextTile.setWalkable(true);
                 return new Result(true, "The item on this tile has been destroyed!");
             }
             else{
@@ -70,6 +74,7 @@ public class PickAxe extends Tool{
         }
         else if(nextTile.getContainedItem() != null){
             nextTile.setContainedItem(null);
+            nextTile.setWalkable(true);
             return new Result(true, "The item on this tile has been destroyed!");
         }
         else{

@@ -205,4 +205,8 @@ public class Backpack {
         }
         return null;
     }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
 }

@@ -1,10 +1,12 @@
 package io.github.stardew.mini.Model.Animals;
 
+import com.badlogic.gdx.graphics.Texture;
+
 public enum AnimalProductType {
     EGG("Egg", 50),
     LARGE_EGG("Large Egg", 95),
     DUCK_EGG("Duck Egg", 95),
-    DUCK_FEATHERS("Duck Feathers", 250),
+    DUCK_FEATHERS("Duck Feather", 250),
     BUNNY_WOOL("Bunny Wool", 340),
     BUNNY_FEET("Bunny Feet", 565),
     DINOSAUR_EGG("Dinosaur Egg", 350),
@@ -17,6 +19,7 @@ public enum AnimalProductType {
 
     private final String productName;
     private final int price;
+    private Texture texture;
 
     AnimalProductType(String productName, int price) {
         this.productName = productName;
@@ -29,5 +32,12 @@ public enum AnimalProductType {
 
     public int getPrice() {
         return price;
+    }
+
+    public Texture getTexture() { return texture;}
+
+    public void initTexture(){
+        String correctedName = this.productName.replace(" ", "_");
+        this.texture = new Texture("Animal_product/" + correctedName + ".png");
     }
 }
