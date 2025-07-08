@@ -106,6 +106,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private ClockHud clockHud;
 
+    private final Array<HeartEffect> heartEffects = new Array<>();
+    public static ArrayList<Animation<TextureRegion>> playerAnimations = new ArrayList<>();
 
 
     public GameView(GameController controller) {
@@ -769,6 +771,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
         }, 5, 5);
+
+        determineAvatar();
+    }
+
+    private void determineAvatar() {
+        switch (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getAvatar()){
+            case Abigail -> playerAnimations = GameAssetManager.abigailAnimations;
+            case Alex -> playerAnimations = GameAssetManager.alexAnimations;
+            case Shane -> playerAnimations = GameAssetManager.shaneAnimations;
+            case Haley -> playerAnimations = GameAssetManager.haleyAnimations;
+        }
     }
 
 
@@ -858,6 +871,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         drawPlayer();
+        // --- DRAW HEART EFFECTS ---
+        Iterator<HeartEffect> iterator = heartEffects.iterator();
+        while (iterator.hasNext()) {
+            HeartEffect effect = iterator.next();
+            effect.update(Gdx.graphics.getDeltaTime());
+            effect.draw(batch);
+            if (effect.isFinished()) {
+                iterator.remove();
+            }
+        }
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -917,7 +940,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                     if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
+                    if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
                     if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
                 }
@@ -1122,16 +1145,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         if(!currentPlayer.hasFainted()) {
             // Clamp moveDirection to valid index range
-            int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, GameAssetManager.playerAnimations.size() - 1);
+            int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, playerAnimations.size() - 1);
 
-            Animation<TextureRegion> currentAnimation = GameAssetManager.playerAnimations.get(moveDirection);
+            Animation<TextureRegion> currentAnimation = playerAnimations.get(moveDirection);
             TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 
             // Draw player with height of 2 tiles
             batch.draw(currentFrame, drawX, drawY, tileSize, tileSize * 2);
         }
         else{
-            batch.draw(GameAssetManager.playerAtlas.findRegion("player_0_1"), drawX, drawY, tileSize, tileSize * 2);
+            //batch.draw(GameAssetManager.playerAtlas.findRegion("player_0_1"), drawX, drawY, tileSize, tileSize * 2);
         }
     }
 
