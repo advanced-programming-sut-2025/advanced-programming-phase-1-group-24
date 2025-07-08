@@ -72,6 +72,14 @@ public class GameAssetManager {
     public static Texture Goat_Texture;
     public static Texture Dinosaur_Texture;
     public static Texture Sheep_Texture;
+    //Habitat Textures
+    public static Texture Barn;
+    public static Texture Big_Barn;
+    public static Texture Deluxe_Barn;
+    public static Texture Coop;
+    public static Texture Big_Coop;
+    public static Texture Deluxe_Coop;
+    public static Texture Shipping_Bin;
     public static BitmapFont customFont;
     public static Texture abigailTexture;
     public static TextureRegion[][] abigailFrames;
@@ -137,7 +145,6 @@ public class GameAssetManager {
         crowFrames[1] = tmp1[4][3];
 
         crowAnimation = new Animation<>(0.1f, crowFrames);
-
 
         loadAnimals();
 
@@ -225,6 +232,30 @@ public class GameAssetManager {
         buttonStyle2.font = skin.getFont("custom-font"); // Use your custom font
         buttonStyle2.font.getData().setScale(0.9f);
         skin.add("custom-button", buttonStyle2);
+
+
+        //Create custom select box
+        SelectBox.SelectBoxStyle customStyle = new SelectBox.SelectBoxStyle();
+        // Font
+        customStyle.font = skin.getFont("custom-font");
+        customStyle.fontColor = Color.WHITE;
+        // Safe drawable references based on your skin
+        customStyle.background = skin.getDrawable("selectBox");
+        customStyle.backgroundOpen = skin.getDrawable("selectDown");
+        // List style (dropdown appearance)
+        List.ListStyle listStyle = new List.ListStyle();
+        listStyle.font = skin.getFont("custom-font");
+        listStyle.fontColorSelected = Color.WHITE;
+        listStyle.fontColorUnselected = Color.LIGHT_GRAY;
+        listStyle.selection = skin.getDrawable("selection");
+        customStyle.listStyle = listStyle;
+        // Scroll style (required, even if minimal)
+        ScrollPane.ScrollPaneStyle scrollStyle = new ScrollPane.ScrollPaneStyle();
+        scrollStyle.vScroll = skin.getDrawable("scrollVertical");
+        scrollStyle.vScrollKnob = skin.getDrawable("scrollKnobVertical");
+        customStyle.scrollStyle = scrollStyle;
+        // Add to skin
+        skin.add("custom-selectbox", customStyle);
     }
 
     public static void loadAnimals() {
@@ -236,7 +267,18 @@ public class GameAssetManager {
         Goat_Texture = new Texture(Gdx.files.internal("Animals/Goat.png"));
         Dinosaur_Texture = new Texture(Gdx.files.internal("Animals/Dinosaur.png"));
         Sheep_Texture = new Texture(Gdx.files.internal("Animals/Sheep.png"));
+
+        Barn = new Texture(Gdx.files.internal("Habitat/Barn.png"));
+        Big_Barn = new Texture(Gdx.files.internal("Habitat/Big_Barn.png"));
+        Deluxe_Barn = new Texture(Gdx.files.internal("Habitat/Deluxe_Barn.png"));
+        Coop = new Texture(Gdx.files.internal("Habitat/Coop.png"));
+        Big_Coop = new Texture(Gdx.files.internal("Habitat/Big_Coop.png"));
+        Deluxe_Coop = new Texture(Gdx.files.internal("Habitat/Deluxe_Coop.png"));
+
+        Shipping_Bin = new Texture(Gdx.files.internal("Habitat/Shipping_Bin.png"));
+
         SECRET_HEART =  new Texture("Heart/Secret_Heart.png");
+
     }
 
     public static void dispose() {
@@ -263,6 +305,27 @@ public class GameAssetManager {
         if (stormOverlay != null) stormOverlay.dispose();
         if (dropTexture != null) dropTexture.dispose();
         if (crowSheet != null) crowSheet.dispose();
+
+        disposeAnimals();
+    }
+
+    private static void disposeAnimals() {
+
+        if (White_Chicken_Texture != null) White_Chicken_Texture.dispose();
+        if (White_Cow_Texture != null) White_Cow_Texture.dispose();
+        if (Duck_Texture != null) Duck_Texture.dispose();
+        if (Pig_Texture != null) Pig_Texture.dispose();
+        if (Rabbit_Texture != null) Rabbit_Texture.dispose();
+        if (Goat_Texture != null) Goat_Texture.dispose();
+        if (Dinosaur_Texture != null) Dinosaur_Texture.dispose();
+
+        if(Barn != null) Barn.dispose();
+        if(Big_Barn != null) Big_Barn.dispose();
+        if(Deluxe_Barn != null) Deluxe_Barn.dispose();
+        if(Coop != null) Coop.dispose();
+        if(Big_Coop != null) Big_Coop.dispose();
+        if(Deluxe_Coop != null) Deluxe_Coop.dispose();
+
         if(SECRET_HEART != null) SECRET_HEART.dispose();
     }
 
