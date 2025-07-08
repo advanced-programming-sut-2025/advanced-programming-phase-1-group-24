@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-public class GameMenuController implements MenuController {
+public class GameController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();

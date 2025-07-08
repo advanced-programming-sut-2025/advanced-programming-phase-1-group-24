@@ -6,12 +6,12 @@ import io.github.stardew.mini.View.*;
 import java.util.Scanner;
 
 public enum Menu {
-    MainMenu(new MainMenu()),
-    LoginMenu(new LoginMenu()),
+    MainMenu(new MainMenuView()),
+    LoginMenu(new LoginMenuView()),
     GameMenu(new GameMenu()),
-    ProfileMenu(new ProfileMenu()),
-    TradeMenu(new TradeMenu()),
-    ExitMenu(new ExitMenu());
+    ProfileMenu(new ProfileMenuView()),
+    TradeMenu(new TradeMenuView()),
+    ExitMenu(new ExitMenuView());
 
     private final AppMenu menu;
 

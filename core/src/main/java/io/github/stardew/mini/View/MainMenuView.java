@@ -2,13 +2,12 @@ package io.github.stardew.mini.View;
 
 
 import io.github.stardew.mini.Controller.MainMenuController;
-import io.github.stardew.mini.Model.Menus.LoginMenuCommands;
 import io.github.stardew.mini.Model.Menus.MainMenuCommands;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
-public class MainMenu implements AppMenu{
+public class MainMenuView implements AppMenu{
     MainMenuController controller = new MainMenuController();
 
 
