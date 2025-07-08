@@ -106,7 +106,7 @@ public class Machine extends Item {
             for (Machine machine : house.getMachines()) {
                 if (machine.getActivated()) {
                     machine.setHoursLeft(machine.getHoursLeft() - 1);
-                    if (machine.getHoursLeft() == 0) {
+                    if (machine.getHoursLeft() <= 0) {
                         machine.setActivated(false);
                         machine.setReady(true);
                         machine.setMaxProcessTime(0);

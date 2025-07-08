@@ -34,8 +34,6 @@ import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.CropType;
 import io.github.stardew.mini.Model.Growables.GrowableType;
-import io.github.stardew.mini.Model.Growables.TreeType;
-import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
@@ -43,8 +41,10 @@ import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
 import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
@@ -82,6 +82,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private Dialog animalMenuDialog;
     private Animal selectedAnimal;
+
+    private Dialog machineMenuDialog;
+    private Machine selectedMachine;
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -198,9 +201,23 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     }
                 }
 
-//                if(){
-//
-//                }
+                if (tile != null && tile.getContainedItem() != null && tile.getContainedItem() instanceof Machine) {
+                    System.out.println("machine");
+                    selectedMachine = (Machine)tile.getContainedItem();
+
+                    // Convert screen coordinates to stage coordinates
+                    Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
+
+                    // Center dialog around mouse position
+                    machineMenuDialog.setPosition(
+                        stageCoords.x - machineMenuDialog.getWidth() / 2,
+                        stageCoords.y - machineMenuDialog.getHeight() / 2
+                    );
+                    machineMenuDialog.setVisible(true);
+                    machineMenuDialog.show(stage);
+                    Gdx.input.setInputProcessor(stage);
+                    return true;
+                }
             }
         }
         return false;
@@ -368,6 +385,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         createAnimalDialog();
 
         createShopMenusDialogs();
+
+        createMachineDialog();
     }
 
     private void createTerminal() {
@@ -388,6 +407,148 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         shopPurchaseDialog.setMovable(false);
         shopPurchaseDialog.setVisible(false);
         stage.addActor(shopPurchaseDialog);
+    }
+
+    private void createMachineDialog() {
+        // Create the animal menu dialog (initially hidden)
+        machineMenuDialog = new Dialog("Machine Menu", GameAssetManager.skin, "dialog") {
+            @Override
+            protected void result(Object object) {
+                handleMachineMenuChoice(object.toString());
+            }
+        };
+
+        machineMenuDialog.getContentTable().defaults().pad(10);
+
+        // Add buttons with their result objects
+        TextButton RecepiesButton = new TextButton("Recepies", GameAssetManager.skin);
+        RecepiesButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                machineMenuDialog.hide();                       // hide the main menu
+                handleMachineMenuChoice("Recepies");
+            }
+        });
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                machineMenuDialog.hide();
+                handleMachineMenuChoice("Cancel");
+
+            }
+        });
+
+        TextButton cheatButton = new TextButton("Cheat", GameAssetManager.skin);
+        cheatButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                handleMachineMenuChoice("Cheat");
+                machineMenuDialog.hide();
+            }
+        });
+
+
+
+        TextButton exitButton = new TextButton("Exit", GameAssetManager.skin);
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                machineMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
+                selectedMachine = null;
+            }
+        });
+
+        machineMenuDialog.getContentTable().add(RecepiesButton).row();
+        machineMenuDialog.getContentTable().add(cancelButton).row();
+        machineMenuDialog.getContentTable().add(cheatButton).row();
+        machineMenuDialog.getContentTable().add(exitButton).row();
+
+        machineMenuDialog.setKeepWithinStage(true);
+        machineMenuDialog.setMovable(false);
+        machineMenuDialog.setVisible(false);  // Add this after creation
+        stage.addActor(machineMenuDialog);
+    }
+
+    private void showRecipeDialog(Machine machine) {
+        Dialog dlg = new Dialog("Recipes for " + machine.getType().getName(), GameAssetManager.skin) {
+            @Override
+            protected void result(Object obj) {
+                // only “Close” exists here, so just hide
+                this.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        };
+
+        Table tbl = dlg.getContentTable();
+        tbl.defaults().pad(6).left();
+
+        // Header row
+        tbl.add(new Label("Product", GameAssetManager.skin)).padRight(20);
+        tbl.add(new Label("Ingredients", GameAssetManager.skin)).row();
+
+        // One line per product
+        for (randomStuffType prod : machine.getType().getProducts()) {
+            StringBuilder ing = new StringBuilder();
+            prod.getIngredients().forEach((name, qty) ->
+                ing.append(name).append(" x").append(qty).append(", ")
+            );
+            // strip trailing comma
+            if (ing.length() > 0) ing.setLength(ing.length() - 2);
+
+            tbl.add(new Label(prod.getName(), GameAssetManager.skin));
+            tbl.add(new Label(ing.length()>0 ? ing.toString() : "—", GameAssetManager.skin))
+                .row();
+        }
+
+        // Close button
+        dlg.button("Close", "Close");
+        dlg.show(stage);
+    }
+
+
+    private void handleMachineMenuChoice(String choice) {
+        if (selectedMachine == null) {
+            //System.out.println("animal is null");
+            return;
+        }
+        //System.out.println(selectedAnimal.getName());
+        Result result = null;
+
+        // Handle choices...
+        switch (choice) {
+            case "Cancel":
+                selectedMachine.setActivated(false);
+                result = new Result (false, "Cancelled!");
+                break;
+            case "Recepies":
+                showRecipeDialog(selectedMachine);
+
+                break;
+            case "Cheat":
+                selectedMachine.setHoursLeft(0);
+                Gdx.input.setInputProcessor(this);
+                //selectedMachine.setReady(true);
+
+                //controller.releaseAnimal(selectedAnimal);
+                break;
+            case "Exit":
+                //selectedMachine.setActivated(false);
+                Gdx.input.setInputProcessor(this);
+                // Do nothing
+                break;
+            default:
+                result = new Result(false, choice);
+                break;
+        }
+         if (result != null) {
+        showErrorDialog(stage, result.message());
+         }
+        machineMenuDialog.hide();
+        // Gdx.input.setInputProcessor(this);  // Return input to game
+        selectedMachine = null;
     }
 
     private void createAnimalDialog() {
