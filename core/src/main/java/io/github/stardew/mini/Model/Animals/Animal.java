@@ -1,12 +1,20 @@
 package io.github.stardew.mini.Model.Animals;
 
 
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Things.ProductQuality;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 public class Animal {
-    private  String name;
+    private String name;
     private final AnimalType animalType;
     private Tile currentTile;
     private Habitat livingPlace;
@@ -17,13 +25,20 @@ public class Animal {
     private AnimalProduct product = null;
     private int daysLeftToProduce;
 
+    //new fields added
+    private float movementCooldown = 0f;
+    private Queue<Tile> pathToTarget = new LinkedList<>();
+    private Tile movingFrom = null;
+    private Tile movingTo = null;
+    private float moveProgress = 0f; // 0.0 -> 1.0
+    private float moveSpeed = 2f; // tiles per second
+
     public Animal(String name, AnimalType animalType) {
         this.name = name;
         this.animalType = animalType;
         this.currentTile = null;
         this.livingPlace = null;
         this.daysLeftToProduce = animalType.getDaysToProduce();
-
     }
 
     public void pet() {
@@ -40,18 +55,34 @@ public class Animal {
         }
     }
 
+//    public void endOfDayUpdate() {
+//        // in controller update the sleptOutSide
+//        //if (!isInHabitat()) sleptOutside = true;
+//        if (!fedToday) friendship -= 20;
+//        if (!isInHabitat) friendship -= 20;
+//        if (!pettedToday) friendship -= 10;
+//        //(200 / Math.max(friendship, 1)); ?????????
+//        if (friendship <= 0) friendship = 0;
+//
+//        fedToday = false;
+//        pettedToday = false;
+//        //isInHabitat = false;
+//    }
     public void endOfDayUpdate() {
-        // in controller update the sleptOutSide
-        //if (!isInHabitat()) sleptOutside = true;
         if (!fedToday) friendship -= 20;
         if (!isInHabitat) friendship -= 20;
         if (!pettedToday) friendship -= 10;
-        //(200 / Math.max(friendship, 1)); ?????????
-        if (friendship <= 0) friendship = 0;
+        if (friendship < 0) friendship = 0;
 
         fedToday = false;
         pettedToday = false;
-        //isInHabitat = false;
+
+        // Reset movement state if animals sleep at night
+        pathToTarget.clear();
+        movingFrom = null;
+        movingTo = null;
+        moveProgress = 0f;
+        movementCooldown = 0f; // Optional
     }
 
     public void updateProductEndDay() {
@@ -119,7 +150,7 @@ public class Animal {
         int habitatWidth = livingPlace.getWidth();
         int habitatHeight = livingPlace.getHeight();
         isInHabitat = (tileX >= habitatX && tileX < habitatX + habitatWidth &&
-                tileY >= habitatY && tileY < habitatY + habitatHeight);
+            tileY >= habitatY && tileY < habitatY + habitatHeight);
         return isInHabitat;
     }
 
@@ -189,6 +220,67 @@ public class Animal {
         copy.setDaysLeftToProduce(this.daysLeftToProduce);
 
         return copy;
+    }
+
+    public boolean isMoving() {
+        return movingTo != null;
+    }
+
+    public void startMove(Tile from, Tile to) {
+        this.movingFrom = from;
+        this.movingTo = to;
+        this.moveProgress = 0f;
+    }
+
+    public void updateMovement(float delta) {
+        if (movingTo != null) {
+            moveProgress += moveSpeed * delta;
+            if (moveProgress >= 1f) {
+                moveProgress = 0f;
+                currentTile.setContainedAnimal(null);
+                currentTile = movingTo;
+                currentTile.setContainedAnimal(this);
+                movingFrom = null;
+                movingTo = null;
+
+                if (!pathToTarget.isEmpty()) {
+                    startMove(currentTile, pathToTarget.poll());
+                }
+            }
+        }
+    }
+
+    public void setPathToTarget(List<Tile> path) {
+        this.pathToTarget.clear();
+        this.pathToTarget.addAll(path);
+        if (!this.pathToTarget.isEmpty()) {
+            startMove(currentTile, this.pathToTarget.poll());
+        }
+    }
+
+    public Tile getMovingFrom() {
+        return movingFrom;
+    }
+
+    public Tile getMovingTo() {
+        return movingTo;
+    }
+
+    public float getMoveProgress() {
+        return moveProgress;
+    }
+
+
+    public float getMovementCooldown() {
+        return movementCooldown;
+    }
+
+    public void reduceCooldown(float delta) {
+        movementCooldown -= delta;
+    }
+
+    public void resetCooldown() {
+        movementCooldown = (3f + MathUtils.random(2f));
     }
 
 }
