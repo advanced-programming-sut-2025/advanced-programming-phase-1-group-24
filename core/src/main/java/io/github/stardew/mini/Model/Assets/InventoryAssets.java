@@ -34,9 +34,24 @@ public class InventoryAssets {
     public static Texture GoldHOE;
     public static Texture IridiumHOE;
     public static Texture InitialPICKAXE;
+    public static Texture CopperPICKAXE;
+    public static Texture IronPICKAXE;
+    public static Texture GoldPICKAXE;
+    public static Texture IridiumPICKAXE;
     public static Texture InitialAXE;
+    public static Texture CopperAXE;
+    public static Texture IronAXE;
+    public static Texture GoldAXE;
+    public static Texture IridiumAXE;
     public static Texture InitialWATERINGCAN;
+    public static Texture CopperWATERINGCAN;
+    public static Texture IronWATERINGCAN;
+    public static Texture GoldWATERINGCAN;
+    public static Texture IridiumWATERINGCAN;
     public static Texture InitialFISHINGPOLE;
+    public static Texture BambooFISHINGPOLE;
+    public static Texture FiberglassFISHINGPOLE;
+    public static Texture IridiumFISHINGPOLE;
     public static Texture InitialSCYTHE;
     public static Texture InitialMILKPAIL;
     public static Texture InitialSHEAR;
@@ -58,12 +73,27 @@ public class InventoryAssets {
         GoldHOE = new Texture(Gdx.files.internal("Hoe/Gold_Hoe.png"));
         IridiumHOE = new Texture(Gdx.files.internal("Hoe/Iridium_Hoe.png"));
         InitialPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Pickaxe.png"));
+        CopperPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Copper_Pickaxe.png"));
+        IronPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Steel_Pickaxe.png"));
+        GoldPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Gold_Pickaxe.png"));
+        IridiumPICKAXE = new Texture(Gdx.files.internal("Tools/Pickaxe/Iridium_Pickaxe.png"));
         InitialAXE = new Texture(Gdx.files.internal("Tools/Axe/Axe.png"));
+        CopperAXE = new Texture(Gdx.files.internal("Tools/Axe/Copper_Axe.png"));
+        IronAXE = new Texture(Gdx.files.internal("Tools/Axe/Steel_Axe.png"));
+        GoldAXE = new Texture(Gdx.files.internal("Tools/Axe/Gold_Axe.png"));
+        IridiumAXE = new Texture(Gdx.files.internal("Tools/Axe/Iridium_Axe.png"));
         InitialSCYTHE = new Texture(Gdx.files.internal("Tools/Scythe.png"));
         InitialFISHINGPOLE = new Texture(Gdx.files.internal("Fishing_Pole/Training_Rod.png"));
+        BambooFISHINGPOLE = new Texture(Gdx.files.internal("Fishing_Pole/Bamboo_Pole.png"));
+        FiberglassFISHINGPOLE = new Texture(Gdx.files.internal("Fishing_Pole/Fiberglass_Rod.png"));
+        IridiumFISHINGPOLE = new Texture(Gdx.files.internal("Fishing_Pole/Iridium_Rod.png"));
         InitialMILKPAIL = new Texture(Gdx.files.internal("Tools/Milk_Pail.png"));
         InitialSHEAR = new Texture(Gdx.files.internal("Tools/Shears.png"));
         InitialWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Watering_Can.png"));
+        CopperWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Copper_Watering_Can.png"));
+        IronWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Steel_Watering_Can.png"));
+        GoldWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Gold_Watering_Can.png"));
+        IridiumWATERINGCAN = new Texture(Gdx.files.internal("Watering_Can/Iridium_Watering_Can.png"));
         InitialTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
         CopperTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Copper.png"));
         IronTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
@@ -75,9 +105,24 @@ public class InventoryAssets {
         toolMap.put("GOLDHOE", GoldHOE);
         toolMap.put("IRIDIUMHOE", IridiumHOE);
         toolMap.put("INITIALPICKAXE", InitialPICKAXE);
+        toolMap.put("COPPERPICKAXE", CopperPICKAXE);
+        toolMap.put("IRONPICKAXE", IronPICKAXE);
+        toolMap.put("GOLDPICKAXE", GoldPICKAXE);
+        toolMap.put("IRIDIUMPICKAXE", IridiumPICKAXE);
         toolMap.put("INITIALAXE", InitialAXE);
+        toolMap.put("COPPERAXE", CopperAXE);
+        toolMap.put("IRONAXE", IronAXE);
+        toolMap.put("GOLDAXE", GoldAXE);
+        toolMap.put("IRIDIUMAXE", IridiumAXE);
         toolMap.put("INITIALWATERINGCAN", InitialWATERINGCAN);
-        toolMap.put("INITIALFISHINGPOLE", InitialFISHINGPOLE);
+        toolMap.put("COPPERWATERINGCAN", CopperWATERINGCAN);
+        toolMap.put("IRONWATERINGCAN", IronWATERINGCAN);
+        toolMap.put("GOLDWATERINGCAN", GoldWATERINGCAN);
+        toolMap.put("IRIDIUMWATERINGCAN", IridiumWATERINGCAN);
+        toolMap.put("TRAININGFISHINGPOLE", InitialFISHINGPOLE);
+        toolMap.put("BAMBOOFISHINGPOLE", BambooFISHINGPOLE);
+        toolMap.put("FIBERGLASSFISHINGPOLE", FiberglassFISHINGPOLE);
+        toolMap.put("IRIDIUMFISHINGPOLE", IridiumFISHINGPOLE);
         toolMap.put("INITIALSCYTHE", InitialSCYTHE);
         toolMap.put("INITIALMILKPAIL", InitialMILKPAIL);
         toolMap.put("INITIALTRASHCAN", InitialTRASHCAN);
@@ -101,30 +146,10 @@ public class InventoryAssets {
         disposeToolTextures();
     }
 
-
-    public static Texture getToolTexture(String textureKey) {
-        return toolMap.get(textureKey);
-    }
-
     public static void disposeToolTextures() {
-        if (InitialHOE != null) InitialHOE.dispose();
-        if (CopperHOE != null) CopperHOE.dispose();
-        if (IronHOE != null) IronHOE.dispose();
-        if (GoldHOE != null) GoldHOE.dispose();
-        if (IridiumHOE != null) IridiumHOE.dispose();
-        if (InitialPICKAXE != null) InitialPICKAXE.dispose();
-        if (InitialAXE != null) InitialAXE.dispose();
-        if (InitialWATERINGCAN != null) InitialWATERINGCAN.dispose();
-        if (InitialFISHINGPOLE != null) InitialFISHINGPOLE.dispose();
-        if (InitialSCYTHE != null) InitialSCYTHE.dispose();
-        if (InitialMILKPAIL != null) InitialMILKPAIL.dispose();
-        if (InitialTRASHCAN != null) InitialTRASHCAN.dispose();
-        if (CopperTRASHCAN != null) CopperTRASHCAN.dispose();
-        if (IronTRASHCAN != null) IronTRASHCAN.dispose();
-        if (GoldTRASHCAN != null) GoldTRASHCAN.dispose();
-        if (IridiumTRASHCAN != null) IridiumTRASHCAN.dispose();
-        if (InitialSHEAR != null) InitialSHEAR.dispose();
-
+        for (Texture texture : toolMap.values()) {
+            texture.dispose();
+        }
         if (toolMap != null) {
             toolMap.clear();
         }
@@ -133,4 +158,9 @@ public class InventoryAssets {
             region.getTexture().dispose();
         }
     }
+
+    public static Texture getToolTexture(String textureKey) {
+        return toolMap.get(textureKey);
+    }
+
 }

@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Model.Things;
 
+import com.badlogic.gdx.graphics.Texture;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 public enum FishType {
     Salmon("Salmon",Season.AUTUMN,75, RarenessType.COMMON),
@@ -27,12 +28,14 @@ public enum FishType {
     private final Season season;
     private final int sellPrice;
     private final RarenessType rareness;
+    private final Texture texture;
 
     FishType(String name, Season season, int sellPrice, RarenessType rareness) {
         this.name = name;
         this.season = season;
         this.sellPrice = sellPrice;
         this.rareness = rareness;
+        this.texture = new Texture("Fish/" + this.name() + ".png");
     }
 
     public String getName() { return name; }
@@ -48,6 +51,8 @@ public enum FishType {
     public RarenessType getRareness() {
         return rareness;
     }
+
+    public Texture getTexture() { return texture; }
 
     public enum RarenessType {
         COMMON,

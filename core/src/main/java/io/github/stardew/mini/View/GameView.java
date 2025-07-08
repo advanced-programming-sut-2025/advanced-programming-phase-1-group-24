@@ -29,21 +29,24 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.stardew.mini.Controller.GameMenuController;
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Animals.AnimalProduct;
+import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.FriendshipLevels;
-import io.github.stardew.mini.Model.Growables.CropType;
-import io.github.stardew.mini.Model.Growables.GrowableType;
-import io.github.stardew.mini.Model.Growables.TreeType;
+import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.GreenHouse;
-import io.github.stardew.mini.Model.Things.Backpack;
-import io.github.stardew.mini.Model.Things.ForagingMineral;
-import io.github.stardew.mini.Model.Things.Item;
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
+import io.github.stardew.mini.Model.Reccepies.randomStuff;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
+import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
+import io.github.stardew.mini.Model.Tools.FishingPole;
 import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.User;
@@ -83,7 +86,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 16;
+        parameter.size = 32;
         smallFont = generator.generateFont(parameter);
         generator.dispose();
     }
@@ -152,22 +155,26 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             if (keycode == Input.Keys.LEFT) {
                 selectedSlot--;
                 if (selectedSlot < 0) selectedSlot = totalItems - 1;
+                showBackpack();
                 return true;
             }
             if (keycode == Input.Keys.RIGHT) {
                 selectedSlot++;
                 if (selectedSlot >= totalItems) selectedSlot = 0;
+                showBackpack();
                 return true;
             }
             if (keycode == Input.Keys.UP) {
                 selectedSlot -= maxItemsPerRow;
                 if (selectedSlot < 0) selectedSlot = Math.max(0, totalItems - 1);
+                showBackpack();
                 return true;
             }
             if (keycode == Input.Keys.DOWN) {
                 selectedSlot += maxItemsPerRow;
                 if (selectedSlot >= totalItems)
                     selectedSlot = Math.min(totalItems - 1, selectedSlot % maxItemsPerRow); // Wrap to first row, maintaining column
+                showBackpack();
                 return true;
             }
         }
@@ -903,7 +910,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             slotStack.add(slotBg);
 
             Tool tool = tools.get(i);
-            String textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
+            String textureOrigin;
+            if (tool instanceof FishingPole) {
+                textureOrigin = ((FishingPole) tool).getPoleMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
+            } else {
+                textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
+            }
             Texture itemTex = InventoryAssets.getToolTexture(textureOrigin);
 
             if (i == selectedSlot && InventoryAssets.highlightedSlot != null) {
@@ -1043,7 +1055,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         itemsContainer.pad(10);
 
         float slotSize = GameAssetManager.TILE_SIZE;
-        float itemImageSize = slotSize * 0.8f;
+        float itemImagePadding = slotSize * 0.1f;
+        float itemImageRenderSize = slotSize - (itemImagePadding * 2);
         float labelOffset = 5f;
 
         ArrayList<Item> sortedItems = new ArrayList<>(items.keySet());
@@ -1060,12 +1073,24 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             slotBg.setSize(slotSize, slotSize);
             itemSlotStack.add(slotBg);
 
-            Texture itemTex = null;  //fix later
+            if (currentSlotIndex == selectedSlot) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotSize, slotSize);
+                itemSlotStack.add(highlightImage);
+            }
+
+            Texture itemTex = getItemTexture(item);
             if (itemTex != null) {
                 Image itemImage = new Image(itemTex);
-                itemImage.setSize(itemImageSize, itemImageSize);
-                itemImage.setOrigin(itemImage.getWidth() / 2, itemImage.getHeight() / 2);
-                itemSlotStack.add(itemImage);
+                itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
+                itemImage.setScaling(Scaling.fit);
+                itemImage.setAlign(com.badlogic.gdx.utils.Align.center);
+
+                Container<Image> itemImageContainer = new Container<>(itemImage);
+                itemImageContainer.pad(itemImagePadding);
+                itemImageContainer.fill();
+
+                itemSlotStack.add(itemImageContainer);
             } else {
                 Gdx.app.error("GameView", "Texture for item " + item.getName() + " is null!");
             }
@@ -1078,11 +1103,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             labelContainer.fill();
             itemSlotStack.add(labelContainer);
 
-            if (currentSlotIndex == selectedSlot) {
-                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
-                highlightImage.setSize(slotSize, slotSize);
-                itemSlotStack.add(highlightImage);
-            }
 
             itemsContainer.add(itemSlotStack).size(slotSize).pad(5);
 
@@ -1093,6 +1113,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
 
+        // Fill remaining empty slots
         for (int i = sortedItems.size(); i < totalSlots; i++) {
             Stack emptySlotStack = new Stack();
             Image slotBg = new Image(InventoryAssets.slot);
@@ -1135,6 +1156,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         Texture trashcanTex = InventoryAssets.getToolTexture(textureOrigin);
         if (trashcanTex != null) {
             Image trashcanImage = new Image(trashcanTex);
+            trashcanImage.setTouchable(Touchable.disabled);
             trashcanButton.clearChildren();
             trashcanButton.add(trashcanImage).expand().fill().center();
         } else {
@@ -1145,10 +1167,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         trashcanButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Trashcan button clicked!");
                 if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
                     Item itemToTrash = sortedItems.get(selectedSlot);
-                    trashcan.useTrashCan(itemToTrash, 1);
+                    backpack.removeItem(itemToTrash.getName(), 1);
                     showBackpack();
                 } else {
                     System.out.println("No item selected to trash.");
@@ -1164,7 +1185,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         backButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                System.out.println("Back button clicked!");
                 showBackpackMenu = false;
                 backpackMenuTable.setVisible(false);
                 inventoryMenuTable.setVisible(true);
@@ -1179,6 +1199,48 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         backpackMenuTable.setVisible(true);
         showBackpackMenu = true;
+    }
+
+    public Texture getItemTexture(Item item) {
+        if (item instanceof Fish) {
+            return ((Fish) item).getType().getTexture();
+        }
+        if (item instanceof Food) {
+            return ((Food) item).getType().getTexture();
+        }
+        if (item instanceof ForagingMineral) {
+            return ((ForagingMineral) item).getType().getTexture();
+        }
+        if (item instanceof randomStuff) {
+            return ((randomStuff) item).getType().getTexture();
+        }
+        if (item instanceof AnimalProduct) {
+            return ((AnimalProduct) item).getAnimalProductType().getTexture();
+        }
+        if (item instanceof Machine) {
+            return ((Machine) item).getType().getTexture();
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            if(sourceType.getName().equalsIgnoreCase(item.getName())) {
+                return sourceType.getTexture();
+            }
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            if(foragingCropType.getName().equalsIgnoreCase(item.getName())) {
+                return foragingCropType.getTexture();
+            }
+        }
+        for(CropType cropType : CropType.values()) {
+            if(cropType.getName().equalsIgnoreCase(item.getName())) {
+                return cropType.getCropProductTexture();
+            }
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            if(fruitType.getName().equalsIgnoreCase(item.getName())) {
+                return fruitType.getTexture();
+            }
+        }
+        return null;
     }
 
 }
