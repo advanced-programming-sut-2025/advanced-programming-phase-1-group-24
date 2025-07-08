@@ -77,6 +77,15 @@ public class User {
     private int hoursLeftForBuff;
     private int movingDirection = 0;
 
+    private Avatar avatar;
+
+    public Avatar getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Avatar avatar) {
+        this.avatar = avatar;
+    }
 
     public int getMovingDirection() {
         return movingDirection;
@@ -461,7 +470,7 @@ public class User {
     }
 
     public void handleFainting() {
-        if (this.energy <= 0 || this.currentTurnEnergy <= 0) {
+        if (this.energy <= 0) { //deleted turn enrgy
             this.energy = 0;
             this.currentTurnEnergy = 0;
             System.out.println("not enough energy! You faiented!");

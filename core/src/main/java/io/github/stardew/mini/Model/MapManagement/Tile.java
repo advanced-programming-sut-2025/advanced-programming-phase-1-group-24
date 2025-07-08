@@ -106,7 +106,11 @@ public class Tile {
         this.containedNPC = containedNPC;
     }
 
-    public void changeTile(){}
+    public void changeTile() {
+    }
 
+    public boolean isBuildable() {
+        return isWalkable && containedItem == null && containedNPC == null && containedGrowable == null && productOfGrowable == null && type == TileType.FARM;
+    }
 }
 

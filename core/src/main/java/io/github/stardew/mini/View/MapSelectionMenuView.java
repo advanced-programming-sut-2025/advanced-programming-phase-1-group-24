@@ -233,6 +233,11 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                     tiles2.setContainedItem(machine);
                     new_tile.setContainedAnimal(moo);
                     MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
+                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
+                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+                    heny.setCurrentTile(new_tile_heny);
+                    new_tile.setContainedAnimal(heny);
+                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
 

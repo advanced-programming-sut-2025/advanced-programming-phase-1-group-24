@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -21,6 +24,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
@@ -28,22 +36,40 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.StoreMenuController;
+import com.sun.tools.javac.Main;
+import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.CrowFlight;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Growables.CropType;
 import io.github.stardew.mini.Model.Growables.GrowableType;
+import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
+import io.github.stardew.mini.Model.Menus.GameMenuCommands;
+import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.Places.Shop;
+import io.github.stardew.mini.Model.Places.ShopItem;
+import io.github.stardew.mini.Model.Reccepies.randomStuff;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
+import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
+import io.github.stardew.mini.Model.TimeManagement.*;
+import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
@@ -52,16 +78,18 @@ import io.github.stardew.mini.Model.User;
 
 //import java.awt.*;
 import java.awt.*;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.regex.Matcher;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
     private TextButton friendsButton;
-    //private Window friendsWindow;
     private Dialog friendsDialog;
     private GameController controller;
     private SpriteBatch batch;
@@ -86,6 +114,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog machineMenuDialog;
     private Machine selectedMachine;
 
+
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
 
@@ -94,11 +123,22 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog shopPurchaseDialog;
     private ShopItem selectedShopItem;
     private int purchaseQuantity = 1;
+    private Dialog buyAnimalDialog;
 
     private StoreMenuController storeController;
-    // private boolean isShowingErrorDialog = false;
     private int gameWidth = Gdx.graphics.getWidth();
     private int gameHeight = Gdx.graphics.getHeight();
+
+    public List<Integer> crowAttacks = new ArrayList<>();
+    private List<CrowFlight> activeCrows = new ArrayList<>();
+
+    private ClockHud clockHud;
+    private boolean isPlacingBuilding = false;
+    private Habitat buildingToPlace = null;
+    private Farm currentFarm = null;
+
+    private final Array<HeartEffect> heartEffects = new Array<>();
+    public static ArrayList<Animation<TextureRegion>> playerAnimations = new ArrayList<>();
 
 
     public GameView(GameController controller) {
@@ -109,14 +149,257 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
     }
 
+    public void startPlacingBuilding(Habitat building) {
+        this.isPlacingBuilding = true;
+        this.buildingToPlace = building;
+        this.currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+        setCameraPosition();
+        camera.update();
+        Gdx.input.setInputProcessor(this);
+        showErrorDialog(stage, "Select a tile inside your farm to build");
+        //+ building.getDisplayName());
+    }
+
+    private void setCameraPosition() {
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (showFullMap) {
+            // Full map view
+            float mapWidth = MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length * GameAssetManager.TILE_SIZE;
+            float mapHeight = MainApp.getInstance().getCurrentGame().getMap().getMap().length * GameAssetManager.TILE_SIZE;
+
+            camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
+
+            // Zoom out to fit entire map
+            float zoomX = mapWidth / camera.viewportWidth;
+            float zoomY = mapHeight / camera.viewportHeight;
+            camera.zoom = Math.max(zoomX, zoomY);
+        } else if (isPlacingBuilding) {
+            // Focus on current player's farm
+            if (currentFarm == null) {
+                currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+            }
+            if (currentFarm != null) {
+                setCameraToFarm(currentFarm);  //  use your clean method
+                return;  // camera already updated
+            }
+        } else {
+            // Focus on player
+            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
+
+            camera.zoom = 1f;
+            int tileSize = GameAssetManager.TILE_SIZE;
+
+            // Get player's tile position
+            Tile tile = currentPlayer.getCurrentTile();
+            float drawX = tile.getX() * tileSize + tileSize / 2f;
+            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+
+            camera.position.set(drawX, drawY, 0);
+        }
+
+        camera.update();  //  always update unless you return early
+    }
+
+    private void setCameraToFarm(Farm farm) {
+        int tileSize = GameAssetManager.TILE_SIZE;
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        Tile tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
+        float centerX = tile.getX() * tileSize + tileSize / 2f;
+        float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
+
+        camera.position.set(centerX, centerY, 0);
+        float zoomX = (float) farm.getWidth() * GameAssetManager.TILE_SIZE / camera.viewportWidth;
+        float zoomY = (float) farm.getHeight() * GameAssetManager.TILE_SIZE / camera.viewportHeight;
+        camera.zoom = Math.max(zoomX, zoomY);
+    }
+
+
+private void updateAnimals(float delta) {
+    for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+        for (Animal animal : player.getOwnedAnimals()) {
+            animal.updateMovement(delta);
+            animal.updateIsInHabitat();
+
+            // Only try to assign a new path if animal is not moving
+            // and its personal cooldown allows it
+            if (!animal.isMoving() && animal.isInHabitat()) {
+                animal.reduceCooldown(delta);
+
+                if (animal.getMovementCooldown() <= 0f) {
+                    List<Tile> path = generateStepwisePath(animal);
+
+                    // ✅ Check Euclidean distance
+                    if (!path.isEmpty()) {
+                        Tile first = animal.getCurrentTile();
+                        Tile last = path.get(path.size() - 1);
+                        double distance = Math.sqrt(Math.pow(first.getX() - last.getX(), 2) +
+                            Math.pow(first.getY() - last.getY(), 2));
+                        if (distance > 5) {
+                            path.clear(); // Ignore
+                        }
+                    }
+
+                    if (!path.isEmpty()) {
+                        animal.setPathToTarget(path);
+                        animal.resetCooldown(); // reset after assigning path
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+    private List<Tile> generateStepwisePath(Animal animal) {
+        Tile start = animal.getCurrentTile();
+        Tile target = findRandomTargetTileWithinDistance(start, 5);
+        if (target == null) return new ArrayList<>();
+
+        return findShortestPath(start, target, 5);
+    }
+    private Tile findRandomTargetTileWithinDistance(Tile start, int maxDistance) {
+        List<Tile> candidates = new ArrayList<>();
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+
+        for (int dx = -maxDistance; dx <= maxDistance; dx++) {
+            for (int dy = -maxDistance; dy <= maxDistance; dy++) {
+                int nx = start.getX() + dx;
+                int ny = start.getY() + dy;
+                double distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > maxDistance || distance == 0) continue;
+
+                Tile candidate = map.getTile(nx, ny);
+                if (candidate != null && candidate.isBuildable() &&
+                    candidate.getContainedAnimal() == null) {
+                    candidates.add(candidate);
+                }
+            }
+        }
+
+        if (candidates.isEmpty()) return null;
+
+        return candidates.get(new Random().nextInt(candidates.size()));
+    }
+    private List<Tile> findShortestPath(Tile start, Tile goal, int maxSteps) {
+        Queue<Tile> queue = new LinkedList<>();
+        Map<Tile, Tile> cameFrom = new HashMap<>();
+        Set<Tile> visited = new HashSet<>();
+
+        queue.add(start);
+        visited.add(start);
+        cameFrom.put(start, null);
+
+        while (!queue.isEmpty()) {
+            Tile current = queue.poll();
+
+            if (current.equals(goal)) break;
+
+            for (Tile neighbor : getWalkableNeighbors(current)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    cameFrom.put(neighbor, current);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        // Reconstruct path
+        List<Tile> path = new LinkedList<>();
+        Tile step = goal;
+        while (step != null && !step.equals(start)) {
+            path.add(0, step);
+            step = cameFrom.get(step);
+        }
+
+        if (path.size() > maxSteps) return new ArrayList<>();
+        return path;
+    }
+    private List<Tile> getWalkableNeighbors(Tile tile) {
+        List<Tile> neighbors = new ArrayList<>();
+        int[][] directions = { {1,0}, {-1,0}, {0,1}, {0,-1} }; // 4-directional
+
+        for (int[] dir : directions) {
+            int nx = tile.getX() + dir[0];
+            int ny = tile.getY() + dir[1];
+            Tile neighbor = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
+            if (neighbor != null && neighbor.isBuildable() && neighbor.getContainedAnimal() == null) {
+                neighbors.add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
+
+    private void drawAnimals(int rows, int tileSize) {
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            for (Animal animal : player.getOwnedAnimals()) {
+                float x, y;
+
+                if (animal.isMoving()) {
+                    Tile from = animal.getMovingFrom();
+                    Tile to = animal.getMovingTo();
+                    float p = animal.getMoveProgress();
+
+                    x = MathUtils.lerp(from.getX(), to.getX(), p) * tileSize;
+                    y = MathUtils.lerp(
+                        rows - from.getY() - 1,
+                        rows - to.getY() - 1,
+                        p
+                    ) * tileSize;
+                } else {
+                    x = animal.getCurrentTile().getX() * tileSize;
+                    y = (rows - animal.getCurrentTile().getY() - 1) * tileSize;
+                }
+
+                batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
+            }
+        }
+    }
+
+    private void drawShapeRenderer(Tile[][] tiles, int tileSize) {
+        if (isPlacingBuilding && currentFarm != null) {
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            ShapeRenderer shapeRenderer = new ShapeRenderer();
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+            for (int y = currentFarm.getY(); y < currentFarm.getY() + currentFarm.getHeight(); y++) {
+                for (int x = currentFarm.getX(); x < currentFarm.getX() + currentFarm.getWidth(); x++) {
+                    Tile tile = tiles[y][x];
+
+                    float drawX = x * tileSize;
+                    float drawY = (tiles.length - y - 1) * tileSize;
+
+                    if (tile != null && tile.isBuildable()) {
+                        shapeRenderer.setColor(1f, 1f, 1f, 0.0f);
+                    } else {
+                        shapeRenderer.setColor(0f, 0f, 0f, 0.35f);
+                    }
+                    shapeRenderer.rect(drawX, drawY, tileSize, tileSize);
+                }
+            }
+
+            shapeRenderer.end();
+            shapeRenderer.dispose();
+
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+    }
+
+
     @Override
     public boolean keyDown(int keycode) {
         if (keycode == Input.Keys.M) {
             showFullMap = !showFullMap;  // toggle map mode
             setCameraPosition();         // update camera immediately
-            controller.printMap("0","0","150");
+            //controller.printMap("0","0","150");
             return true;
         }
+
         if (keycode == Input.Keys.F) {
             Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
             for (int i = 0; i < map.length; i++) {
@@ -147,23 +430,130 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             machine.useMachine("Coffee",currentPlayer);
             MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse().getMachines().add(machine);
         }
-        if (keycode == Input.Keys.X) {
+        if (keycode == Input.Keys.U) {
             Tile tile = currentPlayer.getCurrentTile();
             Machine machine = (Machine) tile.getContainedItem();
             System.out.println(machine.getHoursLeft());
             System.out.println(machine.getMaxProcessTime());
         }
+        if (keycode == Input.Keys.X) {
+            showFullMap = false;  // ✅ disable full map so farm zoom works
+            // buildingToPlace = new Habitat(0, 0, 2, 2, StorageType.INITIAL, Habitat.HabitatType.Barn);
+            isPlacingBuilding = !isPlacingBuilding;
+            //startPlacingBuilding(buildingToPlace);
+            return true;
+
+        }
+        if(keycode == Input.Keys.L) {
+            currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+            Tile tile = currentPlayer.getCurrentTile();
+            Tile neededTile = MainApp.getInstance().getCurrentGame().getMap().getTile(tile.getX() - 1, tile.getY());
+            System.out.println(neededTile);
+            System.out.println(neededTile.getContainedGrowable());
+            System.out.println(neededTile.getContainedItem());
+            System.out.println(neededTile.getContainedNPC());
+            System.out.println(neededTile.getProductOfGrowable());
+            System.out.println(neededTile.isHasBeenBurt());
+            System.out.println(neededTile.getisWalkable());
+            System.out.println(neededTile.getContainedAnimal());
+        }
+
+        if(keycode == Input.Keys.C){
+            controller.crowAttack();
+        }
+
+        if(keycode == Input.Keys.E){
+            System.out.println(currentPlayer.getEnergy());
+        }
+        if(keycode == Input.Keys.I){
+            currentPlayer.setEnergy(200);
+            currentPlayer.setFainted(false);
+        }
+//        if(keycode == Input.Keys.Q) {
+//            MainApp.getInstance().getCurrentGame().getFriendship("user44", "john").setLevel(3);
+//            currentPlayer.getRecievedGift().add(new Gift("john", "user44", new randomStuff(10, randomStuffType.Stone), 5));
+//            controller.sendGift("john", "Stone", "10");
+//        }
+        if (keycode == Input.Keys.P) {
+            Animal animal = getAnimalNearPlayer();
+            if (animal != null) {
+                Result result = controller.petAnimal(animal.getName());
+                if (result.isSuccessful()) {
+                    Tile tile = animal.getCurrentTile();
+                    Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                    int tileSize = GameAssetManager.TILE_SIZE;
+                    int rows = tiles.length;
+                    float heartX = tile.getX() * tileSize + (tileSize / 2);
+                    float heartY = (rows - tile.getY() - 1) * tileSize + (tileSize);
+                    //float drawY = (rows - y - 1) * tileSize + tileSize + 4;
+//                    float heartX = tile.getX() * TILE_SIZE;
+//                    float heartY = tile.getY() * TILE_SIZE + 32;
+                    heartEffects.add(new HeartEffect(heartX, heartY));
+                }
+            }
+        }
 
         if (showFullMap) return true;
-
-
         return false;
+}
+    private Animal getAnimalNearPlayer() {
+        int playerX = currentPlayer.getCurrentTile().getX();
+        int playerY = currentPlayer.getCurrentTile().getY();
 
-
+        for (Animal animal : currentPlayer.getOwnedAnimals()) {
+            Tile tile = animal.getCurrentTile();
+            int dx = Math.abs(tile.getX() - playerX);
+            int dy = Math.abs(tile.getY() - playerY);
+            if ((dx == 1 && dy == 0) || (dx == 0 && dy == 1)) {
+                return animal;
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
+            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+
+            if (isInsideFarm(tileX, tileY)) {
+
+                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+
+                if (tile != null && tile.isBuildable()) {
+                    if (buildingToPlace == null || storeController.isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
+                        Result result;
+                        if (buildingToPlace == null) {
+                            result = storeController.buyFromCarpenter("Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+                        } else {
+                            buildingToPlace.setX(tileX);
+                            buildingToPlace.setY(tileY);
+                            result = storeController.buyFromCarpenter(buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+                        }
+                        if (result.isSuccessful()) {
+                            //updateHabitatTiles();
+                            showErrorDialog(stage, "Building placed!");
+                        } else {
+                            showErrorDialog(stage, result.message());
+                        }
+                    } else {
+                        showErrorDialog(stage, "Building doesnt fit here!");
+                    }
+                } else {
+                    showErrorDialog(stage, "Tile is not buildable.");
+                }
+            } else {
+                showErrorDialog(stage, "Please click inside your farm.");
+            }
+            //setBuilding(new Building(buildingToPlace));
+            isPlacingBuilding = false;
+            buildingToPlace = null;
+            currentFarm = null;
+            return true;
+        }
+
         if (!terminalVisible) {
             //&&  button == Input.Buttons.RIGHT) {
             // Convert screen coordinates to world coordinates
@@ -200,7 +590,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                         return true;
                     }
                 }
-
+//                if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
+//                    //TODO: open inventory
+//                    //TODO: open a very similar dialog to purchase window
+//                    //TODO: call storeController.placingInShippingBin
+//                }
                 if (tile != null && tile.getContainedItem() != null && tile.getContainedItem() instanceof Machine) {
                     System.out.println("machine");
                     selectedMachine = (Machine)tile.getContainedItem();
@@ -219,8 +613,48 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     return true;
                 }
             }
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            stage.getCamera().unproject(touchPos); // convert to stage coords
+            float mouseX = touchPos.x;
+            float mouseY = touchPos.y;
+
+            if(isClickInside(mouseX, mouseY, friendsButton)){
+                if (friendsDialog != null) {
+                    friendsDialog.remove();
+                }
+                createFriendsDialog();
+                friendsDialog.setVisible(true);
+                friendsDialog.show(stage);
+                Gdx.input.setInputProcessor(stage);
+                return true;
+            }
+
+
         }
         return false;
+    }
+
+    public void updateHabitatTiles() {
+        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        for (int y = buildingToPlace.getY(); y < buildingToPlace.getY() + buildingToPlace.getHeight(); y++) {
+            for (int x = buildingToPlace.getX(); x < buildingToPlace.getX() + buildingToPlace.getWidth(); x++) {
+                Tile tile = tiles[y][x];
+                if (tile != null) {
+                    if (buildingToPlace.getHabitatType() == Habitat.HabitatType.Barn ||
+                        buildingToPlace.getHabitatType() == Habitat.HabitatType.Big_Barn ||
+                        buildingToPlace.getHabitatType() == Habitat.HabitatType.Deluxe_Barn) {
+                        tile.setType(TileType.BARN);
+                    } else {
+                        tile.setType(TileType.CAGE);
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean isInsideFarm(int tileX, int tileY) {
+        return tileX >= currentFarm.getX() && tileX < currentFarm.getX() + currentFarm.getWidth() &&
+            tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight();
     }
 
 
@@ -259,57 +693,158 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         return false;
     }
 
-    private void showShopMenuDialog(float x, float y) {
-        shopMenuDialog.clear();
-        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+            private void showShopMenuDialog(float x, float y) {
+                shopMenuDialog.getContentTable().clear();
+                shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
-        // Create a table for item buttons
-        Table itemTable = new Table();
-        itemTable.top(); // align buttons to the top
-        itemTable.defaults().pad(5).fillX();
+                Table content = shopMenuDialog.getContentTable();
+                content.defaults().pad(10);
+                content.clear();
 
-        for (ShopItem item : selectedShop.getProducts()) {
-            boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+                // Filter dropdown (SelectBox)
+                Table filterTable = new Table();
+                SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
+                filterSelectBox.setItems("All Products", "Available Products");
+                filterSelectBox.setSelected("All Products"); // default selection
+                filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
+                filterTable.add(filterSelectBox).left();
 
-            TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin);
-            itemButton.setDisabled(!isAvailable);
-            itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+                content.add(filterTable).left().row();
 
-            itemButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    selectedShopItem = item;
-                    purchaseQuantity = 1;
-                    showPurchaseDialog();
-                    shopMenuDialog.hide();
-                }
-            });
+                // Item list table
+                final Table itemTable = new Table();
+                itemTable.top();
+                itemTable.defaults().pad(5).fillX();
 
-            itemTable.add(itemButton).expandX().fillX().row();
-        }
+                // Refresh logic for filtering
+                Runnable refreshItems = () -> {
+                    itemTable.clear();
+                    boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
 
-        // Wrap the table in a ScrollPane
-        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
-        scrollPane.setFadeScrollBars(false);
-        scrollPane.setScrollingDisabled(true, false); // only vertical scroll
-        scrollPane.setForceScroll(false, true);
-        scrollPane.layout(); // force layout of scrollPane
+                    for (final ShopItem item : selectedShop.getProducts()) {
+                        boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
 
-        // Add scrollPane to dialog content
-        Table content = shopMenuDialog.getContentTable();
+                        if (onlyAvailable && !isAvailable) continue;
+
+                        TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
+                        itemButton.setDisabled(!isAvailable);
+                        itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+
+                        itemButton.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                selectedShopItem = item;
+                                if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
+                                    || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
+                                    showFullFarm(item);
+                                } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
+                                    showBuyAnimalDialog(item);
+                                } else {
+                                    purchaseQuantity = 1;
+                                    showPurchaseDialog();
+                                }
+                                //TODO:upgrade tool menu?
+                                shopMenuDialog.hide();
+                            }
+                        });
+
+                        itemTable.add(itemButton).expandX().fillX().row();
+                    }
+                };
+
+                // Listener for dropdown change
+                filterSelectBox.addListener(new ChangeListener() {
+                    @Override
+                    public void changed(ChangeEvent event, Actor actor) {
+                        refreshItems.run();
+                    }
+                });
+
+                // Scrollable list for items
+                ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+                scrollPane.setFadeScrollBars(false);
+                scrollPane.setScrollingDisabled(true, false);
+                scrollPane.setForceScroll(false, true);
+                scrollPane.layout();
+
+                content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
+
+                // Initial load
+                refreshItems.run();
+
+                shopMenuDialog.pack();
+                shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+
+                shopMenuDialog.setVisible(true);
+                shopMenuDialog.show(stage);
+                Gdx.input.setInputProcessor(stage);
+            }
+
+    public void showBuyAnimalDialog(ShopItem item) {
+        buyAnimalDialog.getContentTable().clear();
+        buyAnimalDialog.getTitleLabel().setText("Buy " + item.getName());
+
+        Table content = buyAnimalDialog.getContentTable();
         content.clear();
         content.defaults().pad(10);
-        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2); // adjust as needed
 
-        shopMenuDialog.add(content);
-        shopMenuDialog.pack();
-        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+        // Label + TextField for animal name input
+        Label nameLabel = new Label("Animal Name:", GameAssetManager.skin, "custom-label");
+        final TextField nameField = new TextField("", GameAssetManager.skin);
+        nameField.setMessageText("Enter name...");
 
-        shopMenuDialog.setVisible(true);
-        shopMenuDialog.show(stage);
+        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+
+        buyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String enteredName = nameField.getText().trim();
+
+                if (enteredName.isEmpty()) {
+                    showErrorDialog(stage, "Please enter a name for the animal.");
+                    return;
+                }
+
+                Result result = storeController.buyAnimal(item.getName(), enteredName);
+                buyAnimalDialog.hide();
+                showErrorDialog(stage, result.message());
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                buyAnimalDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        content.add(nameLabel).left().row();
+        content.add(nameField).width(300).row();
+        content.add(buyButton).colspan(2).padTop(10).row();
+        content.add(cancelButton).colspan(2);
+
+        buyAnimalDialog.pack();
+        buyAnimalDialog.setPosition(
+            (Gdx.graphics.getWidth() - buyAnimalDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - buyAnimalDialog.getHeight()) / 2
+        );
+
+        buyAnimalDialog.setVisible(true);
+        buyAnimalDialog.show(stage);
         Gdx.input.setInputProcessor(stage);
     }
 
+
+    public void showFullFarm(ShopItem item) {
+        showFullMap = false;  // ✅ disable full map so farm zoom works
+        if (item.getShopItemType() != ShopItemType.SHIPPING_BIN) {
+            buildingToPlace = (Habitat) item.getItem();
+        }
+        isPlacingBuilding = true;
+        startPlacingBuilding(buildingToPlace);
+    }
 
     private void showPurchaseDialog() {
         shopPurchaseDialog.clear();
@@ -319,11 +854,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         content.clear();
         content.defaults().pad(10);
 
-        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin);
-        TextButton plusButton = new TextButton("+", GameAssetManager.skin);
-        TextButton minusButton = new TextButton("-", GameAssetManager.skin);
-        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin);
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
+        TextButton buyButton = new TextButton("Buy", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+
 
         plusButton.addListener(new ClickListener() {
             @Override
@@ -374,6 +910,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             (Gdx.graphics.getWidth() - shopPurchaseDialog.getWidth()) / 2,
             (Gdx.graphics.getHeight() - shopPurchaseDialog.getHeight()) / 2
         );
+
         shopPurchaseDialog.setVisible(true);
         shopPurchaseDialog.show(stage);
         Gdx.input.setInputProcessor(stage);
@@ -389,26 +926,114 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         createMachineDialog();
     }
 
+    private void createShopMenusDialogs() {
+        shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "custom-window");
+        shopMenuDialog.padTop(40f);
+        shopMenuDialog.setKeepWithinStage(true);
+        shopMenuDialog.setMovable(false);
+        shopMenuDialog.setVisible(false);
+        stage.addActor(shopMenuDialog);
+
+        shopPurchaseDialog = new Dialog("Purchase", GameAssetManager.skin, "custom-window");
+        shopPurchaseDialog.padTop(40f);
+        shopPurchaseDialog.setKeepWithinStage(true);
+        shopPurchaseDialog.setMovable(false);
+        shopPurchaseDialog.setVisible(false);
+        stage.addActor(shopPurchaseDialog);
+
+        buyAnimalDialog = new Dialog("Buy Animal", GameAssetManager.skin, "custom-window");
+        buyAnimalDialog.padTop(40f);
+        buyAnimalDialog.setKeepWithinStage(true);
+        buyAnimalDialog.setMovable(false);
+        buyAnimalDialog.setVisible(false);
+        stage.addActor(buyAnimalDialog);
+    }
+
     private void createTerminal() {
         terminalWindow = new TerminalWindow(GameAssetManager.skin, this);
         terminalWindow.setVisible(false);
         stage.addActor(terminalWindow);
     }
 
-    private void createShopMenusDialogs() {
-        shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "dialog");
-        shopMenuDialog.setKeepWithinStage(true);
-        shopMenuDialog.setMovable(false);
-        shopMenuDialog.setVisible(false);
-        stage.addActor(shopMenuDialog);
+    private void createAnimalDialog() {
+        // Create the animal menu dialog (initially hidden)
+        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                handleAnimalMenuChoice(object.toString());
+            }
+        };
+        animalMenuDialog.padTop(40);
+        animalMenuDialog.getContentTable().defaults().pad(10);
 
-        shopPurchaseDialog = new Dialog("Purchase", GameAssetManager.skin, "dialog");
-        shopPurchaseDialog.setKeepWithinStage(true);
-        shopPurchaseDialog.setMovable(false);
-        shopPurchaseDialog.setVisible(false);
-        stage.addActor(shopPurchaseDialog);
+        // Add buttons with their result objects
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
+        feedButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("feed");
+            }
+        });
+
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
+        petButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("pet");
+            }
+        });
+
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
+        releaseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("release");
+            }
+        });
+
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
+        sellButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("sell");
+            }
+        });
+
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
+        collectButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("collect");
+            }
+        });
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
+                selectedAnimal = null;
+            }
+        });
+
+        animalMenuDialog.getContentTable().add(feedButton).row();
+        animalMenuDialog.getContentTable().add(petButton).row();
+        animalMenuDialog.getContentTable().add(releaseButton).row();
+        animalMenuDialog.getContentTable().add(sellButton).row();
+        animalMenuDialog.getContentTable().add(collectButton).row();
+        animalMenuDialog.getContentTable().add(cancelButton);
+
+        animalMenuDialog.setKeepWithinStage(true);
+        animalMenuDialog.setMovable(false);
+        animalMenuDialog.setVisible(false);  // Add this after creation
+        stage.addActor(animalMenuDialog);
     }
-
     private void createMachineDialog() {
         // Create the animal menu dialog (initially hidden)
         machineMenuDialog = new Dialog("Machine Menu", GameAssetManager.skin, "dialog") {
@@ -543,93 +1168,202 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 result = new Result(false, choice);
                 break;
         }
-         if (result != null) {
-        showErrorDialog(stage, result.message());
-         }
+        if (result != null) {
+            showErrorDialog(stage, result.message());
+        }
         machineMenuDialog.hide();
         // Gdx.input.setInputProcessor(this);  // Return input to game
         selectedMachine = null;
     }
 
-    private void createAnimalDialog() {
-        // Create the animal menu dialog (initially hidden)
-        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "dialog") {
-            @Override
-            protected void result(Object object) {
-                handleAnimalMenuChoice(object.toString());
+    private void createFriendsDialog() {
+        friendsDialog = new Dialog("Friends", GameAssetManager.skin, "custom-window");
+        friendsDialog.padTop(40);
+        //friendsDialog.getContentTable().debug(); // show layout
+        Table content = friendsDialog.getContentTable();
+        content.defaults().pad(10).expandX().fillX();
+        //content.debug();
+
+        for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(friend.getUsername())) {
+                continue;
             }
-        };
+            Table row = new Table();
+            Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
+            int level = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), friend.getUsername()).getLevel();
+            System.out.println(level);
+            Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
+            TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
+            TextButton receivedButton = new TextButton("Received", GameAssetManager.skin, "custom-button");
+            TextButton sentButton = new TextButton("Sent", GameAssetManager.skin, "custom-button");
 
-        animalMenuDialog.getContentTable().defaults().pad(10);
+            giftButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    //TODO : send gift via inventory (sendGift method)
+                    //send a notif for the friend that we sent the gift for
+                }
+            });
+            receivedButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    showReceivedGifts(friend);
 
-        // Add buttons with their result objects
-        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin);
-        feedButton.addListener(new ClickListener() {
+                }
+            });
+            sentButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    List<Gift> sentGifts = new ArrayList<>();
+                    for(User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()) {
+                        if(otherPlayer.getUsername().equals(currentPlayer.getUsername())) {
+                            continue;
+                        }
+                        Friendship friendship = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), otherPlayer.getUsername());
+                        List<Gift> allGits = friendship.getGifts();
+                        for(Gift gift : allGits) {
+                            if(gift.getSender().equals(currentPlayer.getUsername())) {
+                                sentGifts.add(gift);
+                            }
+                        }
+                    }
+                    showSentGiftsDialog(sentGifts);
+                }
+            });
+
+            row.add(nameLabel).left().pad(100);
+            row.add(levelLabel).pad(100);
+            row.add(giftButton).pad(100);
+            row.add(receivedButton).pad(100);
+            row.add(sentButton).right().pad(100);
+            content.add(row).fillX().row();
+        }
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                handleAnimalMenuChoice("feed");
+                friendsDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
             }
         });
+        content.add(closeButton).row();
 
-        TextButton petButton = new TextButton("Pet", GameAssetManager.skin);
-        petButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                handleAnimalMenuChoice("pet");
-            }
-        });
-
-        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin);
-        releaseButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                handleAnimalMenuChoice("release");
-            }
-        });
-
-        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin);
-        sellButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                handleAnimalMenuChoice("sell");
-            }
-        });
-
-        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin);
-        collectButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                handleAnimalMenuChoice("collect");
-            }
-        });
-
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
-        cancelButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                animalMenuDialog.hide();
-                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
-                selectedAnimal = null;
-            }
-        });
-
-        animalMenuDialog.getContentTable().add(feedButton).row();
-        animalMenuDialog.getContentTable().add(petButton).row();
-        animalMenuDialog.getContentTable().add(releaseButton).row();
-        animalMenuDialog.getContentTable().add(sellButton).row();
-        animalMenuDialog.getContentTable().add(collectButton).row();
-        animalMenuDialog.getContentTable().add(cancelButton);
-
-        animalMenuDialog.setKeepWithinStage(true);
-        animalMenuDialog.setMovable(false);
-        animalMenuDialog.setVisible(false);  // Add this after creation
-        stage.addActor(animalMenuDialog);
+        friendsDialog.pack();
+        friendsDialog.setPosition(20, 220);
+        friendsDialog.setVisible(false);
+        stage.addActor(friendsDialog);
     }
+
+    private void showReceivedGifts(User friend) {
+        Dialog receivedGiftsDialog = new Dialog("Received Gifts from " + friend.getUsername(), GameAssetManager.skin, "custom-window");
+        receivedGiftsDialog.padTop(40);
+        Table giftTable = receivedGiftsDialog.getContentTable();
+        giftTable.defaults().pad(10).expandX().fillX();
+
+        List<Gift> receivedGifts = MainApp.getInstance().getCurrentGame()
+            .getCurrentPlayer().getRecievedGift()
+            .stream().filter(g -> g.getSender().equals(friend.getUsername()))
+            .collect(Collectors.toList());
+
+        if (receivedGifts.isEmpty()) {
+            giftTable.add(new Label("No gifts received from " + friend.getUsername(), GameAssetManager.skin, "custom-label")).row();
+        } else {
+            int index = 1;
+            for (Gift gift : receivedGifts) {
+                final int giftIndex = index;
+
+                Label giftLabel = new Label(gift.getItem().getName() + "(from :" + gift.getSender() + ")",
+                    GameAssetManager.skin, "custom-label");
+
+                // Create a dropdown or rating selector
+                SelectBox<String> ratingBox = new SelectBox<>(GameAssetManager.skin);
+                ratingBox.setItems("1", "2", "3", "4", "5");
+                ratingBox.setSelected("3");
+
+                TextButton rateButton = new TextButton("Rate", GameAssetManager.skin, "custom-button");
+                rateButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        String resultMessage;
+                        try {
+                            Result result = controller.rateGifts(String.valueOf(giftIndex), ratingBox.getSelected());
+                            resultMessage = result.getMessage();
+                        } catch (Exception e) {
+                            resultMessage = "Error rating gift: " + e.getMessage();
+                        }
+
+                        Dialog resultDialog = new Dialog("Result", GameAssetManager.skin, "custom-window");
+                        Label resultLabel = new Label(resultMessage, GameAssetManager.skin, "custom-label");
+                        resultDialog.getContentTable().add(resultLabel).pad(20).row();
+                        TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+                        resultDialog.button(okButton, true);
+                        resultDialog.show(stage);
+                    }
+                });
+
+                Table giftRow = new Table();
+                giftRow.add(giftLabel).pad(10).left();
+                giftRow.add(ratingBox).pad(10).width(80);
+                giftRow.add(rateButton).pad(10).right();
+                giftTable.add(giftRow).row();
+
+                index++;
+            }
+        }
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                receivedGiftsDialog.hide();
+            }
+        });
+
+        giftTable.add(closeButton).colspan(3).center().row();
+
+        receivedGiftsDialog.pack();
+        receivedGiftsDialog.setPosition(100, 200);
+        receivedGiftsDialog.show(stage);
+    }
+
+    public void showSentGiftsDialog(List<Gift> sentGifts) {
+        Dialog sentDialog = new Dialog("Sent Gifts", GameAssetManager.skin, "custom-window");
+        sentDialog.padTop(40);
+
+        Table content = sentDialog.getContentTable();
+        content.defaults().pad(10).expandX().fillX();
+
+        if (sentGifts == null || sentGifts.isEmpty()) {
+            Label emptyLabel = new Label("You haven't sent any gifts yet.", GameAssetManager.skin, "custom-label");
+            content.add(emptyLabel).center().row();
+        } else {
+            int index = 1;
+            for (Gift gift : sentGifts) {
+                Label giftLabel = new Label("Gift #" + index + " → " + gift.getReceiver()
+                    + " (" + gift.getItem().getName() + ")", GameAssetManager.skin, "custom-label");
+
+                content.add(giftLabel).left().padBottom(5).row();
+                index++;
+            }
+        }
+
+        // Add OK button with custom style
+        TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                sentDialog.hide();
+            }
+        });
+
+        content.add(okButton).center().padTop(20).row();
+
+        sentDialog.pack();
+        sentDialog.setPosition(100, 200);
+        sentDialog.show(stage);
+    }
+
 
 
 
@@ -687,6 +1421,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         batch.setProjectionMatrix(camera.combined);
         createUI();
 
+        clockHud = new ClockHud(stage);
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(200, 200);
         friendsButton.setColor(Color.PURPLE);
@@ -703,22 +1438,20 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
         }, 5, 5);
+
+        determineAvatar();
+    }
+
+    private void determineAvatar() {
+        switch (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getAvatar()){
+            case Abigail -> playerAnimations = GameAssetManager.abigailAnimations;
+            case Alex -> playerAnimations = GameAssetManager.alexAnimations;
+            case Shane -> playerAnimations = GameAssetManager.shaneAnimations;
+            case Haley -> playerAnimations = GameAssetManager.haleyAnimations;
+        }
     }
 
 
-
-//    @Override
-//    public void show() {
-//        stage = new Stage(new ScreenViewport());
-//        mapOfGame = MainApp.getInstance().getCurrentGame().getMap();
-//        camera = new OrthographicCamera();
-//        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        setCameraPosition();
-//        camera.update();
-//        Gdx.input.setInputProcessor(this);
-//        batch.setProjectionMatrix(camera.combined);
-//        createUI();
-//    }
     @Override
     public void render(float v) {
         for (LightningFlash flash : activeFlashes) {
@@ -759,12 +1492,14 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         activeFlashes.removeIf(flash -> !flash.isActive());
 
+        updateCrowFlightSpawn();
 
         stateTime += Gdx.graphics.getDeltaTime();
         Gdx.gl.glClearColor(0, 0, 0, 1); // clear with black
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         setCameraPosition();
+        camera.update();
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -776,8 +1511,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int rows = tiles.length;
         drawTiles(rows,tiles,tileSize);
         drawGreenHouse(tileSize,rows);
-        drawShops(tileSize,rows);
-
+                drawHabitats(tileSize, rows);
+                drawShops(tileSize,rows);
 //TODO : handle Giant Crop
         //TODO : handle burnt plants
         for (int y = 0; y < rows; y++) {
@@ -794,28 +1529,18 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
 
-        for (int y = 0; y < rows; y++) {
-            for (int x = 0; x < tiles[0].length; x++) {
-                Tile tile = tiles[y][x];
-                if (tile != null && tile.getContainedAnimal() != null) {
-                    batch.draw(tile.getContainedAnimal().getAnimalType().getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                }
-            }
-        }
+                updateAnimals(v);
+                drawAnimals(rows, tileSize);
 
         drawPlayer();
-        if (!showFullMap && !terminalVisible) {
-            moveCooldown -= v;
-            if (moveCooldown <= 0f) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 4)) moveCooldown = MOVE_INTERVAL;
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
-                }
+        // --- DRAW HEART EFFECTS ---
+        Iterator<HeartEffect> iterator = heartEffects.iterator();
+        while (iterator.hasNext()) {
+            HeartEffect effect = iterator.next();
+            effect.update(Gdx.graphics.getDeltaTime());
+            effect.draw(batch);
+            if (effect.isFinished()) {
+                iterator.remove();
             }
         }
         float camX = camera.position.x - camera.viewportWidth / 2f;
@@ -836,6 +1561,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
 
+        renderCrowFlights(batch, v);
+
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             terminalVisible = !terminalVisible;
@@ -850,8 +1577,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Gdx.input.setInputProcessor(this);
             }
         }
+        setCameraPosition();
+        camera.update();
         batch.setColor(darkOverlayColor);
-        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth, camera.viewportHeight);
+        batch.draw(GameAssetManager.pixel, camX, camY, camera.viewportWidth * 50 , camera.viewportHeight * 50);
         batch.setColor(Color.WHITE);
         for (LightningFlash flash : activeFlashes) {
             if (flash.isActive()) {
@@ -861,14 +1590,54 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
        batch.setColor(Color.WHITE);
+//        TimeAndDate timeAndDate = MainApp.getInstance().getCurrentGame().getTimeAndDate();
+//        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
+//            Integer.toString(currentPlayer.getMoney()));
+
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted()) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
 
         batch.end(); // ✅ this must come BEFORE stage rendering
 
+                                drawShapeRenderer(tiles, tileSize);
+
+        drawClock(v);
+
         // --- DRAW UI ---
-        handleInput();
+        //handleInput();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
+
+    private void drawClock(float v) {
+        int hour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // 0 to 23
+
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+
+        String timeStr = displayHour + (hour >= 12 ? " p.m." : " a.m.");
+        clockHud.updateTime(hour, timeStr);
+        clockHud.updateDate(MainApp.getInstance().getCurrentGame().getTimeAndDate().getDayOfWeek().name() +
+            MainApp.getInstance().getCurrentGame().getTimeAndDate().getDay());
+        clockHud.updateMoney(currentPlayer.getMoney());
+        clockHud.updateWeather(MainApp.getInstance().getCurrentGame().getCurrentWeatherType());
+        clockHud.updateSeason(MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason());
+
+        clockHud.draw(v);
+    }
+
     private void drawItems(Tile[][] tiles, int y, int x, int tileSize, int rows) {
         if (tiles[y][x].getContainedItem() instanceof ForagingMineral foraging) {
             batch.draw(foraging.getType().getTexture(),
@@ -1002,7 +1771,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 7 * tileSize
             );
         }
-
     }
     private void drawShops(int tileSize, int rows) {
         List<Shop> shops = MainApp.getInstance().getCurrentGame().getMap().getShops(); // <-- Ensure you have this method
@@ -1025,6 +1793,57 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         }
     }
+    private void drawHabitats(int tileSize, int rows) {
+        for (Farm farm : MainApp.getInstance().getCurrentGame().getMap().getFarms()) {
+            for (Habitat barn : farm.getBarn()) {
+                int drawX = (barn.getX()) * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - barn.getY() - barn.getHeight()) * tileSize;
+
+                for (int j = barn.getX(); j < barn.getX() + barn.getWidth(); j++) {
+                    for (int i = barn.getY(); i < barn.getY() + barn.getHeight(); i++) {
+                        batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+                Texture texture = barn.getHabitatType().getTexture();
+                batch.draw(
+                    texture,
+                    drawX,
+                    drawY,
+                    barn.getWidth() * tileSize,
+                    barn.getHeight() * tileSize
+                );
+            }
+            for (Habitat cage : farm.getCage()) {
+                int drawX = (cage.getX()) * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getHeight() - cage.getY() - cage.getHeight()) * tileSize;
+
+                for (int j = cage.getX(); j < cage.getX() + cage.getWidth(); j++) {
+                    for (int i = cage.getY(); i < cage.getY() + cage.getHeight(); i++) {
+                        batch.draw(TileType.FARM.getTexture(), j * tileSize, (rows - i - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+                Texture texture = cage.getHabitatType().getTexture();
+                batch.draw(
+                    texture,
+                    drawX,
+                    drawY,
+                    cage.getWidth() * tileSize,
+                    cage.getHeight() * tileSize
+                );
+            }
+            Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < tiles[0].length; x++) {
+                    Tile tile = tiles[y][x];
+                    if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
+                        batch.draw(TileType.FARM.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                        batch.draw(GameAssetManager.Shipping_Bin, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+
+        }
+    }
     private void drawTiles(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -1043,7 +1862,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public void resize(int width, int height) {
         camera.setToOrtho(false, width, height);
         camera.update();
-
+        clockHud.resize(width, height);
         // Update stage viewport
         //stage.getViewport().update(width, height, true);
     }
@@ -1065,7 +1884,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public void dispose() {
-
+        clockHud.dispose();
     }
 
     private void drawPlayer() {
@@ -1081,48 +1900,21 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         int drawX = tileX * tileSize;
         int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tileY - 1) * tileSize;
 
-        // Clamp moveDirection to valid index range
-        int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, GameAssetManager.playerAnimations.size() - 1);
+        if(!currentPlayer.hasFainted()) {
+            // Clamp moveDirection to valid index range
+            int moveDirection = MathUtils.clamp(currentPlayer.getMovingDirection(), 0, playerAnimations.size() - 1);
 
-        Animation<TextureRegion> currentAnimation = GameAssetManager.playerAnimations.get(moveDirection);
-        TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
+            Animation<TextureRegion> currentAnimation = playerAnimations.get(moveDirection);
+            TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
 
-        // Draw player with height of 2 tiles
-        batch.draw(currentFrame, drawX, drawY, tileSize, tileSize * 2);
-    }
-
-
-    private void setCameraPosition() {
-        if (showFullMap) {
-            // Full map view
-            float mapWidth = MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length * GameAssetManager.TILE_SIZE;
-            float mapHeight = MainApp.getInstance().getCurrentGame().getMap().getMap().length * GameAssetManager.TILE_SIZE;
-
-            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            camera.position.set(mapWidth / 2f, mapHeight / 2f, 0);
-
-            // Zoom out to fit entire map
-            float zoomX = mapWidth / camera.viewportWidth;
-            float zoomY = mapHeight / camera.viewportHeight;
-            camera.zoom = Math.max(zoomX, zoomY);
-
-        } else {
-            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
-
-            camera.zoom = 1f;
-            camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            int tileSize = GameAssetManager.TILE_SIZE;
-
-            // Get player's tile position
-            Tile tile = currentPlayer.getCurrentTile();
-            float drawX = tile.getX() * tileSize + tileSize / 2f;
-            float drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
-
-            // Set camera to center on that position
-            camera.position.set(drawX, drawY, 0);
-            camera.update();
+            // Draw player with height of 2 tiles
+            batch.draw(currentFrame, drawX, drawY, tileSize, tileSize * 2);
         }
-    }
+        else{
+            //batch.draw(GameAssetManager.playerAtlas.findRegion("player_0_1"), drawX, drawY, tileSize, tileSize * 2);
+        }
+            }
+
 
     public Point findTopLeftOfGiantCropSquare(int x, int y, int rows, int cols, boolean isProduct) {
         // 4 possible 2x2 square orientations around (x, y)
@@ -1161,64 +1953,6 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             return map[y][x].getContainedGrowable().getGrowableType() == GrowableType.Giant;
         }
     }
-
-
-    private void toggleFriendsDialog() {
-        if (friendsDialog != null && friendsDialog.getStage() != null) {
-            friendsDialog.hide();
-            friendsDialog = null;
-            return;
-        }
-        friendsDialog = new Dialog("Friends", GameAssetManager.skin, "custom-window");
-        friendsDialog.padTop(40);
-        //friendsDialog.getContentTable().debug(); // show layout
-        Table content = friendsDialog.getContentTable();
-        content.defaults().pad(10).expandX().fillX();
-        //content.debug();
-
-        for (User friend : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(friend.getUsername())) {
-                continue;
-            }
-            Table row = new Table();
-            Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
-            int level = MainApp.getInstance().getCurrentGame().getFriendship(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername(), friend.getUsername()).getLevel();
-            Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
-            TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
-
-            giftButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    System.out.println("Gifting " + friend.getUsername());
-                    // Your gift logic here
-                }
-            });
-
-            row.add(nameLabel).left().pad(100);
-            row.add(levelLabel).pad(100);
-            row.add(giftButton).right().pad(100);
-            content.add(row).fillX().row();
-        }
-
-        friendsDialog.pack();
-        stage.addActor(friendsDialog);
-        friendsDialog.setPosition(20, 220);
-    }
-
-
-    private void handleInput() {
-        if (Gdx.input.justTouched()) {
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            stage.getCamera().unproject(touchPos); // convert to stage coords
-            float mouseX = touchPos.x;
-            float mouseY = touchPos.y;
-
-            if (isClickInside(mouseX, mouseY, friendsButton)) {
-                toggleFriendsDialog();
-            }
-        }
-    }
-
 
     private boolean isClickInside(float x, float y, Actor actor) {
         return x >= actor.getX() && x <= actor.getX() + actor.getWidth() &&
@@ -1261,16 +1995,59 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                         MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
 
             currentPlayer.setCurrentTile(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX]);
-            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
-            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+//            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+//            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+            //currentPlayer.reduceEnergy(5);
             currentPlayer.setMovingDirection(direction);
             setCameraPosition();
+            camera.update();
             return true;
         }
-
         return false;
     }
+
+    private void updateCrowFlightSpawn() {
+        int currentHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour();
+
+        Iterator<Integer> it = crowAttacks.iterator();
+        while (it.hasNext()) {
+            int scheduledHour = it.next();
+            if (scheduledHour == currentHour) {
+                float startX = camera.position.x + camera.viewportWidth / 2f; // spawn just off the right side
+                float screenHeight = camera.viewportHeight;
+
+                activeCrows.add(new CrowFlight(camera, GameAssetManager.crowAnimation));
+                it.remove(); // Prevent retriggering the same attack
+            }
+        }
+    }
+
+
+    private void renderCrowFlights(SpriteBatch batch, float deltaTime) {
+        float screenLeft = camera.position.x - camera.viewportWidth / 2f;
+
+        Iterator<CrowFlight> iterator = activeCrows.iterator();
+        while (iterator.hasNext()) {
+            CrowFlight crow = iterator.next();
+            crow.time += deltaTime;
+
+            // Move based on duration to cross screen
+            crow.x -= (camera.viewportWidth / crow.duration) * deltaTime;
+
+            TextureRegion frame = crow.animation.getKeyFrame(crow.time, true);
+
+            float crowWidth = 128;
+            float crowHeight = 128;
+
+            batch.draw(frame, crow.x, crow.y, crowWidth, crowHeight);
+
+            if (crow.isFinished(screenLeft)) {
+                iterator.remove();
+            }
+        }
+    }
+
 
     public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
@@ -1352,7 +2129,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 //            int count = (countStr != null) ? Integer.parseInt(countStr) : 1;
 //            System.out.println(storeController.purchase(product, count));
 //        }  else if ((matcher = StoreMenuCommands.UPGRADE_TOOL.getMatcher(input)) != null) {
-//            System.out.println(storeController.upgradeTool(matcher.group("tool").trim()));
+        //           System.out.println(storeController.upgradeTool(matcher.group("tool").trim()));
 //        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
 //            System.out.println(controller.cheatAddMoney(matcher.group("count")));
 //        }

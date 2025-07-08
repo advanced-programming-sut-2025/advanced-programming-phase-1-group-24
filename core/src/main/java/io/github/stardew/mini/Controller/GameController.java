@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Controller;
 
 
+import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
@@ -376,6 +377,12 @@ public class GameController implements MenuController {
                 for (int i = 0; i < tiles[0].length; i++) {
                         updateGrowable(tiles[j][i]);
                         tiles[j][i].setHasBeenBurt(false);
+                        if(tiles[j][i].getContainedGrowable() == null &&
+                        tiles[j][i].getProductOfGrowable() == null &&
+                        tiles[j][i].getContainedItem() == null &&
+                        tiles[j][i].getType() == TileType.FARM) {
+                            tiles[j][i].setWalkable(true);
+                        }
                 }
             }
             randomForaging();
@@ -1578,6 +1585,9 @@ public class GameController implements MenuController {
                     if (target.getContainedGrowable() != null) {
                         target.getContainedGrowable().setHasBeenAttackedByCrow(true);
                     }
+                    int attackTime = MathUtils.random(9, 18);
+                    view.crowAttacks.add(attackTime);
+                    System.out.println(attackTime);
                     System.out.println("A crow destroyed a crop at tile (" + target.getX() + ", " + target.getY() + ")!" + "GHAR GHAR");
                 }
             }
@@ -2065,9 +2075,9 @@ public class GameController implements MenuController {
             return new Result(false, "You don't have enough level!");
         }
 
-        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) {
-            return new Result(false, "Players are not adjacent.");
-        }
+//        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) {
+//            return new Result(false, "Players are not adjacent.");
+//        }
 
         int availableCount = sender.getBackpack().getItemCount(item);
         if (availableCount < amount) {

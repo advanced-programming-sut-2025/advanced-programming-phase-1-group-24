@@ -40,7 +40,7 @@ public class Farm extends Place {
         this.lake = new ArrayList<>();
         if (template.lake != null) {
             for (Block b : template.lake) {
-                Habitat habitat = new Habitat(b.startX + startX, b.startY + startY, b.width, b.height, StorageType.INITIAL);
+                Habitat habitat = new Habitat(b.startX + startX, b.startY + startY, b.width, b.height, StorageType.INITIAL, Habitat.HabitatType.Barn);
                 lake.add(habitat);
             }
         }
