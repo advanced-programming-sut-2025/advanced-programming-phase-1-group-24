@@ -128,24 +128,6 @@ public class GameAssetManager {
 
         dropAnimation = new Animation<>(0.05f, dropFrames);
         dropAnimation.setPlayMode(Animation.PlayMode.NORMAL);
-//        abigailAtlas = new TextureAtlas(Gdx.files.internal("game/character/sprites_player.atlas"));
-//
-//        for (int i = 14; i > 9; i--) {
-//            Array<TextureRegion> walkFrames = new Array<>();
-//            if (i == 14) {
-//                for (int j = 0; j < 4; j++) {
-//                    String region = "player_" + 13 + "_" + 0;
-//                    walkFrames.add(abigailAtlas.findRegion(region));
-//                }
-//            } else {
-//                for (int j = 0; j < 4; j++) {
-//                    String region = "player_" + i + "_" + j;
-//                    walkFrames.add(abigailAtlas.findRegion(region));
-//                }
-//            }
-//            abigailAnimations.add(new Animation<>(0.15f, walkFrames, Animation.PlayMode.LOOP));
-//        }
-
         crowSheet = new Texture("Birds.png"); // renamed file accordingly
         TextureRegion[][] tmp1 = TextureRegion.split(crowSheet, 16, 16);
 
@@ -157,13 +139,22 @@ public class GameAssetManager {
         crowAnimation = new Animation<>(0.1f, crowFrames);
 
 
-        CLOCK_ALL = new Texture("Clock/Clock_All.png");
-        CLOCK_MAIN = new TextureRegion(CLOCK_ALL, 0, 0, 72, 59);
-        CLOCK_ARROW = new TextureRegion(CLOCK_ALL, 72, 0, 8, 18);
-        for (int i = 0; i < 12; i++) {
-            ClOCK_MANNERS[i] = new TextureRegion(CLOCK_ALL, 80 + i % 4 * 13, i / 4 * 9, 13, 9);
-        }
+        loadAnimals();
 
+        createCustomStyles();
+
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        pixel = new Texture(pixmap);
+        pixmap.dispose();
+
+        loadClock();
+
+        loadPlayer();
+    }
+
+    private static void loadPlayer() {
         alexTexture = new Texture(Gdx.files.internal("game/character/Alex.png"));
         haleyTexture = new Texture(Gdx.files.internal("game/character/Haley.png"));
         shaneTexture = new Texture(Gdx.files.internal("game/character/Shane.png"));
@@ -178,17 +169,15 @@ public class GameAssetManager {
         haleyAnimations = generatePlayerAnimations(haleyFrames, 1);
         shaneAnimations = generatePlayerAnimations(shaneFrames, 0);
         abigailAnimations = generatePlayerAnimations(abigailFrames, 0);
+    }
 
-
-        loadAnimals();
-
-        createCustomStyles();
-
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.WHITE);
-        pixmap.fill();
-        pixel = new Texture(pixmap);
-        pixmap.dispose();
+    private static void loadClock() {
+        CLOCK_ALL = new Texture("Clock/Clock_All.png");
+        CLOCK_MAIN = new TextureRegion(CLOCK_ALL, 0, 0, 72, 59);
+        CLOCK_ARROW = new TextureRegion(CLOCK_ALL, 72, 0, 8, 18);
+        for (int i = 0; i < 12; i++) {
+            ClOCK_MANNERS[i] = new TextureRegion(CLOCK_ALL, 80 + i % 4 * 13, i / 4 * 9, 13, 9);
+        }
     }
 
     private static void createCustomStyles() {
