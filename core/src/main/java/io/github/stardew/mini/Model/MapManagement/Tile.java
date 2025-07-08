@@ -5,6 +5,8 @@ import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;;
+
+;
 public class Tile {
     private TileType type;
     private boolean isWalkable;
@@ -104,7 +106,11 @@ public class Tile {
         this.containedNPC = containedNPC;
     }
 
-    public void changeTile(){}
+    public void changeTile() {
+    }
 
+    public boolean isBuildable() {
+        return isWalkable && containedItem == null && containedNPC == null && containedGrowable == null && productOfGrowable == null && type == TileType.FARM;
+    }
 }
 

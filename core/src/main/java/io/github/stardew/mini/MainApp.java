@@ -1,50 +1,71 @@
 package io.github.stardew.mini;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Json;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import io.github.stardew.mini.Controller.*;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Assets.CropAssets;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Assets.ShopAssets;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
-import io.github.stardew.mini.View.GameView;
+import io.github.stardew.mini.View.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class MainApp extends com.badlogic.gdx.Game {
+    // Game instance (LibGDX-style singleton)
     private static MainApp instance;
+    private static SpriteBatch batch;
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
+    private GameView currentGameView;
     private ArrayList<User> users = UserDatabase.loadUsers();
     private Menu currentMenu = Menu.GameMenu;
-    private User loggedInUser = null;// instead of null
-    private static SpriteBatch batch;
+    private User loggedInUser = loadLoggedInUser();// instead of null
+
 
     @Override
     public void create() {
         instance = this;
         batch = new SpriteBatch();
-//        // Initialize game data
-       //loadGameData();
+        //loadGameData();
         GameAssetManager.load();
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        if(loggedInUser == null) {
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        }
+        else
+            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+
+//       // Initialize game data
+       //loadGameData();
+        TileType.initTextures();
+        AnimalType.initTextures();
         TreeAssets.load();
         CropAssets.load();
         InventoryAssets.load();
         TileType.initTextures();
+        Habitat.HabitatType.initTextures();
+        ShopAssets.load();
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
@@ -72,15 +93,74 @@ public class MainApp extends com.badlogic.gdx.Game {
         for(AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-        User logged = getUserByUsername("user208");
-        setLoggedInUser(logged);
-        GameController controller = new GameController();
-        controller.createGame("user207 user206", new Scanner(System.in));
-        setScreen(new GameView(controller));
 
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
     }
+
+    private void loadGameData() {
+        // LibGDX file handling
+        FileHandle usersFile = Gdx.files.local("data/users.json");
+        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
+        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
+
+        Json json = new Json();
+
+        // Load users
+        if (usersFile.exists()) {
+            users = json.fromJson(ArrayList.class, User.class, usersFile);
+        } else {
+            users = new ArrayList<>();
+        }
+
+        // Load active games
+        if (gamesFile.exists()) {
+            activeGames = json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
+        } else {
+            activeGames = new ArrayList<>();
+        }
+
+        // Load logged in user
+        if (loggedInUserFile.exists()) {
+            loggedInUser = json.fromJson(User.class, loggedInUserFile);
+        }
+    }
+
+    @Override
+    public void render() {
+        super.render();
+    }
+
+//    private void loadGameData() {
+//        // LibGDX file handling
+//        FileHandle usersFile = Gdx.files.local("data/users.json");
+//        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
+//        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
+//
+//        Json json = new Json();
+//
+//        // Load users
+//        if (usersFile.exists()) {
+//            users = UserDatabase.loadUsers();
+//                //json.fromJson(ArrayList.class, User.class, usersFile);
+//        } else {
+//            users = new ArrayList<>();
+//        }
+//
+//        // Load active games
+//        if (gamesFile.exists()) {
+//            activeGames =loadActiveGames();
+//                //json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
+//        } else {
+//            activeGames = new ArrayList<>();
+//        }
+//
+//        // Load logged in user
+//        if (loggedInUserFile.exists()) {
+//            loggedInUser = loadLoggedInUser();
+//                //json.fromJson(User.class, loggedInUserFile);
+//        }
+//    }
 
     @Override
     public void dispose() {
@@ -89,6 +169,29 @@ public class MainApp extends com.badlogic.gdx.Game {
         TreeAssets.dispose();
         CropAssets.dispose();
         InventoryAssets.dispose();
+        ShopAssets.dispose();
+        batch.dispose();
+        loggedInUser.getOwnedAnimals().clear();
+        //saveGameData();
+    }
+
+    private void saveGameData() {
+        Json json = new Json();
+        json.setUsePrototypes(false); // For proper serialization
+
+        // Save users
+        Gdx.files.local("data/users.json")
+            .writeString(json.prettyPrint(users), false);
+
+        // Save active games
+        Gdx.files.local("data/active_games.json")
+            .writeString(json.prettyPrint(activeGames), false);
+
+        // Save logged in user
+        if (loggedInUser != null) {
+            Gdx.files.local("data/logged_in_user.json")
+                .writeString(json.toJson(loggedInUser), false);
+        }
     }
 
     private User loadLoggedInUser() {
@@ -198,13 +301,24 @@ public class MainApp extends com.badlogic.gdx.Game {
         changeScreen();
     }
     public void changeScreen() {
-        switch(currentMenu) {
+        switch (currentMenu) {
             case GameMenu:
-                //getInstance().setScreen(new GameMenuView(new GameMenuController()));
+                getInstance().setScreen(new GameView(new GameController()));
                 break;
             case MainMenu:
                 //getInstance().setScreen(new MainMenuScreen(this));
                 break;
+            case PreGameMenu:
+                getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                break;
+            case NewGameMenu:
+                getInstance().setScreen(new NewGameMenuView(new NewGameMenuController()));
+                break;
+            case MapSelectionMenu:
+                getInstance().setScreen(new MapSelectionMenuView(new MapSelectionMenuController()));
+                break;
+
+
             // ... other cases
         }
     }
@@ -231,6 +345,12 @@ public class MainApp extends com.badlogic.gdx.Game {
     public static SpriteBatch getBatch() {
         return batch;
     }
+
+    public GameView getCurrentGameView() {
+        return currentGameView;
+    }
+
+    public void setCurrentGameView(GameView currentGameView) {
+        this.currentGameView = currentGameView;
+    }
 }
-
-

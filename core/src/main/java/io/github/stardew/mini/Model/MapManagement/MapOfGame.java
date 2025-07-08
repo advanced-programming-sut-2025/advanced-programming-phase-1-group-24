@@ -1,23 +1,29 @@
 package io.github.stardew.mini.Model.MapManagement;
 
+import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
 import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.Growables.SourceType;
 import io.github.stardew.mini.Model.Places.*;
+import io.github.stardew.mini.Model.Places.Farm;
+import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
+import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.Places.Farm;
 import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
+import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.View.GameView;
 
 import java.util.*;
 
@@ -159,6 +165,16 @@ public class MapOfGame {
         if (tile.getType() == TileType.GREENHOUSE) {
             return;
         }
+
+        int flashHour = MathUtils.random(9, 18); // Random hour between 9 and 22
+        System.out.println(flashHour);
+
+        LightningFlash flash = new LightningFlash();
+        flash.scheduledTime = flashHour;
+
+        GameView.scheduledFlashes.add(flash);
+
+
         if (tile.getContainedGrowable() != null) {
             tile.setContainedItem(new ForagingMineral(ProductQuality.Normal, ForagingMineralType.Coal));
             tile.getContainedGrowable().setGrowableType(GrowableType.Coal);
@@ -222,7 +238,7 @@ public class MapOfGame {
         );
 
         Shop pierreStore = new Shop(
-                ShopType.PIERRE_STORE,
+                ShopType.PIERRE_GENERAL_SHOP,
                 "Pierre’s General Store",
                 "Pierre",
                 9, 17,
@@ -271,7 +287,20 @@ public class MapOfGame {
                 fishShop, marnieRanch, starDropSaloon
         ));
     }
+    public Shop getShopAtPosition(int x, int y) {
+        for (Shop shop : shops) {
+            int shopX = shop.getX();
+            int shopY = shop.getY();
+            int shopWidth = shop.getWidth();
+            int shopHeight = shop.getHeight();
 
+            if (x >= shopX && x < shopX + shopWidth &&
+                y >= shopY && y < shopY + shopHeight) {
+                return shop;
+            }
+        }
+        return null;
+    }
     private ArrayList<ShopItem> createBlacksmithItems() {
         ArrayList<ShopItem> items = new ArrayList<>();
 
@@ -426,28 +455,28 @@ public class MapOfGame {
 
         // Barn upgrades
         items.add(new ShopItem("Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.INITIAL),
+                new Habitat(0, 0, 4, 3, StorageType.INITIAL, Habitat.HabitatType.Barn),
                 ShopItemType.BARN, 6000, 6000, 6000, 6000));
 
         items.add(new ShopItem("Big Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.BIG),
+                new Habitat(0, 0, 4, 3, StorageType.BIG, Habitat.HabitatType.Big_Barn),
                 ShopItemType.BARN, 12000, 12000, 12000, 12000));
 
         items.add(new ShopItem("Deluxe Barn", 1,
-                new Habitat(0, 0, 4, 3, StorageType.DELUX),
+                new Habitat(0, 0, 4, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Barn),
                 ShopItemType.BARN, 25000, 25000, 25000, 25000));
 
         // Coop upgrades
         items.add(new ShopItem("Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.INITIAL),
+                new Habitat(0, 0, 3, 3, StorageType.INITIAL, Habitat.HabitatType.CAGE),
                 ShopItemType.CAGE, 4000, 4000, 4000, 4000));
 
         items.add(new ShopItem("Big Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.BIG),
+                new Habitat(0, 0, 3, 3, StorageType.BIG,Habitat.HabitatType.Big_Cage),
                 ShopItemType.CAGE, 10000, 10000, 10000, 10000));
 
         items.add(new ShopItem("Deluxe Cage", 1,
-                new Habitat(0, 0, 3, 3, StorageType.DELUX),
+                new Habitat(0, 0, 3, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Cage),
                 ShopItemType.CAGE, 20000, 20000, 20000, 20000));
 
         // Other buildings
@@ -532,20 +561,7 @@ public class MapOfGame {
         return shops;
     }
 
-    public Shop getShopAtPosition(int x, int y) {
-        for (Shop shop : shops) {
-            int shopX = shop.getX();
-            int shopY = shop.getY();
-            int shopWidth = shop.getWidth();
-            int shopHeight = shop.getHeight();
 
-            if (x >= shopX && x < shopX + shopWidth &&
-                    y >= shopY && y < shopY + shopHeight) {
-                return shop;
-            }
-        }
-        return null;
-    }
 
 
 
@@ -568,5 +584,6 @@ public class MapOfGame {
         return x >= houseX && x < houseX + width &&
                 y >= houseY && y < houseY + height;
     }
+
 
 }

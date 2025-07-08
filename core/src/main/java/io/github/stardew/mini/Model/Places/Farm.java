@@ -13,6 +13,11 @@ import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate.Block;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
+import io.github.stardew.mini.Model.Things.Item;
+import io.github.stardew.mini.Model.Things.StorageType;
+import io.github.stardew.mini.Model.User;
+
+import java.util.*;
 
 public class Farm extends Place {
     private ArrayList<Habitat> cage;
@@ -35,7 +40,7 @@ public class Farm extends Place {
         this.lake = new ArrayList<>();
         if (template.lake != null) {
             for (Block b : template.lake) {
-                Habitat habitat = new Habitat(b.startX + startX, b.startY + startY, b.width, b.height, StorageType.INITIAL);
+                Habitat habitat = new Habitat(b.startX + startX, b.startY + startY, b.width, b.height, StorageType.INITIAL, Habitat.HabitatType.Barn);
                 lake.add(habitat);
             }
         }
