@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import io.github.stardew.mini.Controller.LoginMenuController;
+import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
@@ -106,6 +108,10 @@ public class PreGameMenuView implements AppMenu, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                MainApp.getInstance().setScreen(
+                    new MainMenuView(new MainMenuController(), skin)
+                );
+
             }
         });
         backButton.getStyle().over = skin.getDrawable("button-normal-over");
