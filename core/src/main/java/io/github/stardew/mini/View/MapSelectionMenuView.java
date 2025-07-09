@@ -230,6 +230,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                     Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
                     Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
                     moo.setCurrentTile(new_tile);
+                    moo.setInHabitat(false);
                     tiles2.setContainedItem(machine);
                     new_tile.setContainedAnimal(moo);
                     MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
@@ -237,10 +238,10 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                     Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
                     heny.setCurrentTile(new_tile_heny);
                     new_tile.setContainedAnimal(heny);
+                    heny.setInHabitat(false);
                     MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
-
 
                 }
             }

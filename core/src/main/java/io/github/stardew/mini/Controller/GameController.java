@@ -869,58 +869,148 @@ public class GameController implements MenuController {
         animal.feed(); // sets fedToday = true and increases friendship
         return new Result(true, name + " was fed with hay.");
     }
-
-    public Result shepherdAnimal(String name, String x, String y) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
-        int targetX = Integer.parseInt(x);
-        int targetY = Integer.parseInt(y);
-        Animal animal = player.getAnimalByName(name);
-        Farm farm = game.getMap().getFarmByOwner(player);
-
-        if (animal == null) {
-            return new Result(false, "No animal named " + name + " found.");
-        }
-        Tile animalTile = animal.getCurrentTile();
-        if (animalTile == null) {
-            return new Result(false, "Error: animal tile not found.");
-        }
-
-        // Validate target location is inside player's farm bounds
-        if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
-                targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
-            return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
-        }
-
-        // Check weather condition — animals can only go out in SUNNY weather
-        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
-            return new Result(false, "Cannot shepherd animals outside in bad weather.");
-        }
-
-        // Check tile validity
-        Tile targetTile = game.getMap().getTile(targetX, targetY);
-        if (targetTile == null || !targetTile.getisWalkable()) {
-            return new Result(false, "Invalid location for shepherding.");
-        }
-
-        // Move animal to the target tile
-        animal.setCurrentTile(targetTile);
-        targetTile.setContainedAnimal(animal);
-
-        // Feed the animal based on its location
-        if (!animal.updateIsInHabitat()) {
-            animal.feed(); // Assume this feeds the animal fresh grass
-        }
-//        else {
-//            boolean fed = player.useHay(1); // Try to feed from hay (1 unit)
-//            if (!fed) {
-//                return new Result(false, name + " could not be fed (no hay available).");
-//            }
-//            animal.feedWithHay();
+//
+//    public Result shepherdAnimal(String name, String x, String y) {
+//        Game game = MainApp.getInstance().getCurrentGame();
+//        User player = game.getCurrentPlayer();
+//        int targetX = Integer.parseInt(x);
+//        int targetY = Integer.parseInt(y);
+//        Animal animal = player.getAnimalByName(name);
+//        Farm farm = game.getMap().getFarmByOwner(player);
+//
+//        if (animal == null) {
+//            return new Result(false, "No animal named " + name + " found.");
 //        }
-        return new Result(true, name + " was shepherded to (" + targetX + ", " + targetY + ").");
+//        Tile animalTile = animal.getCurrentTile();
+//        if (animalTile == null) {
+//            return new Result(false, "Error: animal tile not found.");
+//        }
+//
+//        // Validate target location is inside player's farm bounds
+//        if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
+//                targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
+//            return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
+//        }
+//        // Check weather condition — animals can only go out in SUNNY weather
+//        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+//            return new Result(false, "Cannot shepherd animals outside in bad weather.");
+//        }
+//        // Check tile validity
+//        Tile targetTile = game.getMap().getTile(targetX, targetY);
+//        if (targetTile == null || !targetTile.getisWalkable()) {
+//            return new Result(false, "Invalid location for shepherding.");
+//        }
+//        // Move animal to the target tile
+//        animal.setCurrentTile(targetTile);
+//        targetTile.setContainedAnimal(animal);
+//
+//        // Feed the animal based on its location
+//        if (!animal.updateIsInHabitat()) {
+//            animal.feed(); // Assume this feeds the animal fresh grass
+//        }
+////        else {
+////            boolean fed = player.useHay(1); // Try to feed from hay (1 unit)
+////            if (!fed) {
+////                return new Result(false, name + " could not be fed (no hay available).");
+////            }
+////            animal.feedWithHay();
+////        }
+//        return new Result(true, name + " was shepherded to (" + targetX + ", " + targetY + ").");
+//    }
+public Result shepherdAnimal(String name, String x, String y) {
+    Game game = MainApp.getInstance().getCurrentGame();
+    User player = game.getCurrentPlayer();
+    int targetX = Integer.parseInt(x);
+    int targetY = Integer.parseInt(y);
+    Animal animal = player.getAnimalByName(name);
+    Farm farm = game.getMap().getFarmByOwner(player);
+
+    if (animal == null) {
+        return new Result(false, "No animal named " + name + " found.");
     }
 
+    Tile animalTile = animal.getCurrentTile();
+    if (animalTile == null) {
+        return new Result(false, "Error: animal tile not found.");
+    }
+
+    if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
+        targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
+        return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
+    }
+
+    if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+        return new Result(false, "Cannot shepherd animals outside in bad weather.");
+    }
+
+    Tile targetTile = game.getMap().getTile(targetX, targetY);
+    if (targetTile == null || !targetTile.getisWalkable() || targetTile.getContainedAnimal() != null) {
+        return new Result(false, "Invalid location for shepherding.");
+    }
+
+    // Find path to target tile
+    List<Tile> path = findShortestPath(animalTile, targetTile, 30); // allow more steps for shepherding
+    if (path.isEmpty()) {
+        return new Result(false, "No valid path to target location.");
+    }
+
+    // Assign movement path
+    animal.setPathToTarget(path);
+
+    // Optional: reset cooldown to make the animal move immediately
+    animal.resetCooldown();
+
+    return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
+}
+    private List<Tile> findShortestPath(Tile start, Tile goal, int maxSteps) {
+        Queue<Tile> queue = new LinkedList<>();
+        Map<Tile, Tile> cameFrom = new HashMap<>();
+        Set<Tile> visited = new HashSet<>();
+
+        queue.add(start);
+        visited.add(start);
+        cameFrom.put(start, null);
+
+        while (!queue.isEmpty()) {
+            Tile current = queue.poll();
+
+            if (current.equals(goal)) break;
+
+            for (Tile neighbor : getWalkableNeighbors(current)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    cameFrom.put(neighbor, current);
+                    queue.add(neighbor);
+                }
+            }
+        }
+
+        // Reconstruct path
+        List<Tile> path = new LinkedList<>();
+        Tile step = goal;
+        while (step != null && !step.equals(start)) {
+            path.add(0, step);
+            step = cameFrom.get(step);
+        }
+
+        if (path.size() > maxSteps) return new ArrayList<>();
+        return path;
+    }
+    private List<Tile> getWalkableNeighbors(Tile tile) {
+        List<Tile> neighbors = new ArrayList<>();
+        int[][] directions = { {1,0}, {-1,0}, {0,1}, {0,-1} }; // 4-directional
+
+        for (int[] dir : directions) {
+            int nx = tile.getX() + dir[0];
+            int ny = tile.getY() + dir[1];
+            Tile neighbor = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
+            if (neighbor != null && neighbor.isBuildable() && neighbor.getContainedAnimal() == null) {
+                neighbors.add(neighbor);
+            }
+        }
+
+        return neighbors;
+    }
     public Result collectProduct(String name) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
