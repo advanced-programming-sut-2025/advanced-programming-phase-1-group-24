@@ -137,7 +137,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private Dialog machineMenuDialog;
     private Machine selectedMachine;
-
+    private TextButton recipesButton, cancelButton, cheatButton, exitButton, grabButton;
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -145,6 +145,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog shopMenuDialog;
     private Shop selectedShop;
     private Dialog shopPurchaseDialog;
+    private Dialog numItemDialog;
     private ShopItem selectedShopItem;
     private int purchaseQuantity = 1;
     private Dialog buyAnimalDialog;
@@ -174,7 +175,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Table inventoryMenuTable;
     private Table backpackMenuTable;
     public static float toolUsageStateTime = 0f;
+    private Item equippedItem = null;
+    private Table equippedItemSlotTable;
     public static boolean isToolBeingUsed = false;
+
+    private String scenario = "";
+    String giftReciever, artisanName;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -437,6 +443,11 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ENTER) {
+            if (equippedItem != null) {
+                equippedItem = null;
+            }
+        }
         if (keycode == Input.Keys.E) {
             if (showBackpackMenu) {
                 showBackpackMenu = false;
@@ -1084,6 +1095,108 @@ private void updateAnimals(float delta) {
         Gdx.input.setInputProcessor(stage);
     }
 
+    private void showNumItemDialog() {
+        //purchaseQuantity = 1;
+        //numItemDialog.getContentTable().clearChildren();
+        //numItemDialog.getTitleLabel().setText("Select Quantity " + selectedShopItem.getName());
+        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
+        numItemDialog.padTop(40f);
+        numItemDialog.setKeepWithinStage(true);
+        numItemDialog.setMovable(false);
+        numItemDialog.setVisible(false);
+        numItemDialog.setModal(true);
+        numItemDialog.setResizable(false);
+        showBackpackMenu = false;
+        backpackMenuTable.setVisible(false);
+        inventoryMenuTable.setVisible(false);
+        showInventoryMenu = false;
+
+        Table content = numItemDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(10);
+
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
+        TextButton applyButton = new TextButton("Apply", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+
+
+        plusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                purchaseQuantity++;
+                quantityLabel.setText("Quantity: " + purchaseQuantity);
+            }
+        });
+
+        minusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (purchaseQuantity > 1) {
+                    purchaseQuantity--;
+                    quantityLabel.setText("Quantity: " + purchaseQuantity);
+                }
+            }
+        });
+
+        applyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Result result;
+                switch (scenario){
+                    case "Gift":
+                        result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
+                        break;
+                    case "Machine":
+                        result=controller.artisanUse(artisanName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
+                        break;
+                    case "Sell":
+                        result=storeController.placeInShippingBin(equippedItem.getName(),purchaseQuantity);
+                        break;
+                    default:
+
+                        result = new Result(true,"");
+                        break;
+
+                }
+                //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
+                numItemDialog.hide();
+                if(!result.message().equals("")){
+                    showErrorDialog(stage, result.message());
+                }
+
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                numItemDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        content.add(quantityLabel).colspan(2).row();
+        content.add(minusButton).padRight(5);
+        content.add(plusButton).row();
+        content.add(applyButton).colspan(2).row();
+        content.add(cancelButton).colspan(2);
+
+        numItemDialog.add(content);
+        numItemDialog.pack();
+        numItemDialog.setPosition(
+            (Gdx.graphics.getWidth() - numItemDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - numItemDialog.getHeight()) / 2
+        );
+        numItemDialog.pack();
+        numItemDialog.setVisible(true);
+        stage.addActor(numItemDialog);
+        Gdx.input.setInputProcessor(stage);
+
+    }
+
     public void createUI() {
         createTerminal();
 
@@ -1093,7 +1206,17 @@ private void updateAnimals(float delta) {
 
         createMachineDialog();
     }
+    private void createNumItemDialog() {
+        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
+        numItemDialog.padTop(40f);
+        numItemDialog.setKeepWithinStage(true);
+        numItemDialog.setMovable(false);
+        numItemDialog.setVisible(false);
+        numItemDialog.setModal(true);
+        numItemDialog.setResizable(false);
 
+        stage.addActor(numItemDialog);
+    }
     private void createShopMenusDialogs() {
         shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "custom-window");
         shopMenuDialog.padTop(40f);
@@ -1214,8 +1337,8 @@ private void updateAnimals(float delta) {
         machineMenuDialog.getContentTable().defaults().pad(10);
 
         // Add buttons with their result objects
-        TextButton RecepiesButton = new TextButton("Recepies", GameAssetManager.skin);
-        RecepiesButton.addListener(new ClickListener() {
+        recipesButton = new TextButton("Recepies", GameAssetManager.skin);
+        recipesButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 machineMenuDialog.hide();                       // hide the main menu
@@ -1223,7 +1346,7 @@ private void updateAnimals(float delta) {
             }
         });
 
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        cancelButton = new TextButton("Cancel", GameAssetManager.skin);
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1233,7 +1356,7 @@ private void updateAnimals(float delta) {
             }
         });
 
-        TextButton cheatButton = new TextButton("Cheat", GameAssetManager.skin);
+        cheatButton = new TextButton("Cheat", GameAssetManager.skin);
         cheatButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1244,7 +1367,7 @@ private void updateAnimals(float delta) {
 
 
 
-        TextButton exitButton = new TextButton("Exit", GameAssetManager.skin);
+        exitButton = new TextButton("Exit", GameAssetManager.skin);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1254,15 +1377,34 @@ private void updateAnimals(float delta) {
             }
         });
 
-        machineMenuDialog.getContentTable().add(RecepiesButton).row();
+
+        grabButton = new TextButton("Grab Product", GameAssetManager.skin);
+        grabButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                machineMenuDialog.hide();
+                handleMachineMenuChoice("Grab Product");
+                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
+                selectedMachine = null;
+            }
+        });
+
+        grabButton.setVisible(false);
+
+
+
+
+        machineMenuDialog.getContentTable().add(recipesButton).row();
         machineMenuDialog.getContentTable().add(cancelButton).row();
         machineMenuDialog.getContentTable().add(cheatButton).row();
         machineMenuDialog.getContentTable().add(exitButton).row();
+        machineMenuDialog.getContentTable().add(grabButton).row();
 
         machineMenuDialog.setKeepWithinStage(true);
         machineMenuDialog.setMovable(false);
         machineMenuDialog.setVisible(false);  // Add this after creation
         stage.addActor(machineMenuDialog);
+
     }
 
     private void showRecipeDialog(Machine machine) {
@@ -1331,6 +1473,11 @@ private void updateAnimals(float delta) {
                 //selectedMachine.setActivated(false);
                 Gdx.input.setInputProcessor(this);
                 // Do nothing
+                break;
+            case "Grab Product":
+                Result resultt = selectedMachine.grabPreparedProduct(currentPlayer);
+                System.out.println(resultt.message());
+                Gdx.input.setInputProcessor(this);
                 break;
             default:
                 result = new Result(false, choice);
@@ -1603,7 +1750,13 @@ private void updateAnimals(float delta) {
         toolMenuTable.padBottom(GameAssetManager.TILE_SIZE * 0.75f);
         toolMenuTable.setVisible(showToolsMenu);
         stage.addActor(toolMenuTable);
+        equippedItemSlotTable = new Table();
+        equippedItemSlotTable.bottom().center();
+        equippedItemSlotTable.padBottom(10);
+        equippedItemSlotTable.setVisible(true);
+        stage.addActor(equippedItemSlotTable);
 
+        updateEquippedItemSlot();
         Timer.schedule(new Timer.Task() {
                 @Override
                 public void run() {
@@ -1814,6 +1967,12 @@ private void updateAnimals(float delta) {
         }
 
         /// /////////////////////////////////////////////////////////////////////////
+        updateEquippedItemSlot();
+        if (equippedItem != null && currentPlayer != null && currentPlayer.getCurrentTile() != null) {
+            int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+            batch.draw(getItemTexture(equippedItem), drawX,  drawY, tileSize, tileSize);
+        }
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -1936,6 +2095,7 @@ private void updateAnimals(float delta) {
                 batch.setColor(Color.WHITE);
             } else if (machine.getReady()) {
                 GameAssetManager.customFont.draw(batch, "Done!", drawX + tileSize / 2f - 50, drawY + 20);
+                grabButton.setVisible(true);
             }
         }
     }
@@ -2407,7 +2567,7 @@ private void updateAnimals(float delta) {
 
         private void drawSelectedTool(Texture itemTex) {
             if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
-
+            if (itemTex == null) { return; }
             Tile tile = currentPlayer.getCurrentTile();
             int tileSize = GameAssetManager.TILE_SIZE;
 
@@ -2634,6 +2794,26 @@ private void updateAnimals(float delta) {
                 }
             });
 
+            TextButton selectButton = new TextButton("Select", GameAssetManager.skin, "custom-button");
+            selectButton.setColor(Color.BLUE);
+            selectButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                        equippedItem = sortedItems.get(selectedSlot);
+                        updateEquippedItemSlot();
+                        //showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                        System.out.println("Equipped item: " + equippedItem);
+                        //shopPurchaseDialog.show(stage).setVisible(true);
+                        //Gdx.input.setInputProcessor(stage);
+                        //showPurchaseDialog();
+                        showNumItemDialog();
+                    } else {
+                        showErrorDialog(stage, "No item selected.");
+                    }
+                }
+            });
+
             Table controlButtonsTable = new Table();
             controlButtonsTable.defaults().pad(10);
 
@@ -2651,7 +2831,7 @@ private void updateAnimals(float delta) {
             });
             controlButtonsTable.add(backButton).width(100).height(40);
             controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
-
+            controlButtonsTable.add(selectButton).width(100).height(40);
             backpackMenuTable.add(controlButtonsTable).bottom().center().row();
 
             backpackMenuTable.setVisible(true);
@@ -2659,6 +2839,7 @@ private void updateAnimals(float delta) {
         }
 
         public Texture getItemTexture(Item item) {
+            if(item == null) {return null;}
             if (item instanceof Fish) {
                 return ((Fish) item).getType().getTexture();
             }
@@ -2836,7 +3017,56 @@ private void updateAnimals(float delta) {
             );
             stage.addActor(skillsDialog);
         }
+    private void updateEquippedItemSlot() {
+        equippedItemSlotTable.clearChildren();
 
+        float slotSize = GameAssetManager.TILE_SIZE;
+        float itemImagePadding = slotSize * 0.1f;
+        float itemImageRenderSize = slotSize - (itemImagePadding * 2);
+        float labelOffset = 5f;
+
+        Stack itemSlotStack = new Stack();
+
+        Image slotBg = new Image(InventoryAssets.slot);
+        slotBg.setSize(slotSize, slotSize);
+        itemSlotStack.add(slotBg);
+
+        if (equippedItem != null) {
+            Texture itemTex = getItemTexture(equippedItem);
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
+                itemImage.setScaling(Scaling.fit);
+                itemImage.setAlign(com.badlogic.gdx.utils.Align.center);
+
+                Container<Image> itemImageContainer = new Container<>(itemImage);
+                itemImageContainer.pad(itemImagePadding);
+                itemImageContainer.fill();
+
+                itemSlotStack.add(itemImageContainer);
+            } else {
+                Gdx.app.error("GameView", "Texture for equipped item " + equippedItem.getName() + " is null!");
+            }
+
+            Integer count = currentPlayer.getBackpack().getInventoryItems().get(equippedItem);
+            if (count != null && count > 1) {
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+                Container<Label> labelContainer = new Container<>(countLabel);
+                labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
+                labelContainer.padRight(labelOffset);
+                labelContainer.padBottom(labelOffset);
+                labelContainer.fill();
+                itemSlotStack.add(labelContainer);
+            }
+        }
+
+        equippedItemSlotTable.add(itemSlotStack).size(slotSize).pad(5);
+
+        equippedItemSlotTable.pack();
+        equippedItemSlotTable.setPosition(
+            (stage.getWidth() - equippedItemSlotTable.getWidth()) / 2,
+            10);
+    }
 
 
         public void handleCommand(Scanner scanner) {
