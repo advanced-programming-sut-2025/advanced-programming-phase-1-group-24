@@ -222,7 +222,7 @@ public class GameController implements MenuController {
 //
 //        return new Result(true, "next turn started for " + currentUser.getUsername());
 //    }
-    public Result nextTurn(Scanner scanner) {
+    public Result nextTurn() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
 
@@ -230,19 +230,19 @@ public class GameController implements MenuController {
             return new Result(false, "no active game!");
         goToNextTurn(currentGame);
         User currentUser = currentGame.getCurrentPlayer();
-        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
-            return voteToTerminateInteractive(scanner, currentUser);
-        }
+//        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
+//            return voteToTerminateInteractive(scanner, currentUser);
+//        }
         StringBuilder result = new StringBuilder();
-        result.append("next turn started for " + currentUser.getUsername());
-        if (!currentUser.getNotifications().isEmpty()) {
-            result.append("\nYou have new notifications:\n");
-            for (Message notification : currentUser.getNotifications()) {
-                result.append("- From ").append(notification.getSender())
-                        .append(": ").append(notification.getMessage()).append("\n");
-            }
-        }
-        currentUser.getNotifications().clear();
+//        result.append("next turn started for " + currentUser.getUsername());
+//        if (!currentUser.getNotifications().isEmpty()) {
+//            result.append("\nYou have new notifications:\n");
+//            for (Message notification : currentUser.getNotifications()) {
+//                result.append("- From ").append(notification.getSender())
+//                        .append(": ").append(notification.getMessage()).append("\n");
+//            }
+//        }
+//        currentUser.getNotifications().clear();
         return new Result(true, result.toString());
     }
 
@@ -804,7 +804,7 @@ public class GameController implements MenuController {
         }
     }
 
-    private boolean isAdjacent(Tile t1, Tile t2) {
+    public boolean isAdjacent(Tile t1, Tile t2) {
         int dx = Math.abs(t1.getX() - t2.getX());
         int dy = Math.abs(t1.getY() - t2.getY());
         return dx <= 1 && dy <= 1;
