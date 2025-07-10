@@ -12,6 +12,7 @@ public class randomStuff extends Item {
         super(type.getName(), true, price, false, ProductQuality.Normal,true);
         this.type = type;
     }
+    public randomStuff(){}
     @Override
     public randomStuff copy() {
         randomStuff newStuff = new randomStuff( getPrice(), type);

@@ -20,6 +20,7 @@ public class Gift {
         this.amount = amount;
     }
 
+
     public String getSender() {
         return sender;
     }

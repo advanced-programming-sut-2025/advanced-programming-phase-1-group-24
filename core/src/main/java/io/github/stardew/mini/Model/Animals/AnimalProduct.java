@@ -12,6 +12,12 @@ public class AnimalProduct extends Item {
         super(animalProductType.getProductName(), true, animalProductType.getPrice(), false, productQuality,true);
         this.animalProductType = animalProductType;
     }
+    public AnimalProduct(){}
+
+    @Override
+    public Item copy() {
+        return null;
+    }
 
     public AnimalProductType getAnimalProductType() {
         return animalProductType;

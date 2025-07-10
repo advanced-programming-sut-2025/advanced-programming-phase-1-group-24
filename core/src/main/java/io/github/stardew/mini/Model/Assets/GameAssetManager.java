@@ -278,7 +278,6 @@ public class GameAssetManager {
         Shipping_Bin = new Texture(Gdx.files.internal("Habitat/Shipping_Bin.png"));
 
         SECRET_HEART =  new Texture("Heart/Secret_Heart.png");
-
     }
 
     public static void dispose() {

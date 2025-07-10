@@ -1004,7 +1004,7 @@ public Result shepherdAnimal(String name, String x, String y) {
             int nx = tile.getX() + dir[0];
             int ny = tile.getY() + dir[1];
             Tile neighbor = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
-            if (neighbor != null && neighbor.isBuildable() && neighbor.getContainedAnimal() == null) {
+            if (neighbor != null && neighbor.canBuildOn() && neighbor.getContainedAnimal() == null) {
                 neighbors.add(neighbor);
             }
         }

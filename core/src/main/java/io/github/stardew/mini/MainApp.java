@@ -15,12 +15,14 @@ import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.ShopAssets;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
@@ -35,7 +37,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames ; // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users = UserDatabase.loadUsers();
@@ -50,14 +52,13 @@ public class MainApp extends com.badlogic.gdx.Game {
         //loadGameData();
         GameAssetManager.load();
         setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-        if(loggedInUser == null) {
-        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-        }
-        else
+        if (loggedInUser == null) {
+            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        } else
             setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
 //       // Initialize game data
-       //loadGameData();
+        //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -69,28 +70,28 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
-        for(FruitType fruitType : FruitType.values()) {
+        for (FruitType fruitType : FruitType.values()) {
             fruitType.initTexture();
         }
-        for(SourceType sourceType : SourceType.values()) {
+        for (SourceType sourceType : SourceType.values()) {
             sourceType.initTexture();
         }
-        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+        for (ForagingCropType foragingCropType : ForagingCropType.values()) {
             foragingCropType.initTexture();
         }
-        for(CropType cropType : CropType.values()) {
+        for (CropType cropType : CropType.values()) {
             cropType.initTexture();
         }
-        for(ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
+        for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
             foragingMineralType.initTexture();
         }
-        for(MachineType machineType : MachineType.values()) {
+        for (MachineType machineType : MachineType.values()) {
             machineType.initTexture();
         }
-        for(io.github.stardew.mini.Model.Reccepies.randomStuffType randomStuffType : randomStuffType.values()) {
+        for (io.github.stardew.mini.Model.Reccepies.randomStuffType randomStuffType : randomStuffType.values()) {
             randomStuffType.initTexture();
         }
-        for(AnimalProductType animalProductType : AnimalProductType.values()) {
+        for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
         activeGames = loadActiveGames();
@@ -171,9 +172,54 @@ public class MainApp extends com.badlogic.gdx.Game {
         InventoryAssets.dispose();
         ShopAssets.dispose();
         batch.dispose();
-        loggedInUser.getOwnedAnimals().clear();
+//        loggedInUser.getOwnedAnimals().clear();
+        // currentGame.getMap().getShops().clear();
         saveActiveGames();
+
         //saveGameData();
+    }
+
+    //    private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
+//        File file = new File("data/active_games.json");
+//        if (!file.exists()) return new ArrayList<>();
+//
+//        try (Reader reader = new FileReader(file)) {
+//            Type listType = new TypeToken<ArrayList<io.github.stardew.mini.Model.Game>>() {
+//            }.getType();
+//            return new Gson().fromJson(reader, listType);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return new ArrayList<>();
+//        }
+//    }
+//
+//    public void saveActiveGames() {
+//        File file = new File("data/active_games.json");
+//        try (Writer writer = new FileWriter(file)) {
+//            new Gson().toJson(activeGames, writer);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
+    public void saveActiveGames() {
+        try {
+            GameSaver.saveGames(activeGames, "data/active_games.json");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
+        File file = new File("data/active_games.json");
+        if (!file.exists()) return new ArrayList<>();
+
+        try {
+            List<io.github.stardew.mini.Model.Game> list = GameSaver.loadGames(file.getPath());
+            return new ArrayList<>(list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
 //    private void saveGameData() {
@@ -216,38 +262,12 @@ public class MainApp extends com.badlogic.gdx.Game {
         "how many times did SpongeBob take the driving test?"
     );
 
-    private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
-        File file = new File("data/active_games.json");
-        if (!file.exists()) return new ArrayList<>();
-
-        try (Reader reader = new FileReader(file)) {
-            Type listType = new TypeToken<ArrayList<io.github.stardew.mini.Model.Game>>() {
-            }.getType();
-            return new Gson().fromJson(reader, listType);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    public void saveActiveGames() {
-        File file = new File("data/active_games.json");
-        try (Writer writer = new FileWriter(file)) {
-            new Gson().toJson(activeGames, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     public Menu getCurrentMenu() {
         return currentMenu;
     }
 
     private MainApp() {
     }
-
-    ;
 
     public static MainApp getInstance() {
         if (instance == null) {
@@ -264,7 +284,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         return null;
     }
-
 
     public ArrayList<User> getUsers() {
         return users;
@@ -293,6 +312,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
+
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
@@ -301,13 +321,14 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.currentMenu = currentMenu;
         changeScreen();
     }
+
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:
                 getInstance().setScreen(new GameView(new GameController()));
                 break;
             case MainMenu:
-                //getInstance().setScreen(new MainMenuScreen(this));
+                getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
                 break;
             case PreGameMenu:
                 getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
@@ -338,6 +359,7 @@ public class MainApp extends com.badlogic.gdx.Game {
 
     public io.github.stardew.mini.Model.Game getGameByUser(User user) {
         for (io.github.stardew.mini.Model.Game game : activeGames) {
+            System.out.println(game.getPlayers());
             if (game.hasUser(user)) return game;
         }
         return null;

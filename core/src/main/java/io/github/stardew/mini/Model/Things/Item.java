@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Things;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.Model.Growables.*;
@@ -9,15 +11,30 @@ import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 
 import java.util.Objects;
+import java.util.Random;
 
-public class Item {
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "itemType" // the field name in JSON that tells which subtype it is
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Food.class, name = "Food"),
+    @JsonSubTypes.Type(value = Fish.class, name = "Fish"),
+    @JsonSubTypes.Type(value = AnimalProduct.class, name = "AnimalProduct"),
+    @JsonSubTypes.Type(value = Growable.class, name = "Growable"),
+    @JsonSubTypes.Type(value = randomStuff.class, name = "randomStuff"),
+    @JsonSubTypes.Type(value = Machine.class, name = "Machine"),
+    @JsonSubTypes.Type(value = ForagingMineral.class, name = "ForagingMineral"),
+})
+
+public abstract class Item {
     protected String name;
     protected boolean isSellable;
     protected int price;
     protected boolean isPlaceable;
     protected boolean isEatable;
     protected ProductQuality productQuality = ProductQuality.Normal;
-
     public Item(String name, boolean isSellable, int price, boolean isPlaceable, ProductQuality productQuality, boolean isEatable) {
         this.name = name;
         this.isSellable = isSellable;
@@ -26,7 +43,7 @@ public class Item {
         this.productQuality = productQuality;
         this.isEatable = isEatable;
     }
-
+    public Item(){}
     public String getName() {
         return name;
     }
@@ -141,9 +158,10 @@ public class Item {
         return null;
     }
 
-    public Item copy() {
-        return new Item(name, isSellable, price, isPlaceable, productQuality, isEatable);
-    }
+//    public Item copy() {
+//        return new Item(name, isSellable, price, isPlaceable, productQuality, isEatable);
+//    }
+   public abstract Item copy();
 
     @Override
     public boolean equals(Object o) {

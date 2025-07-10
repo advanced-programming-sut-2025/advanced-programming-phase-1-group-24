@@ -95,6 +95,7 @@ public class PreGameMenuView implements AppMenu, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Result result = controller.loadGame();
+                MainApp.getInstance().getCurrentGame().getMap().initializeShops();
                 if (result.isSuccessful()) {
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
                 } else {
@@ -108,9 +109,6 @@ public class PreGameMenuView implements AppMenu, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-                MainApp.getInstance().setScreen(
-                    new MainMenuView(new MainMenuController(), skin)
-                );
 
             }
         });

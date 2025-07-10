@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -27,38 +26,28 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.StoreMenuController;
-import com.sun.tools.javac.Main;
-import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.CrowFlight;
-import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.Friendships.Friendship;
@@ -68,7 +57,6 @@ import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
-import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
@@ -80,17 +68,10 @@ import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.randomStuffType;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Places.Shop;
-import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.*;
-import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
@@ -102,13 +83,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import java.util.regex.Matcher;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
@@ -273,7 +252,7 @@ private void updateAnimals(float delta) {
 
             // Only try to assign a new path if animal is not moving
             // and its personal cooldown allows it
-            if (!animal.isMoving() && !animal.isInHabitat()) {
+            if (!animal.itMoving() && !animal.isInHabitat()) {
                 animal.reduceCooldown(delta);
 
                 if (animal.getMovementCooldown() <= 0f) {
@@ -321,7 +300,7 @@ private void updateAnimals(float delta) {
                 if (distance > maxDistance || distance == 0) continue;
 
                 Tile candidate = map.getTile(nx, ny);
-                if (candidate != null && candidate.isBuildable() &&
+                if (candidate != null && candidate.canBuildOn() &&
                     candidate.getContainedAnimal() == null) {
                     candidates.add(candidate);
                 }
@@ -374,7 +353,7 @@ private void updateAnimals(float delta) {
             int nx = tile.getX() + dir[0];
             int ny = tile.getY() + dir[1];
             Tile neighbor = MainApp.getInstance().getCurrentGame().getMap().getTile(nx, ny);
-            if (neighbor != null && neighbor.isBuildable() && neighbor.getContainedAnimal() == null) {
+            if (neighbor != null && neighbor.canBuildOn() && neighbor.getContainedAnimal() == null) {
                 neighbors.add(neighbor);
             }
         }
@@ -387,7 +366,7 @@ private void updateAnimals(float delta) {
             for (Animal animal : player.getOwnedAnimals()) {
                 float x, y;
 
-                if (animal.isMoving()) {
+                if (animal.itMoving()) {
                     Tile from = animal.getMovingFrom();
                     Tile to = animal.getMovingTo();
                     float p = animal.getMoveProgress();
@@ -399,10 +378,11 @@ private void updateAnimals(float delta) {
                         p
                     ) * tileSize;
                 } else {
+                    if (animal.getCurrentTile() == null) continue;
                     x = animal.getCurrentTile().getX() * tileSize;
                     y = (rows - animal.getCurrentTile().getY() - 1) * tileSize;
                 }
-
+                if (animal.getCurrentTile() == null) continue;
                 batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
             }
         }
@@ -424,7 +404,7 @@ private void updateAnimals(float delta) {
                     float drawX = x * tileSize;
                     float drawY = (tiles.length - y - 1) * tileSize;
 
-                    if (tile != null && tile.isBuildable()) {
+                    if (tile != null && tile.canBuildOn()) {
                         shapeRenderer.setColor(1f, 1f, 1f, 0.0f);
                     } else {
                         shapeRenderer.setColor(0f, 0f, 0f, 0.35f);
@@ -632,7 +612,6 @@ private void updateAnimals(float delta) {
                 }
             }
         }
-
         if (showFullMap) return true;
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
@@ -670,7 +649,7 @@ private void updateAnimals(float delta) {
 
                 Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
 
-                if (tile != null && tile.isBuildable()) {
+                if (tile != null && tile.canBuildOn()) {
                     if (buildingToPlace == null || storeController.isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
                         Result result;
                         if (buildingToPlace == null) {
@@ -777,7 +756,6 @@ private void updateAnimals(float delta) {
                 Gdx.input.setInputProcessor(stage);
                 return true;
             }
-
 
         }
         return false;
@@ -1925,7 +1903,7 @@ private void handleAnimalMenuChoice(String choice) {
         drawGreenHouse(tileSize,rows);
                 drawHabitats(tileSize, rows);
                 drawShops(tileSize,rows);
-//TODO : handle Giant Crop
+        //TODO : handle Giant Crop
         //TODO : handle burnt plants
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -2218,7 +2196,6 @@ private void handleAnimalMenuChoice(String choice) {
             int drawY = (rows - shop.getY() - shop.getHeight()) * tileSize;
 
             Texture texture = shop.getShopType().getTexture();
-            System.out.println( shop.getShopType());
              if (texture != null) {
                 batch.draw(texture, drawX, drawY, shop.getWidth() * tileSize, shop.getHeight() * tileSize);
             }

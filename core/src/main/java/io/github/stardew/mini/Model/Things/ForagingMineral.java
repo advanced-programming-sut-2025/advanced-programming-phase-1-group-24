@@ -7,6 +7,7 @@ public class ForagingMineral extends Item{
         super(type.getName(), true, type.getSellPrice(), true, productQuality,false);
         this.type = type;
     }
+    public ForagingMineral(){}
     @Override
     public ForagingMineral copy() {
         return new ForagingMineral(this.getProductQuality(), this.type);

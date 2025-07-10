@@ -61,6 +61,9 @@ public class Farm extends Place {
         this.barn = new ArrayList<>();
     }
 
+    public Farm() {
+    }
+
     public Tile getRandomFarmTile(Tile[][] map) {
         List<Tile> farmTiles = new ArrayList<>();
 

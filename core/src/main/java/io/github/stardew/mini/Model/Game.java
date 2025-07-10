@@ -1,18 +1,20 @@
 package io.github.stardew.mini.Model;
 
 
+import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.NPCManagement.NPCtype;
+import io.github.stardew.mini.Model.Places.Farm;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
-
+import io.github.stardew.mini.Model.Places.Habitat;
 import java.util.*;
 import io.github.stardew.mini.Model.MapManagement.*;
 
@@ -52,6 +54,8 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+    }
+    public Game() {
     }
 
     private ArrayList<NPC> npcs;
@@ -354,6 +358,16 @@ public class Game {
         if (currentPlayer.getSkillsLevel().get(Skill.MINING) == 1 &&
                 !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
             currentPlayer.getCookingRecepies().add(FoodRecipe.MinersTreat);
+    }
+    public void reloadExtraData(){
+        for (Tile[] row : map.getMap()) {
+            for (Tile tile : row) {
+                Animal animal = tile.getContainedAnimal();
+                if (animal != null) {
+                    animal.reloadAfterLoad(tile);
+                }
+            }
+        }
     }
 
 }
