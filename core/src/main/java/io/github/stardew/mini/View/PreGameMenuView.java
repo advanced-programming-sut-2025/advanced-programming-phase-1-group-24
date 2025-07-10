@@ -95,6 +95,7 @@ public class PreGameMenuView implements AppMenu, Screen {
                 Result result = controller.loadGame();
                 if (result.isSuccessful()) {
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+                    MainApp.getInstance().getCurrentGame().getMap().initializeShops();
                 } else {
                     showErrorDialog(stage, result.message());
                 }
