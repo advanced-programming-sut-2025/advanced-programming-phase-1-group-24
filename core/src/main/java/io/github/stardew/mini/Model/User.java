@@ -70,6 +70,60 @@ public class User {
     private int movingDirection = 0;
 
     private Avatar avatar;
+    private boolean isProposing;
+    private boolean isAccepting;
+    private boolean isRejecting;
+    private float proposingTimer = 0f;
+    private float acceptingTimer = 0f;
+    private float rejectingTimer = 0f;
+
+    public float getProposingTimer() {
+        return proposingTimer;
+    }
+
+    public float getAcceptingTimer() {
+        return acceptingTimer;
+    }
+
+    public float getRejectingTimer() {
+        return rejectingTimer;
+    }
+
+    public void setProposingTimer(float proposingTimer) {
+        this.proposingTimer = proposingTimer;
+    }
+
+    public void setAcceptingTimer(float acceptingTimer) {
+        this.acceptingTimer = acceptingTimer;
+    }
+
+    public void setRejectingTimer(float rejectingTimer) {
+        this.rejectingTimer = rejectingTimer;
+    }
+
+    public boolean isRejecting() {
+        return isRejecting;
+    }
+
+    public void setRejecting(boolean rejecting) {
+        isRejecting = rejecting;
+    }
+
+    public boolean isAccepting() {
+        return isAccepting;
+    }
+
+    public void setAccepting(boolean accepting) {
+        isAccepting = accepting;
+    }
+
+    public boolean isProposing() {
+        return isProposing;
+    }
+
+    public void setProposing(boolean proposing) {
+        isProposing = proposing;
+    }
 
     public Avatar getAvatar() {
         return avatar;
@@ -296,6 +350,12 @@ public class User {
         this.buffMiningSkill = false;
         this.buffMaxEnergy = false;
         this.hoursLeftForBuff = 0;
+        this.isProposing = false;
+        this.isAccepting = false;
+        this.isRejecting = false;
+        this.proposingTimer = 0f;
+        this.acceptingTimer = 0f;
+        this.rejectingTimer = 0f;
     }
 
 

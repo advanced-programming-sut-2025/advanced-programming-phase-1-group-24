@@ -26,13 +26,13 @@ public class ShopAssets {
     public static final Map<String, List<Texture>> shopTextures = new HashMap<>();
 
     public static void load() {
-        Blacksmith = new Texture(Gdx.files.internal("shop/Blacksmith.png"));
-        Carpenter = new Texture(Gdx.files.internal("shop/Carpenter.png"));
-        Fish = new Texture(Gdx.files.internal("shop/Fish.png"));
-        Marnie = new Texture(Gdx.files.internal("shop/Marnie.png"));
-        Jojamart = new Texture(Gdx.files.internal("shop/Jojamart.png"));
-        PierresGeneral = new Texture(Gdx.files.internal("shop/PierresGeneral.png"));
-        StardropSaloon = new Texture(Gdx.files.internal("shop/StardropSaloon.png"));
+        Blacksmith = new Texture(Gdx.files.internal("Shop/Blacksmith.png"));
+        Carpenter = new Texture(Gdx.files.internal("Shop/Carpenter.png"));
+        Fish = new Texture(Gdx.files.internal("Shop/Fish.png"));
+        Marnie = new Texture(Gdx.files.internal("Shop/Marnie.png"));
+        Jojamart = new Texture(Gdx.files.internal("Shop/Jojamart.png"));
+        PierresGeneral = new Texture(Gdx.files.internal("Shop/PierresGeneral.png"));
+        StardropSaloon = new Texture(Gdx.files.internal("Shop/StardropSaloon.png"));
 
     }
 
