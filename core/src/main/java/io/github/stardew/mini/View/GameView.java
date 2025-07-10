@@ -1278,15 +1278,6 @@ private void createAnimalDialog() {
     });
     animalMenuDialog.getContentTable().add(petButton).row();
 
-    TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
-    releaseButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("release");
-        }
-    });
-    animalMenuDialog.getContentTable().add(releaseButton).row();
-
     TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
     sellButton.addListener(new ClickListener() {
         public void clicked(InputEvent event, float x, float y) {
@@ -1734,7 +1725,6 @@ private void handleAnimalMenuChoice(String choice) {
         switch (choice) {
             case "feed": result = controller.feedHay(selectedAnimal.getName()); break;
             case "pet": result = controller.petAnimal(selectedAnimal.getName()); break;
-            case "release": result = new Result(true, ""); break;
             case "sell": result = controller.sellAnimal(selectedAnimal.getName()); break;
             case "collect": result = controller.collectProduct(selectedAnimal.getName()); break;
             case "cancel": result = new Result(true, ""); break;
@@ -1782,7 +1772,7 @@ private void handleAnimalMenuChoice(String choice) {
                     controller.handleEndOfDay();
                     updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
                 }
-                }, 5, 5);
+                }, 20, 20);
 
         determineAvatar();
 
@@ -2224,13 +2214,12 @@ private void handleAnimalMenuChoice(String choice) {
             }
         }
         for (Shop shop : shops) {
-
-
             int drawX = shop.getX() * tileSize;
             int drawY = (rows - shop.getY() - shop.getHeight()) * tileSize;
 
             Texture texture = shop.getShopType().getTexture();
-            if (texture != null) {
+            System.out.println( shop.getShopType());
+             if (texture != null) {
                 batch.draw(texture, drawX, drawY, shop.getWidth() * tileSize, shop.getHeight() * tileSize);
             }
         }

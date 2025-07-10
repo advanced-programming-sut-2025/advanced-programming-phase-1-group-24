@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Controller;
 
+import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
@@ -14,6 +15,7 @@ import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.Tools.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -592,18 +594,52 @@ public class StoreMenuController {
         player.getOwnedAnimals().add(newAnimal);
         // fix animal current tile in the habitat and place the animal in the containedAnimal field of the tile in that Tile
 
-        // Find a free tile in that habitat
-        Tile freeTile = map.getTile(newAnimal.getLivingPlace().getX(), newAnimal.getLivingPlace().getY());
-        if (freeTile == null) {
+        // Get habitat bounds
+        Habitat habitat = newAnimal.getLivingPlace();
+        int startX = habitat.getX();
+        int startY = habitat.getY();
+        int endX = startX + habitat.getWidth() - 1;
+        int endY = startY + habitat.getHeight() - 1;
+
+       // Collect all free tiles in the habitat
+        List<Tile> freeTiles = new ArrayList<>();
+        for (int x = startX; x < endX; x++) {
+            for (int y = startY; y < endY; y++) {
+                Tile tile = map.getTile(x, y);
+                if (tile != null && tile.getContainedAnimal() == null) {
+                    freeTiles.add(tile);
+                }
+            }
+        }
+        System.out.println("end habitat coordinates "+ endX+ ", " + endY);
+
+        if (freeTiles.isEmpty()) {
             return new Result(false, "No free space in the habitat for the animal.");
         }
+
+        // Pick a random free tile
+        Tile freeTile = freeTiles.get(MathUtils.random(freeTiles.size() - 1));
 
         // Set references both ways
         newAnimal.setCurrentTile(freeTile);
         freeTile.setContainedAnimal(newAnimal);
         selectedItem.sell(1);
+
         return new Result(true, "Successfully bought " + name + " the " + animal +
-            "! now it is on " + freeTile.getX() + "," + freeTile.getY());
+            "! Now it is on " + freeTile.getX() + "," + freeTile.getY());
+
+//        // Find a free tile in that habitat
+//        Tile freeTile = map.getTile(newAnimal.getLivingPlace().getX(), newAnimal.getLivingPlace().getY());
+//        if (freeTile == null) {
+//            return new Result(false, "No free space in the habitat for the animal.");
+//        }
+//
+//        // Set references both ways
+//        newAnimal.setCurrentTile(freeTile);
+//        freeTile.setContainedAnimal(newAnimal);
+//        selectedItem.sell(1);
+//        return new Result(true, "Successfully bought " + name + " the " + animal +
+//            "! now it is on " + freeTile.getX() + "," + freeTile.getY());
     }
 
     public Result showAllProducts() {
@@ -779,9 +815,9 @@ public class StoreMenuController {
         String requiredBar = getRequiredBarName(nextMaterial);
         int requiredBarCount = 5;
         int cost = getUpgradeCost(nextMaterial, toolType == ToolType.TRASHCAN);
-///    ////////////////////
-        player.getBackpack().addItem(new randomStuff(10, randomStuffType.Copper_Bar), requiredBarCount);
-        /// /////////////////
+/////    ////////////////////
+//        player.getBackpack().addItem(new randomStuff(10, randomStuffType.Copper_Bar), requiredBarCount);
+//        /// /////////////////
         int playerBarCount = player.getBackpack().getItemCount(requiredBar);
         int playerMoney = player.getMoney();
 
