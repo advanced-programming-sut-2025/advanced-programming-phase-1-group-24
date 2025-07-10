@@ -16,7 +16,7 @@ public class Axe extends Tool {
     public Axe(ToolType type) {
         super(type);
     }
-
+    public Axe(){}
     public Result useAxe(int xDirection, int yDirection, Tile currentTile,
                          MapOfGame map, User currentPlayer, double energyWeatherModifier) {
         int currentX = currentTile.getX();

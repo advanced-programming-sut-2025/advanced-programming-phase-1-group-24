@@ -33,6 +33,8 @@ public class Trade {
         numberOfTrades++;
     }
 
+    public Trade() {
+    }
 
     public User getSender() {
         return sender;

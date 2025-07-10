@@ -1,6 +1,8 @@
 package io.github.stardew.mini.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Friendships.Message;
@@ -21,7 +23,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class User {
     //user
     private String username;
@@ -88,7 +93,7 @@ public class User {
     }
 
     /// /////////////?????????????/
-
+    public User(){}
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
         this.password = password;

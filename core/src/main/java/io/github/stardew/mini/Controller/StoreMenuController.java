@@ -268,6 +268,7 @@ public class StoreMenuController {
             randomStuff randomStuffCopy = ((randomStuff) item).copy();
             result = player.getBackpack().addItem(randomStuffCopy, count);
         } else {
+            System.out.println("item class: " + item.getClass());
             result = new Result(false, "Unknown item type");
         }
         if ((item instanceof Tool || item instanceof Animal || item instanceof Habitat) && count > 1) {

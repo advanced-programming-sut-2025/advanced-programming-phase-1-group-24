@@ -13,6 +13,7 @@ public class Shear extends Tool{
     public Shear(ToolType type) {
         super(type);
     }
+    public Shear(){}
     public Result useShear(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map, double weatherModifier) {
         int energy = (int) (4 * weatherModifier);
         if (!currentPlayer.tryConsumeEnergy(energy)) {

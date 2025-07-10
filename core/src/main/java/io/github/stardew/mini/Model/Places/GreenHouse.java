@@ -10,6 +10,9 @@ public class GreenHouse extends Place{
         this.height = height;
     }
 
+    public GreenHouse() {
+    }
+
     public boolean getIsGreenHouseFixed(){
         return isGreenHouseFixed;
     }

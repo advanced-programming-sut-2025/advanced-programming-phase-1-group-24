@@ -17,6 +17,9 @@ public class NPCMission {
         this.isAlreadyDone = false;
     }
 
+    public NPCMission() {
+    }
+
     public Map<String, Integer> getRequiredItems() {
         return requiredItems;
     }

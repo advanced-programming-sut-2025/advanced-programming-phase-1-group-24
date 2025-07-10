@@ -17,6 +17,9 @@ public class TimeAndDate {
         this.season = season;
     }
 
+    public TimeAndDate() {
+    }
+
     public void advanceHour() {
         hour++;
         if (hour >= 24) {
