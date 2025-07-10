@@ -175,6 +175,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Table backpackMenuTable;
     public static float toolUsageStateTime = 0f;
     public static boolean isToolBeingUsed = false;
+    private Item equippedItem = null;
+    private Table equippedItemSlotTable;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -437,6 +439,11 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ENTER) {
+            if (equippedItem != null) {
+                equippedItem = null;
+            }
+        }
         if (keycode == Input.Keys.E) {
             if (showBackpackMenu) {
                 showBackpackMenu = false;
@@ -1604,6 +1611,15 @@ private void updateAnimals(float delta) {
         toolMenuTable.setVisible(showToolsMenu);
         stage.addActor(toolMenuTable);
 
+        equippedItemSlotTable = new Table();
+        equippedItemSlotTable.bottom().center();
+        equippedItemSlotTable.padBottom(10);
+        equippedItemSlotTable.setVisible(true);
+        stage.addActor(equippedItemSlotTable);
+
+        updateEquippedItemSlot();
+
+
         Timer.schedule(new Timer.Task() {
                 @Override
                 public void run() {
@@ -1814,6 +1830,15 @@ private void updateAnimals(float delta) {
         }
 
         /// /////////////////////////////////////////////////////////////////////////
+
+        updateEquippedItemSlot();
+        if (equippedItem != null && currentPlayer != null && currentPlayer.getCurrentTile() != null) {
+            int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+            batch.draw(getItemTexture(equippedItem), drawX,  drawY, tileSize, tileSize);
+        }
+
+
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -1888,6 +1913,7 @@ private void updateAnimals(float delta) {
 
         // --- DRAW UI ---
         //handleInput();
+
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
@@ -2406,6 +2432,7 @@ private void updateAnimals(float delta) {
         }
 
         private void drawSelectedTool(Texture itemTex) {
+            if (itemTex == null) { return; }
             if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
 
             Tile tile = currentPlayer.getCurrentTile();
@@ -2634,6 +2661,21 @@ private void updateAnimals(float delta) {
                 }
             });
 
+            TextButton selectButton = new TextButton("Select", GameAssetManager.skin, "custom-button");
+            selectButton.setColor(Color.BLUE);
+            selectButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                        equippedItem = sortedItems.get(selectedSlot);
+                        updateEquippedItemSlot();
+                        showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                    } else {
+                        showErrorDialog(stage, "No item selected.");
+                    }
+                }
+            });
+
             Table controlButtonsTable = new Table();
             controlButtonsTable.defaults().pad(10);
 
@@ -2651,6 +2693,7 @@ private void updateAnimals(float delta) {
             });
             controlButtonsTable.add(backButton).width(100).height(40);
             controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
+            controlButtonsTable.add(selectButton).width(100).height(40);
 
             backpackMenuTable.add(controlButtonsTable).bottom().center().row();
 
@@ -2659,6 +2702,7 @@ private void updateAnimals(float delta) {
         }
 
         public Texture getItemTexture(Item item) {
+            if(item == null) {return null;}
             if (item instanceof Fish) {
                 return ((Fish) item).getType().getTexture();
             }
@@ -3155,6 +3199,57 @@ private void updateAnimals(float delta) {
 
         stage.addActor(dialog);
         Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
+    }
+
+    private void updateEquippedItemSlot() {
+        equippedItemSlotTable.clearChildren();
+
+        float slotSize = GameAssetManager.TILE_SIZE;
+        float itemImagePadding = slotSize * 0.1f;
+        float itemImageRenderSize = slotSize - (itemImagePadding * 2);
+        float labelOffset = 5f;
+
+        Stack itemSlotStack = new Stack();
+
+        Image slotBg = new Image(InventoryAssets.slot);
+        slotBg.setSize(slotSize, slotSize);
+        itemSlotStack.add(slotBg);
+
+        if (equippedItem != null) {
+            Texture itemTex = getItemTexture(equippedItem);
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
+                itemImage.setScaling(Scaling.fit);
+                itemImage.setAlign(com.badlogic.gdx.utils.Align.center);
+
+                Container<Image> itemImageContainer = new Container<>(itemImage);
+                itemImageContainer.pad(itemImagePadding);
+                itemImageContainer.fill();
+
+                itemSlotStack.add(itemImageContainer);
+            } else {
+                Gdx.app.error("GameView", "Texture for equipped item " + equippedItem.getName() + " is null!");
+            }
+
+            Integer count = currentPlayer.getBackpack().getInventoryItems().get(equippedItem);
+            if (count != null && count > 1) {
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+                Container<Label> labelContainer = new Container<>(countLabel);
+                labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
+                labelContainer.padRight(labelOffset);
+                labelContainer.padBottom(labelOffset);
+                labelContainer.fill();
+                itemSlotStack.add(labelContainer);
+            }
+        }
+
+        equippedItemSlotTable.add(itemSlotStack).size(slotSize).pad(5);
+
+        equippedItemSlotTable.pack();
+        equippedItemSlotTable.setPosition(
+            (stage.getWidth() - equippedItemSlotTable.getWidth()) / 2,
+            10);
     }
 }
 
