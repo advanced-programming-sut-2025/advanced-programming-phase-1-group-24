@@ -22,9 +22,11 @@ import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.User;
 
 import java.util.Scanner;
@@ -222,24 +224,25 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                         }
                     }
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
-                    Machine machine = new Machine(MachineType.KEG);
-
-
-                    Animal moo = new Animal("moo", AnimalType.COW);
-                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
-                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    moo.setCurrentTile(new_tile);
-                    moo.setInHabitat(false);
-                    tiles2.setContainedItem(machine);
-                    new_tile.setContainedAnimal(moo);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
-                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
-                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    heny.setCurrentTile(new_tile_heny);
-                    new_tile.setContainedAnimal(heny);
-                    heny.setInHabitat(false);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
+//                    Machine machine = new Machine(MachineType.KEG);
+//
+//
+//                    Animal moo = new Animal("moo", AnimalType.COW);
+//                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
+//                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    moo.setCurrentTile(new_tile);
+//                    moo.setInHabitat(false);
+//                    moo.setLivingPlace(new Habitat(0,0,1,1, StorageType.INITIAL, Habitat.HabitatType.Barn));
+//                    tiles2.setContainedItem(machine);
+//                    new_tile.setContainedAnimal(moo);
+//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
+//                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
+//                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    heny.setCurrentTile(new_tile_heny);
+//                    new_tile.setContainedAnimal(heny);
+//                    heny.setInHabitat(false);
+//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
 

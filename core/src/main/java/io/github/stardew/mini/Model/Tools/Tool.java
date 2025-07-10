@@ -8,7 +8,7 @@ public  class Tool {
     ToolMaterial material;
 
     public Tool(ToolType type) {
-        this.name =type.name();
+        this.name =type.getName();
         this.type = type;
         this.material = ToolMaterial.Initial;
     }

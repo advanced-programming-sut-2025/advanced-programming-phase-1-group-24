@@ -1104,7 +1104,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         double price = animal.getAnimalType().getBasePrice();
         double friendship = animal.getFriendship();
 
-        int sellingPrice = (int) ((1000 / price + 0.3) * friendship);
+        int sellingPrice = (int) ((1000.0 / price + 0.3) * friendship);
 
         // Remove the animal and add money to the player
         animal.getLivingPlace().getLivingAnimals().remove(animal);

@@ -35,7 +35,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = loadActiveGames(); // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames ; // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users = UserDatabase.loadUsers();
@@ -93,38 +93,38 @@ public class MainApp extends com.badlogic.gdx.Game {
         for(AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-
+        activeGames = loadActiveGames();
         // Set initial screen
         //getInstance().setScreen(new LoginView(this));
     }
 
-    private void loadGameData() {
-        // LibGDX file handling
-        FileHandle usersFile = Gdx.files.local("data/users.json");
-        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
-        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
-
-        Json json = new Json();
-
-        // Load users
-        if (usersFile.exists()) {
-            users = json.fromJson(ArrayList.class, User.class, usersFile);
-        } else {
-            users = new ArrayList<>();
-        }
-
-        // Load active games
-        if (gamesFile.exists()) {
-            activeGames = json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
-        } else {
-            activeGames = new ArrayList<>();
-        }
-
-        // Load logged in user
-        if (loggedInUserFile.exists()) {
-            loggedInUser = json.fromJson(User.class, loggedInUserFile);
-        }
-    }
+//    private void loadGameData() {
+//        // LibGDX file handling
+//        FileHandle usersFile = Gdx.files.local("data/users.json");
+//        FileHandle gamesFile = Gdx.files.local("data/active_games.json");
+//        FileHandle loggedInUserFile = Gdx.files.local("data/logged_in_user.json");
+//
+//        Json json = new Json();
+//
+//        // Load users
+//        if (usersFile.exists()) {
+//            users = json.fromJson(ArrayList.class, User.class, usersFile);
+//        } else {
+//            users = new ArrayList<>();
+//        }
+//
+//        // Load active games
+//        if (gamesFile.exists()) {
+//            activeGames = json.fromJson(ArrayList.class, io.github.stardew.mini.Model.Game.class, gamesFile);
+//        } else {
+//            activeGames = new ArrayList<>();
+//        }
+//
+//        // Load logged in user
+//        if (loggedInUserFile.exists()) {
+//            loggedInUser = json.fromJson(User.class, loggedInUserFile);
+//        }
+//    }
 
     @Override
     public void render() {
@@ -172,27 +172,28 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
         loggedInUser.getOwnedAnimals().clear();
+        saveActiveGames();
         //saveGameData();
     }
 
-    private void saveGameData() {
-        Json json = new Json();
-        json.setUsePrototypes(false); // For proper serialization
-
-        // Save users
-        Gdx.files.local("data/users.json")
-            .writeString(json.prettyPrint(users), false);
-
-        // Save active games
-        Gdx.files.local("data/active_games.json")
-            .writeString(json.prettyPrint(activeGames), false);
-
-        // Save logged in user
-        if (loggedInUser != null) {
-            Gdx.files.local("data/logged_in_user.json")
-                .writeString(json.toJson(loggedInUser), false);
-        }
-    }
+//    private void saveGameData() {
+//        Json json = new Json();
+//        json.setUsePrototypes(false); // For proper serialization
+//
+//        // Save users
+//        Gdx.files.local("data/users.json")
+//            .writeString(json.prettyPrint(users), false);
+//
+//        // Save active games
+//        Gdx.files.local("data/active_games.json")
+//            .writeString(json.prettyPrint(activeGames), false);
+//
+//        // Save logged in user
+//        if (loggedInUser != null) {
+//            Gdx.files.local("data/logged_in_user.json")
+//                .writeString(json.toJson(loggedInUser), false);
+//        }
+//    }
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
