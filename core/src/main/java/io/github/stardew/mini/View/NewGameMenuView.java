@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.NewGameMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
@@ -34,26 +35,40 @@ public class NewGameMenuView implements AppMenu, Screen {
     private Label errorLabel;
     private TextButton addPlayerButton;
     private TextButton startGameButton;
+    private TextButton backButton;
     private ArrayList<Label> playerLabels = new ArrayList<>();
 
-    private int gameWidth = Gdx.graphics.getWidth();
-    private int gameHeight = Gdx.graphics.getHeight();
+//    private int gameWidth = Gdx.graphics.getWidth();
+//    private int gameHeight = Gdx.graphics.getHeight();
 
     public NewGameMenuView(NewGameMenuController controller) {
         this.controller = controller;
         controller.setView(this);
         createUI();
     }
+//    stage = new Stage(new ScreenViewport());
+//        Gdx.input.setInputProcessor(stage);
+//
+//    // background
+//    Texture bg = GameAssetManager.getBackground();
+//    Image bgImage = new Image(bg);
+//        bgImage.setFillParent(true);
+//        stage.addActor(bgImage);
+//
 
     public void createUI() {
         Skin skin = GameAssetManager.skin;
-        stage = new Stage(new FitViewport(gameWidth, gameHeight));
+//        stage = new Stage(new FitViewport(gameWidth, gameHeight));
+        stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-
         table = new Table();
         table.setFillParent(true);
 
-        background = GameAssetManager.getBackground();
+        //background = GameAssetManager.getBackground();
+        Texture bg = GameAssetManager.getBackground();
+        Image bgImage = new Image(bg);
+        bgImage.setFillParent(true);
+        stage.addActor(bgImage);
 
         Label titleLabel = new Label("NEW GAME MENU", skin);
         titleLabel.setFontScale(2.5f);
@@ -67,14 +82,18 @@ public class NewGameMenuView implements AppMenu, Screen {
 
         addPlayerButton = new TextButton("Add Player", skin, "custom-button");
         startGameButton = new TextButton("Start Game", skin, "custom-button");
+        backButton =  new TextButton("Back", skin, "custom-button");
         startGameButton.setDisabled(true); // disabled initially
 
         errorLabel = new Label("", skin);
         errorLabel.setColor(Color.RED);
 
-        float buttonWidth = (float) gameWidth / 4;
-        float buttonHeight = (float) gameHeight / 8;
-        float bottomPad = (float) gameHeight / 30;
+        float buttonWidth = Gdx.graphics.getWidth() / 4f;
+        float buttonHeight = Gdx.graphics.getHeight() / 8f;
+//
+//        float buttonWidth = (float) gameWidth / 4;
+//        float buttonHeight = (float) gameHeight / 8;
+        float bottomPad = (float) Gdx.graphics.getHeight() / 30;
 
         table.add(titleLabel).colspan(2).padBottom(bottomPad * 2).row();
         table.add(nameInput).width(buttonWidth).height(buttonHeight / 2).padBottom(bottomPad);
@@ -84,6 +103,7 @@ public class NewGameMenuView implements AppMenu, Screen {
         // Placeholder for player list display
         updatePlayerListUI();
 
+        table.add(backButton).colspan(2).padTop(bottomPad * 2).width(buttonWidth).height(buttonHeight).row();
         table.add(startGameButton).colspan(2).padTop(bottomPad * 2).width(buttonWidth).height(buttonHeight).row();
 
         // Add listeners
@@ -93,6 +113,11 @@ public class NewGameMenuView implements AppMenu, Screen {
                     playerNames.add(username);
                     nameInput.setText("");
                     updatePlayerListUI();
+            }
+        });
+        backButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
             }
         });
 
@@ -136,25 +161,37 @@ public class NewGameMenuView implements AppMenu, Screen {
 //        stage.act(delta);
 //        stage.draw();
 //    }
+//    @Override
+//    public void render(float v) {
+//        ScreenUtils.clear(0, 0, 0, 1);
+//        MainApp.getBatch().begin();
+//        MainApp.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
+//        MainApp.getBatch().end();
+//        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+//        stage.draw();
+//    }
     @Override
     public void render(float v) {
         ScreenUtils.clear(0, 0, 0, 1);
-        MainApp.getBatch().begin();
-        MainApp.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
-        MainApp.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
+
 
     @Override
     public void show() {
 
     }
 
+//    @Override
+//    public void resize(int i, int i1) {
+//
+//    }
     @Override
-    public void resize(int i, int i1) {
-
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
+
 
     @Override
     public void pause() {

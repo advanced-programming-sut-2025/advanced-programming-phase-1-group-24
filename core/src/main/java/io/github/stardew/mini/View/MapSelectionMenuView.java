@@ -6,14 +6,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
@@ -135,8 +133,8 @@ public class MapSelectionMenuView implements AppMenu, Screen {
     private Stage stage;
     public Table table;
     private Texture background;
-    private int gameWidth = Gdx.graphics.getWidth();
-    private int gameHeight = Gdx.graphics.getHeight();
+//    private int gameWidth = Gdx.graphics.getWidth();
+//    private int gameHeight = Gdx.graphics.getHeight();
     private String selectedMap = null; // To track the selected map
 
     public MapSelectionMenuView(MapSelectionMenuController controller) {
@@ -147,7 +145,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
 
     public void createUI() {
         Skin skin = GameAssetManager.skin;
-        stage = new Stage(new FitViewport(gameWidth, gameHeight));
+        stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
@@ -175,9 +173,9 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         TextButton.TextButtonStyle selectedStyle = new TextButton.TextButtonStyle(originalStyle);
         selectedStyle.fontColor = Color.GREEN;
 
-        float buttonWidth = (float) gameWidth / 4;
-        float buttonHeight = (float) gameHeight / 7;
-        float bottomPad = (float) gameHeight / 10;
+        float buttonWidth = (float) Gdx.graphics.getWidth() / 4;
+        float buttonHeight = (float) Gdx.graphics.getHeight() / 7;
+        float bottomPad = (float) Gdx.graphics.getHeight() / 10;
 
         table.add(titleLabel).colspan(2).padBottom(bottomPad).row();
 //
@@ -249,9 +247,12 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                 }
             }
         });
-
+        Texture bg = GameAssetManager.getBackground();
+        Image bgImage = new Image(bg);
+        bgImage.setFillParent(true);
+        stage.addActor(bgImage);
         stage.addActor(table);
-        background = GameAssetManager.getBackground();
+//        background = GameAssetManager.getBackground();
     }
 //    public void createUI() {
 //        Skin skin = GameAssetManager.skin;
@@ -336,9 +337,6 @@ public class MapSelectionMenuView implements AppMenu, Screen {
     @Override
     public void render(float v) {
         ScreenUtils.clear(0, 0, 0, 1);
-        MainApp.getBatch().begin();
-        MainApp.getBatch().draw(GameAssetManager.getBackground(), 0, 0, gameWidth, gameHeight);
-        MainApp.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -349,8 +347,8 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         readyLabel.setFontScale(1.5f);
         readyLabel.setColor(Color.GREEN);
         readyLabel.setPosition(
-            gameWidth / 2 - readyLabel.getWidth() / 2,
-            gameHeight / 2 - readyLabel.getHeight() / 2
+            Gdx.graphics.getWidth() / 2 - readyLabel.getWidth() / 2,
+            Gdx.graphics.getHeight() / 2 - readyLabel.getHeight() / 2
         );
         stage.addActor(readyLabel);
     }
@@ -361,9 +359,9 @@ public class MapSelectionMenuView implements AppMenu, Screen {
     }
 
     @Override
-    public void resize(int i, int i1) {
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
-
     @Override
     public void pause() {
     }

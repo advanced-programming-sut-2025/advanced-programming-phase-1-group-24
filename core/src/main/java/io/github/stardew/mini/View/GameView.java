@@ -39,6 +39,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.MainMenuController;
+import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
@@ -157,6 +158,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private Label animalInfoLabel;
 
+    private TextButton exitButton;
+    private TextButton forceTerminateButton;
+    private Label energyLabel;
+
+    private Item equippedItem = null;
+    private Table equippedItemSlotTable;
+    private Timer.Task gameTickTask;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -756,6 +764,34 @@ private void updateAnimals(float delta) {
                 Gdx.input.setInputProcessor(stage);
                 return true;
             }
+            if (isClickInside(mouseX, mouseY, exitButton)) {
+                Result result = controller.exitGame();
+                if (!result.isSuccessful()) {
+                    showErrorDialog(stage, result.message());
+                } else{
+                    if (gameTickTask != null) {
+                        gameTickTask.cancel();
+                    }
+                    MainApp.getInstance().setCurrentGame(null);
+                    MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
+                    MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+//                    Gdx.app.postRunnable(() -> {
+//                        Timer.instance().stop();
+//                        MainApp.getInstance().setCurrentGame(null);
+//                        MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
+//                        MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+//                    });
+                }
+                return true;
+            }
+            if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
+                //Result result = controller.startForceTerminateVote();
+//                if (!result.isSuccessful()) {
+//                    showErrorDialog(stage, result.message());
+//                }
+                return true;
+            }
+
 
         }
         return false;
@@ -1743,15 +1779,22 @@ private void handleAnimalMenuChoice(String choice) {
         toolMenuTable.setVisible(showToolsMenu);
         stage.addActor(toolMenuTable);
 
-        Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
-                    controller.handleEndOfDay();
-                    updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
-                }
-                }, 20, 20);
-
+//        Timer.schedule(new Timer.Task() {
+//                @Override
+//                public void run() {
+//                    MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+//                    controller.handleEndOfDay();
+//                    updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+//                }
+//                }, 20, 20);
+        gameTickTask = Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+                controller.handleEndOfDay();
+                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+            }
+        }, 5, 5);
         determineAvatar();
 
         inventoryMenuTable = new Table(GameAssetManager.skin);
@@ -1829,6 +1872,21 @@ private void handleAnimalMenuChoice(String choice) {
         backpackMenuTable.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
         backpackMenuTable.setVisible(false);
         stage.addActor(backpackMenuTable);
+
+        /// //////////////////////////////////////////////////////////
+        exitButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
+        exitButton.setSize(200, 200);
+        exitButton.setColor(Color.MAGENTA);
+        exitButton.setPosition(10, Gdx.graphics.getHeight() - 200);
+        exitButton.setTouchable(Touchable.enabled);
+        stage.addActor(exitButton);
+
+        forceTerminateButton = new TextButton("Force Terminate", GameAssetManager.skin, "custom-button");
+        forceTerminateButton.setSize(200, 200);
+        forceTerminateButton.setColor(Color.PINK);
+        forceTerminateButton.setPosition(210, Gdx.graphics.getHeight() - 200);
+        forceTerminateButton.setTouchable(Touchable.enabled);
+        stage.addActor(forceTerminateButton);
 
     }
 

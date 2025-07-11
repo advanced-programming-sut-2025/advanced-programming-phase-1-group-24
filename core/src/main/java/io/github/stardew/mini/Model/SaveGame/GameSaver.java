@@ -2,10 +2,13 @@ package io.github.stardew.mini.Model.SaveGame;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import java.io.File;
+
+import java.io.*;
 
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Game; // change based on your path
+
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 //public class GameSaver {
@@ -37,6 +40,9 @@ import io.github.stardew.mini.Model.User;
 
 import java.io.File;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
 //
 //public class GameSaver {
 //
@@ -89,7 +95,6 @@ public class GameSaver {
     private static ObjectMapper createCustomObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
-        // Register support for Java 8 time, optional, etc.
         mapper.findAndRegisterModules();
 
         // Optional: Pretty-print JSON
@@ -113,23 +118,41 @@ public class GameSaver {
         module.addKeyDeserializer(Animal.class, new GenericKeyDeserializer<>());
 
 
-        // Add more as needed...
-
         mapper.registerModule(module);
 
         return mapper;
     }
-
+/// //////////// save with json
+//    public static void saveGames(List<Game> games, String filePath) throws Exception {
+//        ObjectMapper mapper = createCustomObjectMapper();
+//        mapper.writeValue(new File(filePath), games);
+//    }
+//
+//    public static List<Game> loadGames(String filePath) throws Exception {
+//        ObjectMapper mapper = createCustomObjectMapper();
+//        return mapper.readValue(
+//            new File(filePath),
+//            mapper.getTypeFactory().constructCollectionType(List.class, Game.class)
+//        );
+//    }
+    /// ///////////save with zip
     public static void saveGames(List<Game> games, String filePath) throws Exception {
         ObjectMapper mapper = createCustomObjectMapper();
-        mapper.writeValue(new File(filePath), games);
+        try (OutputStream fileStream = new FileOutputStream(filePath);
+             OutputStream gzipStream = new GZIPOutputStream(fileStream);
+             OutputStreamWriter writer = new OutputStreamWriter(gzipStream, StandardCharsets.UTF_8)) {
+            mapper.writeValue(writer, games);
+        }
     }
-
     public static List<Game> loadGames(String filePath) throws Exception {
         ObjectMapper mapper = createCustomObjectMapper();
-        return mapper.readValue(
-            new File(filePath),
-            mapper.getTypeFactory().constructCollectionType(List.class, Game.class)
-        );
+        try (InputStream fileStream = new FileInputStream(filePath);
+             InputStream gzipStream = new GZIPInputStream(fileStream);
+             InputStreamReader reader = new InputStreamReader(gzipStream, StandardCharsets.UTF_8)) {
+            return mapper.readValue(reader,
+                mapper.getTypeFactory().constructCollectionType(List.class, Game.class));
+        }
     }
+
+
 }

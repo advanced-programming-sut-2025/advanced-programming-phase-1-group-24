@@ -45,6 +45,30 @@ public class GameController implements MenuController {
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
 
+    public Result exitGame() {
+        MainApp app = MainApp.getInstance();
+        User currentUser = app.getLoggedInUser();
+        Game currentGame = app.getCurrentGame();
+
+        if (currentGame == null)
+            return new Result(false, "no active game to exit!");
+
+        if (!currentGame.getMainPlayer().equals(currentUser))
+            return new Result(false, "only the game owner can exit the game!");
+
+        if (!currentGame.getCurrentPlayer().equals(currentUser)) // check if it's their turn
+            return new Result(false, "you can only exit the game during your turn!");
+
+        // Save the current game state
+        for (User player : currentGame.getPlayers()) {
+            player.updateMaxMoney();
+        }
+        app.saveActiveGames();
+
+        // Exit game: go back to game menu
+        //app.setCurrentGame(null);
+        return new Result(true, "game exited and saved successfully. returning to game menu...");
+    }
 //    public boolean checkEnergy() {
 //        Game game = MainApp.getInstance().getCurrentGame();
 //        if (game == null) {
