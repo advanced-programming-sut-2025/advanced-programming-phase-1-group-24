@@ -7,7 +7,7 @@ import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
 public enum TreeType {
-    ApricotTree("Apricot Tree", SourceType.ApricotSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Apricot, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
+    ApricotTree("Apricot Tree", SourceType.ApricotSapling, Arrays.asList(2, 2, 2, 2), 8, FruitType.Apricot, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     CherryTree("Cherry Tree", SourceType.CherrySapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Cherry, false, new ArrayList<>(Arrays.asList(Season.SPRING)), null),
     BananaTree("Banana Tree", SourceType.BananaSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Banana, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),
     MangoTree("Mango Tree", SourceType.MangoSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Mango, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),

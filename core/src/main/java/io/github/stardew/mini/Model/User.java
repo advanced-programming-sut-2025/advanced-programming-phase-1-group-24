@@ -4,17 +4,25 @@ package io.github.stardew.mini.Model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import io.github.stardew.mini.Model.Friendships.Gift;
+import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
+import io.github.stardew.mini.Model.Reccepies.Craft;
+import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Tools.Tool;
+import io.github.stardew.mini.Model.Tools.ToolType;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Growables.*;
@@ -75,6 +83,60 @@ public class User {
     private int movingDirection = 0;
 
     private Avatar avatar;
+    private boolean isProposing;
+    private boolean isAccepting;
+    private boolean isRejecting;
+    private float proposingTimer = 0f;
+    private float acceptingTimer = 0f;
+    private float rejectingTimer = 0f;
+
+    public float getProposingTimer() {
+        return proposingTimer;
+    }
+
+    public float getAcceptingTimer() {
+        return acceptingTimer;
+    }
+
+    public float getRejectingTimer() {
+        return rejectingTimer;
+    }
+
+    public void setProposingTimer(float proposingTimer) {
+        this.proposingTimer = proposingTimer;
+    }
+
+    public void setAcceptingTimer(float acceptingTimer) {
+        this.acceptingTimer = acceptingTimer;
+    }
+
+    public void setRejectingTimer(float rejectingTimer) {
+        this.rejectingTimer = rejectingTimer;
+    }
+
+    public boolean isRejecting() {
+        return isRejecting;
+    }
+
+    public void setRejecting(boolean rejecting) {
+        isRejecting = rejecting;
+    }
+
+    public boolean isAccepting() {
+        return isAccepting;
+    }
+
+    public void setAccepting(boolean accepting) {
+        isAccepting = accepting;
+    }
+
+    public boolean isProposing() {
+        return isProposing;
+    }
+
+    public void setProposing(boolean proposing) {
+        isProposing = proposing;
+    }
 
     public Avatar getAvatar() {
         return avatar;
@@ -301,6 +363,12 @@ public class User {
         this.buffMiningSkill = false;
         this.buffMaxEnergy = false;
         this.hoursLeftForBuff = 0;
+        this.isProposing = false;
+        this.isAccepting = false;
+        this.isRejecting = false;
+        this.proposingTimer = 0f;
+        this.acceptingTimer = 0f;
+        this.rejectingTimer = 0f;
     }
 
 

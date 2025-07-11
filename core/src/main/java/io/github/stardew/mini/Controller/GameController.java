@@ -205,7 +205,7 @@ public class GameController implements MenuController {
 
 
 
-    public Result startForceTerminateVote(Scanner scanner) {
+    public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
         User currentUser = app.getLoggedInUser();
@@ -220,6 +220,10 @@ public class GameController implements MenuController {
         currentGame.setVoteInProgress(true);
         currentGame.getTerminationVotes().clear();
         currentGame.getTerminationVotes().put(currentUser, true);
+        for(User player : currentGame.getPlayers()) {
+            if(currentUser.equals(player)) continue;
+            player.addToNotifications(new Message(currentUser.getUsername(), player.getUsername(), "force terminate has started!"));
+        }
 
         return new Result(true, "termination vote started. your vote is recorded as YES.");
     }
@@ -246,7 +250,7 @@ public class GameController implements MenuController {
 //
 //        return new Result(true, "next turn started for " + currentUser.getUsername());
 //    }
-    public Result nextTurn(Scanner scanner) {
+    public Result nextTurn() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
 
@@ -254,19 +258,19 @@ public class GameController implements MenuController {
             return new Result(false, "no active game!");
         goToNextTurn(currentGame);
         User currentUser = currentGame.getCurrentPlayer();
-        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
-            return voteToTerminateInteractive(scanner, currentUser);
-        }
+//        if (currentGame.isVoteInProgress() && !currentGame.getTerminationVotes().containsKey(currentUser)) {
+//            return voteToTerminateInteractive(scanner, currentUser);
+//        }
         StringBuilder result = new StringBuilder();
-        result.append("next turn started for " + currentUser.getUsername());
-        if (!currentUser.getNotifications().isEmpty()) {
-            result.append("\nYou have new notifications:\n");
-            for (Message notification : currentUser.getNotifications()) {
-                result.append("- From ").append(notification.getSender())
-                        .append(": ").append(notification.getMessage()).append("\n");
-            }
-        }
-        currentUser.getNotifications().clear();
+//        result.append("next turn started for " + currentUser.getUsername());
+//        if (!currentUser.getNotifications().isEmpty()) {
+//            result.append("\nYou have new notifications:\n");
+//            for (Message notification : currentUser.getNotifications()) {
+//                result.append("- From ").append(notification.getSender())
+//                        .append(": ").append(notification.getMessage()).append("\n");
+//            }
+//        }
+//        currentUser.getNotifications().clear();
         return new Result(true, result.toString());
     }
 
@@ -325,8 +329,8 @@ public class GameController implements MenuController {
         if (currentGame == null || !currentGame.isVoteInProgress())
             return new Result(false, "no active termination vote!");
 
-        if (!currentGame.isUserTurn(user))
-            return new Result(false, "you can only vote during your own turn!");
+//        if (!currentGame.isUserTurn(user))
+//            return new Result(false, "you can only vote during your own turn!");
 
         if (currentGame.getTerminationVotes().containsKey(user))
             return new Result(false, "you have already voted!");
@@ -344,10 +348,11 @@ public class GameController implements MenuController {
             for (User player : currentGame.getPlayers()) {
                 player.updateMaxMoney();
                 player.setPlayedGames(player.getPlayedGames()+1);
+                player.updateGameFields();
             }
             app.getActiveGames().remove(currentGame);
-            app.setCurrentGame(null);
-            app.saveActiveGames();
+            //app.setCurrentGame(null);
+            //app.saveActiveGames();
             UserDatabase.saveUsers(app.getUsers());
             return new Result(true, "game terminated by unanimous vote. returning to game menu...");
         }
@@ -429,7 +434,7 @@ public class GameController implements MenuController {
             for (User user : game.getPlayers()) {
                 game.handleFoodRecipe(user);
             }
-            printMap("0","0","150");
+            //printMap("0","0","150");
         }
     }
 
@@ -828,7 +833,7 @@ public class GameController implements MenuController {
         }
     }
 
-    private boolean isAdjacent(Tile t1, Tile t2) {
+    public boolean isAdjacent(Tile t1, Tile t2) {
         int dx = Math.abs(t1.getX() - t2.getX());
         int dy = Math.abs(t1.getY() - t2.getY());
         return dx <= 1 && dy <= 1;
@@ -1385,6 +1390,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                             if (map[j][i].getIsPlowed()) {
                                 map[j][i].setContainedGrowable(GrowableFactory.getInstance().create(getRandomForagingSourceBySeason(currentGame.getTimeAndDate().getSeason())));
                                 map[j][i].getContainedGrowable().setName(findCropBySourceName(map[j][i].getContainedGrowable().getName()).getName());
+                                map[j][i].getContainedGrowable().setCurrentStage(1);
                                 map[j][i].setWalkable(false);
                             } else {
                                 map[j][i].setProductOfGrowable(GrowableFactory.getInstance().create(getRandomForagingCropBySeason(currentGame.getTimeAndDate().getSeason())));
@@ -1490,6 +1496,7 @@ public Result shepherdAnimal(String name, String x, String y) {
             map[y][x].setContainedGrowable(growable);
             //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
             map[y][x].getContainedGrowable().setCurrentStage(1);
+            System.out.println("plantedddddddddddd" + map[y][x].getContainedGrowable().getCurrentStage());
             map[y][x].setIsPlowed(false);
             if (growable.getCropType() != null) {
                 tryFormGiant(y, x, growable.getCropType());
@@ -1622,6 +1629,7 @@ public Result shepherdAnimal(String name, String x, String y) {
 
 
         for (Tile tile : tiles) {
+            System.out.println("1");
             tile.setContainedGrowable(shared);
         }
 
@@ -1718,6 +1726,37 @@ public Result shepherdAnimal(String name, String x, String y) {
             if(tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
                 return;
             }
+
+            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant){
+                Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getProductOfGrowable() != null &&
+                    map[tile.getY()][tile.getX() - 1].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                    tile.setContainedGrowable(null);
+                    tile.setProductOfGrowable(map[tile.getY()][tile.getX() - 1].getProductOfGrowable());
+                }
+                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getProductOfGrowable() != null &&
+                    map[tile.getY() - 1][tile.getX()].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                    tile.setContainedGrowable(null);
+                    tile.setProductOfGrowable(map[tile.getY() - 1][tile.getX()].getProductOfGrowable());
+                }
+            }
+
+            if(tile.getContainedGrowable() == null){
+                return;
+            }
+
+            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getContainedGrowable() != null &&
+                    map[tile.getY()][tile.getX() - 1].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                        return;
+                }
+                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getContainedGrowable() != null &&
+                     map[tile.getY() - 1][tile.getX()].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                    return;
+                }
+            }
+
             if (tile.getContainedGrowable().getDaysLeftToDie() <= 0) {
                 tile.setContainedGrowable(null);
                 tile.setProductOfGrowable(null);
@@ -2697,6 +2736,25 @@ public Result shepherdAnimal(String name, String x, String y) {
         int currentLevel = player.getSkillsLevel().getOrDefault(skill, 0);
         return new Result(true, "Your " + skill.name() + " skill is " + currentLevel);
 
+    }
+
+    public Result buildGreenHouse() {
+        Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
+            !playerBackPack.hasItem("Stone", 500)) {
+            return new Result(false, "green house build failed");
+        }
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
+        GreenHouse greenHouse = farm.getGreenHouse();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        for (int j = greenHouse.getY(); j < greenHouse.getY() + greenHouse.getHeight(); j++) {
+            for (int i = greenHouse.getX(); i < greenHouse.getX() + greenHouse.getWidth(); i++) {
+                map[j][i].setWalkable(true);
+            }
+        }
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        return new Result(true, "green house build successful");
     }
 
 

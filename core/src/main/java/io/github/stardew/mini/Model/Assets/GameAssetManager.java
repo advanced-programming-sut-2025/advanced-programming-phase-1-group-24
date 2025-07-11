@@ -36,6 +36,7 @@ public class GameAssetManager {
     public static Texture FLOORING_09;
     public static Texture FLOORING_10;
     public static Texture FLOORING_17;
+    public static Texture FLOORING_21;
     public static Texture FLOORING_26;
     public static Texture FLOORING_28;
     public static Texture FLOORING_29;
@@ -83,15 +84,25 @@ public class GameAssetManager {
     public static BitmapFont customFont;
     public static Texture abigailTexture;
     public static TextureRegion[][] abigailFrames;
+    public static TextureRegion abigialFaint;
+    public static TextureRegion abigailAccepting;
+    public static TextureRegion abigailRejecting;
     public static ArrayList<Animation<TextureRegion>> abigailAnimations = new ArrayList<>();
     public static Texture alexTexture;
     public static TextureRegion[][] alexFrames;
+    public static TextureRegion alexFaint;
+    public static TextureRegion alexProposing;
     public static ArrayList<Animation<TextureRegion>> alexAnimations = new ArrayList<>();
     public static Texture haleyTexture;
     public static TextureRegion[][] haleyFrames;
+    public static TextureRegion haleyFaint;
+    public static TextureRegion haleyAccepting;
+    public static TextureRegion haleyRejecting;
     public static ArrayList<Animation<TextureRegion>> haleyAnimations = new ArrayList<>();
     public static Texture shaneTexture;
     public static TextureRegion[][] shaneFrames;
+    public static TextureRegion shaneFaint;
+    public static TextureRegion shaneProposing;
     public static ArrayList<Animation<TextureRegion>> shaneAnimations = new ArrayList<>();
 
     public static Texture SECRET_HEART ;
@@ -115,6 +126,7 @@ public class GameAssetManager {
         FLOORING_09 = new Texture(Gdx.files.internal("Flooring/Flooring_09.png"));
         FLOORING_10 = new Texture(Gdx.files.internal("Flooring/Flooring_10.png"));
         FLOORING_17 = new Texture(Gdx.files.internal("Flooring/Flooring_17.png"));
+        FLOORING_21 = new Texture(Gdx.files.internal("Flooring/Flooring_21.png"));
         FLOORING_26 = new Texture(Gdx.files.internal("Flooring/Flooring_26.png"));
         FLOORING_28 = new Texture(Gdx.files.internal("Flooring/Flooring_28.png"));
         FLOORING_29 = new Texture(Gdx.files.internal("Flooring/Flooring_29.png"));
@@ -171,6 +183,19 @@ public class GameAssetManager {
         haleyFrames = TextureRegion.split(haleyTexture, 16, 32);
         shaneFrames = TextureRegion.split(shaneTexture, 16, 32);
         abigailFrames = TextureRegion.split(abigailTexture, 16, 32);
+
+        alexFaint = alexFrames[8][3];
+        haleyFaint = haleyFrames[6][2];
+        shaneFaint = shaneFrames[7][2];
+        abigialFaint = abigailFrames[6][3];
+
+        haleyAccepting = haleyFrames[12][3];
+        haleyRejecting = haleyFrames[7][2];
+        abigailAccepting = abigailFrames[11][3];
+        abigailRejecting = abigailFrames[8][0];
+
+        alexProposing = alexFrames[12][0];
+        shaneProposing = shaneFrames[12][0];
 
         alexAnimations = generatePlayerAnimations(alexFrames, 0);
         haleyAnimations = generatePlayerAnimations(haleyFrames, 1);
@@ -291,6 +316,7 @@ public class GameAssetManager {
         if (FLOORING_09 != null) FLOORING_09.dispose();
         if (FLOORING_10 != null) FLOORING_10.dispose();
         if (FLOORING_17 != null) FLOORING_17.dispose();
+        if(FLOORING_21 != null) FLOORING_21.dispose();
         if (FLOORING_26 != null) FLOORING_26.dispose();
         if (FLOORING_29 != null) FLOORING_29.dispose();
         if (FLOORING_52 != null) FLOORING_52.dispose();
