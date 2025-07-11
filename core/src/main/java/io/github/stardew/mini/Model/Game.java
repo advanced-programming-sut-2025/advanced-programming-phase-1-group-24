@@ -1,6 +1,8 @@
 package io.github.stardew.mini.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.MapManagement.*;
@@ -17,6 +19,7 @@ import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
 import java.util.*;
 import io.github.stardew.mini.Model.MapManagement.*;
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
     private MapOfGame map;

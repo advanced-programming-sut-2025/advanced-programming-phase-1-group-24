@@ -21,7 +21,4 @@ public class GreenHouse extends Place{
         this.isGreenHouseFixed = isGreenHouseFixed;
     }
 
-
-
-
 }

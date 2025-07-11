@@ -1,6 +1,8 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.MapManagement.Tile;
@@ -13,6 +15,10 @@ import io.github.stardew.mini.Model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NPC {
     private NPCtype npcName;
