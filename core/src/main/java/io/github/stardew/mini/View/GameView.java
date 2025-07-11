@@ -449,9 +449,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             } else if (mousePos.y < camera.position.y) {
                 direction = "down";
             }
+            Result result;
             if (equippedItem == null) {
                 showErrorDialog(stage, "Pick a seed first!");
-            } else controller.plantGrowable(equippedItem.getName(), direction);
+            } else {
+                result = controller.plantGrowable(equippedItem.getName(), direction);
+                if(!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
+            }
         }
         if (keycode == Input.Keys.ENTER) {
             if (equippedItem != null) {
@@ -605,9 +609,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             Tile neededTile = MainApp.getInstance().getCurrentGame().getMap().getTile(tile.getX() - 1, tile.getY());
             System.out.println(neededTile);
             System.out.println(neededTile.getContainedGrowable());
+            if(neededTile.getContainedGrowable() != null) {
+                System.out.println(neededTile.getContainedGrowable().getAge());
+                System.out.println(neededTile.getContainedGrowable().getGrowableType());
+                System.out.println(neededTile.getContainedGrowable().getDaysLeftToDie());
+            }
             System.out.println(neededTile.getContainedItem());
             System.out.println(neededTile.getContainedNPC());
             System.out.println(neededTile.getProductOfGrowable());
+            if(neededTile.getProductOfGrowable() != null){
+                System.out.println(neededTile.getProductOfGrowable().getGrowableType());
+            }
             System.out.println(neededTile.isHasBeenBurt());
             System.out.println(neededTile.getisWalkable());
             System.out.println(neededTile.getContainedAnimal());
@@ -2180,20 +2192,21 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
         } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.CropProduct) {
-            //TODO : Handle products of crops (one time growth)
             batch.draw(tiles[y][x].getProductOfGrowable().getCropType().getCropProductTexture(),
                 x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
         } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.Giant) {
             Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
-            int topleftX = point.x;
-            int topleftY = point.y;
-            batch.draw(CropType.fromName(tiles[y][x].getProductOfGrowable().getName()).getGiantTexture(),
-                topleftX * tileSize,
-                topleftY * tileSize,
-                2 * tileSize,
-                2 * tileSize);
+            if (point != null) {
+                int topleftX = point.x;
+                int topleftY = point.y;
+                batch.draw(CropType.fromName(tiles[y][x].getProductOfGrowable().getName()).getGiantTexture(),
+                    topleftX * tileSize,
+                    (rows - topleftY - 2) * tileSize,
+                    2 * tileSize,
+                    2 * tileSize);
+            }
         }
     }
 
@@ -3307,6 +3320,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 if (accepted) {
                     Result result = controller.voteToTerminate(true, currentPlayer);
                     if(!result.isSuccessful()) showErrorDialog(stage, result.message());
+                    else{
+                        Gdx.app.postRunnable(new Runnable() {
+                            @Override
+                            public void run() {
+                                Timer.instance().stop();
+                                MainApp.getInstance().setCurrentGame(null);
+                                MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
+                                MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                            }
+                        });
+                    }
                 } else {
                     Result result = controller.voteToTerminate(false, currentPlayer);
                     showErrorDialog(stage, result.message());
