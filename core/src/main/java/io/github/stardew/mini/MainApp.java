@@ -23,6 +23,8 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
@@ -56,6 +58,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         } else
             setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
+//       // Initialize game data
+       //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -183,6 +187,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         return null;
     }
 
+
     public ArrayList<User> getUsers() {
         return users;
     }
@@ -219,7 +224,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.currentMenu = currentMenu;
         changeScreen();
     }
-
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:
