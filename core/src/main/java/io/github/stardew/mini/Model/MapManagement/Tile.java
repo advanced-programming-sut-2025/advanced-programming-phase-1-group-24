@@ -1,12 +1,16 @@
 package io.github.stardew.mini.Model.MapManagement;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.User;;
 
-;
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class Tile {
     private TileType type;
     private boolean isWalkable;
@@ -22,7 +26,7 @@ public class Tile {
     private NPC containedNPC;
     private boolean hasBeenBurt;
 
-
+public Tile(){}
     public TileType getType() {
         return type;
     }
@@ -109,7 +113,7 @@ public class Tile {
     public void changeTile() {
     }
 
-    public boolean isBuildable() {
+    public boolean canBuildOn() {
         return isWalkable && containedItem == null && containedNPC == null && containedGrowable == null && productOfGrowable == null && type == TileType.FARM;
     }
 }

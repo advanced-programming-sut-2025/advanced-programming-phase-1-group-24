@@ -24,7 +24,10 @@ public class House extends Place{
     fridge = new HashMap<>();
   }
 
-  public ArrayList<Machine> getMachines() {
+    public House() {
+    }
+
+    public ArrayList<Machine> getMachines() {
     return machines;
   }
 

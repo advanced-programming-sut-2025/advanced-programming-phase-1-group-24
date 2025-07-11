@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Controller;
 
+import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
@@ -14,11 +15,12 @@ import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.Tools.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class StoreMenuController {
-    public Result purchase(ShopItem item, int count) {
+    public Result purchase(Shop shop, ShopItem item, int count) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
@@ -26,10 +28,10 @@ public class StoreMenuController {
             return new Result(false, "Invalid count! Count must be greater than 0.");
         }
 
-        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
-        if (shop == null) {
-            return new Result(false, "You must be inside a store to purchase items.");
-        }
+//        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+//        if (shop == null) {
+//            return new Result(false, "You must be inside a store to purchase items.");
+//        }
         if (game.getTimeAndDate().getHour() < shop.getStartHour() || game.getTimeAndDate().getHour() >= shop.getEndHour()) {
             return new Result(false, "the store is closed");
         }
@@ -211,17 +213,17 @@ public class StoreMenuController {
                 result = new Result(true, "Successfully purchased: " + milkPailCopy.getName());
             }
         } else if (item instanceof FishingPole) {
-            FishingPole fishingPolePailCopy = ((FishingPole) item).copy();
-            if ((fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.Iridium && player.getSkillsLevel().get(Skill.FISHING) < 4) ||
-                (fishingPolePailCopy.getPoleMaterial() == FishingPoleMaterial.FiberGlass && player.getSkillsLevel().get(Skill.FISHING) < 2)) {
+            FishingPole fishingPoleCopy = ((FishingPole) item).copy();
+            if ((fishingPoleCopy.getPoleMaterial() == FishingPoleMaterial.Iridium && player.getSkillsLevel().get(Skill.FISHING) < 4) ||
+                (fishingPoleCopy.getPoleMaterial() == FishingPoleMaterial.FiberGlass && player.getSkillsLevel().get(Skill.FISHING) < 2)) {
                 result = new Result(false, "You dont have the required fishing level to buy this fishing pole!");
             } else {
-                if (player.getBackpack().hasTool("fishingpole")) {
-                    result = new Result(false, "You already have fishing pole!");
-                } else {
-                    player.getBackpack().getTools().add(fishingPolePailCopy);
-                    result = new Result(true, "Successfully purchased: " + fishingPolePailCopy.getName());
-                }
+//                if (player.getBackpack().hasTool("fishingpole")) {
+//                    result = new Result(false, "You already have fishing pole!");
+//                } else {
+                    player.getBackpack().getTools().add(fishingPoleCopy);
+                    result = new Result(true, "Successfully purchased: " + fishingPoleCopy.getName());
+//                }
             }
         } else if (item instanceof Shear) {
             Shear shearCopy = ((Shear) item).copy();
@@ -266,6 +268,7 @@ public class StoreMenuController {
             randomStuff randomStuffCopy = ((randomStuff) item).copy();
             result = player.getBackpack().addItem(randomStuffCopy, count);
         } else {
+            System.out.println("item class: " + item.getClass());
             result = new Result(false, "Unknown item type");
         }
         if ((item instanceof Tool || item instanceof Animal || item instanceof Habitat) && count > 1) {
@@ -381,16 +384,16 @@ public class StoreMenuController {
 //        return new Result(true, "Successfully built: " + name + " at (" + targetX + ", " + targetY + ")");
 //    }
 
-    public Result buyFromCarpenter(String name, String x, String y) {
+    public Result buyFromCarpenter(Shop shop, String name, String x, String y) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
 
-        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
-        if (shop == null) {
-            return new Result(false, "You should be inside a shop to use this method!");
-        }
+//        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+//        if (shop == null) {
+//            return new Result(false, "You should be inside a shop to use this method!");
+//        }
         if (shop.getShopType() != ShopType.CARPENTER_SHOP) {
             return new Result(false, "You should be inside the Carpenter's Shop to use this method!");
         }
@@ -447,12 +450,13 @@ public class StoreMenuController {
             tileTypeToSet = TileType.CAGE;
         }
 
-// Set the type of all tiles in the habitat area
+        // Set the type of all tiles in the habitat area
         for (int i = xCoord; i < xCoord + newHabitat.getWidth(); i++) {
             for (int j = yCoord; j < yCoord + newHabitat.getHeight(); j++) {
                 Tile tile = map.getTile(i, j);
                 if (tile != null && tileTypeToSet != null) {
                     tile.setType(tileTypeToSet);
+                    tile.setWalkable(false);
                 }
             }
         }
@@ -522,17 +526,17 @@ public class StoreMenuController {
     }
 
 
-    public Result buyAnimal(String animal, String name) {
+    public Result buyAnimal(Shop shop, String animal, String name) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Tile playerTile = player.getCurrentTile();
-        Shop shop = map.getShopAtPosition(playerTile.getX(), playerTile.getY());
+//        Shop shop = map.getShopAtPosition(playerTile.getX(), playerTile.getY());
 
         // 1. Validate shop
-        if (shop == null || shop.getShopType() != ShopType.MARNIE_RANCH) {
-            return new Result(false, "You must be inside Marnie’s Ranch to buy an animal.");
-        }
+//        if (shop == null || shop.getShopType() != ShopType.MARNIE_RANCH) {
+//            return new Result(false, "You must be inside Marnie’s Ranch to buy an animal.");
+//        }
         if (game.getTimeAndDate().getHour() < shop.getStartHour() || game.getTimeAndDate().getHour() >= shop.getEndHour()) {
             return new Result(false, "the store is closed");
         }
@@ -591,18 +595,52 @@ public class StoreMenuController {
         player.getOwnedAnimals().add(newAnimal);
         // fix animal current tile in the habitat and place the animal in the containedAnimal field of the tile in that Tile
 
-        // Find a free tile in that habitat
-        Tile freeTile = map.getTile(newAnimal.getLivingPlace().getX(), newAnimal.getLivingPlace().getY());
-        if (freeTile == null) {
+        // Get habitat bounds
+        Habitat habitat = newAnimal.getLivingPlace();
+        int startX = habitat.getX();
+        int startY = habitat.getY();
+        int endX = startX + habitat.getWidth() - 1;
+        int endY = startY + habitat.getHeight() - 1;
+
+       // Collect all free tiles in the habitat
+        List<Tile> freeTiles = new ArrayList<>();
+        for (int x = startX; x < endX; x++) {
+            for (int y = startY; y < endY; y++) {
+                Tile tile = map.getTile(x, y);
+                if (tile != null && tile.getContainedAnimal() == null) {
+                    freeTiles.add(tile);
+                }
+            }
+        }
+        System.out.println("end habitat coordinates "+ endX+ ", " + endY);
+
+        if (freeTiles.isEmpty()) {
             return new Result(false, "No free space in the habitat for the animal.");
         }
+
+        // Pick a random free tile
+        Tile freeTile = freeTiles.get(MathUtils.random(freeTiles.size() - 1));
 
         // Set references both ways
         newAnimal.setCurrentTile(freeTile);
         freeTile.setContainedAnimal(newAnimal);
         selectedItem.sell(1);
+
         return new Result(true, "Successfully bought " + name + " the " + animal +
-            "! now it is on " + freeTile.getX() + "," + freeTile.getY());
+            "! Now it is on " + freeTile.getX() + "," + freeTile.getY());
+
+//        // Find a free tile in that habitat
+//        Tile freeTile = map.getTile(newAnimal.getLivingPlace().getX(), newAnimal.getLivingPlace().getY());
+//        if (freeTile == null) {
+//            return new Result(false, "No free space in the habitat for the animal.");
+//        }
+//
+//        // Set references both ways
+//        newAnimal.setCurrentTile(freeTile);
+//        freeTile.setContainedAnimal(newAnimal);
+//        selectedItem.sell(1);
+//        return new Result(true, "Successfully bought " + name + " the " + animal +
+//            "! now it is on " + freeTile.getX() + "," + freeTile.getY());
     }
 
     public Result showAllProducts() {
@@ -738,15 +776,15 @@ public class StoreMenuController {
     }
 
 
-    public Result upgradeTool(String tool) {
+    public Result upgradeTool(Shop shop, String tool) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
 
-        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
-        if (shop == null || shop.getShopType() != ShopType.BLACKSMITH) {
-            return new Result(false, "You must be inside the blacksmith store to upgrade tools.");
-        }
+//        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());
+//        if (shop == null || shop.getShopType() != ShopType.BLACKSMITH) {
+//            return new Result(false, "You must be inside the blacksmith store to upgrade tools.");
+//        }
 
         int hour = game.getTimeAndDate().getHour();
         if (hour < shop.getStartHour() || hour >= shop.getEndHour()) {
@@ -778,9 +816,9 @@ public class StoreMenuController {
         String requiredBar = getRequiredBarName(nextMaterial);
         int requiredBarCount = 5;
         int cost = getUpgradeCost(nextMaterial, toolType == ToolType.TRASHCAN);
-///    ////////////////////
-        player.getBackpack().addItem(new randomStuff(10, randomStuffType.Copper_Bar), requiredBarCount);
-        /// /////////////////
+/////    ////////////////////
+//        player.getBackpack().addItem(new randomStuff(10, randomStuffType.Copper_Bar), requiredBarCount);
+//        /// /////////////////
         int playerBarCount = player.getBackpack().getItemCount(requiredBar);
         int playerMoney = player.getMoney();
 

@@ -12,7 +12,7 @@ public class MilkPail extends Tool {
     public MilkPail(ToolType type) {
         super(type);
     }
-
+    public MilkPail(){}
     public Result useMilkPail(int xDirection, int yDirection, Tile currentTile, User currentPlayer, MapOfGame map, double weatherModifier) {
         int energy = (int) (4 * weatherModifier);
         if (!currentPlayer.tryConsumeEnergy(energy)) {

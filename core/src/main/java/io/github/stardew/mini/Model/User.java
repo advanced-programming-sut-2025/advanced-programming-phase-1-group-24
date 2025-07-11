@@ -1,18 +1,28 @@
 package io.github.stardew.mini.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import io.github.stardew.mini.Model.Friendships.Gift;
+import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
+import io.github.stardew.mini.Model.Reccepies.Craft;
+import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Tools.Tool;
+import io.github.stardew.mini.Model.Tools.ToolType;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Growables.*;
@@ -21,7 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class User {
     //user
     private String username;
@@ -142,7 +155,7 @@ public class User {
     }
 
     /// /////////////?????????????/
-
+    public User(){}
     public User(String username, String password, String nickname, String email, boolean gender) {
         this.username = username;
         this.password = password;

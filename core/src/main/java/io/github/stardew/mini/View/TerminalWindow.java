@@ -233,7 +233,6 @@ private void initializeUI() {
 //            // In your original code, output goes to System.out
 //            // You'll need to modify your controllers to return strings instead of printing
 //            // Or capture System.out output (more complex)
-//
 //            // For now, just return the command as if it was processed
 //            return "Executed: " + command;
 //        } catch (Exception e) {
@@ -242,6 +241,8 @@ private void initializeUI() {
 //            scanner.close();
 //        }
 //    }
+
+
     private String processCommand(String command) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         PrintStream oldOut = System.out;

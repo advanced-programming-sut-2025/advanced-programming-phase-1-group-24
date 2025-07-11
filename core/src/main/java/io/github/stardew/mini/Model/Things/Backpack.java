@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Things;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Result;
@@ -8,6 +10,7 @@ import io.github.stardew.mini.Model.Tools.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Backpack {
     private StorageType type;
