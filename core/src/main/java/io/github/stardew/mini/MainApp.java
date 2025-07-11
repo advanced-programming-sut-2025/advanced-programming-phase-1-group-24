@@ -18,6 +18,7 @@ import io.github.stardew.mini.Model.Assets.TreeAssets;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.NPCManagement.NPCtype;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
@@ -92,6 +93,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         for(AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
+        }
+        for(NPCtype npCtype : NPCtype.values()) {
+            npCtype.initTexture();
         }
 
         // Set initial screen

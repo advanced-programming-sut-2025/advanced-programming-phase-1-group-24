@@ -59,6 +59,8 @@ import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
+import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.Friendships.Friendship;
@@ -138,6 +140,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog machineMenuDialog;
     private Machine selectedMachine;
 
+    private NPC selectedNPC;
+    private Dialog npcMenuDialog;
+    private Dialog npcQuestDialog;
+    private Dialog npcFriendshipDialog;
+    private Dialog npcSpeechBubbleDialog;
+    private Map<NPC, TextButton> npcTalkButtons = new HashMap<>();
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -169,6 +177,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private boolean showInventoryMenu = false;
     private boolean showBackpackMenu = false;
     private BitmapFont smallFont;
+    private BitmapFont smallerButtonFont;
     private int selectedSlot = 0;
     private Table toolMenuTable;
     private Table inventoryMenuTable;
@@ -183,6 +192,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 32;
         smallFont = generator.generateFont(parameter);
+
+        FreeTypeFontGenerator.FreeTypeFontParameter smallerParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        smallerParameter.size = 24;
+        smallerButtonFont = generator.generateFont(smallerParameter);
+
         generator.dispose();
     }
 
@@ -655,13 +669,30 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        stage.getCamera().unproject(touchPos); // convert to stage coords
+        float mouseX = touchPos.x;
+        float mouseY = touchPos.y;
+
+        if(isClickInside(mouseX, mouseY, friendsButton)){
+            if (friendsDialog != null) {
+                friendsDialog.remove();
+            }
+            createFriendsDialog();
+            friendsDialog.setVisible(true);
+            friendsDialog.show(stage);
+            Gdx.input.setInputProcessor(stage);
+            return true;
+        }
+        if (stage.touchDown(screenX, screenY, pointer, button)) {
+            return true;
+        }
             if (showInventoryMenu || showBackpackMenu) {
                 return stage.touchDown(screenX, screenY, pointer, button);
             }
             if (skillsDialog != null && skillsDialog.getStage() != null) {
                 return stage.touchDown(screenX, screenY, pointer, button);
             }
-
         if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
             Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
@@ -715,21 +746,36 @@ private void updateAnimals(float delta) {
             // Check if click is within map bounds
             if (tileX >= 0 && tileY >= 0 && tileX < MainApp.getInstance().getCurrentGame().getMap().getWidth() && tileY < MainApp.getInstance().getCurrentGame().getMap().getHeight()) {
                 Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
-                if (tile != null && tile.getContainedAnimal() != null) {
-                    selectedAnimal = tile.getContainedAnimal();
+                if (button == Input.Buttons.RIGHT) { // Check for right mouse button click
+                    if (tile != null && tile.getContainedNPC() != null) {
+                        selectedNPC = tile.getContainedNPC();
 
-                    // Convert screen coordinates to stage coordinates
-                    Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
+                        Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
 
-                    // Center dialog around mouse position
-                    animalMenuDialog.setPosition(
-                        stageCoords.x - animalMenuDialog.getWidth() / 2,
-                        stageCoords.y - animalMenuDialog.getHeight() / 2
-                    );
-                    animalMenuDialog.setVisible(true);
-                    animalMenuDialog.show(stage);
-                    Gdx.input.setInputProcessor(stage);
-                    return true;
+                        npcMenuDialog.setPosition(
+                            stageCoords.x - npcMenuDialog.getWidth() / 2,
+                            stageCoords.y - npcMenuDialog.getHeight() / 2
+                        );
+                        npcMenuDialog.setVisible(true);
+                        npcMenuDialog.show(stage);
+                        Gdx.input.setInputProcessor(stage);
+                        return true;
+                    }
+                }
+
+                if (button == Input.Buttons.LEFT) {
+                    if (tile != null && tile.getContainedAnimal() != null) {
+                        selectedAnimal = tile.getContainedAnimal();
+                        Vector3 stageCoords = stage.getViewport().unproject(new Vector3(screenX, screenY, 0));
+                        animalMenuDialog.setPosition(
+                            stageCoords.x - animalMenuDialog.getWidth() / 2,
+                            stageCoords.y - animalMenuDialog.getHeight() / 2
+                        );
+                        animalMenuDialog.setVisible(true);
+                        animalMenuDialog.show(stage);
+                        Gdx.input.setInputProcessor(stage);
+                        return true;
+                    }
                 }
                 if (tile != null && tile.getType() == TileType.SHOP) {
                     selectedShop = MainApp.getInstance().getCurrentGame().getMap().getShopAtPosition(tileX, tileY);
@@ -762,23 +808,6 @@ private void updateAnimals(float delta) {
                     return true;
                 }
             }
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            stage.getCamera().unproject(touchPos); // convert to stage coords
-            float mouseX = touchPos.x;
-            float mouseY = touchPos.y;
-
-            if(isClickInside(mouseX, mouseY, friendsButton)){
-                if (friendsDialog != null) {
-                    friendsDialog.remove();
-                }
-                createFriendsDialog();
-                friendsDialog.setVisible(true);
-                friendsDialog.show(stage);
-                Gdx.input.setInputProcessor(stage);
-                return true;
-            }
-
-
         }
         return false;
     }
@@ -818,6 +847,9 @@ private void updateAnimals(float delta) {
     }
     @Override
     public boolean touchUp(int i, int i1, int i2, int i3) {
+        if (stage.touchUp(i, i1, i2, i3)) {
+            return true;
+        }
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchUp(i, i1, i2, i3);
         }
@@ -829,6 +861,9 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean touchCancelled(int i, int i1, int i2, int i3) {
+        if (stage.touchCancelled(i, i1, i2, i3)) {
+            return true;
+        }
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchCancelled(i, i1, i2, i3);
         }
@@ -840,6 +875,9 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean touchDragged(int i, int i1, int i2) {
+        if (stage.touchDragged(i, i1, i2)) {
+            return true;
+        }
         if (showInventoryMenu || showBackpackMenu) {
             return stage.touchDragged(i, i1, i2);
         }
@@ -851,6 +889,9 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean mouseMoved(int i, int i1) {
+        if (stage.mouseMoved(i, i1)) {
+            return true;
+        }
         if (showInventoryMenu || showBackpackMenu || (skillsDialog != null && skillsDialog.getStage() != null)) {
             return stage.mouseMoved(i, i1);
         }
@@ -859,6 +900,9 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean scrolled(float v, float v1) {
+        if (stage.scrolled(v, v1)) {
+            return true;
+        }
         if (showInventoryMenu || showBackpackMenu) {
             return stage.scrolled(v, v1);
         }
@@ -1099,6 +1143,10 @@ private void updateAnimals(float delta) {
         createShopMenusDialogs();
 
         createMachineDialog();
+
+        createNPCDialog();
+
+        createNPCSpeechBubbleDialog();
     }
 
     private void createShopMenusDialogs() {
@@ -1539,7 +1587,375 @@ private void updateAnimals(float delta) {
         sentDialog.show(stage);
     }
 
+    private void showNPCFriendshipDialog(final NPC npc, final User player) {
+        if (npcFriendshipDialog == null) {
+            npcFriendshipDialog = new Dialog("Friendship with " + npc.getNpcName().getName(), GameAssetManager.skin, "custom-window");
+            npcFriendshipDialog.padTop(40);
+            npcFriendshipDialog.getTitleLabel().setAlignment(Align.center);
+            npcFriendshipDialog.setKeepWithinStage(true);
+            npcFriendshipDialog.setMovable(false);
+            stage.addActor(npcFriendshipDialog);
+        } else {
+            npcFriendshipDialog.getTitleLabel().setText("Friendship with " + npc.getNpcName().getName());
+            npcFriendshipDialog.getContentTable().clear();
+            npcFriendshipDialog.getButtonTable().clear();
+        }
 
+        int currentLevel = npc.getFriendshipLevels().get(currentPlayer.getUsername());
+        int currentPoints = (npc.getFriendshipPoints().get(currentPlayer.getUsername())) % 200;
+
+        Table content = npcFriendshipDialog.getContentTable();
+        content.defaults().pad(5).align(Align.left);
+
+        Label levelLabel = new Label("Level: " + currentLevel, GameAssetManager.skin, "custom-label");
+        levelLabel.setFontScale(0.7f);
+        content.add(levelLabel).row();
+
+        ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+        TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
+
+        Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
+        progressBarStyle.background = progressBarBackground;
+        progressBarStyle.background.setMinHeight(20);
+
+        progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
+        progressBarStyle.knob.setMinWidth(0);
+
+        Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(Color.YELLOW);
+        progressBarStyle.knobBefore = progressBarKnobBefore;
+        progressBarStyle.knobBefore.setMinHeight(20);
+
+        ProgressBar xpBar = new ProgressBar(0, 200, 1, false, progressBarStyle);
+        xpBar.setValue(currentPoints);
+
+        Label xpTextLabel = new Label(currentPoints + "/" + 200, GameAssetManager.skin, "custom-label");
+        xpTextLabel.setFontScale(0.5f);
+        xpTextLabel.setColor(Color.LIGHT_GRAY);
+
+        content.add().width(20);
+        content.add(xpBar).width(150).height(20);
+        content.add(xpTextLabel).width(70).row();
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.getLabel().setFontScale(0.7f);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcFriendshipDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        npcFriendshipDialog.getButtonTable().add(closeButton).pad(10);
+
+        npcFriendshipDialog.pack();
+        npcFriendshipDialog.setPosition(
+            (Gdx.graphics.getWidth() - npcFriendshipDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - npcFriendshipDialog.getHeight()) / 2
+        );
+
+        npcFriendshipDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void showNPCQuestDialog(final NPC npc, final User player) {
+        if (npcQuestDialog == null) {
+            npcQuestDialog = new Dialog("Quests for " + npc.getNpcName().getName(), GameAssetManager.skin, "custom-window");
+            npcQuestDialog.padTop(40);
+            npcQuestDialog.getTitleLabel().setAlignment(Align.center);
+            npcQuestDialog.setKeepWithinStage(true);
+            npcQuestDialog.setMovable(false);
+            stage.addActor(npcQuestDialog);
+        } else {
+            npcQuestDialog.getTitleLabel().setText("Quests for " + npc.getNpcName().getName());
+            npcQuestDialog.getContentTable().clear();
+            npcQuestDialog.getButtonTable().clear();
+        }
+
+        Table questsTable = new Table(GameAssetManager.skin);
+        questsTable.defaults().pad(5).align(Align.left);
+
+        Map<String, ArrayList<NPCMission>> unlockedMissions = npc.getUnlockedMissions();
+        List<NPCMission> missionsForPlayer = unlockedMissions.get(player.getUsername());
+
+        if (missionsForPlayer == null || missionsForPlayer.isEmpty()) {
+            questsTable.add(new Label("No missions available from " + npc.getNpcName().getName() + ".", GameAssetManager.skin, "custom-label")).colspan(2).row();
+        } else {
+            int missionIndex = 1;
+            for (final NPCMission mission : missionsForPlayer) {
+                Label missionLabel = new Label("Mission " + missionIndex + ":", GameAssetManager.skin, "custom-label");
+                missionLabel.setColor(Color.CORAL);
+                missionLabel.setFontScale(0.8f);
+                questsTable.add(missionLabel).colspan(2).row();
+
+                Label requiredLabel = new Label("  Required:", GameAssetManager.skin, "custom-label");
+                requiredLabel.setFontScale(0.7f);
+                requiredLabel.setColor(Color.ORANGE);
+                questsTable.add(requiredLabel).row();
+                Table requiredItemsTable = new Table(GameAssetManager.skin);
+                requiredItemsTable.defaults().padLeft(10);
+                if (mission.getRequiredItems().isEmpty()) {
+                    Label itemLabel = new Label("None", GameAssetManager.skin, "custom-label");
+                    itemLabel.setFontScale(0.5f);
+                    requiredItemsTable.add(itemLabel);
+                } else {
+                    for (Map.Entry<String, Integer> entry : mission.getRequiredItems().entrySet()) {
+                        Label itemLabel = new Label(entry.getKey() + ": " + entry.getValue(), GameAssetManager.skin, "custom-label");
+                        itemLabel.setFontScale(0.5f);
+                        requiredItemsTable.add(itemLabel).row();
+                    }
+                }
+                questsTable.add(requiredItemsTable).colspan(2).row();
+
+                Label prizeLabel = new Label("  Prizes:", GameAssetManager.skin, "custom-label");
+                prizeLabel.setFontScale(0.7f);
+                prizeLabel.setColor(Color.ORANGE);
+                questsTable.add(prizeLabel).row();
+                Table prizeItemsTable = new Table(GameAssetManager.skin);
+                prizeItemsTable.defaults().padLeft(10);
+                if (mission.getPrizeItems().isEmpty()) {
+                    Label itemLabel = new Label("None", GameAssetManager.skin, "custom-label");
+                    itemLabel.setFontScale(0.5f);
+                    prizeItemsTable.add(itemLabel);
+                } else {
+                    for (Map.Entry<String, Integer> entry : mission.getPrizeItems().entrySet()) {
+                        Label itemLabel = new Label(entry.getKey() + ": " + entry.getValue(), GameAssetManager.skin, "custom-label");
+                        itemLabel.setFontScale(0.5f);
+                        prizeItemsTable.add(itemLabel).row();
+                    }
+                }
+                questsTable.add(prizeItemsTable).colspan(2).row();
+
+                Label statusLabel = new Label(mission.getAlreadyDone() ? "Status: Done" : "Status: Not Done", GameAssetManager.skin, "custom-label");
+                if (mission.getAlreadyDone()) {
+                    statusLabel.setColor(Color.GREEN);
+                } else {
+                    statusLabel.setColor(Color.RED);
+                }
+                statusLabel.setFontScale(0.6f);
+                TextButton doMissionButton = new TextButton("Complete", GameAssetManager.skin, "custom-button");
+                doMissionButton.getLabel().setFontScale(0.7f);
+                doMissionButton.setDisabled(mission.getAlreadyDone());
+
+                final int currentMissionIndex = missionIndex;
+                doMissionButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Result result = controller.doMission(currentMissionIndex);
+                        showErrorDialog(stage, result.message());
+                        npcQuestDialog.hide();
+                    }
+                });
+
+                questsTable.add(statusLabel).padRight(10);
+                questsTable.add(doMissionButton).width(120).height(30).padBottom(10).row();
+                questsTable.add().colspan(2).height(10).row();
+                missionIndex++;
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(questsTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+
+        npcQuestDialog.getContentTable().add(scrollPane).expand().fill().row();
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.getLabel().setFontScale(0.7f);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcQuestDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        npcQuestDialog.getButtonTable().add(closeButton).pad(10);
+
+        npcQuestDialog.pack();
+        npcQuestDialog.setSize(Math.min(npcQuestDialog.getPrefWidth(), Gdx.graphics.getWidth() * 0.7f),
+            Math.min(npcQuestDialog.getPrefHeight(), Gdx.graphics.getHeight() * 0.8f));
+        npcQuestDialog.setPosition(
+            (Gdx.graphics.getWidth() - npcQuestDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - npcQuestDialog.getHeight()) / 2
+        );
+
+        npcQuestDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void handleNPCMenuChoice(String choice) {
+        if (selectedNPC == null) {
+            System.err.println("Error: No NPC selected when handling menu choice: " + choice);
+            return;
+        }
+
+        switch (choice) {
+            case "gift":
+                if (equippedItem == null) {
+                    showErrorDialog(stage, "You haven't selected any gift yet.");
+                }
+                else{
+                    Result npcResult = selectedNPC.giveGift(equippedItem.getName(),currentPlayer);
+                    if (npcResult.isSuccessful()) {
+                        currentPlayer.getBackpack().grabItem(equippedItem.getName(), 1);
+                    }
+                    showErrorDialog(stage, npcResult.message());
+                }
+                break;
+            case "quests":
+                showNPCQuestDialog(selectedNPC, currentPlayer);
+                break;
+            case "friendship":
+                showNPCFriendshipDialog(selectedNPC, currentPlayer);
+                break;
+            case "cancel":
+                break;
+            default:
+                break;
+        }
+
+        npcMenuDialog.hide();
+        Gdx.input.setInputProcessor(GameView.this);
+        selectedNPC = null;
+    }
+
+    private void createNPCDialog() {
+        npcMenuDialog = new Dialog("NPC Interaction", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                handleNPCMenuChoice(object.toString());
+            }
+        };
+        npcMenuDialog.getTitleLabel().setAlignment(Align.center);
+        npcMenuDialog.padTop(40);
+        npcMenuDialog.getContentTable().defaults().pad(10);
+
+        npcMenuDialog.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (!npcMenuDialog.isVisible()) {
+                    Gdx.input.setInputProcessor(GameView.this);
+                }
+            }
+        });
+
+        TextButton.TextButtonStyle smallerButtonStyle = new TextButton.TextButtonStyle(
+            GameAssetManager.skin.get("custom-button", TextButton.TextButtonStyle.class)
+        );
+        smallerButtonStyle.font = smallerButtonFont;
+
+
+        TextButton giftButton = new TextButton("Gift", smallerButtonStyle);
+        giftButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcMenuDialog.hide();
+                handleNPCMenuChoice("gift");
+            }
+        });
+
+        TextButton questsButton = new TextButton("Quests", smallerButtonStyle);
+        questsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcMenuDialog.hide();
+                handleNPCMenuChoice("quests");
+            }
+        });
+
+        TextButton friendshipButton = new TextButton("Friendship", smallerButtonStyle);
+        friendshipButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcMenuDialog.hide();
+                handleNPCMenuChoice("friendship");
+            }
+        });
+
+        TextButton cancelButton = new TextButton("Cancel", smallerButtonStyle);
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                npcMenuDialog.hide();
+                handleNPCMenuChoice("cancel");
+            }
+        });
+
+        npcMenuDialog.getContentTable().add(giftButton).row();
+        npcMenuDialog.getContentTable().add(questsButton).row();
+        npcMenuDialog.getContentTable().add(friendshipButton).row();
+        npcMenuDialog.getContentTable().add(cancelButton);
+
+        npcMenuDialog.setKeepWithinStage(true);
+        npcMenuDialog.setMovable(false);
+        npcMenuDialog.setVisible(false);
+        stage.addActor(npcMenuDialog);
+
+        npcMenuDialog.pack();
+        npcMenuDialog.setPosition(
+            (Gdx.graphics.getWidth() - npcMenuDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - npcMenuDialog.getHeight()) / 2
+        );
+    }
+
+    private void createNPCSpeechBubbleDialog() {
+        npcSpeechBubbleDialog = new Dialog("", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                this.hide();
+            }
+        };
+        npcSpeechBubbleDialog.getTitleLabel().remove();
+        npcSpeechBubbleDialog.pad(10);
+        npcSpeechBubbleDialog.setKeepWithinStage(true);
+        npcSpeechBubbleDialog.setMovable(false);
+        npcSpeechBubbleDialog.setVisible(false);
+        npcSpeechBubbleDialog.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                if (!npcSpeechBubbleDialog.isVisible()) {
+                    Gdx.input.setInputProcessor(GameView.this);
+                }
+            }
+        });
+        TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+        npcSpeechBubbleDialog.button(okButton, true);
+        stage.addActor(npcSpeechBubbleDialog);
+    }
+
+    private void showNPCSpeechBubble(NPC npc, String message) {
+        if (npcSpeechBubbleDialog == null) {
+            createNPCSpeechBubbleDialog();
+        }
+
+        npcSpeechBubbleDialog.getContentTable().clear();
+        Label messageLabel = new Label(message, GameAssetManager.skin, "custom-label");
+        messageLabel.setWrap(true);
+        messageLabel.setAlignment(Align.center);
+        npcSpeechBubbleDialog.getContentTable().add(messageLabel).width(200).pad(5).row();
+
+        npcSpeechBubbleDialog.pack();
+
+        // Position the speech bubble above the NPC's head
+        Tile npcTile = npc.getCurrentTile();
+        int tileSize = GameAssetManager.TILE_SIZE;
+        int rows = MainApp.getInstance().getCurrentGame().getMap().getMap().length;
+
+        float npcCenterX = npcTile.getX() * tileSize + tileSize / 2f;
+        float npcTopY = (rows - npcTile.getY() - 1) * tileSize + tileSize;
+
+        Vector3 worldPos = new Vector3(npcCenterX, npcTopY + tileSize / 2f, 0);
+        camera.project(worldPos);
+        stage.getViewport().unproject(worldPos);
+
+        npcSpeechBubbleDialog.setPosition(
+            worldPos.x - npcSpeechBubbleDialog.getWidth() / 2,
+            worldPos.y
+        );
+
+        npcSpeechBubbleDialog.setVisible(true);
+        npcSpeechBubbleDialog.show(stage);
+        Gdx.input.setInputProcessor(GameView.this);
+    }
 
 
     private void handleAnimalMenuChoice(String choice) {
@@ -1811,8 +2227,6 @@ private void updateAnimals(float delta) {
             }
         }
 
-        /// ////////////////////////////////////////////
-
         updateToolsMenuTable();
         if (isToolBeingUsed) {
             toolUsageStateTime += Gdx.graphics.getDeltaTime();
@@ -1828,8 +2242,6 @@ private void updateAnimals(float delta) {
                 toolUsageStateTime = 0f; // Reset for next usage
             }
         }
-
-        /// /////////////////////////////////////////////////////////////////////////
 
         updateEquippedItemSlot();
         if (equippedItem != null && currentPlayer != null && currentPlayer.getCurrentTile() != null) {
@@ -1901,6 +2313,43 @@ private void updateAnimals(float delta) {
                     if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
                     if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                }
+            }
+        }
+
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
+                for (Tile tile : tileRow) {
+                    if (tile.getContainedNPC() != null) {
+                        NPC npc = tile.getContainedNPC();
+                        TextButton talkButton = npcTalkButtons.get(npc);
+
+                        if (talkButton == null) {
+                            talkButton = new TextButton("...", GameAssetManager.skin, "custom-button");
+                            talkButton.setSize(tileSize / 2f, tileSize / 2f);
+                            talkButton.getLabel().setFontScale(0.5f);
+                            talkButton.setColor(Color.WHITE);
+                            talkButton.addListener(new ClickListener() {
+                                @Override
+                                public void clicked(InputEvent event, float x, float y) {
+                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(),currentPlayer).message());
+                                    event.stop();
+                                }
+                            });
+                            stage.addActor(talkButton);
+                            npcTalkButtons.put(npc, talkButton);
+                        }
+
+                        // Calculate screen position for the button above the NPC
+                        float npcCenterX = tile.getX() * tileSize + tileSize / 2f;
+                        float npcTopY = (rows - tile.getY() - 1) * tileSize + tileSize * 2f;
+
+                        Vector3 buttonWorldCoords = new Vector3(npcCenterX, npcTopY, 0);
+                        camera.project(buttonWorldCoords);
+
+                        talkButton.setPosition(buttonWorldCoords.x - talkButton.getWidth() / 2f, buttonWorldCoords.y);
+                        talkButton.setVisible(true);
+                    }
                 }
             }
         }
@@ -2150,6 +2599,9 @@ private void updateAnimals(float delta) {
                 }
                 if (tiles[y][x].isHasBeenBurt()) {
                     batch.draw(GameAssetManager.burntTile, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                }
+                if (tiles[y][x].getContainedNPC() != null) {
+                    batch.draw(tiles[y][x].getContainedNPC().getNpcName().getTextureRegion(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize * 2f);
                 }
             }
         }
