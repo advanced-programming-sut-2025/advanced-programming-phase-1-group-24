@@ -1,7 +1,7 @@
 [
   {
     "username": "john",
-    "password": "b4e887610ef824355a4cb9509bcb6e14182769dd8011046d3f697d0efbd2da5f",
+    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
     "nickname": "John",
     "email": "john@example.com",
     "gender": true,
@@ -83,7 +83,105 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "user2",
+    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user2",
@@ -169,93 +267,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
-  },
-  {
-    "username": "user2",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FORAGING": 0,
-      "FARMING": 0,
-      "MINING": 0,
-      "FISHING": 0
-    },
-    "skillExperience": {
-      "FORAGING": 0,
-      "FARMING": 0,
-      "MINING": 0,
-      "FISHING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "TRASHCAN",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user0",
@@ -341,7 +359,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user0",
@@ -427,7 +451,105 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "user02",
+    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
+    "nickname": "hey",
+    "email": "user2@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "Riazi 2 to chand shodi?",
+    "securityAnswer": "hi",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0
+    },
+    "skillExperience": {
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "MINING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user02",
@@ -513,93 +635,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
-  },
-  {
-    "username": "user02",
-    "password": "c9adce1964b6da2a1e3a6d91164c6e11aea3e4dca6799d9ada7edf728ba21e32",
-    "nickname": "hey",
-    "email": "user2@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "Riazi 2 to chand shodi?",
-    "securityAnswer": "hi",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FISHING": 0,
-      "FORAGING": 0,
-      "FARMING": 0,
-      "MINING": 0
-    },
-    "skillExperience": {
-      "FISHING": 0,
-      "FORAGING": 0,
-      "FARMING": 0,
-      "MINING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "HOE",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "PICKAXE",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "AXE",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "name": "WATERINGCAN",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "SCYTHE",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "TRASHCAN",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user03",
@@ -685,7 +727,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user03",
@@ -771,7 +819,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia2",
@@ -855,7 +909,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia3",
@@ -939,7 +999,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia4",
@@ -1023,7 +1089,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia5",
@@ -1107,7 +1179,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia6",
@@ -1191,7 +1269,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia7",
@@ -1275,7 +1359,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia8",
@@ -1292,16 +1382,25 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FARMING": 0,
-      "MINING": 0,
+      "FORAGING": 0,
       "FISHING": 0,
-      "FORAGING": 0
+      "FARMING": 0,
+      "MINING": 0
     },
     "skillExperience": {
-      "FARMING": 0,
-      "MINING": 0,
+      "FORAGING": 0,
       "FISHING": 0,
-      "FORAGING": 0
+      "FARMING": 0,
+      "MINING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia8",
+      "x": 142,
+      "y": 14,
+      "hasBeenBurt": false
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1331,6 +1430,8 @@
           "material": "Initial"
         },
         {
+          "maxCapacity": 40,
+          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -1348,6 +1449,15 @@
       }
     },
     "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia8",
+      "x": 126,
+      "y": 8,
+      "hasBeenBurt": false
+    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -1359,7 +1469,14 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia9",
@@ -1443,7 +1560,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia10",
@@ -1527,7 +1650,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia12",
@@ -1613,7 +1742,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia12",
@@ -1699,7 +1834,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia13",
@@ -1757,8 +1898,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -1787,7 +1926,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia13",
@@ -1845,8 +1990,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -1875,6 +2018,196 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "user44",
+    "password": "724f07baf35718d0424073bf85822e0f60004bdeb57ede3ebd532a52c9aa2b0f",
+    "nickname": "hay",
+    "email": "user44@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "What is your favorite food?",
+    "securityAnswer": "hey",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "MINING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "MINING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "user44",
+    "password": "724f07baf35718d0424073bf85822e0f60004bdeb57ede3ebd532a52c9aa2b0f",
+    "nickname": "hay",
+    "email": "user44@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "What is your favorite food?",
+    "securityAnswer": "hey",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "MINING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "MINING": 0,
+      "FORAGING": 0,
+      "FARMING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "HOE",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "PICKAXE",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "AXE",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "name": "WATERINGCAN",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "SCYTHE",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "TRASHCAN",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   }
 ]

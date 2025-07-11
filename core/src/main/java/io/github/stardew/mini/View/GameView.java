@@ -38,7 +38,9 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.sun.tools.javac.Main;
 import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.*;
@@ -58,6 +60,7 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
+import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Reccepies.Machine;
@@ -162,6 +165,12 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog relationshipDialog;
     private final List<Flower> activeFlowers = new ArrayList<>();
 
+    private TextButton exitButton;
+    private TextButton forceTerminateButton;
+    private Label energyLabel;
+
+    private Item equippedItem = null;
+    private Table equippedItemSlotTable;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -427,6 +436,28 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.J) {
+            Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(mousePos);
+            String direction = "";
+            if (mousePos.x > camera.position.x) {
+                direction = "right";
+            } else if (mousePos.x < camera.position.x) {
+                direction = "left";
+            } else if (mousePos.y > camera.position.y) {
+                direction = "up";
+            } else if (mousePos.y < camera.position.y) {
+                direction = "down";
+            }
+            if (equippedItem == null) {
+                showErrorDialog(stage, "Pick a seed first!");
+            } else controller.plantGrowable(equippedItem.getName(), direction);
+        }
+        if (keycode == Input.Keys.ENTER) {
+            if (equippedItem != null) {
+                equippedItem = null;
+            }
+        }
         if (keycode == Input.Keys.E) {
             if (showBackpackMenu) {
                 showBackpackMenu = false;
@@ -587,14 +618,18 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         if (keycode == Input.Keys.R) {
-            System.out.println(currentPlayer.getEnergy());
+            Tile tile = currentPlayer.getCurrentTile();
+            Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+             System.out.println(map[tile.getX() + 1][tile.getY()].getContainedGrowable().getGrowableType());
         }
         if (keycode == Input.Keys.I) {
             currentPlayer.setEnergy(200);
             currentPlayer.setFainted(false);
         }
         if (keycode == Input.Keys.Q) {
-            MainApp.getInstance().getCurrentGame().getFriendship("kimia8", "user2").setLevel(3);
+            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
+            controller.handleEndOfDay();
+            //MainApp.getInstance().getCurrentGame().getFriendship("kimia8", "user2").setLevel(3);
             //currentPlayer.getRecievedGift().add(new Gift("john", "kimia8", new randomStuff(10, randomStuffType.Stone), 5));
             //controller.sendGift("john", "Stone", "10");
         }
@@ -745,6 +780,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     Gdx.input.setInputProcessor(stage);
                     return true;
                 }
+                if (tile != null && tile.getType() == TileType.GREENHOUSE &&
+                    !MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getGreenHouse().getIsGreenHouseFixed()) {
+                    Result result = controller.buildGreenHouse();
+                    if (!result.isSuccessful()) {
+                        showErrorDialog(stage, result.message());
+                    }
+                }
                 if (tile != null) {
                     for (User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()) {
                         if (otherPlayer.getUsername().equals(currentPlayer.getUsername())) continue;
@@ -777,8 +819,28 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Gdx.input.setInputProcessor(stage);
                 return true;
             }
-
-
+            if (isClickInside(mouseX, mouseY, exitButton)) {
+                Result result = controller.exitGame();
+                if (!result.isSuccessful()) {
+                    showErrorDialog(stage, result.message());
+                }
+                else{
+                    Gdx.app.postRunnable(() -> {
+                        Timer.instance().stop();
+                        MainApp.getInstance().setCurrentGame(null);
+                        MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
+                        MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                    });
+                }
+                return true;
+            }
+            if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
+                Result result = controller.startForceTerminateVote();
+                if (!result.isSuccessful()) {
+                    showErrorDialog(stage, result.message());
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -1668,11 +1730,38 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
         stage.addActor(friendsButton);
 
+        exitButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
+        exitButton.setSize(200, 200);
+        exitButton.setColor(Color.MAGENTA);
+        exitButton.setPosition(10, Gdx.graphics.getHeight() - 200);
+        exitButton.setTouchable(Touchable.enabled);
+        stage.addActor(exitButton);
+
+        forceTerminateButton = new TextButton("Force Terminate", GameAssetManager.skin, "custom-button");
+        forceTerminateButton.setSize(200, 200);
+        forceTerminateButton.setColor(Color.PINK);
+        forceTerminateButton.setPosition(210, Gdx.graphics.getHeight() - 200);
+        forceTerminateButton.setTouchable(Touchable.enabled);
+        stage.addActor(forceTerminateButton);
+
+        energyLabel = new Label("Energy", GameAssetManager.skin, "custom-label");
+        energyLabel.setPosition(Gdx.graphics.getWidth() - 200, 220);
+        stage.addActor(energyLabel);
+
         this.toolMenuTable = new Table();
         toolMenuTable.bottom().center();
         toolMenuTable.padBottom(GameAssetManager.TILE_SIZE * 0.75f);
         toolMenuTable.setVisible(showToolsMenu);
         stage.addActor(toolMenuTable);
+
+        equippedItemSlotTable = new Table();
+        equippedItemSlotTable.bottom().center();
+        equippedItemSlotTable.padBottom(10);
+        equippedItemSlotTable.setVisible(true);
+        stage.addActor(equippedItemSlotTable);
+
+        updateEquippedItemSlot();
+
 
         Timer.schedule(new Timer.Task() {
             @Override
@@ -1802,23 +1891,24 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         determineAvatar();
         showNotifications();
-        if(currentPlayer.isProposing()){
+        energyLabel.setText("Energy: " + currentPlayer.getEnergy());
+        if (currentPlayer.isProposing()) {
             currentPlayer.setProposingTimer(currentPlayer.getProposingTimer() + v);
-            if(currentPlayer.getProposingTimer() > 1f){
+            if (currentPlayer.getProposingTimer() > 1f) {
                 currentPlayer.setProposingTimer(0);
                 currentPlayer.setProposing(false);
             }
         }
-        if(currentPlayer.isRejecting()){
+        if (currentPlayer.isRejecting()) {
             currentPlayer.setRejectingTimer(currentPlayer.getRejectingTimer() + v);
-            if(currentPlayer.getRejectingTimer() > 1f){
+            if (currentPlayer.getRejectingTimer() > 1f) {
                 currentPlayer.setRejectingTimer(0);
                 currentPlayer.setRejecting(false);
             }
         }
-        if(currentPlayer.isAccepting()){
+        if (currentPlayer.isAccepting()) {
             currentPlayer.setAcceptingTimer(currentPlayer.getAcceptingTimer() + v);
-            if(currentPlayer.getAcceptingTimer() > 1f){
+            if (currentPlayer.getAcceptingTimer() > 1f) {
                 currentPlayer.setAcceptingTimer(0);
                 currentPlayer.setAccepting(false);
             }
@@ -1950,6 +2040,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         }
 
         /// /////////////////////////////////////////////////////////////////////////
+
+
+        updateEquippedItemSlot();
+        if (equippedItem != null && currentPlayer != null && currentPlayer.getCurrentTile() != null) {
+            int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+            batch.draw(getItemTexture(equippedItem), drawX, drawY, tileSize, tileSize);
+        }
+
+
         float camX = camera.position.x - camera.viewportWidth / 2f;
         float camY = camera.position.y - camera.viewportHeight / 2f;
 
@@ -2081,7 +2181,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 tileSize, tileSize);
         } else if (tiles[y][x].getProductOfGrowable().getGrowableType() == GrowableType.CropProduct) {
             //TODO : Handle products of crops (one time growth)
-            batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
+            batch.draw(tiles[y][x].getProductOfGrowable().getCropType().getCropProductTexture(),
                 x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
@@ -2125,14 +2225,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         } else if (tiles[y][x].getContainedGrowable().getCropType() != null) {
             //TODO : handling the products of a crop that can regrow(just like tree)
             if (tiles[y][x].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
-                Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, true);
-                int topleftX = point.x;
-                int topleftY = point.y;
-                batch.draw(tiles[y][x].getContainedGrowable().getCropType().getGiantTexture(),
-                    topleftX * tileSize,
-                    topleftY * tileSize,
-                    2 * tileSize,
-                    2 * tileSize);
+                Point point = findTopLeftOfGiantCropSquare(x, y, rows, tiles[0].length, false);
+                if (point != null) {
+                    int topleftX = point.x;
+                    int topleftY = point.y;
+                    batch.draw(tiles[y][x].getContainedGrowable().getCropType().getGiantTexture(),
+                        topleftX * tileSize,
+                        (rows - topleftY - 2) * tileSize,
+                        2 * tileSize,
+                        2 * tileSize);
+                }
             } else if (tiles[y][x].getProductOfGrowable() != null && !tiles[y][x].getContainedGrowable().getCropType().oneTime()) {
                 batch.draw(tiles[y][x].getContainedGrowable().getCropType().getCropProductTexture(),
                     x * tileSize,
@@ -2140,6 +2242,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                     tileSize, tileSize);
             } else {
                 int currentStage = tiles[y][x].getContainedGrowable().getCurrentStage();
+                currentStage--;
                 batch.draw(tiles[y][x].getContainedGrowable().getCropType().getTextures().get(currentStage),
                     x * tileSize,
                     (rows - y - 1) * tileSize,
@@ -2426,12 +2529,16 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     public boolean isGiantCrop(int x, int y, boolean isProduct) {
         Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+
         if (isProduct) {
-            return map[y][x].getProductOfGrowable().getGrowableType() == GrowableType.Giant;
+            Growable product = map[y][x].getProductOfGrowable();
+            return product != null && product.getGrowableType() == GrowableType.Giant;
         } else {
-            return map[y][x].getContainedGrowable().getGrowableType() == GrowableType.Giant;
+            Growable growable = map[y][x].getContainedGrowable();
+            return growable != null && growable.getGrowableType() == GrowableType.Giant;
         }
     }
+
 
     private boolean isClickInside(float x, float y, Actor actor) {
         return x >= actor.getX() && x <= actor.getX() + actor.getWidth() &&
@@ -2608,6 +2715,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
     private void drawSelectedTool(Texture itemTex) {
+        if (itemTex == null) {
+            return;
+        }
         if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
 
         Tile tile = currentPlayer.getCurrentTile();
@@ -2665,9 +2775,11 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         toolUsageStateTime = 0f;
 
         if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
-            controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+            Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
         } else {
-            controller.useTool("Down");
+            Result result = controller.useTool("Down");
+            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
         }
     }
 
@@ -2836,6 +2948,21 @@ public class GameView implements Screen, InputProcessor, AppMenu {
             }
         });
 
+        TextButton selectButton = new TextButton("Select", GameAssetManager.skin, "custom-button");
+        selectButton.setColor(Color.BLUE);
+        selectButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                    equippedItem = sortedItems.get(selectedSlot);
+                    updateEquippedItemSlot();
+                    showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                } else {
+                    showErrorDialog(stage, "No item selected.");
+                }
+            }
+        });
+
         Table controlButtonsTable = new Table();
         controlButtonsTable.defaults().pad(10);
 
@@ -2853,6 +2980,8 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         });
         controlButtonsTable.add(backButton).width(100).height(40);
         controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
+        controlButtonsTable.add(selectButton).width(100).height(40);
+
 
         backpackMenuTable.add(controlButtonsTable).bottom().center().row();
 
@@ -2861,6 +2990,9 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     }
 
     public Texture getItemTexture(Item item) {
+        if (item == null) {
+            return null;
+        }
         if (item instanceof Fish) {
             return ((Fish) item).getType().getTexture();
         }
@@ -3039,6 +3171,57 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         stage.addActor(skillsDialog);
     }
 
+    private void updateEquippedItemSlot() {
+        equippedItemSlotTable.clearChildren();
+
+        float slotSize = GameAssetManager.TILE_SIZE;
+        float itemImagePadding = slotSize * 0.1f;
+        float itemImageRenderSize = slotSize - (itemImagePadding * 2);
+        float labelOffset = 5f;
+
+        Stack itemSlotStack = new Stack();
+
+        Image slotBg = new Image(InventoryAssets.slot);
+        slotBg.setSize(slotSize, slotSize);
+        itemSlotStack.add(slotBg);
+
+        if (equippedItem != null) {
+            Texture itemTex = getItemTexture(equippedItem);
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
+                itemImage.setScaling(Scaling.fit);
+                itemImage.setAlign(Align.center);
+
+                Container<Image> itemImageContainer = new Container<>(itemImage);
+                itemImageContainer.pad(itemImagePadding);
+                itemImageContainer.fill();
+
+                itemSlotStack.add(itemImageContainer);
+            } else {
+                Gdx.app.error("GameView", "Texture for equipped item " + equippedItem.getName() + " is null!");
+            }
+
+            Integer count = currentPlayer.getBackpack().getInventoryItems().get(equippedItem);
+            if (count != null && count > 1) {
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+                Container<Label> labelContainer = new Container<>(countLabel);
+                labelContainer.align(Align.bottomRight);
+                labelContainer.padRight(labelOffset);
+                labelContainer.padBottom(labelOffset);
+                labelContainer.fill();
+                itemSlotStack.add(labelContainer);
+            }
+        }
+
+        equippedItemSlotTable.add(itemSlotStack).size(slotSize).pad(5);
+
+        equippedItemSlotTable.pack();
+        equippedItemSlotTable.setPosition(
+            (stage.getWidth() - equippedItemSlotTable.getWidth()) / 2,
+            10);
+    }
+
     private void showNotifications() {
         List<Message> notifications = currentPlayer.getNotifications();
         if (notifications.isEmpty()) return;
@@ -3053,6 +3236,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
                 Dialog proposalDialog = proposalNotification(notification);
                 Gdx.input.setInputProcessor(stage);
                 proposalDialog.show(stage);
+            } else if (message.equals("force terminate has started!")) {
+                Dialog forceTerminationDialog = forceTerminationNotification();
+                Gdx.input.setInputProcessor(stage);
+                forceTerminationDialog.show(stage);
             } else {
                 generalNotifications.append("- From ").append(notification.getSender())
                     .append(": ").append(message).append("\n");
@@ -3085,13 +3272,13 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog proposalNotification(Message notification) {
         String sender = notification.getSender();
 
-        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin,"custom-window") {
+        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
             @Override
             protected void result(Object obj) {
                 Gdx.input.setInputProcessor(GameView.this);
                 boolean accepted = (Boolean) obj;
                 if (accepted) {
-                    controller.respondToMarriage("accept",sender);
+                    controller.respondToMarriage("accept", sender);
                     currentPlayer.setAccepting(true);
                 } else {
                     controller.respondToMarriage("reject", sender);
@@ -3108,6 +3295,33 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         proposalDialog.button(acceptButton, true);
         proposalDialog.button(rejectButton, false);
         return proposalDialog;
+    }
+
+    @NotNull
+    private Dialog forceTerminationNotification() {
+        Dialog forceTerminationDialog = new Dialog("Force Termination", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object obj) {
+                Gdx.input.setInputProcessor(GameView.this);
+                boolean accepted = (Boolean) obj;
+                if (accepted) {
+                    Result result = controller.voteToTerminate(true, currentPlayer);
+                    if(!result.isSuccessful()) showErrorDialog(stage, result.message());
+                } else {
+                    Result result = controller.voteToTerminate(false, currentPlayer);
+                    showErrorDialog(stage, result.message());
+                }
+            }
+        };
+        Label label = new Label("Do you want to force terminate this game ?", GameAssetManager.skin, "custom-label");
+        forceTerminationDialog.getContentTable().add(label).pad(10);
+
+        TextButton acceptButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
+        TextButton rejectButton = new TextButton("No", GameAssetManager.skin, "custom-button");
+
+        forceTerminationDialog.button(acceptButton, true);
+        forceTerminationDialog.button(rejectButton, false);
+        return forceTerminationDialog;
     }
 
 

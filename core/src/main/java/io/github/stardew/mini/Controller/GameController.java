@@ -181,7 +181,7 @@ public class GameController implements MenuController {
 
 
 
-    public Result startForceTerminateVote(Scanner scanner) {
+    public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
         User currentUser = app.getLoggedInUser();
@@ -196,6 +196,10 @@ public class GameController implements MenuController {
         currentGame.setVoteInProgress(true);
         currentGame.getTerminationVotes().clear();
         currentGame.getTerminationVotes().put(currentUser, true);
+        for(User player : currentGame.getPlayers()) {
+            if(currentUser.equals(player)) continue;
+            player.addToNotifications(new Message(currentUser.getUsername(), player.getUsername(), "force terminate has started!"));
+        }
 
         return new Result(true, "termination vote started. your vote is recorded as YES.");
     }
@@ -301,8 +305,8 @@ public class GameController implements MenuController {
         if (currentGame == null || !currentGame.isVoteInProgress())
             return new Result(false, "no active termination vote!");
 
-        if (!currentGame.isUserTurn(user))
-            return new Result(false, "you can only vote during your own turn!");
+//        if (!currentGame.isUserTurn(user))
+//            return new Result(false, "you can only vote during your own turn!");
 
         if (currentGame.getTerminationVotes().containsKey(user))
             return new Result(false, "you have already voted!");
@@ -323,7 +327,7 @@ public class GameController implements MenuController {
             }
             app.getActiveGames().remove(currentGame);
             app.setCurrentGame(null);
-            app.saveActiveGames();
+            //app.saveActiveGames();
             UserDatabase.saveUsers(app.getUsers());
             return new Result(true, "game terminated by unanimous vote. returning to game menu...");
         }
@@ -405,7 +409,7 @@ public class GameController implements MenuController {
             for (User user : game.getPlayers()) {
                 game.handleFoodRecipe(user);
             }
-            printMap("0","0","150");
+            //printMap("0","0","150");
         }
     }
 
@@ -1376,6 +1380,7 @@ public class GameController implements MenuController {
             map[y][x].setContainedGrowable(growable);
             //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
             map[y][x].getContainedGrowable().setCurrentStage(1);
+            System.out.println("plantedddddddddddd" + map[y][x].getContainedGrowable().getCurrentStage());
             map[y][x].setIsPlowed(false);
             if (growable.getCropType() != null) {
                 tryFormGiant(y, x, growable.getCropType());
@@ -2585,6 +2590,48 @@ public class GameController implements MenuController {
 
     }
 
+    public Result buildGreenHouse() {
+        Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
+            !playerBackPack.hasItem("Stone", 500)) {
+            return new Result(false, "green house build failed");
+        }
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
+        GreenHouse greenHouse = farm.getGreenHouse();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        for (int j = greenHouse.getY(); j < greenHouse.getY() + greenHouse.getHeight(); j++) {
+            for (int i = greenHouse.getX(); i < greenHouse.getX() + greenHouse.getWidth(); i++) {
+                map[j][i].setWalkable(true);
+            }
+        }
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        return new Result(true, "green house build successful");
+    }
+
+    public Result exitGame() {
+        MainApp app = MainApp.getInstance();
+        User currentUser = app.getLoggedInUser();
+        Game currentGame = app.getCurrentGame();
+
+        if (currentGame == null)
+            return new Result(false, "no active game to exit!");
+
+        if (!currentGame.getMainPlayer().equals(currentUser))
+            return new Result(false, "only the game owner can exit the game!");
+
+//        if (!currentGame.getCurrentPlayer().equals(currentUser)) // check if it's their turn
+//            return new Result(false, "you can only exit the game during your turn!");
+
+        // Save the current game state
+        for (User player : currentGame.getPlayers()) {
+            player.updateMaxMoney();
+        }
+        //app.saveActiveGames();
+
+        //app.setCurrentGame(null);
+        return new Result(true, "game exited and saved successfully. returning to game menu...");
+    }
 
 }
 
