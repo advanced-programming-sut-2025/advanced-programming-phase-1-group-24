@@ -1275,6 +1275,7 @@ public class GameController implements MenuController {
                             if (map[j][i].getIsPlowed()) {
                                 map[j][i].setContainedGrowable(GrowableFactory.getInstance().create(getRandomForagingSourceBySeason(currentGame.getTimeAndDate().getSeason())));
                                 map[j][i].getContainedGrowable().setName(findCropBySourceName(map[j][i].getContainedGrowable().getName()).getName());
+                                map[j][i].getContainedGrowable().setCurrentStage(1);
                                 map[j][i].setWalkable(false);
                             } else {
                                 map[j][i].setProductOfGrowable(GrowableFactory.getInstance().create(getRandomForagingCropBySeason(currentGame.getTimeAndDate().getSeason())));
@@ -1513,6 +1514,7 @@ public class GameController implements MenuController {
 
 
         for (Tile tile : tiles) {
+            System.out.println("1");
             tile.setContainedGrowable(shared);
         }
 
@@ -1609,6 +1611,37 @@ public class GameController implements MenuController {
             if(tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
                 return;
             }
+
+            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant){
+                Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getProductOfGrowable() != null &&
+                    map[tile.getY()][tile.getX() - 1].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                    tile.setContainedGrowable(null);
+                    tile.setProductOfGrowable(map[tile.getY()][tile.getX() - 1].getProductOfGrowable());
+                }
+                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getProductOfGrowable() != null &&
+                    map[tile.getY() - 1][tile.getX()].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                    tile.setContainedGrowable(null);
+                    tile.setProductOfGrowable(map[tile.getY() - 1][tile.getX()].getProductOfGrowable());
+                }
+            }
+
+            if(tile.getContainedGrowable() == null){
+                return;
+            }
+
+            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getContainedGrowable() != null &&
+                    map[tile.getY()][tile.getX() - 1].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                        return;
+                }
+                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getContainedGrowable() != null &&
+                     map[tile.getY() - 1][tile.getX()].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                    return;
+                }
+            }
+
             if (tile.getContainedGrowable().getDaysLeftToDie() <= 0) {
                 tile.setContainedGrowable(null);
                 tile.setProductOfGrowable(null);
