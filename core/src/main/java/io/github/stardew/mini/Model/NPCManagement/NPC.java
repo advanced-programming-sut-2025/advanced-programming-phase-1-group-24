@@ -2,6 +2,7 @@ package io.github.stardew.mini.Model.NPCManagement;
 
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Result;
@@ -123,16 +124,13 @@ public class NPC {
             currentPlayer.getBackpack().grabItem(itemName, mission.getRequiredItems().get(itemName));
         }
         int howManyItems = 1;
-        String message = "";
         if (friendshipLevels.get(currentPlayer.getUsername()) >= 2)  howManyItems = 2;
         for (String itemName : mission.getPrizeItems().keySet()) {
             if (itemName.equals("Gold Coin")) {
                 currentPlayer.addMoney( mission.getPrizeItems().get(itemName) * howManyItems);
-                message = "Your current money is " + currentPlayer.getMoney() + ".";
             }
             else if (itemName.equals("Friendship Level")) {
                 friendshipLevels.put(currentPlayer.getUsername(),friendshipLevels.get(currentPlayer.getUsername()) + 1);
-                message = "Your new Friendship level is " + friendshipLevels.get(currentPlayer.getUsername()) + ".";
             }
             else if (itemName.equals("Salmon Dinner Recipe")) {
                 currentPlayer.getCookingRecepies().add(FoodRecipe.SalmonDinner);
@@ -143,7 +141,7 @@ public class NPC {
             }
         }
         mission.setAlreadyDone(true);
-        return new Result(true, "Mission was completed successfully." + message);
+        return new Result(true, "Mission was completed successfully.");
     }
 
     public Result giveGift(String itemName, User currentPlayer){
@@ -212,6 +210,21 @@ public class NPC {
             }
         }
         return false;
+    }
+
+    public Tile getCurrentTile() {
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+        if (map.getTile(72, 55).getContainedNPC().equals(this))
+            return map.getTile(72, 55);
+        else if (map.getTile(72, 65).getContainedNPC().equals(this))
+            return map.getTile(72, 65);
+        else if (map.getTile(72, 75).getContainedNPC().equals(this))
+            return map.getTile(72, 75);
+        else if (map.getTile(72, 85).getContainedNPC().equals(this))
+            return map.getTile(72, 85);
+        else if (map.getTile(72, 95).getContainedNPC().equals(this))
+            return map.getTile(72, 95);
+        else return null;
     }
 
 

@@ -32,7 +32,10 @@ public class GameAssetManager {
     public static Texture LIGHT_GREEN_FLOOR;
     public static Texture DARK_GREEN_FLOOR;
     public static Texture FLOORING_01;
+    public static Texture FLOORING_02;
     public static Texture FLOORING_03;
+    public static Texture FLOORING_06;
+    public static Texture FLOORING_08;
     public static Texture FLOORING_09;
     public static Texture FLOORING_10;
     public static Texture FLOORING_17;
@@ -41,6 +44,7 @@ public class GameAssetManager {
     public static Texture FLOORING_29;
     public static Texture FLOORING_52;
     public static Texture FLOORING_55;
+    public static Texture FLOORING_62;
     public static Texture FLOORING_71;
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
@@ -111,7 +115,10 @@ public class GameAssetManager {
         LIGHT_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_44.png"));
         DARK_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
         FLOORING_01 = new Texture(Gdx.files.internal("Flooring/Flooring_01.png"));
+        FLOORING_02 = new Texture(Gdx.files.internal("Flooring/Flooring_02.png"));
         FLOORING_03 = new Texture(Gdx.files.internal("Flooring/Flooring_03.png"));
+        FLOORING_06 = new Texture(Gdx.files.internal("Flooring/Flooring_06.png"));
+        FLOORING_08 = new Texture(Gdx.files.internal("Flooring/Flooring_08.png"));
         FLOORING_09 = new Texture(Gdx.files.internal("Flooring/Flooring_09.png"));
         FLOORING_10 = new Texture(Gdx.files.internal("Flooring/Flooring_10.png"));
         FLOORING_17 = new Texture(Gdx.files.internal("Flooring/Flooring_17.png"));
@@ -120,6 +127,7 @@ public class GameAssetManager {
         FLOORING_29 = new Texture(Gdx.files.internal("Flooring/Flooring_29.png"));
         FLOORING_52 = new Texture(Gdx.files.internal("Flooring/Flooring_52.png"));
         FLOORING_55 = new Texture(Gdx.files.internal("Flooring/Flooring_55.png"));
+        FLOORING_62 = new Texture(Gdx.files.internal("Flooring/Flooring_62.png"));
         FLOORING_71 = new Texture(Gdx.files.internal("Flooring/Flooring_71.png"));
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));

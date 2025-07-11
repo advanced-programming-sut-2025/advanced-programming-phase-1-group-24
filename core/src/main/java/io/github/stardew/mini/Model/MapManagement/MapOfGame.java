@@ -79,19 +79,39 @@ public class MapOfGame {
         //initialize npcHouses
 // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
-                {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
+            {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
         };
 
         for (int[] coordinates : npsHouseCoordinates) {
             int startX = coordinates[0];
             int startY = coordinates[1];
 
-            // Loop over each 5x5 area to set NPC HOUSE type
-            for (int y = startY; y < startY + 6; y++) {
-                for (int x = startX; x < startX + 6; x++) {
-                    Tile tile = map[y][x];
-                    tile.setType(TileType.NPCHOUSE); // mark tile as NPC house
-                    // tile.setWalkable(true);          // optionally adjust walkability
+            int houseWidth = 6;
+            int houseHeight = 6;
+
+            int doorX = startX + 2;
+            int doorY = startY + houseHeight - 1;
+
+            for (int y = startY; y < startY + houseHeight; y++) {
+                for (int x = startX; x < startX + houseWidth; x++) {
+                    if (y >= 0 && y < map.length && x >= 0 && x < map[0].length) {
+                        Tile tile = map[y][x];
+
+                        if (x == startX || x == startX + houseWidth - 1 ||
+                            y == startY || y == startY + houseHeight - 1) {
+
+                            if (x == doorX && y == doorY) {
+                                tile.setType(TileType.DOOR);
+                                tile.setWalkable(true);
+                            } else {
+                                tile.setType(TileType.NPCWALL);
+                                tile.setWalkable(false);
+                            }
+                        } else {
+                            tile.setType(TileType.NPCHOUSE);
+                            tile.setWalkable(true);
+                        }
+                    }
                 }
             }
         }
