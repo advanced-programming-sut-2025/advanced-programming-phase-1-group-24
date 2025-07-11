@@ -15,14 +15,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.LoginMenuController;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.User;
 
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 
@@ -35,8 +39,9 @@ public class PreGameMenuView implements AppMenu, Screen {
     private Stage stage;
     public Table table;
     private Texture background;
-    private int gameWidth = Gdx.graphics.getWidth();
-    private int gameHeight = Gdx.graphics.getHeight();
+//    private int gameWidth = Gdx.graphics.getWidth();
+//    private int gameHeight = Gdx.graphics.getHeight();
+    private Label savedGameInfoLabel;
 
     public PreGameMenuView(PreGameMenuController controller) {
         createUI();
@@ -46,7 +51,7 @@ public class PreGameMenuView implements AppMenu, Screen {
 
     public void createUI() {
         Skin skin = GameAssetManager.skin;
-        stage = new Stage(new FitViewport(gameWidth, gameHeight));
+        stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
 //         BitmapFont customFont= new BitmapFont(Gdx.files.internal("font/myfont.fnt"));
@@ -70,15 +75,51 @@ public class PreGameMenuView implements AppMenu, Screen {
 
         TextButton newGameButton = new TextButton("Play new game", skin, "custom-button");
         TextButton lastGameButton = new TextButton("Play last game", skin, "custom-button");
+        // check if there's a saved game
+//        Game savedGame = MainApp.getInstance().getGameByUser(MainApp.getInstance().getLoggedInUser());
+//        if (savedGame != null) {
+//            String gameDetails = "Saved Game: " + savedGame.getTimeAndDate().toString();
+//            // You can customize this string to show season, day, farm name, etc.
+//            savedGameInfoLabel = new Label(gameDetails, skin,"custom-label");
+//        } else {
+//            savedGameInfoLabel = new Label("No saved game found.", skin,"custom-label");
+//        }
+//        savedGameInfoLabel.setFontScale(0.5f);
+        // Check for saved game
+        Game savedGame = MainApp.getInstance().getGameByUser(MainApp.getInstance().getLoggedInUser());
+
+        if (savedGame != null) {
+            StringBuilder details = new StringBuilder();
+            details.append("Saved Game Info:\n");
+            details.append("Day: ").append(savedGame.getTimeAndDate().getDay()).append("\n");
+            details.append("Season: ").append(savedGame.getTimeAndDate().getSeason()).append("\n");
+            details.append("Time: ").append(savedGame.getTimeAndDate().getHour()).append(":00\n");
+            details.append("Owner: ").append(savedGame.getMainPlayer().getUsername()).append("\n");
+            List<User> players = savedGame.getPlayers();
+            details.append("Players: ");
+            for (int i = 0; i < players.size(); i++) {
+                details.append(players.get(i).getUsername());
+                if (i != players.size() - 1) {
+                    details.append(", ");
+                }
+            }
+            savedGameInfoLabel = new Label(details.toString(), skin, "custom-label");
+            savedGameInfoLabel.setFontScale(0.6f);
+        } else {
+            savedGameInfoLabel = new Label("No saved game found.", skin, "custom-label");
+        }
+        savedGameInfoLabel.setColor(Color.BLUE);
         TextButton backButton = new TextButton("Back", skin, "custom-button");
 
-        float buttonWidth = (float) gameWidth / 4;
-        float buttonHeight = (float) gameHeight / 7;
-        float bottomPad = (float) gameHeight / 10;
+        float buttonWidth = (float) Gdx.graphics.getWidth() / 4;
+        float buttonHeight = (float) Gdx.graphics.getHeight() / 7;
+        float bottomPad = (float) Gdx.graphics.getHeight() / 24;
         table.add(titleLabel).colspan(1).padBottom(bottomPad).row();
         table.add(newGameButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
         table.row();
         table.add(lastGameButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
+        table.row();
+        table.add(savedGameInfoLabel).padBottom(bottomPad);
         table.row();
         table.add(backButton).width(buttonWidth).height(buttonHeight);
 
@@ -95,8 +136,8 @@ public class PreGameMenuView implements AppMenu, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Result result = controller.loadGame();
-                MainApp.getInstance().getCurrentGame().getMap().initializeShops();
                 if (result.isSuccessful()) {
+                    MainApp.getInstance().getCurrentGame().getMap().initializeShops();
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
                 } else {
                     showErrorDialog(stage, result.message());
@@ -114,13 +155,27 @@ public class PreGameMenuView implements AppMenu, Screen {
         });
         backButton.getStyle().over = skin.getDrawable("button-normal-over");
 
+        //background = GameAssetManager.getBackground();
+        Texture bg = GameAssetManager.getBackground();
+        Image bgImage = new Image(bg);
+        bgImage.setFillParent(true);
+        stage.addActor(bgImage);
+
         stage.addActor(table);
-        background = GameAssetManager.getBackground();
+//        background = GameAssetManager.getBackground();
     }
 
     @Override
     public void show() {
 
+    }
+
+
+    @Override
+    public void render(float v) {
+        ScreenUtils.clear(0, 0, 0, 1);
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
     }
 
     //    @Override
@@ -133,18 +188,8 @@ public class PreGameMenuView implements AppMenu, Screen {
 //        stage.draw();
 //    }
     @Override
-    public void render(float v) {
-        ScreenUtils.clear(0, 0, 0, 1);
-        MainApp.getBatch().begin();
-        MainApp.getBatch().draw(background, 0, 0, gameWidth, gameHeight);
-        MainApp.getBatch().end();
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
-    }
-
-    @Override
-    public void resize(int i, int i1) {
-
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
