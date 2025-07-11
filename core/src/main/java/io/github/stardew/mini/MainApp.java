@@ -173,7 +173,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
 //        loggedInUser.getOwnedAnimals().clear();
-        // currentGame.getMap().getShops().clear();
+         currentGame.getMap().getShops().clear();
         saveActiveGames();
 
         //saveGameData();

@@ -1,8 +1,13 @@
 package io.github.stardew.mini.Model.Friendships;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class Trade {
     private User sender;
     private User recipient;

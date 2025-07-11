@@ -1,6 +1,8 @@
 package io.github.stardew.mini.Model.MapManagement;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -27,7 +29,10 @@ import io.github.stardew.mini.View.GameView;
 
 import java.util.*;
 
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class MapOfGame {
 
     private Tile[][] map;

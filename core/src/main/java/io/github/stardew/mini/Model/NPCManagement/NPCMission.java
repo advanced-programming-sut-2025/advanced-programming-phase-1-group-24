@@ -1,11 +1,16 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Things.Item;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class NPCMission {
     private Map<String, Integer> requiredItems;
     private Map<String, Integer> prizeItems;

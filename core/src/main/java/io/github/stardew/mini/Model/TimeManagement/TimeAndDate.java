@@ -1,7 +1,10 @@
 package io.github.stardew.mini.Model.TimeManagement;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Reccepies.Machine;
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class TimeAndDate {
     private int hour; // 0 - 23
