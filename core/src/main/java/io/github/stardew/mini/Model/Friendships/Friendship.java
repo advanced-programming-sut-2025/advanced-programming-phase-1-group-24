@@ -1,11 +1,17 @@
 package io.github.stardew.mini.Model.Friendships;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import java.util.ArrayList;
 import java.util.Objects;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class Friendship {
-    private final String player1;
-    private final String player2;
+    private  String player1;
+    private  String player2;
     private int level;
     private int xp;
     private ArrayList<Gift> gifts = new ArrayList<>();
@@ -24,6 +30,9 @@ public class Friendship {
         this.xp = 0;
         this.gifts = new ArrayList<>();
         this.talkHistory = new ArrayList<>();
+    }
+
+    public Friendship() {
     }
 
     public void addXp(int amount) {

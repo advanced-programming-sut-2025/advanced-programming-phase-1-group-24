@@ -9,7 +9,7 @@ public class Fish extends Item {
         super(type.getName(), true, type.getSellPrice(), false, productQuality,false);
         this.type = type;
     }
-
+    public Fish(){}
 
     public FishType getType() {
         return type;

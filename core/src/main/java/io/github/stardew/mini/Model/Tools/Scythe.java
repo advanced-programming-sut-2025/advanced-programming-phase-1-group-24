@@ -16,6 +16,8 @@ public class Scythe extends Tool{
         super(type);
     }
 
+    public Scythe() {}
+
     @Override
     public void upgrade(ToolMaterial material) {
         return;

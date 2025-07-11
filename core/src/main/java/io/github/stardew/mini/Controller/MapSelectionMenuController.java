@@ -244,6 +244,27 @@ public class MapSelectionMenuController implements MenuController {
         return null;
     }
 
+    public Result buildGreenHouse() {
+        Backpack playerBackPack = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack();
+        if (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMoney() < 1000 ||
+            !playerBackPack.hasItem("Stone", 500)) {
+            return new Result(false, "green house build failed");
+        }
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
+        GreenHouse greenHouse = farm.getGreenHouse();
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        for (int j = greenHouse.getY(); j < greenHouse.getY() + greenHouse.getHeight(); j++) {
+            for (int i = greenHouse.getX(); i < greenHouse.getX() + greenHouse.getWidth(); i++) {
+                map[j][i].setWalkable(true);
+            }
+        }
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
+        MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        return new Result(true, "green house build successful");
+    }
+
+
+
     public Result exitGame() {
         MainApp app = MainApp.getInstance();
         User currentUser = app.getLoggedInUser();
