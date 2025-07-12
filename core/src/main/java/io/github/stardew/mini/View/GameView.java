@@ -2990,10 +2990,12 @@ private void updateAnimals(float delta) {
 
                 int playerFishingLevel = currentPlayer.getSkillsLevel().get(Skill.FISHING);
                 fishingMinigameDialog.startMinigame(
-                    playerFishingLevel
+                    playerFishingLevel,
+                    data.movementType(),
+                    currentCaughtFish
                 );
                 isFishingActive = true;
-                Gdx.input.setInputProcessor(stage);
+                Gdx.input.setInputProcessor(this);
             }
         } else {
             int tileSize = GameAssetManager.TILE_SIZE;

@@ -7,6 +7,7 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Things.Fish;
+import io.github.stardew.mini.Model.Things.FishMovementType;
 import io.github.stardew.mini.Model.Things.FishType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
 import io.github.stardew.mini.Model.TimeManagement.Season;
@@ -95,9 +96,14 @@ public class FishingPole extends Tool {
             // The hooked fish. Its quality will be determined *after* the minigame.
             Fish hookedFish = new Fish(ProductQuality.Normal, chosenFishType);
 
+            //Randomly select a movement type for the fish
+            FishMovementType[] movementTypes = FishMovementType.values();
+            FishMovementType chosenMovementType = movementTypes[random.nextInt(movementTypes.length)];
+
+
             return new FishingAttemptOutcome(
                 new Result(true, "A fish is on the line!"),
-                Optional.of(new FishingMinigameData(hookedFish))
+                Optional.of(new FishingMinigameData(hookedFish, chosenMovementType))
             );
 
         } else {

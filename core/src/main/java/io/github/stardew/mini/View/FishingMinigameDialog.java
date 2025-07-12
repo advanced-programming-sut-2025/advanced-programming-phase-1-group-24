@@ -7,15 +7,19 @@ import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.math.MathUtils;
 
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
+import io.github.stardew.mini.Model.Things.FishMovementType;
+import io.github.stardew.mini.Model.Things.Fish;
+import io.github.stardew.mini.Model.Things.FishType.RarenessType;
 
 public class FishingMinigameDialog extends Group {
 
@@ -25,35 +29,42 @@ public class FishingMinigameDialog extends Group {
     private Image fishIcon;
     private Image greenBar;
     private ProgressBar catchProgressBar;
+    private TextButton cancelButton;
 
     // Minigame state variables
-    private float fishPosition; // 0 to 1, representing vertical position in the bar
-    private float fishSpeed;    // How fast the fish moves
-    private float greenBarPosition; // 0 to 1, representing vertical position of the player's bar
-    private float greenBarHeight; // Relative height of the green bar (0 to 1)
-    private float greenBarSpeed; // How fast the green bar moves up/down
-    private boolean isGreenBarMovingUp; // True if player is holding input
-    private float catchProgress; // 0 to 100 for the ProgressBar
+    private float fishPosition;
+    private float fishSpeed;
+    private float greenBarPosition;
+    private float greenBarHeight;
+    private float greenBarSpeed;
+    private boolean isGreenBarMovingUp;
+    private float catchProgress;
+    private FishMovementType currentMovementType;
+    private float fishMovementTimer;
 
     // Callback for when the minigame ends
     public interface FishingMinigameCallback {
         void onMinigameEnd(boolean caughtSuccessfully, boolean perfectCatch);
     }
     private FishingMinigameCallback callback;
-    private boolean perfectCatchTracker; // To track if the fish ever left the bar for "perfect"
+    private boolean perfectCatchTracker;
 
-    // Constants for minigame scaling and appearance
-    private static final float BAR_WIDTH = 50f; // Width of the fishing bar
-    private static final float BAR_HEIGHT = 400f; // Height of the fishing bar
+    private static final float BAR_WIDTH = 50f;
+    private static final float BAR_HEIGHT = 400f;
     private static final float FISH_ICON_SIZE = 32f;
-    private static final float GREEN_BAR_MIN_HEIGHT_PX = 60f; // Minimum height of green bar in pixels
-    private static final float GREEN_BAR_MAX_HEIGHT_LVL_FACTOR = 0.05f; // How much height scales with fishing level
-    private static final float GREEN_BAR_LIFT_ACCELERATION = 550f; // Pixels per second squared
-    private static final float GREEN_BAR_GRAVITY = 400f; // Pixels per second squared
-    private static final float FISH_BASE_SPEED = 100f; // Original was 150f. Lowering makes fish slower.
-    private static final float CATCH_PROGRESS_SPEED = 20f; // Original was 30f. Higher makes catch bar fill faster.
-    private static final float CATCH_DECAY_SPEED = 3f; // Original was 20f. Lower makes catch bar deplete slower.
-    private static final float FISH_RANDOM_ACCELERATION = 80f; // NEW: Constant for random fish movement
+    private static final float GREEN_BAR_MIN_HEIGHT_PX = 60f;
+    private static final float GREEN_BAR_MAX_HEIGHT_LVL_FACTOR = 0.05f;
+
+    private static final float GREEN_BAR_LIFT_ACCELERATION = 700f;
+    private static final float GREEN_BAR_GRAVITY = 350f;
+
+    private static final float BASE_FISH_SPEED_PX_PER_SEC = 150f;
+    private static final float BASE_FISH_ACCELERATION_PX_PER_SEC2 = 100f;
+
+    private static final float CATCH_PROGRESS_SPEED = 25f;
+    private static final float CATCH_DECAY_SPEED = 3f;
+
+    private static final float FISH_MOVEMENT_UPDATE_INTERVAL = 0.5f;
 
     private ShapeRenderer shapeRenderer;
     private boolean isMinigameActive;
@@ -82,6 +93,24 @@ public class FishingMinigameDialog extends Group {
         fishIcon.setSize(FISH_ICON_SIZE, FISH_ICON_SIZE);
         containerTable.addActor(fishIcon);
 
+        cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+        cancelButton.setSize(100, 40);
+        cancelButton.setColor(Color.RED);
+        cancelButton.setPosition(this.getWidth() / 2 - cancelButton.getWidth() / 2, 10);
+        this.addActor(cancelButton);
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (isMinigameActive) {
+                    stopMinigame();
+                    if (callback != null) {
+                        callback.onMinigameEnd(false, false);
+                    }
+                }
+            }
+        });
+
         ProgressBar.ProgressBarStyle style = new ProgressBar.ProgressBarStyle();
         style.background = new TextureRegionDrawable(new TextureRegion(GameAssetManager.pixel)).tint(Color.DARK_GRAY);
         style.knobBefore = new TextureRegionDrawable(new TextureRegion(GameAssetManager.pixel)).tint(Color.GREEN);
@@ -95,29 +124,31 @@ public class FishingMinigameDialog extends Group {
         this.callback = callback;
     }
 
-    /**
-     * Starts the fishing minigame.
-     * @param fishingLevel The player's current fishing skill level.
-     */
-    public void startMinigame(int fishingLevel /* Removed float difficulty from signature */) { // MODIFIED: Removed difficulty parameter
+    public void startMinigame(int fishingLevel, FishMovementType movementType, Fish fishToCatch) {
         this.setVisible(true);
         isMinigameActive = true;
 
+        if (fishToCatch != null && fishToCatch.getType().getRareness() == RarenessType.LEGENDARY) {
+            fishIcon.setDrawable(new TextureRegionDrawable(new Texture("Fish/Legend.png")));
+            fishIcon.setSize(FISH_ICON_SIZE , FISH_ICON_SIZE);
+            }
+
         fishPosition = 0.5f;
-        greenBarPosition = 0.5f;
+
+        greenBarHeight = (GREEN_BAR_MIN_HEIGHT_PX + (fishingLevel * GREEN_BAR_MAX_HEIGHT_LVL_FACTOR * BAR_HEIGHT)) / BAR_HEIGHT;
+        greenBarHeight = MathUtils.clamp(greenBarHeight, 0.1f, 0.8f);
+
+        greenBarPosition = fishPosition + (FISH_ICON_SIZE / BAR_HEIGHT / 2f) - (greenBarHeight / 2f);
+        greenBarPosition = MathUtils.clamp(greenBarPosition, 0f, 1f - greenBarHeight);
+
         greenBarSpeed = 0f;
         isGreenBarMovingUp = false;
         catchProgress = 0;
         perfectCatchTracker = true;
+        fishMovementTimer = 0f;
 
-        // Removed assignment of fishDifficulty
-
-        // Randomize initial fish speed and direction (using fixed speed/acceleration for no difficulty)
-        fishSpeed = FISH_BASE_SPEED * (MathUtils.randomBoolean() ? 1 : -1); // MODIFIED: Simplified initial speed
-
-        // Adjust green bar height based on fishing level
-        greenBarHeight = (GREEN_BAR_MIN_HEIGHT_PX + (fishingLevel * GREEN_BAR_MAX_HEIGHT_LVL_FACTOR * BAR_HEIGHT)) / BAR_HEIGHT;
-        greenBarHeight = MathUtils.clamp(greenBarHeight, 0.1f, 0.8f);
+        this.currentMovementType = movementType;
+        fishSpeed = BASE_FISH_SPEED_PX_PER_SEC * movementType.getBaseMaxSpeedFactor() * (MathUtils.randomBoolean() ? 1 : -1);
 
         updateVisuals();
     }
@@ -151,9 +182,40 @@ public class FishingMinigameDialog extends Group {
         greenBarPosition += (greenBarSpeed / BAR_HEIGHT) * delta;
         greenBarPosition = MathUtils.clamp(greenBarPosition, 0f, 1f - greenBarHeight);
 
-        // 2. Update Fish Movement (Simplified without difficulty factor)
-        fishSpeed += MathUtils.random(-FISH_RANDOM_ACCELERATION, FISH_RANDOM_ACCELERATION) * delta; // MODIFIED: Uses fixed random acceleration
-        fishSpeed = MathUtils.clamp(fishSpeed, -FISH_BASE_SPEED, FISH_BASE_SPEED); // MODIFIED: Clamped to base speed
+        // 2. Update Fish Movement
+        fishMovementTimer += delta;
+        if (fishMovementTimer >= FISH_MOVEMENT_UPDATE_INTERVAL) {
+            fishMovementTimer -= FISH_MOVEMENT_UPDATE_INTERVAL;
+
+            float randomAccelerationRange = BASE_FISH_ACCELERATION_PX_PER_SEC2 * currentMovementType.getBaseRandomAccelerationFactor();
+            float maxFishSpeed = BASE_FISH_SPEED_PX_PER_SEC * currentMovementType.getBaseMaxSpeedFactor();
+
+            float currentRandomAcceleration = randomAccelerationRange * (1.0f - currentMovementType.getPredictabilityFactor() + MathUtils.random(0f, 1.0f) * currentMovementType.getPredictabilityFactor());
+
+            float centerPull = (0.5f - fishPosition) * (BASE_FISH_ACCELERATION_PX_PER_SEC2 * 0.1f);
+
+
+            switch (currentMovementType) {
+                case MIXED:
+                    fishSpeed += MathUtils.random(-currentRandomAcceleration, currentRandomAcceleration) + centerPull;
+                    break;
+                case SMOOTH:
+                    fishSpeed += MathUtils.random(-currentRandomAcceleration * 0.5f, currentRandomAcceleration * 0.5f) + centerPull;
+                    break;
+                case SINKER:
+                    fishSpeed += MathUtils.random(-currentRandomAcceleration, currentRandomAcceleration) + (BASE_FISH_ACCELERATION_PX_PER_SEC2 * 0.2f) + centerPull;
+                    break;
+                case FLOATER:
+                    fishSpeed += MathUtils.random(-currentRandomAcceleration, currentRandomAcceleration) - (BASE_FISH_ACCELERATION_PX_PER_SEC2 * 0.2f) + centerPull;
+                    break;
+                case DART:
+                    fishSpeed += MathUtils.random(-randomAccelerationRange * 1.5f, randomAccelerationRange * 1.5f) + centerPull;
+                    maxFishSpeed *= 1.2f;
+                    break;
+            }
+            fishSpeed = MathUtils.clamp(fishSpeed, -maxFishSpeed, maxFishSpeed);
+        }
+
 
         fishPosition += (fishSpeed / BAR_HEIGHT) * delta;
         fishPosition = MathUtils.clamp(fishPosition, 0f, 1f - (FISH_ICON_SIZE / BAR_HEIGHT));
@@ -171,6 +233,7 @@ public class FishingMinigameDialog extends Group {
         boolean fishInGreenBar = (fishBottom >= greenBarPosition && fishBottom < greenBarTop) ||
             (fishTop > greenBarPosition && fishTop <= greenBarTop) ||
             (greenBarPosition >= fishBottom && greenBarPosition < fishTop);
+
 
         if (fishInGreenBar) {
             catchProgress += CATCH_PROGRESS_SPEED * delta;
