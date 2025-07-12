@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -27,35 +26,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.StoreMenuController;
-import com.sun.tools.javac.Main;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.CrowFlight;
-import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
@@ -71,28 +58,24 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
-import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Tools.FishingPole;
+import io.github.stardew.mini.Model.Tools.FishingAttemptOutcome;
+import io.github.stardew.mini.Model.Tools.FishingMinigameData;
+import io.github.stardew.mini.View.FishingMinigameDialog;
+import io.github.stardew.mini.Model.Things.ProductQuality;
 import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.randomStuffType;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Places.Shop;
-import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.*;
-import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
@@ -104,15 +87,13 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import java.util.regex.Matcher;
 
-public class GameView implements Screen, InputProcessor, AppMenu {
+public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigameDialog.FishingMinigameCallback {
     private Stage stage;
     private TextButton friendsButton;
     private Dialog friendsDialog;
@@ -186,6 +167,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public static boolean isToolBeingUsed = false;
     private Item equippedItem = null;
     private Table equippedItemSlotTable;
+
+    private FishingMinigameDialog fishingMinigameDialog;
+    private Fish currentCaughtFish;
+    private boolean isFishingActive = false;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -453,6 +438,13 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (isFishingActive) {
+            if (keycode == Input.Keys.SPACE) {
+                fishingMinigameDialog.setGreenBarMovingUp(true);
+                return true;
+            }
+            return true;
+        }
         if (keycode == Input.Keys.ENTER) {
             if (equippedItem != null) {
                 equippedItem = null;
@@ -838,6 +830,13 @@ private void updateAnimals(float delta) {
 
     @Override
     public boolean keyUp(int i) {
+        if (isFishingActive) {
+            if (i == Input.Keys.SPACE) {
+                fishingMinigameDialog.setGreenBarMovingUp(false);
+                return true;
+            }
+            return true;
+        }
         return false;
     }
 
@@ -2123,6 +2122,14 @@ private void updateAnimals(float delta) {
         backpackMenuTable.setVisible(false);
         stage.addActor(backpackMenuTable);
 
+        fishingMinigameDialog = new FishingMinigameDialog();
+        fishingMinigameDialog.setPosition(
+            (Gdx.graphics.getWidth() - fishingMinigameDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - fishingMinigameDialog.getHeight()) / 2
+        );
+        fishingMinigameDialog.setMinigameCallback(this);
+        stage.addActor(fishingMinigameDialog);
+
     }
 
     private void determineAvatar() {
@@ -2243,6 +2250,10 @@ private void updateAnimals(float delta) {
             }
         }
 
+        if (isFishingActive) {
+            fishingMinigameDialog.act(v);
+        }
+
         updateEquippedItemSlot();
         if (equippedItem != null && currentPlayer != null && currentPlayer.getCurrentTile() != null) {
             int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
@@ -2302,7 +2313,7 @@ private void updateAnimals(float delta) {
 //        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
 //            Integer.toString(currentPlayer.getMoney()));
 
-        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted()) {
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
@@ -2366,6 +2377,47 @@ private void updateAnimals(float delta) {
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
+
+    @Override
+    public void onMinigameEnd(boolean caughtSuccessfully, boolean perfectCatch) {
+        // This method is called by FishingMinigameDialog when it finishes
+        isFishingActive = false;
+        Gdx.input.setInputProcessor(this);
+
+        if (caughtSuccessfully) {
+            // Determine final quality based on player's skill, pole, and perfect catch
+            int fishingLevel = currentPlayer.getSkillsLevel().get(Skill.FISHING);
+            FishingPole currentPole = (FishingPole) currentPlayer.getEquippedTool();
+            double rodQualityFactor = currentPole.getPoleMaterial().getFishQuality();
+
+            double baseQualityValue = (Math.random() * (fishingLevel + 2) * rodQualityFactor) / 7.0;
+
+            ProductQuality finalQuality = ProductQuality.getQualityByValue(baseQualityValue);
+
+            if (perfectCatch) {
+                // SILVER -> GOLD -> IRIDIUM
+               if (finalQuality == ProductQuality.Silver) {
+                    finalQuality = ProductQuality.Golden;
+                } else if (finalQuality == ProductQuality.Golden) {
+                    finalQuality = ProductQuality.Iridium;
+                }
+            }
+
+            Fish finalFish = new Fish(finalQuality, currentCaughtFish.getType());
+
+            Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
+            if (addFishResult.isSuccessful()) {
+                showErrorDialog(stage, "You caught a " + finalQuality.name() + " " + finalFish.getName() + "!");
+                currentPlayer.addSkillExperience(Skill.FISHING);
+            } else {
+                showErrorDialog(stage, "You caught the fish, but your backpack is full!");
+            }
+        } else {
+            showErrorDialog(stage, "The " + currentCaughtFish.getName() + " got away!");
+        }
+        currentCaughtFish = null;
+    }
+
 
     private void drawClock(float v) {
         int hour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour(); // 0 to 23
@@ -2899,20 +2951,51 @@ private void updateAnimals(float delta) {
             batch.draw(itemTex, drawX, drawY, tileSize, tileSize);
         }
 
-        private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
-            if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
-                if (toolMenuTable != null) toolMenuTable.setVisible(false);
-                return;
+    private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
+        if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+            if (toolMenuTable != null) toolMenuTable.setVisible(false);
+            return;
+        }
+
+        ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
+        if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
+            return;
+        }
+
+        Tool toolToUse = tools.get(selectedSlot);
+        currentPlayer.setEquippedTool(toolToUse);
+
+        // Determine energy weather modifier
+        double energyWeatherModifier = 1.0;
+        if (MainApp.getInstance().getCurrentGame().getCurrentWeatherType() == WeatherType.STORM) {
+            energyWeatherModifier = 1.2;
+        }
+
+        if (toolToUse instanceof FishingPole) {
+            FishingPole fishingPole = (FishingPole) toolToUse;
+
+            FishingAttemptOutcome fishingOutcome = fishingPole.useFishingPole(
+                fishingPole,
+                MainApp.getInstance().getCurrentGame().getMap(),
+                currentPlayer.getCurrentTile(),
+                MainApp.getInstance().getCurrentGame().getCurrentPlayer(),
+                MainApp.getInstance().getCurrentGame(),
+                energyWeatherModifier
+            );
+
+
+            if (fishingOutcome.generalResult().isSuccessful() && fishingOutcome.minigameData().isPresent()) {
+                FishingMinigameData data = fishingOutcome.minigameData().get();
+                currentCaughtFish = data.hookedFish();
+
+                int playerFishingLevel = currentPlayer.getSkillsLevel().get(Skill.FISHING);
+                fishingMinigameDialog.startMinigame(
+                    playerFishingLevel
+                );
+                isFishingActive = true;
+                Gdx.input.setInputProcessor(stage);
             }
-
-            ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
-            if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
-                return;
-            }
-
-            Tool toolToUse = tools.get(selectedSlot);
-            currentPlayer.setEquippedTool(toolToUse);
-
+        } else {
             int tileSize = GameAssetManager.TILE_SIZE;
 
             float playerTileGridX = currentPlayer.getCurrentTile().getX();
@@ -2937,16 +3020,19 @@ private void updateAnimals(float delta) {
                 angleDeg += 360;
             }
 
-            // Start the tool usage animation
+            // Start the tool usage animation (for non-fishing tools)
             isToolBeingUsed = true;
             toolUsageStateTime = 0f;
 
             if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
-                controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+                Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
             } else {
-                controller.useTool("Down");
+                Result result = controller.useTool("Down");
+                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
             }
         }
+    }
 
         private int get4DirectionalAngle(float dx, float dy) {
             if (dx == 0 && dy == 0) {
