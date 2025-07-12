@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -61,8 +64,15 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         titleLabel.setStyle(titleStyle);
 
         // Create map selection buttons
+        TextureRegionDrawable map1Drawable = new TextureRegionDrawable(new TextureRegion(GameAssetManager.farm1));
+        TextureRegionDrawable map2Drawable = new TextureRegionDrawable(new TextureRegion(GameAssetManager.farm2));
+        Image map1Image = new Image(map1Drawable);
+        Image map2Image = new Image(map2Drawable);
+        map1Image.setScaling(Scaling.fit);  // Optional: scale images to fit
+        map2Image.setScaling(Scaling.fit);
         TextButton map1Button = new TextButton("Map 1", skin, "custom-button");
         TextButton map2Button = new TextButton("Map 2", skin, "custom-button");
+
         TextButton confirmButton = new TextButton("Confirm", skin, "custom-button");
         confirmButton.setDisabled(true);
 
@@ -77,8 +87,19 @@ public class MapSelectionMenuView implements AppMenu, Screen {
 
         table.add(titleLabel).colspan(2).padBottom(bottomPad).row();
         // Add map selection buttons side by side with consistent padding
-        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20).padBottom(bottomPad);
-        table.add(map2Button).width(buttonWidth).height(buttonHeight).padLeft(20).padBottom(bottomPad).row();
+        Table map1Table = new Table();
+        map1Table.add(map1Image).width(buttonWidth * 1.8f).height(buttonHeight * 1.8f).row();
+        map1Table.add(map1Button).width(buttonWidth).height(buttonHeight);
+
+        Table map2Table = new Table();
+        map2Table.add(map2Image).width(buttonWidth * 1.8f).height(buttonHeight * 1.8f).row();
+        map2Table.add(map2Button).width(buttonWidth).height(buttonHeight);
+
+        table.add(map1Table).padRight(20).padBottom(bottomPad);
+        table.add(map2Table).padLeft(20).padBottom(bottomPad).row();
+//
+//        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20).padBottom(bottomPad);
+//        table.add(map2Button).width(buttonWidth).height(buttonHeight).padLeft(20).padBottom(bottomPad).row();
         table.add(confirmButton).colspan(2).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
 
         // Map selection button listeners

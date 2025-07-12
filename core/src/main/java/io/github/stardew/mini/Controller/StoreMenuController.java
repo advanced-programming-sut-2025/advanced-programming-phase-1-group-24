@@ -394,6 +394,7 @@ public class StoreMenuController {
 //        if (shop == null) {
 //            return new Result(false, "You should be inside a shop to use this method!");
 //        }
+        if(shop == null )return new Result(false, "shop is null");
         if (shop.getShopType() != ShopType.CARPENTER_SHOP) {
             return new Result(false, "You should be inside the Carpenter's Shop to use this method!");
         }
