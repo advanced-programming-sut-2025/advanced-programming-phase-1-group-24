@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import io.github.stardew.mini.Model.Avatar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -93,6 +94,10 @@ public class GameAssetManager {
     public static Texture shaneTexture;
     public static TextureRegion[][] shaneFrames;
     public static ArrayList<Animation<TextureRegion>> shaneAnimations = new ArrayList<>();
+    public static Texture alexxTexture;
+    public static Texture abigaillTexture;
+    public static Texture haleyyTexture;
+    public static Texture shaneeTexture;
 
     public static Texture SECRET_HEART ;
 
@@ -130,7 +135,10 @@ public class GameAssetManager {
         stormOverlay = new Texture(Gdx.files.internal("Weather/Storm.png"));
         dropTexture = new Texture(Gdx.files.internal("Weather/Rain.png"));
         TextureRegion[][] tmp = TextureRegion.split(dropTexture, dropTexture.getWidth() / 11, dropTexture.getHeight());
-
+        alexxTexture = new Texture(Gdx.files.internal("assets/Villagers/Alex.png"));
+        haleyyTexture = new Texture(Gdx.files.internal("assets/Villagers/Haley.png"));
+        shaneeTexture = new Texture(Gdx.files.internal("assets/Villagers/Shane.png"));
+        abigaillTexture = new Texture(Gdx.files.internal("assets/Villagers/Abigail.png"));
         // Only one column
         System.arraycopy(tmp[0], 0, dropFrames, 0, 11);
 
@@ -305,6 +313,10 @@ public class GameAssetManager {
         if (stormOverlay != null) stormOverlay.dispose();
         if (dropTexture != null) dropTexture.dispose();
         if (crowSheet != null) crowSheet.dispose();
+        if (abigaillTexture != null) abigaillTexture.dispose();
+        if (alexxTexture != null) alexxTexture.dispose();
+        if(haleyyTexture != null) haleyyTexture.dispose();
+        if (shaneeTexture != null) shaneeTexture.dispose();
 
         disposeAnimals();
     }
@@ -359,6 +371,27 @@ public class GameAssetManager {
 
         return animations;
     }
+    public static Drawable getAvatarDrawable(Avatar avatar) {
+        TextureRegion region;
+        switch (avatar) {
+            case Abigail:
+                region = new TextureRegion(abigaillTexture);
+                break;
+            case Alex:
+                region = new TextureRegion(alexxTexture);
+                break;
+            case Haley:
+                region = new TextureRegion(haleyyTexture);
+                break;
+            case Shane:
+                region = new TextureRegion(shaneeTexture);
+                break;
+            default:
+                region = new TextureRegion(abigaillTexture);
+        }
+        return new TextureRegionDrawable(region);
+    }
+
 
 
 }

@@ -95,6 +95,11 @@ public class User {
         this.nickname = nickname;
         this.email = email;
         this.gender = gender;
+        if(gender){
+            this.avatar = Avatar.Abigail;
+        }
+        else
+            this.avatar = Avatar.Alex;
 
         this.skillsLevel = new HashMap<>();
         for (Skill skill : Skill.values()) {
