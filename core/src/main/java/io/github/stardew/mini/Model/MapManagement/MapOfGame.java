@@ -81,8 +81,8 @@ public class MapOfGame {
                 }
             }
         }
-        //initialize npcHouses
-// Initialize NPC Houses
+        // initialize npcHouses
+        // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
                 {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
         };
@@ -230,7 +230,7 @@ public class MapOfGame {
                 "Clint",
                 9, 16,
                 createBlacksmithItems(),
-                52, 52, 4, 4
+                52, 52, 6, 4
         );
 
         Shop jojamart = new Shop(
@@ -248,7 +248,7 @@ public class MapOfGame {
                 "Pierre",
                 9, 17,
                 createPierreStoreItems(),
-                52, 72, 3, 4
+                52, 72, 4, 5
         );
 
         Shop carpenterShop = new Shop(
@@ -257,7 +257,7 @@ public class MapOfGame {
                 "Robin",
                 9, 20,
                 createCarpenterShopItems(),
-                52, 82, 4, 4
+                52, 82, 6, 6
         );
 
         Shop fishShop = new Shop(
@@ -275,7 +275,7 @@ public class MapOfGame {
                 "Marnie",
                 9, 16,
                 createMarnieRanchItems(),
-                92, 65, 4, 5
+                90, 67, 7, 5
         );
 
         Shop starDropSaloon = new Shop(
@@ -284,7 +284,7 @@ public class MapOfGame {
                 "Gus",
                 12, 24,
                 createSaloonItems(),
-                92, 75, 5, 4
+                92, 80, 6, 5
         );
 
         shops.addAll(Arrays.asList(

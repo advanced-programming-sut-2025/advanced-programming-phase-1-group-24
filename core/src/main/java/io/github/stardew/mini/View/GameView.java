@@ -110,7 +110,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private OrthographicCamera camera;
     private User currentPlayer;  //should change whenever currentPlayer in Game is changed
     private float stateTime = 0f;
-    private boolean showFullMap = false;
+    private boolean showFullMap = true;
     private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
     private WeatherType currentWeather;
     public static List<LightningFlash> scheduledFlashes = new ArrayList<>();
@@ -174,6 +174,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog relationshipDialog;
     private final List<Flower> activeFlowers = new ArrayList<>();
 
+    private TextButton nextTurnButton;
     private TextButton exitButton;
     private TextButton forceTerminateButton;
     private Label energyLabel;
@@ -254,7 +255,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private void setCameraToFarm(Farm farm) {
         int tileSize = GameAssetManager.TILE_SIZE;
         Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
-        Tile tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
+        Tile tile = tiles[farm.getY() + (farm.getHeight() / 2)][farm.getX() + (farm.getWidth() / 2)];
         float centerX = tile.getX() * tileSize + tileSize / 2f;
         float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
 
@@ -411,6 +412,9 @@ private void updateAnimals(float delta) {
                 }
                 if (animal.getCurrentTile() == null) continue;
                 batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
+                if(animal.getProduct() !=null ){
+                    batch.draw(animal.getProduct().getAnimalProductType().getTexture(), x, y, tileSize/2, tileSize/2);
+                }
             }
         }
     }
@@ -600,8 +604,10 @@ private void updateAnimals(float delta) {
         if (keycode == Input.Keys.Z) {
             Tile tile = currentPlayer.getCurrentTile();
             Machine machine = (Machine) tile.getContainedItem();
+            if(machine != null){
             machine.useMachine("Coffee", currentPlayer);
             MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse().getMachines().add(machine);
+            }
         }
         if (keycode == Input.Keys.U) {
             Tile tile = currentPlayer.getCurrentTile();
@@ -855,17 +861,18 @@ private void updateAnimals(float delta) {
                     MainApp.getInstance().setCurrentGame(null);
                     MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
                     MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
-//                    Gdx.app.postRunnable(() -> {
-//                        Timer.instance().stop();
-//                        MainApp.getInstance().setCurrentGame(null);
-//                        MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
-//                        MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
-//                    });
                 }
                 return true;
             }
             if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
                 Result result = controller.startForceTerminateVote();
+                if (!result.isSuccessful()) {
+                    showErrorDialog(stage, result.message());
+                }
+                return true;
+            }
+            if (isClickInside(mouseX, mouseY, nextTurnButton)) {
+                Result result = controller.nextTurn();
                 if (!result.isSuccessful()) {
                     showErrorDialog(stage, result.message());
                 }
@@ -1353,6 +1360,14 @@ private void createAnimalDialog() {
     animalMenuDialog.getContentTable().add(shepherdButton).row();
 
     // ========== BUTTONS ==========
+    TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
+    releaseButton.addListener(new ClickListener() {
+        public void clicked(InputEvent event, float x, float y) {
+            animalMenuDialog.hide();
+            handleAnimalMenuChoice("release");
+        }
+    });
+    animalMenuDialog.getContentTable().add(releaseButton).row();
     TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
     feedButton.addListener(new ClickListener() {
         public void clicked(InputEvent event, float x, float y) {
@@ -1411,7 +1426,8 @@ private void createAnimalDialog() {
 
         StringBuilder info = new StringBuilder();
         info.append("Name: ").append(selectedAnimal.getName()).append("\n");
-        info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+       // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+        info.append("Friendship: ").append(selectedAnimal.getFriendship()).append("\n");
         info.append("Fed: ").append(selectedAnimal.isFedToday()).append("\n");
         info.append("Petted: ").append(selectedAnimal.isPettedToday()).append("\n");
         info.append("In Habitat: ").append(selectedAnimal.isInHabitat()).append("\n");
@@ -1426,6 +1442,7 @@ private void createAnimalDialog() {
                 .append(")-(").append(currentFarm.getX() + currentFarm.getWidth()-1).append(",").append(currentFarm.getY()+currentFarm.getHeight()-1).append(")\n");
         }
         animalInfoLabel.setText(info.toString());
+        animalInfoLabel.setFontScale(0.5f);
     }
 
     private void createMachineDialog() {
@@ -1840,6 +1857,7 @@ private void createAnimalDialog() {
                 case "pet": result = controller.petAnimal(selectedAnimal.getName()); break;
                 case "sell": result = controller.sellAnimal(selectedAnimal.getName()); break;
                 case "collect": result = controller.collectProduct(selectedAnimal.getName()); break;
+                case "release": result = controller.releaseAnimal(selectedAnimal.getName()); break;
                 case "cancel": result = new Result(true, ""); break;
                 default: result = new Result(false, choice); break;
             }
@@ -1869,8 +1887,14 @@ private void createAnimalDialog() {
         friendsButton.setColor(Color.PURPLE);
         friendsButton.setPosition(Gdx.graphics.getWidth() - 100, 10);
         friendsButton.setTouchable(Touchable.enabled);
-
         stage.addActor(friendsButton);
+
+        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
+        nextTurnButton.setSize(200, 100);
+        nextTurnButton.setColor(Color.MAGENTA);
+        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
+        nextTurnButton.setTouchable(Touchable.enabled);
+        stage.addActor(nextTurnButton);
 
         exitButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
         exitButton.setSize(100, 100);
@@ -2031,6 +2055,7 @@ private void createAnimalDialog() {
     @Override
     public void render(float v) {
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
         determineAvatar();
         showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());

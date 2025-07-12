@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 public class GameController implements MenuController {
     private GameView view;
+
     public void setView(GameView view) {
         this.view = view;
     }
@@ -53,15 +54,19 @@ public class GameController implements MenuController {
         if (currentGame == null)
             return new Result(false, "no active game to exit!");
 
-        if (!currentGame.getMainPlayer().equals(currentUser))
+        System.out.println(currentGame.getMainPlayer());
+        if (!currentGame.getMainPlayer().equals(currentGame.getCurrentPlayer()))
             return new Result(false, "only the game owner can exit the game!");
 
-        if (!currentGame.getCurrentPlayer().equals(currentUser)) // check if it's their turn
-            return new Result(false, "you can only exit the game during your turn!");
+//        if (!currentGame.getCurrentPlayer().equals(currentUser)) // check if it's their turn
+//            return new Result(false, "you can only exit the game during your turn!");
 
         // Save the current game state
         for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
+        }
+        if (currentGame != null) {
+            currentGame.getMap().getShops().clear();
         }
         app.saveActiveGames();
 
@@ -97,8 +102,6 @@ public class GameController implements MenuController {
     }
 
 
-
-
     public Result useTool(String direction) {
 //        MainApp.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getTools().get(0));
         //MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(GrowableFactory.getInstance().create(SourceType.CauliflowerSeeds), 10);
@@ -120,10 +123,10 @@ public class GameController implements MenuController {
         } else {
             if (currentTool instanceof Axe) {
                 return ((Axe) currentTool).useAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player,
-                        MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                    MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof FishingPole) {
                 return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
-                        player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                    player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Hoe) {
                 Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
@@ -203,8 +206,6 @@ public class GameController implements MenuController {
 //    }
 
 
-
-
     public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
@@ -220,8 +221,8 @@ public class GameController implements MenuController {
         currentGame.setVoteInProgress(true);
         currentGame.getTerminationVotes().clear();
         currentGame.getTerminationVotes().put(currentUser, true);
-        for(User player : currentGame.getPlayers()) {
-            if(currentUser.equals(player)) continue;
+        for (User player : currentGame.getPlayers()) {
+            if (currentUser.equals(player)) continue;
             player.addToNotifications(new Message(currentUser.getUsername(), player.getUsername(), "force terminate has started!"));
         }
 
@@ -347,7 +348,7 @@ public class GameController implements MenuController {
         if (currentGame.getTerminationVotes().size() == currentGame.getPlayers().size()) {
             for (User player : currentGame.getPlayers()) {
                 player.updateMaxMoney();
-                player.setPlayedGames(player.getPlayedGames()+1);
+                player.setPlayedGames(player.getPlayedGames() + 1);
                 player.updateGameFields();
             }
             app.getActiveGames().remove(currentGame);
@@ -404,14 +405,14 @@ public class GameController implements MenuController {
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                        updateGrowable(tiles[j][i]);
-                        tiles[j][i].setHasBeenBurt(false);
-                        if(tiles[j][i].getContainedGrowable() == null &&
+                    updateGrowable(tiles[j][i]);
+                    tiles[j][i].setHasBeenBurt(false);
+                    if (tiles[j][i].getContainedGrowable() == null &&
                         tiles[j][i].getProductOfGrowable() == null &&
                         tiles[j][i].getContainedItem() == null &&
                         tiles[j][i].getType() == TileType.FARM) {
-                            tiles[j][i].setWalkable(true);
-                        }
+                        tiles[j][i].setWalkable(true);
+                    }
                 }
             }
             randomForaging();
@@ -524,7 +525,7 @@ public class GameController implements MenuController {
             return new Result(false, "no active game!");
         }
         return new Result(true, "current Date: " + currentDate.getHour() + " hour of day " +
-                currentDate.getDay() + " of season:" + currentDate.getSeason());
+            currentDate.getDay() + " of season:" + currentDate.getSeason());
     }
 
     public Result printDate() {
@@ -592,17 +593,16 @@ public class GameController implements MenuController {
     }
 
 
-
     private boolean isInHabitat(int x, int y, Habitat h) {
         return x >= h.getX() && x < h.getX() + h.getWidth()
-                && y >= h.getY() && y < h.getY() + h.getHeight();
+            && y >= h.getY() && y < h.getY() + h.getHeight();
     }
 
 
     private ForagingCropType getRandomForagingCropBySeason(Season currentSeason) {
         List<ForagingCropType> valid = Arrays.stream(ForagingCropType.values())
-                .filter(crop -> crop.getSeason().contains(currentSeason))
-                .collect(Collectors.toList());
+            .filter(crop -> crop.getSeason().contains(currentSeason))
+            .collect(Collectors.toList());
 
         if (valid.isEmpty()) {
             return null;
@@ -612,16 +612,15 @@ public class GameController implements MenuController {
 
     private SourceType getRandomForagingSourceBySeason(Season currentSeason) {
         List<SourceType> valid = Arrays.stream(SourceType.values())
-                .filter(SourceType::getIsForagingSeed)
-                .filter(source -> source.getForagingSeedSeason().contains(currentSeason))
-                .collect(Collectors.toList());
+            .filter(SourceType::getIsForagingSeed)
+            .filter(source -> source.getForagingSeedSeason().contains(currentSeason))
+            .collect(Collectors.toList());
 
         if (valid.isEmpty()) {
             return null;
         }
         return valid.get(RANDOM.nextInt(valid.size()));
     }
-
 
 
 //    public List<Farm> loadFarmTemplates() {
@@ -669,11 +668,9 @@ public class GameController implements MenuController {
                 } else if (map[i][j].getContainedItem() != null) {
                     System.out.print("\u001B[37;48;5;208mf\u001B[0m");
 
-                }
-                else if(map[i][j].isHasBeenBurt()){
+                } else if (map[i][j].isHasBeenBurt()) {
                     System.out.print("\u001B[37;40mO\u001B[0m");
-                }
-                else System.out.print(type.coloredSymbol());
+                } else System.out.print(type.coloredSymbol());
             }
             System.out.println();
         }
@@ -866,11 +863,11 @@ public class GameController implements MenuController {
         StringBuilder sb = new StringBuilder("Owned animals:\n");
         for (Animal animal : player.getOwnedAnimals()) {
             sb.append("- ").append(animal.getName())
-                    .append(" (Friendship: ").append(animal.getFriendship())
-                    .append(", Fed today: ").append(animal.isFedToday())
-                    .append(", Petted today: ").append(animal.isPettedToday())
-                    .append(", ")
-                    .append(")\n");
+                .append(" (Friendship: ").append(animal.getFriendship())
+                .append(", Fed today: ").append(animal.isFedToday())
+                .append(", Petted today: ").append(animal.isPettedToday())
+                .append(", ")
+                .append(")\n");
         }
 
         return new Result(true, sb.toString());
@@ -937,20 +934,109 @@ public class GameController implements MenuController {
 //        if (!animal.updateIsInHabitat()) {
 //            animal.feed(); // Assume this feeds the animal fresh grass
 //        }
-////        else {
-////            boolean fed = player.useHay(1); // Try to feed from hay (1 unit)
-////            if (!fed) {
-////                return new Result(false, name + " could not be fed (no hay available).");
-////            }
-////            animal.feedWithHay();
-////        }
+
+    /// /        else {
+    /// /            boolean fed = player.useHay(1); // Try to feed from hay (1 unit)
+    /// /            if (!fed) {
+    /// /                return new Result(false, name + " could not be fed (no hay available).");
+    /// /            }
+    /// /            animal.feedWithHay();
+    /// /        }
 //        return new Result(true, name + " was shepherded to (" + targetX + ", " + targetY + ").");
 //    }
-public Result shepherdAnimal(String name, String x, String y) {
+    public Result shepherdAnimal(String name, String x, String y) {
+        Game game = MainApp.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        int targetX = Integer.parseInt(x);
+        int targetY = Integer.parseInt(y);
+        Animal animal = player.getAnimalByName(name);
+        Farm farm = game.getMap().getFarmByOwner(player);
+
+        if (animal == null) {
+            return new Result(false, "No animal named " + name + " found.");
+        }
+
+        Tile animalTile = animal.getCurrentTile();
+        if (animalTile == null) {
+            return new Result(false, "Error: animal tile not found.");
+        }
+
+        if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
+            targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
+            return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
+        }
+
+        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+            return new Result(false, "Cannot shepherd animals outside in bad weather.");
+        }
+
+        Tile targetTile = game.getMap().getTile(targetX, targetY);
+        if (targetTile == null || (!targetTile.getisWalkable() && targetTile.getType() != TileType.CAGE && targetTile.getType() != TileType.BARN)
+            || targetTile.getContainedAnimal() != null) {
+            return new Result(false, "Invalid location for shepherding.");
+        }
+
+        // Find path to target tile
+        List<Tile> path = findShortestPath(animalTile, targetTile, 30); // allow more steps for shepherding
+        if (path.isEmpty()) {
+            return new Result(false, "No valid path to target location.");
+        }
+
+        // Assign movement path
+        animal.setPathToTarget(path);
+
+        // Optional: reset cooldown to make the animal move immediately
+        animal.resetCooldown();
+
+        return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
+    }
+
+//    public Result releaseAnimal(String name) {
+//        Game game = MainApp.getInstance().getCurrentGame();
+//        User player = game.getCurrentPlayer();
+//        Animal animal = player.getAnimalByName(name);
+//        Farm farm = game.getMap().getFarmByOwner(player);
+//
+//        if (animal == null) {
+//            return new Result(false, "No animal named " + name + " found.");
+//        }
+//
+//        Tile animalTile = animal.getCurrentTile();
+//        if (animalTile == null) {
+//            return new Result(false, "Error: animal tile not found.");
+//        }
+//
+//        if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
+//            targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
+//            return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
+//        }
+//
+//        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+//            return new Result(false, "Cannot shepherd animals outside in bad weather.");
+//        }
+//
+//        Tile targetTile = game.getMap().getTile(targetX, targetY);
+//        if (targetTile == null || !targetTile.getisWalkable() || targetTile.getContainedAnimal() != null) {
+//            return new Result(false, "Invalid location for shepherding.");
+//        }
+//
+//        // Find path to target tile
+//        List<Tile> path = findShortestPath(animalTile, targetTile, 30); // allow more steps for shepherding
+//        if (path.isEmpty()) {
+//            return new Result(false, "No valid path to target location.");
+//        }
+//
+//        // Assign movement path
+//        animal.setPathToTarget(path);
+//
+//        // Optional: reset cooldown to make the animal move immediately
+//        animal.resetCooldown();
+//
+//        return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
+//    }
+public Result releaseAnimal(String name) {
     Game game = MainApp.getInstance().getCurrentGame();
     User player = game.getCurrentPlayer();
-    int targetX = Integer.parseInt(x);
-    int targetY = Integer.parseInt(y);
     Animal animal = player.getAnimalByName(name);
     Farm farm = game.getMap().getFarmByOwner(player);
 
@@ -963,34 +1049,59 @@ public Result shepherdAnimal(String name, String x, String y) {
         return new Result(false, "Error: animal tile not found.");
     }
 
-    if (targetX < farm.getX() || targetX >= farm.getX() + farm.getWidth() ||
-        targetY < farm.getY() || targetY >= farm.getY() + farm.getHeight()) {
-        return new Result(false, "The coordinates (" + targetX + "," + targetY + ") are outside your farm.");
-    }
-
     if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
         return new Result(false, "Cannot shepherd animals outside in bad weather.");
     }
 
-    Tile targetTile = game.getMap().getTile(targetX, targetY);
-    if (targetTile == null || !targetTile.getisWalkable() || targetTile.getContainedAnimal() != null) {
-        return new Result(false, "Invalid location for shepherding.");
+    Habitat habitat = animal.getLivingPlace();
+    if (habitat == null) {
+        return new Result(false, "Animal habitat not found.");
     }
 
+    // Try to find a walkable tile adjacent or near the habitat (but not inside it)
+    List<Tile> candidates = new ArrayList<>();
+    Tile[][] mapTiles = game.getMap().getMap();
+
+    int margin = 2; // How far outside the habitat to consider
+    for (int x = habitat.getX() - margin; x <= habitat.getX() + habitat.getWidth() + margin; x++) {
+        for (int y = habitat.getY() - margin; y <= habitat.getY() + habitat.getHeight() + margin; y++) {
+            // Skip tiles inside the habitat
+            if (x >= habitat.getX() && x < habitat.getX() + habitat.getWidth() &&
+                y >= habitat.getY() && y < habitat.getY() + habitat.getHeight()) {
+                continue;
+            }
+
+            if (!(x >= farm.getX() && x < farm.getX() + farm.getWidth() &&
+                y >= farm.getY() && y < farm.getY() + farm.getHeight())) continue; // only tiles inside the player's farm
+
+            Tile tile = game.getMap().getTile(x, y);
+            if (tile != null && tile.getisWalkable() && tile.getContainedAnimal() == null) {
+                candidates.add(tile);
+            }
+        }
+    }
+
+    if (candidates.isEmpty()) {
+        return new Result(false, "No valid nearby tile found to release the animal.");
+    }
+
+    // Pick one at random
+    Tile targetTile = candidates.get(MathUtils.random(candidates.size() - 1));
+
     // Find path to target tile
-    List<Tile> path = findShortestPath(animalTile, targetTile, 30); // allow more steps for shepherding
+    List<Tile> path = findShortestPath(animalTile, targetTile, 30);
     if (path.isEmpty()) {
         return new Result(false, "No valid path to target location.");
     }
 
     // Assign movement path
     animal.setPathToTarget(path);
-
-    // Optional: reset cooldown to make the animal move immediately
     animal.resetCooldown();
 
-    return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
+    return new Result(true, name + " is moving to (" + targetTile.getX() + ", " + targetTile.getY() + ").");
 }
+
+
     private List<Tile> findShortestPath(Tile start, Tile goal, int maxSteps) {
         Queue<Tile> queue = new LinkedList<>();
         Map<Tile, Tile> cameFrom = new HashMap<>();
@@ -1025,9 +1136,10 @@ public Result shepherdAnimal(String name, String x, String y) {
         if (path.size() > maxSteps) return new ArrayList<>();
         return path;
     }
+
     private List<Tile> getWalkableNeighbors(Tile tile) {
         List<Tile> neighbors = new ArrayList<>();
-        int[][] directions = { {1,0}, {-1,0}, {0,1}, {0,-1} }; // 4-directional
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}}; // 4-directional
 
         for (int[] dir : directions) {
             int nx = tile.getX() + dir[0];
@@ -1040,6 +1152,7 @@ public Result shepherdAnimal(String name, String x, String y) {
 
         return neighbors;
     }
+
     public Result collectProduct(String name) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
@@ -1174,7 +1287,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         }
 
         int[][] directions = {
-                {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}
         };
 
         int[][] minEnergy = new int[rows][cols];
@@ -1375,7 +1488,6 @@ public Result shepherdAnimal(String name, String x, String y) {
     }
 
 
-
     public void randomForaging() {
         //call this every morning or night
         Game currentGame = MainApp.getInstance().getCurrentGame();
@@ -1386,7 +1498,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                     int rand = RANDOM.nextInt(100);
                     if (rand == 1 && map[j][i].getType() == TileType.FARM) {
                         if (map[j][i].getProductOfGrowable() == null && map[j][i].getContainedGrowable() == null &&
-                                map[j][i].getContainedItem() == null) {
+                            map[j][i].getContainedItem() == null) {
                             if (map[j][i].getIsPlowed()) {
                                 map[j][i].setContainedGrowable(GrowableFactory.getInstance().create(getRandomForagingSourceBySeason(currentGame.getTimeAndDate().getSeason())));
                                 map[j][i].getContainedGrowable().setName(findCropBySourceName(map[j][i].getContainedGrowable().getName()).getName());
@@ -1455,62 +1567,64 @@ public Result shepherdAnimal(String name, String x, String y) {
 //        growable = (Growable) playerBackPack.grabItemAndReturn(seedName, 1);
 //        Result result = playerBackPack.grabItem(growable.getName(), 1);
         //if (result.isSuccessful()) {
-            //System.out.println(result.message());
-            int x = currentPlayer.getCurrentTile().getX();
-            int y = currentPlayer.getCurrentTile().getY();
-            if (direction.equals("up")) y--;
-            else if (direction.equals("down")) y++;
-            else if (direction.equals("left")) x--;
-            else if (direction.equals("right")) x++;
-            if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
-                return new Result(false, "direction is invalid.");
+        //System.out.println(result.message());
+        int x = currentPlayer.getCurrentTile().getX();
+        int y = currentPlayer.getCurrentTile().getY();
+        if (direction.equals("up")) y--;
+        else if (direction.equals("down")) y++;
+        else if (direction.equals("left")) x--;
+        else if (direction.equals("right")) x++;
+        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+            return new Result(false, "direction is invalid.");
+        }
+        if (hasGiantNeighbor(map, y, x)) {
+            return new Result(false, "You cannot plant next to a giant crop!");
+        }
+        if (map[y][x].getType() != TileType.FARM && map[y][x].getType() != TileType.GREENHOUSE) {
+            return new Result(false, "You cannot plant in this tile!");
+        }
+        if (map[y][x].getContainedItem() != null || map[y][x].getContainedGrowable() != null || map[y][x].getProductOfGrowable() != null) {
+            return new Result(false, "This tile is full!");
+        }
+        if (growable.getGrowableType() == GrowableType.MixedSeeds) {
+            growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(MainApp.getInstance()
+                .getCurrentGame().getTimeAndDate().getSeason()));
+        } else if (map[y][x].getType() != TileType.GREENHOUSE) {
+            Season currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+            if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
+                (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
+                return new Result(false, "You cannot plant this seed out of season!");
             }
-            if (hasGiantNeighbor(map, y, x)) {
-                return new Result(false, "You cannot plant next to a giant crop!");
-            }
-            if (map[y][x].getType() != TileType.FARM && map[y][x].getType() != TileType.GREENHOUSE) {
-                return new Result(false, "You cannot plant in this tile!");
-            }
-            if (map[y][x].getContainedItem() != null || map[y][x].getContainedGrowable() != null || map[y][x].getProductOfGrowable() != null) {
-                return new Result(false, "This tile is full!");
-            }
-            if (growable.getGrowableType() == GrowableType.MixedSeeds) {
-                growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(MainApp.getInstance()
-                        .getCurrentGame().getTimeAndDate().getSeason()));
-            } else if (map[y][x].getType() != TileType.GREENHOUSE) {
-                Season currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
-                if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
-                        (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
-                    return new Result(false, "You cannot plant this seed out of season!");
-                }
-            }
-            if (!map[y][x].getIsPlowed()) {
-                return new Result(false, "The tile isn't plowed!");
-            }
+        }
+        if (!map[y][x].getIsPlowed()) {
+            return new Result(false, "The tile isn't plowed!");
+        }
 //            if(growable.getCropType() != null){
 //                tryFormGiant(y, x, growable.getCropType());
 //            }
-            map[y][x].setWalkable(false);
-            if (growable.getCropType() != null) growable.setName(findCropBySourceName(growable.getName()).getName());
-            if (growable.getTreeType() != null) growable.setName(findTreeBySourceName(growable.getName()).getName());
-            map[y][x].setContainedGrowable(growable);
-            //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
-            map[y][x].getContainedGrowable().setCurrentStage(1);
-            System.out.println("plantedddddddddddd" + map[y][x].getContainedGrowable().getCurrentStage());
-            map[y][x].setIsPlowed(false);
-            if (growable.getCropType() != null) {
-                tryFormGiant(y, x, growable.getCropType());
-            }
-            return new Result(true, "Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
+        map[y][x].setWalkable(false);
+        if (growable.getCropType() != null) growable.setName(findCropBySourceName(growable.getName()).getName());
+        if (growable.getTreeType() != null) growable.setName(findTreeBySourceName(growable.getName()).getName());
+        map[y][x].setContainedGrowable(growable);
+        //System.out.println(showPlant(String.valueOf(x), String.valueOf(y)).message());
+        map[y][x].getContainedGrowable().setCurrentStage(1);
+        System.out.println("plantedddddddddddd" + map[y][x].getContainedGrowable().getCurrentStage());
+        map[y][x].setIsPlowed(false);
+        if (growable.getCropType() != null) {
+            tryFormGiant(y, x, growable.getCropType());
+        }
+        return new Result(true, "Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
         //}
 //        else {
 //            return result;
 //        }
     }
+
     private ForagingMineralType getRandomForagingMineral() {
         ForagingMineralType[] minerals = ForagingMineralType.values();
         return minerals[new Random().nextInt(minerals.length)];
     }
+
     public Result fertalizeGrowable(String fertalizer, String direction) {
         Result result = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -1592,7 +1706,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                                        int y3, int x3, int y4, int x4, CropType cropType) {
         Tile[][] grid = MainApp.getInstance().getCurrentGame().getMap().getMap();
         Tile[] tiles = {
-                grid[y1][x1], grid[y2][x2], grid[y3][x3], grid[y4][x4]
+            grid[y1][x1], grid[y2][x2], grid[y3][x3], grid[y4][x4]
         };
 
         for (Tile tile : tiles) {
@@ -1654,7 +1768,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                     Growable growable = grid[newRow][newCol].getContainedGrowable();
                     Growable productOfGrowable = grid[newRow][newCol].getProductOfGrowable();
                     if ((growable != null && growable.getGrowableType() == GrowableType.Giant) ||
-                            (productOfGrowable != null && productOfGrowable.getGrowableType() == GrowableType.Giant)) {
+                        (productOfGrowable != null && productOfGrowable.getGrowableType() == GrowableType.Giant)) {
                         return true;
                     }
                 }
@@ -1694,14 +1808,14 @@ public Result shepherdAnimal(String name, String x, String y) {
                     Tile neighbor = map[ny][nx];
 
                     if (neighbor.getContainedItem() != null &&
-                            (neighbor.getContainedItem().getName().equals("Scarecrow") ||
-                                    neighbor.getContainedItem().getName().equals("Deluxe Scarecrow"))) {
+                        (neighbor.getContainedItem().getName().equals("Scarecrow") ||
+                            neighbor.getContainedItem().getName().equals("Deluxe Scarecrow"))) {
                         hasScarecrowNearby = true;
                         break;
                     }
                 }
             }
-            if(!hasScarecrowNearby) {
+            if (!hasScarecrowNearby) {
                 if (target.getProductOfGrowable() != null) {
                     target.setProductOfGrowable(null);
                     if (target.getContainedGrowable() != null) {
@@ -1723,36 +1837,36 @@ public Result shepherdAnimal(String name, String x, String y) {
         Game currentGame = MainApp.getInstance().getCurrentGame();
         Season currentSeason = currentGame.getTimeAndDate().getSeason();
         if (tile.getContainedGrowable() != null) {
-            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
+            if (tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
                 return;
             }
 
-            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant){
+            if (tile.getContainedGrowable().getGrowableType() == GrowableType.Giant) {
                 Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
-                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getProductOfGrowable() != null &&
-                    map[tile.getY()][tile.getX() - 1].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                if (tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getProductOfGrowable() != null &&
+                    map[tile.getY()][tile.getX() - 1].getProductOfGrowable().getGrowableType() == GrowableType.Giant) {
                     tile.setContainedGrowable(null);
                     tile.setProductOfGrowable(map[tile.getY()][tile.getX() - 1].getProductOfGrowable());
                 }
-                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getProductOfGrowable() != null &&
-                    map[tile.getY() - 1][tile.getX()].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                if (tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getProductOfGrowable() != null &&
+                    map[tile.getY() - 1][tile.getX()].getProductOfGrowable().getGrowableType() == GrowableType.Giant) {
                     tile.setContainedGrowable(null);
                     tile.setProductOfGrowable(map[tile.getY() - 1][tile.getX()].getProductOfGrowable());
                 }
             }
 
-            if(tile.getContainedGrowable() == null){
+            if (tile.getContainedGrowable() == null) {
                 return;
             }
 
-            if(tile.getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+            if (tile.getContainedGrowable().getGrowableType() == GrowableType.Giant) {
                 Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
-                if(tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getContainedGrowable() != null &&
+                if (tile.getX() > 0 && map[tile.getY()][tile.getX() - 1].getContainedGrowable() != null &&
                     map[tile.getY()][tile.getX() - 1].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
-                        return;
+                    return;
                 }
-                if(tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getContainedGrowable() != null &&
-                     map[tile.getY() - 1][tile.getX()].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
+                if (tile.getY() > 0 && map[tile.getY() - 1][tile.getX()].getContainedGrowable() != null &&
+                    map[tile.getY() - 1][tile.getX()].getContainedGrowable().getGrowableType() == GrowableType.Giant) {
                     return;
                 }
             }
@@ -1772,7 +1886,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                 return;
             }
             //tile.getContainedGrowable().setHasBeenFertalized(false);
-            if(!tile.getContainedGrowable().hasBeenFertalized()) tile.getContainedGrowable().setIsWateredToday(false);
+            if (!tile.getContainedGrowable().hasBeenFertalized()) tile.getContainedGrowable().setIsWateredToday(false);
             Growable growable = tile.getContainedGrowable();
             if (growable != null && growable.getTreeType() != null && growable.getTreeType().getNormalSeasons().contains(currentSeason)) {
                 growable.setAge(growable.getAge() + 1);
@@ -1790,7 +1904,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                     growable.setGrowableType(GrowableType.Tree);
                     if (tile.getProductOfGrowable() == null) {
                         if (growable.getTreeType().getTotalHarvestTime() +
-                                growable.getTreeType().getFruitType().getFullHarvestCycle() <= growable.getAge()) {
+                            growable.getTreeType().getFruitType().getFullHarvestCycle() <= growable.getAge()) {
                             growable.setAge(growable.getTreeType().getTotalHarvestTime());
                             Growable fruit = GrowableFactory.getInstance().create(growable.getTreeType().getSource());
                             fruit.setGrowableType(GrowableType.Fruit);
@@ -1825,7 +1939,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                             tile.setContainedGrowable(null);
                         } else {
                             if (growable.getCropType().getTotalHarvestTime() +
-                                    growable.getCropType().getRegrowthTime() <= growable.getAge()) {
+                                growable.getCropType().getRegrowthTime() <= growable.getAge()) {
                                 growable.setAge(0);
                                 growable.setCurrentStage(1);
                                 Growable product = GrowableFactory.getInstance().create(growable.getCropType().getSource());
@@ -1916,10 +2030,10 @@ public Result shepherdAnimal(String name, String x, String y) {
             String recipient = msg.getRecipient().equals(player.getUsername()) ? "You" : msg.getRecipient();
 
             historyBuilder
-                    .append("- From ").append(direction)
-                    .append(" to ").append(recipient)
-                    .append(": ").append(msg.getMessage())
-                    .append("\n");
+                .append("- From ").append(direction)
+                .append(" to ").append(recipient)
+                .append(": ").append(msg.getMessage())
+                .append("\n");
         }
 
         return new Result(true, historyBuilder.toString());
@@ -1963,7 +2077,7 @@ public Result shepherdAnimal(String name, String x, String y) {
             return new Result(false, "Players are not adjacent.");
         if (sender.isGender())
             return new Result(false, "Only the male players can ask marriage.");
-        if(sender.isGender() == receiver.isGender()){
+        if (sender.isGender() == receiver.isGender()) {
             return new Result(false, "The male player can only ask a woman to marry him.");
         }
         //Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
@@ -2020,7 +2134,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         if (targetX >= cols || targetY >= rows) return false;
 
         int[][] directions = {
-                {-1, 0}, {1, 0}, {0, -1}, {0, 1}
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}
         };
 
         int[][] minEnergy = new int[rows][cols];
@@ -2147,11 +2261,11 @@ public Result shepherdAnimal(String name, String x, String y) {
             if (animal.hasProduct()) {
                 AnimalProduct product = animal.getProduct();
                 output.append(animal.getName())
-                        .append(": ")
-                        .append(product.getName())
-                        .append(" (quality: ")
-                        .append(product.getProductQuality())
-                        .append(")\n");
+                    .append(": ")
+                    .append(product.getName())
+                    .append(" (quality: ")
+                    .append(product.getProductQuality())
+                    .append(")\n");
                 hasUncollected = true;
             }
         }
@@ -2165,8 +2279,8 @@ public Result shepherdAnimal(String name, String x, String y) {
 
     public Result cheatAddMoney(String countString) {
         Game game = MainApp.getInstance().getCurrentGame();
-        if(game==null){
-            return new Result(false,"a new game hasnt started yet");
+        if (game == null) {
+            return new Result(false, "a new game hasnt started yet");
         }
         User player = game.getCurrentPlayer();
 
@@ -2188,12 +2302,12 @@ public Result shepherdAnimal(String name, String x, String y) {
         for (Friendship friendship : game.getAllFriendships()) {
             if (friendship.getPlayer1().equals(currentUsername) || friendship.getPlayer2().equals(currentUsername)) {
                 String other = friendship.getPlayer1().equals(currentUsername)
-                        ? friendship.getPlayer2()
-                        : friendship.getPlayer1();
+                    ? friendship.getPlayer2()
+                    : friendship.getPlayer1();
 
                 result.append("With ").append(other)
-                        .append(" - Level: ").append(friendship.getLevel())
-                        .append(", XP: ").append(friendship.getXp()).append("\n");
+                    .append(" - Level: ").append(friendship.getLevel())
+                    .append(", XP: ").append(friendship.getXp()).append("\n");
             }
         }
 
@@ -2279,11 +2393,11 @@ public Result shepherdAnimal(String name, String x, String y) {
             Gift gift = receivedGifts.get(i);
             // Format each gift details with 1-based index
             String giftDetails = String.format("%d) From: %s, Item: %s, Amount: %d, Rating: %d\n",
-                    i + 1,
-                    gift.getSender(),
-                    gift.getItem().getName(),
-                    gift.getAmount(),
-                    gift.getRate());
+                i + 1,
+                gift.getSender(),
+                gift.getItem().getName(),
+                gift.getAmount(),
+                gift.getRate());
             giftListMessage.append(giftDetails);
         }
 
@@ -2366,15 +2480,15 @@ public Result shepherdAnimal(String name, String x, String y) {
 
         StringBuilder history = new StringBuilder();
         history.append("Gift History between ").append(senderUsername)
-                .append(" and ").append(receiverUsername).append(":\n\n");
+            .append(" and ").append(receiverUsername).append(":\n\n");
 
         for (Gift gift : allGifts) {
             history.append("Sent: ").append(gift.getSender())
-                    .append(" Reciever: ").append(gift.getReceiver())
-                    .append(" | Item: ").append(gift.getItem().getName())
-                    .append(" | Amount: ").append(gift.getAmount())
-                    .append(" | Rating: ").append(gift.getRate())
-                    .append("\n");
+                .append(" Reciever: ").append(gift.getReceiver())
+                .append(" | Item: ").append(gift.getItem().getName())
+                .append(" | Amount: ").append(gift.getAmount())
+                .append(" | Rating: ").append(gift.getRate())
+                .append("\n");
         }
 
         return new Result(true, history.toString());
@@ -2435,9 +2549,9 @@ public Result shepherdAnimal(String name, String x, String y) {
         return new Result(true, "Flower sent successfully.");
     }
 
-    public Result cheatWalk(int x, int y){
+    public Result cheatWalk(int x, int y) {
         Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
-        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
+        if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
             return new Result(false, "You are out of bounds.");
         }
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -2467,7 +2581,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         if (friendships == null) {
             return new Result(false, "Friendship not found.");
         }
-        if(level < 0 || level > 3){
+        if (level < 0 || level > 3) {
             return new Result(false, "Level is out of bounds.");
         }
         friendships.setLevel(level);
@@ -2480,14 +2594,16 @@ public Result shepherdAnimal(String name, String x, String y) {
         if (item == null) {
             return new Result(false, "No item found.");
         }
-        if(count == 0) return new Result(false, "Invalid count.");
+        if (count == 0) return new Result(false, "Invalid count.");
         return MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
     }
 
     public Result meetNPC(String npcName) {
         NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
-        if (npc == null) {return new Result(false, "No npc found.");}
-        Tile currentTile =  MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
+        if (npc == null) {
+            return new Result(false, "No npc found.");
+        }
+        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
         if (!npc.checkIfIsNearNPC(currentTile)) {
             return new Result(false, "You are not near this npc.");
         }
@@ -2512,8 +2628,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                 currentPlayer.getBackpack().grabItem(itemName, 1);
             }
             return result;
-        }
-        else return new Result(false, "you dont have that item.");
+        } else return new Result(false, "you dont have that item.");
     }
 
     public Result npcFriendshipList() {
@@ -2537,7 +2652,9 @@ public Result shepherdAnimal(String name, String x, String y) {
                 break;
             }
         }
-        if (wantedNPC == null) {return new Result(false, "You are not standing next to an npc.");}
+        if (wantedNPC == null) {
+            return new Result(false, "You are not standing next to an npc.");
+        }
         StringBuilder result = new StringBuilder();
         result.append(wantedNPC.getNpcName() + " Unlocked Missions for you :\n");
         int index = 1;
@@ -2568,7 +2685,9 @@ public Result shepherdAnimal(String name, String x, String y) {
                 break;
             }
         }
-        if (wantedNPC == null) {return new Result(false, "You are not standing next to an npc.");}
+        if (wantedNPC == null) {
+            return new Result(false, "You are not standing next to an npc.");
+        }
         return wantedNPC.doMission(missionIndex, currentPlayer);
     }
 
@@ -2581,11 +2700,13 @@ public Result shepherdAnimal(String name, String x, String y) {
         House house = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse();
         for (Item item : currentPlayer.getBackpack().getInventoryItems().keySet()) {
             if (item.getName().equals(itemName)) {
-                if (!(item instanceof Food)) { return new Result(false, "Thats not a food!"); }
-                house.getFridge().put((Food)item, house.getFridge().getOrDefault((Food)item, 0)
-                        + currentPlayer.getBackpack().getInventoryItems().get(item));
+                if (!(item instanceof Food)) {
+                    return new Result(false, "Thats not a food!");
+                }
+                house.getFridge().put((Food) item, house.getFridge().getOrDefault((Food) item, 0)
+                    + currentPlayer.getBackpack().getInventoryItems().get(item));
                 currentPlayer.getBackpack().getInventoryItems().remove(item);
-                return new Result(true,"item added to fridge successfully.");
+                return new Result(true, "item added to fridge successfully.");
             }
         }
         return new Result(false, "Item not found.");
@@ -2630,7 +2751,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                     }
                 }
                 Item food = Item.getRandomItem(recipeName);
-                Result result = currentPlayer.getBackpack().addItem(food,1);
+                Result result = currentPlayer.getBackpack().addItem(food, 1);
                 if (!result.isSuccessful()) return result;
                 for (String itemName : unlockedRecipe.getRecipe().keySet()) {
                     currentPlayer.getBackpack().grabItem(itemName, unlockedRecipe.getRecipe().get(itemName));
@@ -2657,8 +2778,8 @@ public Result shepherdAnimal(String name, String x, String y) {
         Tile currentTile = currentPlayer.getCurrentTile();
         int currentX = currentTile.getX();
         int currentY = currentTile.getY();
-        int[] xDirections = {1,1,0,-1,-1,-1,0,1};
-        int[] yDirections = {0,-1,-1,-1,0,1,1,1};
+        int[] xDirections = {1, 1, 0, -1, -1, -1, 0, 1};
+        int[] yDirections = {0, -1, -1, -1, 0, 1, 1, 1};
         for (int i = 0; i < 8; i++) {
             if (map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem() instanceof Machine) {
                 Machine machine = ((Machine) map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem());
@@ -2673,7 +2794,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                 }
             }
         }
-        return new Result(false,"No machine found.");
+        return new Result(false, "No machine found.");
     }
 
     public Result artisanUse(String artisanName, String itemName1, String itemName2, MapOfGame map) {
@@ -2681,8 +2802,8 @@ public Result shepherdAnimal(String name, String x, String y) {
         Tile currentTile = currentPlayer.getCurrentTile();
         int currentX = currentTile.getX();
         int currentY = currentTile.getY();
-        int[] xDirections = {1,1,0,-1,-1,-1,0,1};
-        int[] yDirections = {0,-1,-1,-1,0,1,1,1};
+        int[] xDirections = {1, 1, 0, -1, -1, -1, 0, 1};
+        int[] yDirections = {0, -1, -1, -1, 0, 1, 1, 1};
         for (int i = 0; i < 8; i++) {
             if (map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem() instanceof Machine) {
                 Machine machine = ((Machine) map.getTile(currentX + xDirections[i], currentY + yDirections[i]).getContainedItem());
@@ -2691,10 +2812,10 @@ public Result shepherdAnimal(String name, String x, String y) {
                         boolean hasItem1 = false;
                         boolean hasItem2 = false;
                         if (machine.getType().equals(MachineType.BEE_HOUSE) &&
-                                (itemName1 != null || itemName2 != null))
+                            (itemName1 != null || itemName2 != null))
                             return new Result(false, "You cant put ingredients in this machine.");
                         if (itemName2 == null && !machine.getType().equals(MachineType.FURNACE)
-                                && !machine.getType().equals(MachineType.FISH_SMOKER)) hasItem2 = true;
+                            && !machine.getType().equals(MachineType.FISH_SMOKER)) hasItem2 = true;
                         if (productsName.getIngredients() != null) {
                             for (String ingredientName : productsName.getIngredients().keySet()) {
                                 if (itemName1 != null) {
@@ -2717,7 +2838,7 @@ public Result shepherdAnimal(String name, String x, String y) {
                 }
             }
         }
-        return new Result(false,"No machine found.");
+        return new Result(false, "No machine found.");
     }
 
     public Result showMoney() {
