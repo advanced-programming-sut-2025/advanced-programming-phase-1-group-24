@@ -3,6 +3,7 @@ package io.github.stardew.mini.Model.MapManagement;
 import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -143,7 +144,7 @@ public class MapOfGame {
 
             for (int index : selectedIndices) {
                 Tile tile = farmTiles.get(index);
-                applyLightningEffect(tile);
+                applyLightningEffect(tile, false);
             }
         }
     }
@@ -166,12 +167,15 @@ public class MapOfGame {
     }
 
 
-    public void applyLightningEffect(Tile tile) {
+    public void applyLightningEffect(Tile tile, boolean isCheat) {
         if (tile.getType() == TileType.GREENHOUSE) {
             return;
         }
 
         int flashHour = MathUtils.random(9, 18); // Random hour between 9 and 22
+        if(isCheat) {
+            flashHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour();
+        }
         System.out.println(flashHour);
 
         LightningFlash flash = new LightningFlash();
@@ -392,7 +396,7 @@ public class MapOfGame {
         items.add(new ShopItem("Sugar", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.Sugar), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Wheat Flour", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.WheatFlower), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Rice", Integer.MAX_VALUE, new randomStuff(250, randomStuffType.Rice), ShopItemType.RANDOMSTUFF, 250, 250, 250, 250));
-        //items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
+        items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
 
         return items;
     }

@@ -81,6 +81,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             foragingCropType.initTexture();
         }
         for (CropType cropType : CropType.values()) {
+            if(cropType == CropType.MixedCrop) continue;
             cropType.initTexture();
         }
         for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
