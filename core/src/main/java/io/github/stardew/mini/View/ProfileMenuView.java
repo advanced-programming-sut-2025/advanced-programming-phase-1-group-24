@@ -14,6 +14,7 @@ import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.ProfileMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Avatar;
 import io.github.stardew.mini.Model.Result;
 
 import java.util.Scanner;
@@ -27,6 +28,8 @@ public class ProfileMenuView implements Screen,AppMenu {
     private TextField usernameField, emailField, nicknameField;
     private TextField oldPasswordField, newPasswordField;
     private TextButton changeUsernameButton, changeEmailButton, changeNicknameButton, changePasswordButton;
+    private SelectBox<String> avatarSelect;
+    private TextButton changeAvatarButton;
     private TextButton backButton;
     //private Label errorLabel;
     public ProfileMenuView(ProfileMenuController controller, Skin skin) {
@@ -57,6 +60,9 @@ public class ProfileMenuView implements Screen,AppMenu {
         infoLabel = new Label("", skin, "custom-label");
         usernameField = new TextField("", skin); usernameField.setMessageText("New Username");
         changeUsernameButton = new TextButton("Change Username", skin, "custom-button");
+        changeAvatarButton = new TextButton("Change Avatar", skin, "custom-button");
+        avatarSelect = new SelectBox<>(skin);
+        avatarSelect.setItems("Abigail", "Alex", "Haley", "Shane");
         emailField = new TextField("", skin); emailField.setMessageText("New Email");
         changeEmailButton = new TextButton("Change Email", skin, "custom-button");
         nicknameField = new TextField("", skin); nicknameField.setMessageText("New Nickname");
@@ -74,6 +80,8 @@ public class ProfileMenuView implements Screen,AppMenu {
 
         table.add(usernameField).width(200).pad(5).height(50);
         table.add(changeUsernameButton).width(450).pad(5).height(50).row();
+        table.add(avatarSelect).width(200).pad(5).height(50);
+        table.add(changeAvatarButton).width(450).pad(5).height(50).row();
         table.add(emailField).width(200).pad(5).height(50);
         table.add(changeEmailButton).width(450).pad(5).height(50).row();
         table.add(nicknameField).width(200).pad(5).height(50);
@@ -128,6 +136,15 @@ public class ProfileMenuView implements Screen,AppMenu {
                         new MainMenuController(), skin
                     )
                 );
+            }
+        });
+        changeAvatarButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String selectedAvatar = avatarSelect.getSelected();
+                Avatar selected = Avatar.valueOf(selectedAvatar);
+                Result res = controller.changeAvatar(selected);
+                updateInfo(res);
             }
         });
     }

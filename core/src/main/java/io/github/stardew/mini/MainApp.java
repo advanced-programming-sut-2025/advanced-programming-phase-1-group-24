@@ -66,6 +66,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         TileType.initTextures();
         Habitat.HabitatType.initTextures();
         ShopAssets.load();
+
         for (TreeType treeType : TreeType.values()) {
             treeType.initTextures();
         }
