@@ -44,6 +44,8 @@ public class Backpack {
         tools.add(wateringcan);
         Scythe scythe = new Scythe(ToolType.SCYTHE);
         tools.add(scythe);
+        FishingPole fishingPole = new FishingPole(ToolType.FISHINGPOLE, FishingPoleMaterial.Bamboo);
+        tools.add(fishingPole);
     }
 
     public void upgrade(StorageType type) {
