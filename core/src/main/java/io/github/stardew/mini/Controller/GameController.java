@@ -208,7 +208,7 @@ public class GameController implements MenuController {
     public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
-        User currentUser = app.getLoggedInUser();
+        User currentUser = app.getCurrentGame().getCurrentPlayer();
 
         if (currentUser == null || currentGame == null)
             return new Result(false, "no active game!");
@@ -292,8 +292,8 @@ public class GameController implements MenuController {
 
             if (turnCounter == players.size()) {
                 turnCounter = 0;
-                game.advanceTimeByOneHour();
-                handleEndOfDay();
+                //game.advanceTimeByOneHour();
+                //handleEndOfDay();
             }
         } while (currentPlayer.hasFainted());
 
@@ -365,7 +365,7 @@ public class GameController implements MenuController {
         Game game = app.getCurrentGame();
         Tile[][] map = game.getMap().getMap();
 
-        if (game.getTimeAndDate().getHour() == 22) {
+        if (game.getTimeAndDate().getHour() == 23) {
 
             for (Shop shop : game.getMap().getShops()) {
                 for (ShopItem shopItem : shop.getProducts()) {
@@ -799,7 +799,7 @@ public class GameController implements MenuController {
 
             Tile targetTile = map[yCoord][xCoord]; // note: map[y][x] because map is row-major
 
-            mapOfGame.applyLightningEffect(targetTile);
+            mapOfGame.applyLightningEffect(targetTile, true);
 
             return new Result(true, "Lightning striked the tile (" + xCoord + "," + yCoord + ").");
         } catch (NumberFormatException e) {
@@ -1540,7 +1540,7 @@ public Result shepherdAnimal(String name, String x, String y) {
 //                    }
 //                }
 //            }
-            return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
+            return new Result(true, growable.getName() + " has been fertalized.");
         } else if (result.isSuccessful() && randomStuffType.fromName(fertalizer) == randomStuffType.SpeedGro) {
             System.out.println(result.message());
             //map[y][x].getContainedGrowable().setHasBeenFertalized(true);
@@ -1557,7 +1557,7 @@ public Result shepherdAnimal(String name, String x, String y) {
 //                    }
 //                }
 //            }
-            return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
+            return new Result(true, growable.getName() + " has been fertalized.");
         } else {
             return result;
         }
@@ -2213,13 +2213,13 @@ public Result shepherdAnimal(String name, String x, String y) {
         String senderUsername = game.getCurrentPlayer().getUsername();
         User sender = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(receiverUsername);
-        Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
         if (sender == null) {
             return new Result(false, "Sender not found.");
         }
         if (receiver == null) {
             return new Result(false, "Receiver not found.");
         }
+        Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
         if (friendship == null) {
             return new Result(false, "Friendship not found between users.");
         }
@@ -2257,7 +2257,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         receiver.addToNotifications(new Message(senderUsername, receiverUsername, "You received " + amount + " of " + itemToGift.getName()));
         receiver.addRecievedGift(gift);
 
-        return new Result(true, "Gift sent successfully. Waiting for receiver to rate the gift.");
+        return new Result(true, "Gift sent successfully.");
     }
 
 

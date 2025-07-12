@@ -8,10 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
@@ -38,16 +35,12 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.sun.tools.javac.Main;
 import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.MainMenuController;
-import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.*;
-import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.CrowFlight;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
@@ -59,16 +52,12 @@ import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Skill;
-import io.github.stardew.mini.Model.Growables.*;
-import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Growables.CropType;
 import io.github.stardew.mini.Model.Growables.GrowableType;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
-import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Reccepies.Machine;
@@ -135,6 +124,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog shopMenuDialog;
     private Shop selectedShop;
     private Dialog shopPurchaseDialog;
+    private Dialog numItemDialog;
     private ShopItem selectedShopItem;
     private int purchaseQuantity = 1;
     private Dialog buyAnimalDialog;
@@ -174,13 +164,17 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog relationshipDialog;
     private final List<Flower> activeFlowers = new ArrayList<>();
 
-    private TextButton exitButton;
+    private TextButton nextTurnButton;
+    private TextButton exitGameButton;
     private TextButton forceTerminateButton;
     private Label energyLabel;
 
     private Item equippedItem = null;
     private Table equippedItemSlotTable;
     private Timer.Task gameTickTask;
+
+    private String scenario = "";
+    String giftReciever, artisanName;
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -471,6 +465,27 @@ private void updateAnimals(float delta) {
                 if(!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
             }
         }
+        if(keycode == Input.Keys.O){
+            Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(mousePos);
+            String direction = "";
+            if (mousePos.x > camera.position.x) {
+                direction = "right";
+            } else if (mousePos.x < camera.position.x) {
+                direction = "left";
+            } else if (mousePos.y > camera.position.y) {
+                direction = "up";
+            } else if (mousePos.y < camera.position.y) {
+                direction = "down";
+            }
+            if(equippedItem == null) {
+                showErrorDialog(stage, "Pick a fertilizer first!");
+            }
+            else{
+                Result result = controller.fertalizeGrowable(equippedItem.getName(), direction);
+                showErrorDialog(stage,result.getMessage());
+            }
+        }
         if (keycode == Input.Keys.ENTER) {
             if (equippedItem != null) {
                 equippedItem = null;
@@ -586,9 +601,7 @@ private void updateAnimals(float delta) {
 
         if (keycode == Input.Keys.N) {
             if (showInventoryMenu || showBackpackMenu) return false;
-//            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
-//            controller.handleEndOfDay();
-            System.out.println(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+            MainApp.getInstance().getCurrentGame().getFriendship("kimia8", "kimia13").setLevel(3);
             return true;
         }
         if (keycode == Input.Keys.K) {
@@ -653,7 +666,7 @@ private void updateAnimals(float delta) {
             currentPlayer.setFainted(false);
         }
         if (keycode == Input.Keys.Q) {
-            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(22);
+            MainApp.getInstance().getCurrentGame().getTimeAndDate().setHour(23);
             controller.handleEndOfDay();
             //MainApp.getInstance().getCurrentGame().getFriendship("kimia8", "user2").setLevel(3);
             //currentPlayer.getRecievedGift().add(new Gift("john", "kimia8", new randomStuff(10, randomStuffType.Stone), 5));
@@ -681,6 +694,110 @@ private void updateAnimals(float delta) {
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
 }
+
+    private void showNumItemDialog() {
+        purchaseQuantity = 1;
+        //numItemDialog.getContentTable().clearChildren();
+        //numItemDialog.getTitleLabel().setText("Select Quantity " + selectedShopItem.getName());
+        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
+        numItemDialog.padTop(40f);
+        numItemDialog.setKeepWithinStage(true);
+        numItemDialog.setMovable(false);
+        numItemDialog.setVisible(false);
+        numItemDialog.setModal(true);
+        numItemDialog.setResizable(false);
+        showBackpackMenu = false;
+        backpackMenuTable.setVisible(false);
+        inventoryMenuTable.setVisible(false);
+        showInventoryMenu = false;
+
+        Table content = numItemDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(10);
+
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
+        TextButton applyButton = new TextButton("Apply", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+
+
+        plusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                purchaseQuantity++;
+                quantityLabel.setText("Quantity: " + purchaseQuantity);
+            }
+        });
+
+        minusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (purchaseQuantity > 1) {
+                    purchaseQuantity--;
+                    quantityLabel.setText("Quantity: " + purchaseQuantity);
+                }
+            }
+        });
+
+        applyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Result result;
+                switch (scenario){
+                    case "Gift":
+                        result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
+                        break;
+                    case "Machine":
+                        result=controller.artisanUse(artisanName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
+                        break;
+                    case "Sell":
+                        result=storeController.placeInShippingBin(equippedItem.getName(),purchaseQuantity);
+                        break;
+                    default:
+                        result = new Result(true,"");
+                        break;
+
+                }
+                scenario = "";
+                giftReciever = "";
+                artisanName = "";
+                //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
+                numItemDialog.hide();
+                if(!result.message().equals("")){
+                    showTimedErrorLabel(stage, result.message(), 2);
+                }
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                numItemDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        content.add(quantityLabel).colspan(2).row();
+        content.add(minusButton).padRight(5);
+        content.add(plusButton).row();
+        content.add(applyButton).colspan(2).row();
+        content.add(cancelButton).colspan(2);
+
+        numItemDialog.add(content);
+        numItemDialog.pack();
+        numItemDialog.setPosition(
+            (Gdx.graphics.getWidth() - numItemDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - numItemDialog.getHeight()) / 2
+        );
+        numItemDialog.pack();
+        numItemDialog.setVisible(true);
+        stage.addActor(numItemDialog);
+        Gdx.input.setInputProcessor(stage);
+
+    }
+
     private Animal getAnimalNearPlayer() {
         int playerX = currentPlayer.getCurrentTile().getX();
         int playerY = currentPlayer.getCurrentTile().getY();
@@ -844,7 +961,7 @@ private void updateAnimals(float delta) {
                 Gdx.input.setInputProcessor(stage);
                 return true;
             }
-            if (isClickInside(mouseX, mouseY, exitButton)) {
+            if (isClickInside(mouseX, mouseY, exitGameButton)) {
                 Result result = controller.exitGame();
                 if (!result.isSuccessful()) {
                     showErrorDialog(stage, result.message());
@@ -866,6 +983,13 @@ private void updateAnimals(float delta) {
             }
             if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
                 Result result = controller.startForceTerminateVote();
+                if (!result.isSuccessful()) {
+                    showErrorDialog(stage, result.message());
+                }
+                return true;
+            }
+            if (isClickInside(mouseX, mouseY, nextTurnButton)) {
+                Result result = controller.nextTurn();
                 if (!result.isSuccessful()) {
                     showErrorDialog(stage, result.message());
                 }
@@ -1584,8 +1708,10 @@ private void createAnimalDialog() {
             Table row = new Table();
             Label nameLabel = new Label(friend.getUsername(), GameAssetManager.skin, "custom-label");
             int level = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), friend.getUsername()).getLevel();
+            int XP = MainApp.getInstance().getCurrentGame().getFriendship(currentPlayer.getUsername(), friend.getUsername()).getXp();
             System.out.println(level);
             Label levelLabel = new Label("Lvl: " + level, GameAssetManager.skin, "custom-label");
+            Label XPLabel = new Label("XP: " + XP, GameAssetManager.skin, "custom-label");
             TextButton giftButton = new TextButton("Gift", GameAssetManager.skin, "custom-button");
             TextButton receivedButton = new TextButton("Received", GameAssetManager.skin, "custom-button");
             TextButton sentButton = new TextButton("Sent", GameAssetManager.skin, "custom-button");
@@ -1593,8 +1719,11 @@ private void createAnimalDialog() {
             giftButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    //TODO : send gift via inventory (sendGift method)
-                    //send a notif for the friend that we sent the gift for
+                    scenario = "Gift";
+                    giftReciever = friend.getUsername();
+                    friendsDialog.hide();
+                    Gdx.input.setInputProcessor(GameView.this);
+                    showBackpack();
                 }
             });
             receivedButton.addListener(new ClickListener() {
@@ -1626,6 +1755,7 @@ private void createAnimalDialog() {
 
             row.add(nameLabel).left().pad(100);
             row.add(levelLabel).pad(100);
+            row.add(XPLabel).pad(100);
             row.add(giftButton).pad(100);
             row.add(receivedButton).pad(100);
             row.add(sentButton).right().pad(100);
@@ -1872,12 +2002,19 @@ private void createAnimalDialog() {
 
         stage.addActor(friendsButton);
 
-        exitButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
-        exitButton.setSize(100, 100);
-        exitButton.setColor(Color.MAGENTA);
-        exitButton.setPosition(10, Gdx.graphics.getHeight() - 100);
-        exitButton.setTouchable(Touchable.enabled);
-        stage.addActor(exitButton);
+        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
+        nextTurnButton.setSize(200, 100);
+        nextTurnButton.setColor(Color.MAGENTA);
+        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
+        nextTurnButton.setTouchable(Touchable.enabled);
+        stage.addActor(nextTurnButton);
+
+        exitGameButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
+        exitGameButton.setSize(100, 100);
+        exitGameButton.setColor(Color.MAGENTA);
+        exitGameButton.setPosition(10, Gdx.graphics.getHeight() - 100);
+        exitGameButton.setTouchable(Touchable.enabled);
+        stage.addActor(exitGameButton);
 
         forceTerminateButton = new TextButton("Force Terminate", GameAssetManager.skin, "custom-button");
         forceTerminateButton.setSize(200, 100);
@@ -2401,6 +2538,7 @@ private void createAnimalDialog() {
     }
 
     private void drawGreenHouse(int tileSize, int rows) {
+        GlyphLayout layout = new GlyphLayout();
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             GreenHouse greenHouseTile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player).getGreenHouse();
 
@@ -2420,6 +2558,16 @@ private void createAnimalDialog() {
                 8 * tileSize,
                 7 * tileSize
             );
+            if (!greenHouseTile.getIsGreenHouseFixed()) {
+                String message = "To build the greenhouse,\nclick here!\n(Need 1000$ and 500 stones)";
+
+                float centerX = drawX + (8 * tileSize) / 2f;
+                float centerY = drawY + (7 * tileSize) / 2f;
+
+                layout.setText(smallFont, message, Color.WHITE, 8 * tileSize, Align.center, true);
+
+                smallFont.draw(batch, layout, centerX - layout.width / 2f - 200, centerY + layout.height / 2f - 100);
+            }
         }
     }
     private void drawShops(int tileSize, int rows) {
@@ -2688,20 +2836,14 @@ private void createAnimalDialog() {
         float alpha = 0f;
 
         if (gameHour >= 18 && gameHour < 22) {
-            // 18 to 22 => fade from 0 to 0.8
             alpha = (gameHour - 18) / 4f * 0.8f;
-        } else if (gameHour >= 22 || gameHour < 9) {
-            // Nighttime
-            alpha = 0.8f;
-        } else if (gameHour >= 9 && gameHour < 10) {
-            // 09:00 to 10:00 — fade back to daylight
-            alpha = 0.8f - ((gameHour - 9) / 1f * 0.8f);
+        } else if (gameHour >= 22) {
+            alpha = 1f;
         } else {
-            // Daytime
             alpha = 0f;
         }
 
-        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 0.8f); // max darkness = 0.8
+        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 1f); // max darkness = 0.8
     }
 
     private boolean tryMove(int dx, int dy, int direction) {
@@ -3095,7 +3237,8 @@ private void createAnimalDialog() {
                 if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
                     equippedItem = sortedItems.get(selectedSlot);
                     updateEquippedItemSlot();
-                    showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                    //showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                    showNumItemDialog();
                 } else {
                     showErrorDialog(stage, "No item selected.");
                 }
@@ -3624,9 +3767,11 @@ private void createAnimalDialog() {
 //            controller.helpReadMap();
 //        } else if ((matcher = GameMenuCommands.WALK.getMatcher(input)) != null) {
 //            controller.walkTo(matcher.group("x"), matcher.group("y"), scanner);
-//        } else if ((matcher = GameMenuCommands.CAFTINFO.getMatcher(input)) != null) {
-//            controller.printCraftInfo(matcher.group("craftname"));
-//        } else if ((matcher = GameMenuCommands.TREEINFO.getMatcher(input)) != null) {
+        //}
+        else if ((matcher = GameMenuCommands.CAFTINFO.getMatcher(input)) != null) {
+            controller.printCraftInfo(matcher.group("craftname"));
+        }
+        //else if ((matcher = GameMenuCommands.TREEINFO.getMatcher(input)) != null) {
 //            controller.printTreeInfo(matcher.group("treename"));
 //        } else if ((matcher = GameMenuCommands.MENU_ENTER.getMatcher(input)) != null) {
 //            System.out.println(controller.enterMenu(matcher.group("menuName")));
@@ -3788,6 +3933,36 @@ private void createAnimalDialog() {
 
         stage.addActor(dialog);
         Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
+    }
+
+    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
+        Skin skin = GameAssetManager.skin;
+
+        Label errorLabel = new Label(message, skin, "custom-label");
+        errorLabel.setAlignment(Align.center);
+        errorLabel.setColor(Color.RED);
+        errorLabel.setFontScale(1.2f);
+
+        // Optional background for visibility
+//        errorLabel.setBackground(skin.getDrawable("window"));
+
+        float width = Gdx.graphics.getWidth() * 0.4f;
+        float height = Gdx.graphics.getHeight() * 0.15f;
+
+        errorLabel.setSize(width, height);
+        errorLabel.setPosition(
+            (Gdx.graphics.getWidth() - width) / 2f,
+            (Gdx.graphics.getHeight() - height) / 2f
+        );
+
+        stage.addActor(errorLabel);
+
+        // Fade out and remove after delay
+        errorLabel.addAction(Actions.sequence(
+            Actions.delay(durationSeconds),
+            Actions.fadeOut(0.5f),
+            Actions.run(errorLabel::remove)
+        ));
     }
 }
 
