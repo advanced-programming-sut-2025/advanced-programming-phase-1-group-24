@@ -275,13 +275,50 @@ public class GameController implements MenuController {
         return new Result(true, result.toString());
     }
 
+//    public void goToNextTurn(Game game) {
+//        List<User> players = game.getPlayers();
+//        int currentPlayerIndex = game.getCurrentPlayerIndex();
+//        int turnCounter = game.getTurnCounter();
+//
+//        User currentPlayer;
+//
+//        do {
+//            currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
+//            currentPlayer = players.get(currentPlayerIndex);
+//            turnCounter++;
+//
+//            if (!currentPlayer.hasFainted()) {
+//                currentPlayer.resetTurnEnergy();
+//            }
+//
+//            if (turnCounter == players.size()) {
+//                turnCounter = 0;
+////                game.advanceTimeByOneHour();
+////                handleEndOfDay();
+//            }
+//        } while (currentPlayer.hasFainted());
+//
+//        // Update game state back
+//        game.setCurrentPlayer(currentPlayer);
+//        game.setCurrentPlayerIndex(currentPlayerIndex);
+//        game.setTurnCounter(turnCounter);
+//    }
     public void goToNextTurn(Game game) {
         List<User> players = game.getPlayers();
         int currentPlayerIndex = game.getCurrentPlayerIndex();
         int turnCounter = game.getTurnCounter();
 
-        User currentPlayer;
+        // Quick check if all players are fainted:
+        boolean allFainted = players.stream().allMatch(User::hasFainted);
 
+        if (allFainted) {
+            // Special case: set hour to 22 and exit early
+            game.getTimeAndDate().setHour(22);
+            handleEndOfDay();
+            // // Exit method here, no loop
+        }
+
+        User currentPlayer;
         do {
             currentPlayerIndex = (currentPlayerIndex + 1) % players.size();
             currentPlayer = players.get(currentPlayerIndex);
@@ -293,16 +330,17 @@ public class GameController implements MenuController {
 
             if (turnCounter == players.size()) {
                 turnCounter = 0;
-                game.advanceTimeByOneHour();
-                handleEndOfDay();
+                // game.advanceTimeByOneHour();
+                // handleEndOfDay();
             }
         } while (currentPlayer.hasFainted());
 
-        // Update game state back
+        // Update current player index and turn counter in game
         game.setCurrentPlayer(currentPlayer);
         game.setCurrentPlayerIndex(currentPlayerIndex);
         game.setTurnCounter(turnCounter);
     }
+
 
 
     private Result voteToTerminateInteractive(Scanner scanner, User user) {

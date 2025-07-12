@@ -182,6 +182,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Item equippedItem = null;
     private Table equippedItemSlotTable;
     private Timer.Task gameTickTask;
+    private boolean hasShownFaintMessage = false; // Add this to your screen class
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -2056,6 +2057,26 @@ private void createAnimalDialog() {
     public void render(float v) {
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+//        if (currentPlayer.hasFainted()) {
+//            if (!hasShownFaintMessage) {
+//                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f);
+//                hasShownFaintMessage = true;
+//            }
+//        } else {
+//            hasShownFaintMessage = false; // Reset if player regains energy
+//        }
+        if (currentPlayer.hasFainted()) {
+            if (!hasShownFaintMessage) {
+                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
+                    controller.nextTurn();
+                });
+                hasShownFaintMessage = true;
+            }
+        } else {
+            hasShownFaintMessage = false;
+        }
+
+
         determineAvatar();
         showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());
@@ -3764,56 +3785,177 @@ private void createAnimalDialog() {
         }
     }
 
-    public void showErrorDialog(Stage stage, String message) {
-        Skin skin = GameAssetManager.skin;
+//    public void showErrorDialog(Stage stage, String message) {
+//        Skin skin = GameAssetManager.skin;
+//
+//        Dialog dialog = new Dialog("", skin) {
+//            @Override
+//            protected void result(Object object) {
+//                // Optional: Handle result
+//            }
+//        };
+//
+//        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+//
+//        Label messageLabel = new Label(message, skin, "custom-label");
+//        messageLabel.setWrap(true);
+//        messageLabel.setAlignment(Align.center);
+//        messageLabel.setFontScale(0.7f); // Optional
+//
+//        TextButton okButton = new TextButton("OK", skin, "custom-button");
+//        okButton.pad(10f);
+//        okButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                dialog.hide(); // Close dialog
+//                Gdx.input.setInputProcessor(GameView.this); // return control to GameView if needed
+//            }
+//        });
+//
+//        Table contentTable = new Table();
+//        contentTable.defaults().pad(10f);
+//        contentTable.add(messageLabel).width(stage.getWidth() * 0.5f).row();
+//        contentTable.add(okButton).center();
+//
+//        dialog.getContentTable().clear();
+//        dialog.getContentTable().add(contentTable).expand().fill();
+//
+//        dialog.setMovable(false);
+//        dialog.setModal(true);
+//        dialog.setResizable(false);
+//
+//        float dialogWidth = stage.getWidth() * 0.4f;
+//        float dialogHeight = stage.getHeight() * 0.25f;
+//        dialog.setSize(dialogWidth, dialogHeight);
+//        dialog.setPosition(
+//            (stage.getWidth() - dialogWidth) / 2f,
+//            (stage.getHeight() - dialogHeight) / 2f
+//        );
+//
+//        stage.addActor(dialog);
+//        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
+//    }
+public void showErrorDialog(Stage stage, String message) {
+    Skin skin = GameAssetManager.skin;
 
-        Dialog dialog = new Dialog("", skin) {
-            @Override
-            protected void result(Object object) {
-                // Optional: Handle result
+    Dialog dialog = new Dialog("", skin) {
+        @Override
+        protected void result(Object object) {
+            // Optional: Handle result
+        }
+    };
+
+    dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+
+    Label messageLabel = new Label(message, skin, "custom-label");
+    messageLabel.setWrap(true);
+    messageLabel.setAlignment(Align.center);
+    messageLabel.setFontScale(0.7f);
+
+    float maxWidth = stage.getWidth() * 0.6f;
+    messageLabel.setWidth(maxWidth); // Required for wrapping to work
+    messageLabel.invalidateHierarchy(); // Force layout to recalculate size
+
+    // Let the label wrap and calculate the height
+    Table contentTable = new Table();
+    contentTable.defaults().pad(10f);
+    contentTable.add(messageLabel).width(maxWidth).row();
+
+    TextButton okButton = new TextButton("OK", skin, "custom-button");
+    okButton.pad(10f);
+    okButton.addListener(new ClickListener() {
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+            dialog.hide();
+            Gdx.input.setInputProcessor(GameView.this);
+        }
+    });
+
+    contentTable.add(okButton).center().padTop(10f);
+
+    dialog.getContentTable().clear();
+    dialog.getContentTable().add(contentTable).expand().fill();
+    dialog.setMovable(false);
+    dialog.setModal(true);
+    dialog.setResizable(false);
+
+    dialog.pack(); // Automatically size dialog based on contents
+
+    // Clamp width/height to screen size if needed
+    float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
+    float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
+    dialog.setSize(clampedWidth, clampedHeight);
+
+    // Center on screen
+    dialog.setPosition(
+        (stage.getWidth() - clampedWidth) / 2f,
+        (stage.getHeight() - clampedHeight) / 2f
+    );
+
+    stage.addActor(dialog);
+    Gdx.input.setInputProcessor(stage);
+}
+
+//    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
+//        Skin skin = GameAssetManager.skin;
+//
+//        Label errorLabel = new Label(message, skin, "custom-label");
+//        errorLabel.setAlignment(Align.center);
+//        errorLabel.setColor(Color.SCARLET);
+//        errorLabel.setFontScale(1.2f);
+//
+//        // Optional background for visibility
+////       errorLabel.setBackground(skin.getDrawable("window"));
+//
+//        float width = Gdx.graphics.getWidth() * 0.4f;
+//        float height = Gdx.graphics.getHeight() * 0.15f;
+//
+//        errorLabel.setSize(width, height);
+//        errorLabel.setPosition(
+//            (Gdx.graphics.getWidth() - width) / 2f,
+//            (Gdx.graphics.getHeight() - height) / 2f
+//        );
+//
+//        stage.addActor(errorLabel);
+//
+//        // Fade out and remove after delay
+//        errorLabel.addAction(Actions.sequence(
+//            Actions.delay(durationSeconds),
+//            Actions.fadeOut(0.5f),
+//            Actions.run(errorLabel::remove)
+//        ));
+//    }
+public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
+    Skin skin = GameAssetManager.skin;
+
+    Label errorLabel = new Label(message, skin, "custom-label");
+    errorLabel.setAlignment(Align.center);
+    errorLabel.setColor(Color.SCARLET);
+    errorLabel.setFontScale(1.2f);
+
+    float width = Gdx.graphics.getWidth() * 0.4f;
+    float height = Gdx.graphics.getHeight() * 0.15f;
+
+    errorLabel.setSize(width, height);
+    errorLabel.setPosition(
+        (Gdx.graphics.getWidth() - width) / 2f,
+        (Gdx.graphics.getHeight() - height) / 2f
+    );
+
+    stage.addActor(errorLabel);
+
+    errorLabel.addAction(Actions.sequence(
+        Actions.delay(durationSeconds),
+        Actions.fadeOut(0.5f),
+        Actions.run(() -> {
+            errorLabel.remove();
+            if (onComplete != null) {
+                onComplete.run();
             }
-        };
+        })
+    ));
+}
 
-        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
-
-        Label messageLabel = new Label(message, skin, "custom-label");
-        messageLabel.setWrap(true);
-        messageLabel.setAlignment(Align.center);
-        messageLabel.setFontScale(0.7f); // Optional
-
-        TextButton okButton = new TextButton("OK", skin, "custom-button");
-        okButton.pad(10f);
-        okButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide(); // Close dialog
-                Gdx.input.setInputProcessor(GameView.this); // return control to GameView if needed
-            }
-        });
-
-        Table contentTable = new Table();
-        contentTable.defaults().pad(10f);
-        contentTable.add(messageLabel).width(stage.getWidth() * 0.5f).row();
-        contentTable.add(okButton).center();
-
-        dialog.getContentTable().clear();
-        dialog.getContentTable().add(contentTable).expand().fill();
-
-        dialog.setMovable(false);
-        dialog.setModal(true);
-        dialog.setResizable(false);
-
-        float dialogWidth = stage.getWidth() * 0.4f;
-        float dialogHeight = stage.getHeight() * 0.25f;
-        dialog.setSize(dialogWidth, dialogHeight);
-        dialog.setPosition(
-            (stage.getWidth() - dialogWidth) / 2f,
-            (stage.getHeight() - dialogHeight) / 2f
-        );
-
-        stage.addActor(dialog);
-        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
-    }
 }
 
 
