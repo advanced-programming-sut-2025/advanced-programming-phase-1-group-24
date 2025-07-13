@@ -1421,8 +1421,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "watering can",
           "type": "WATERINGCAN",
           "material": "Initial"
