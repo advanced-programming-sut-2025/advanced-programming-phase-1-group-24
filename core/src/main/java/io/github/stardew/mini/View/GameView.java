@@ -15,7 +15,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -28,35 +27,24 @@ import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.StoreMenuController;
-import com.sun.tools.javac.Main;
-import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.HouseMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.CrowFlight;
-import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
@@ -70,7 +58,6 @@ import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
-import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
 import io.github.stardew.mini.Model.Reccepies.Machine;
@@ -81,17 +68,10 @@ import io.github.stardew.mini.Model.Tools.Tool;
 import io.github.stardew.mini.Model.Tools.TrashCan;
 import io.github.stardew.mini.Model.Places.Shop;
 import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.randomStuffType;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Places.Shop;
-import io.github.stardew.mini.Model.Places.ShopItem;
-import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.TimeManagement.*;
-import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
@@ -103,13 +83,11 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.*;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import java.util.regex.Matcher;
 
 public class GameView implements Screen, InputProcessor, AppMenu {
     private Stage stage;
@@ -141,6 +119,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private TextButton recipesButton, cancelButton, cheatButton, exitButton, grabButton;
     private String pendingMachineName;
     private String pendingProductName;
+    private Item itemToPlace;
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -154,6 +133,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog buyAnimalDialog;
 
     private StoreMenuController storeController;
+    private HouseMenuController houseMenuController;
     private int gameWidth = Gdx.graphics.getWidth();
     private int gameHeight = Gdx.graphics.getHeight();
 
@@ -196,6 +176,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public GameView(GameController controller) {
         this.controller = controller;
         storeController = new StoreMenuController();
+        houseMenuController = new HouseMenuController();
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -210,6 +191,18 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         camera.update();
         Gdx.input.setInputProcessor(this);
         showErrorDialog(stage, "Select a tile inside your farm to build");
+        //+ building.getDisplayName());
+    }
+
+    public void startPlacingItem(Item item) {
+        showFullMap = false;
+        this.isPlacingBuilding = true;
+        this.itemToPlace = item;
+        this.currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+        setCameraPosition();
+        camera.update();
+        Gdx.input.setInputProcessor(this);
+        showErrorDialog(stage, "Select a tile inside your farm to place item");
         //+ building.getDisplayName());
     }
 
@@ -611,7 +604,14 @@ private void updateAnimals(float delta) {
         }
 
         if(keycode == Input.Keys.R){
-            System.out.println(currentPlayer.getEnergy());
+            if(equippedItem == null){
+                showErrorDialog(stage,"First choose an item!");
+            }
+            else {
+                itemToPlace = equippedItem;
+                startPlacingItem(itemToPlace);
+            }
+
         }
         if(keycode == Input.Keys.I){
             currentPlayer.setEnergy(200);
@@ -669,6 +669,34 @@ private void updateAnimals(float delta) {
                 return stage.touchDown(screenX, screenY, pointer, button);
             }
 
+
+        if (isPlacingBuilding && currentFarm != null && !terminalVisible && itemToPlace != null) {
+            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+
+            if (isInsideFarm(tileX, tileY)) {
+
+                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+
+                if (tile != null && tile.isBuildable()) {
+
+                    Result result = houseMenuController.placeItem(itemToPlace.getName(),tile);
+                    showErrorDialog(stage,result.getMessage());
+
+                } else {
+                    showErrorDialog(stage, "Tile is not buildable.");
+                }
+            } else {
+                showErrorDialog(stage, "Please click inside your farm.");
+            }
+            //setBuilding(new Building(buildingToPlace));
+            isPlacingBuilding = false;
+            itemToPlace = null;
+            buildingToPlace = null;
+            currentFarm = null;
+            return true;
+        }
         if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
             Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
@@ -1460,7 +1488,8 @@ private void updateAnimals(float delta) {
                     Gdx.input.setInputProcessor(GameView.this);
                 }
             });
-            tbl.add(makeBtn).row();
+            tbl.add(makeBtn).colspan(3).padTop(4).row();
+
 
         }
 
@@ -2102,7 +2131,7 @@ private void updateAnimals(float delta) {
                 tileSize, tileSize);
         }
         else if(tiles[y][x].getContainedItem() instanceof Machine machine) {
-            batch.draw(GameAssetManager.FLOORING_01,x * tileSize,
+            batch.draw(machine.getType().getTexture(), x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
 
