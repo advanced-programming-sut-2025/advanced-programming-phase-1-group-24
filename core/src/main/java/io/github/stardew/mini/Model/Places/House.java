@@ -25,7 +25,8 @@ public class House extends Place{
   }
 
   public ArrayList<Machine> getMachines() {
-    return machines;
+
+      return machines;
   }
 
   public Map<Food, Integer> getFridge() {  return fridge; }
