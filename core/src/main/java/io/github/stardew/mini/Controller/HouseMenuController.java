@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Controller;
 
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.Farm;
@@ -76,7 +77,31 @@ public class HouseMenuController implements MenuController {
         player.reduceEnergy(2);
         Result result = player.getBackpack().addItem(new Machine(machineToCraft), 1);
         if(!result.isSuccessful()) return result;
-        return new Result(true, itemName + " crafted successfully!");
+        result = placeItemOnTheGround(itemName);
+        return result;
+    }
+    public Result placeItemOnTheGround(String itemName) {
+        Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
+        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+        House house = farm.getHouse();
+        User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        Item item = player.getBackpack().grabItemAndReturn(itemName, 1);
+        if(item == null || !item.isPlaceable()){
+            return new Result(false, "the item is not placeable or doesn't exist!");
+        }
+        for(int i = farm.getX(); i < farm.getX() + farm.getWidth(); i++){
+            for(int j = farm.getY(); j < farm.getY() + farm.getWidth(); j++){
+                if(map[j][i].getProductOfGrowable() != null || map[j][i].getContainedGrowable() != null ||
+                    map[j][i].getContainedItem() != null || !map[j][i].getisWalkable()){
+                    continue;
+                }
+                map[j][i].setContainedItem(item);
+                if(item instanceof Machine) house.getMachines().add((Machine) item);
+                return new Result(true, itemName + " placed successfully!");
+            }
+
+        }
+        return new Result(false, "No Place Found!");
     }
 
     public Result placeItem(String itemName, String direction) {

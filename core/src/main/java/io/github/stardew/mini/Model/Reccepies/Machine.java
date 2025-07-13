@@ -78,6 +78,7 @@ public class Machine extends Item {
     }
 
     public Result useMachine(String productName, User currentPlayer) {
+        System.out.println(productName);
         for (randomStuffType item : this.type.getProducts()) {
             if (item.getName().equals(productName)) {
                 if(item.getIngredients() == null)
