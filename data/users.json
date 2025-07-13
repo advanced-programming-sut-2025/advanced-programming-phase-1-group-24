@@ -83,7 +83,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user2",
@@ -169,7 +175,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user2",
@@ -255,7 +267,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user0",
@@ -341,7 +359,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user0",
@@ -427,7 +451,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user02",
@@ -513,7 +543,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user02",
@@ -599,7 +635,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user03",
@@ -685,7 +727,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user03",
@@ -771,7 +819,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia2",
@@ -855,7 +909,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia3",
@@ -939,7 +999,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia4",
@@ -1023,7 +1089,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia5",
@@ -1107,7 +1179,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia6",
@@ -1191,7 +1269,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia7",
@@ -1275,7 +1359,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia8",
@@ -1359,7 +1449,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia9",
@@ -1443,7 +1539,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia10",
@@ -1527,7 +1629,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia12",
@@ -1613,7 +1721,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia12",
@@ -1699,7 +1813,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia13",
@@ -1785,7 +1905,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia13",
@@ -1871,7 +1997,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user44",
@@ -1957,7 +2089,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "user44",
@@ -2043,7 +2181,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "zahra24",
@@ -2129,7 +2273,13 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "zahra24",
@@ -2215,6 +2365,12 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0
+    "movingDirection": 0,
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   }
 ]
