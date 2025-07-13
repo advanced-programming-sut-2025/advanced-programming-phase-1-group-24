@@ -599,9 +599,33 @@ private void updateAnimals(float delta) {
             return true;
         }
 
-        if (keycode == Input.Keys.N) {
+        if (keycode == Input.Keys.NUM_3) {
             if (showInventoryMenu || showBackpackMenu) return false;
-            MainApp.getInstance().getCurrentGame().getFriendship("kimia8", "kimia13").setLevel(3);
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
+                friendship.setLevel(3);
+            }
+            return true;
+        }
+        if(keycode == Input.Keys.NUM_2){
+            if (showInventoryMenu || showBackpackMenu) return false;
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
+                friendship.setLevel(2);
+            }
+            return true;
+
+        }
+        if(keycode == Input.Keys.NUM_1){
+            if (showInventoryMenu || showBackpackMenu) return false;
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
+                friendship.setLevel(1);
+            }
+            return true;
+        }
+        if(keycode == Input.Keys.NUM_0){
+            if (showInventoryMenu || showBackpackMenu) return false;
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
+                friendship.setLevel(0);
+            }
             return true;
         }
         if (keycode == Input.Keys.K) {
@@ -636,6 +660,7 @@ private void updateAnimals(float delta) {
             Tile neededTile = MainApp.getInstance().getCurrentGame().getMap().getTile(tile.getX() - 1, tile.getY());
             System.out.println(neededTile);
             System.out.println(neededTile.getContainedGrowable());
+            System.out.println(neededTile.getContainedGrowable().getCurrentStage());
             if(neededTile.getContainedGrowable() != null) {
                 System.out.println(neededTile.getContainedGrowable().getAge());
                 System.out.println(neededTile.getContainedGrowable().getGrowableType());
@@ -989,6 +1014,9 @@ private void updateAnimals(float delta) {
                 return true;
             }
             if (isClickInside(mouseX, mouseY, nextTurnButton)) {
+                if(equippedItem != null) {
+                    equippedItem = null;
+                }
                 Result result = controller.nextTurn();
                 if (!result.isSuccessful()) {
                     showErrorDialog(stage, result.message());
@@ -3589,7 +3617,7 @@ private void createAnimalDialog() {
                 if (accepted) {
                     Result result = controller.voteToTerminate(true, currentPlayer);
                     if(!result.isSuccessful()) showErrorDialog(stage, result.message());
-                    else{
+                    else {
                         if (gameTickTask != null) {
                             gameTickTask.cancel();
                         }

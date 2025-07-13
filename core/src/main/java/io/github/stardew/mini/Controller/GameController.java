@@ -340,7 +340,7 @@ public class GameController implements MenuController {
         if (!approve) {
             currentGame.setVoteInProgress(false);
             currentGame.getTerminationVotes().clear();
-            return new Result(true, "you voted NO. game termination cancelled.");
+            return new Result(false, "you voted NO. game termination cancelled.");
         }
 
         // Check if all players have voted yes
@@ -357,7 +357,7 @@ public class GameController implements MenuController {
             return new Result(true, "game terminated by unanimous vote. returning to game menu...");
         }
 
-        return new Result(true, "your vote is recorded as YES.");
+        return new Result(false, "your vote is recorded as YES.");
     }
 
     public void handleEndOfDay() {
@@ -2424,7 +2424,7 @@ public Result shepherdAnimal(String name, String x, String y) {
             return new Result(false, "Receiver's inventory is full.");
         }
 
-        sender.getBackpack().grabItem(FLOWER_ITEM_NAME, 1);
+        //sender.getBackpack().grabItem(FLOWER_ITEM_NAME, 1);
         String reez = receiver.isGender() ? "pretty" : "handsome";
         receiver.addToNotifications(new Message(senderUsername, receiverUsername, "Here is a flower " + reez + " :)"));
         // Friendship level logic
@@ -2754,6 +2754,7 @@ public Result shepherdAnimal(String name, String x, String y) {
         }
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        greenHouse.setGreenHouseFixed(true);
         return new Result(true, "green house build successful");
     }
 
