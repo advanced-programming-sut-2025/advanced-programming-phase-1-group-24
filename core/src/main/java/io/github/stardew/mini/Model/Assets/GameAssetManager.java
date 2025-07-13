@@ -45,6 +45,9 @@ public class GameAssetManager {
     public static Texture FLOORING_71;
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
+    public static Texture FlOORING_50;
+    public static Texture FLOORING_25;
+    public static Texture FLOORING_64;
     public static Texture burntTile;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
@@ -138,6 +141,9 @@ public class GameAssetManager {
         FLOORING_71 = new Texture(Gdx.files.internal("Flooring/Flooring_71.png"));
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
+        FLOORING_25 = new Texture(Gdx.files.internal("Flooring/Flooring_25.png"));
+        FLOORING_64 = new Texture(Gdx.files.internal("Flooring/Flooring_64.png"));
+        FlOORING_50 = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
         burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
@@ -335,6 +341,9 @@ public class GameAssetManager {
         if (stormOverlay != null) stormOverlay.dispose();
         if (dropTexture != null) dropTexture.dispose();
         if (crowSheet != null) crowSheet.dispose();
+        if(FlOORING_50 != null) FlOORING_50.dispose();
+        if(FLOORING_64 != null) FLOORING_64.dispose();
+        if(FLOORING_25 != null) FLOORING_25.dispose();
 
         disposeAnimals();
         if (farm1 != null) farm1.dispose();

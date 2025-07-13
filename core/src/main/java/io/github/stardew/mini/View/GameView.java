@@ -2753,6 +2753,20 @@ private void createAnimalDialog() {
                 if (tile != null && tile.getTexture() != null) {
                     batch.draw(tile.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                 }
+                if(tile == TileType.EMPTY){
+                    Season season = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+                    switch (season) {
+                            case SUMMER:
+                                batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                                break;
+                                case AUTUMN:
+                                    batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                                    break;
+                                    case WINTER:
+                                        batch.draw(GameAssetManager.FLOORING_25, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                                        break;
+                    }
+                }
                 if (tiles[y][x].isHasBeenBurt()) {
                     batch.draw(GameAssetManager.burntTile, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                 }
