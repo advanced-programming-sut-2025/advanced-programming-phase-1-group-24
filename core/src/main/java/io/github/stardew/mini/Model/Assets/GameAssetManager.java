@@ -107,6 +107,9 @@ public class GameAssetManager {
 
     public static Texture SECRET_HEART ;
 
+    public static Texture farm1 ;
+    public static Texture farm2 ;
+
     public static GameAssetManager getGameAssetManager() {
         if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
@@ -171,6 +174,8 @@ public class GameAssetManager {
         loadClock();
 
         loadPlayer();
+        farm1 = new Texture(Gdx.files.internal("farm1.png"));
+        farm2 = new Texture(Gdx.files.internal("farm2.png"));
     }
 
     private static void loadPlayer() {
@@ -332,6 +337,8 @@ public class GameAssetManager {
         if (crowSheet != null) crowSheet.dispose();
 
         disposeAnimals();
+        if (farm1 != null) farm1.dispose();
+        if (farm2 != null) farm2.dispose();
     }
 
     private static void disposeAnimals() {

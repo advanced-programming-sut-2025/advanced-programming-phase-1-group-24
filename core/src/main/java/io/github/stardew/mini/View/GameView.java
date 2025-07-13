@@ -36,6 +36,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
+import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
@@ -99,7 +100,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private OrthographicCamera camera;
     private User currentPlayer;  //should change whenever currentPlayer in Game is changed
     private float stateTime = 0f;
-    private boolean showFullMap = false;
+    private boolean showFullMap = true;
     private final Color darkOverlayColor = new Color(0, 0, 0, 0); // black with 0 alpha
     private WeatherType currentWeather;
     public static List<LightningFlash> scheduledFlashes = new ArrayList<>();
@@ -172,7 +173,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Item equippedItem = null;
     private Table equippedItemSlotTable;
     private Timer.Task gameTickTask;
-
+    private boolean hasShownFaintMessage = false; // Add this to your screen class
     private String scenario = "";
     String giftReciever, artisanName;
 
@@ -248,7 +249,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private void setCameraToFarm(Farm farm) {
         int tileSize = GameAssetManager.TILE_SIZE;
         Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
-        Tile tile = tiles[farm.getX() + (farm.getWidth() / 2)][farm.getY() + (farm.getHeight() / 2)];
+        Tile tile = tiles[farm.getY() + (farm.getHeight() / 2)][farm.getX() + (farm.getWidth() / 2)];
         float centerX = tile.getX() * tileSize + tileSize / 2f;
         float centerY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tile.getY() - 1) * tileSize + tileSize / 2f;
 
@@ -405,6 +406,9 @@ private void updateAnimals(float delta) {
                 }
                 if (animal.getCurrentTile() == null) continue;
                 batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
+                if(animal.getProduct() !=null ){
+                    batch.draw(animal.getProduct().getAnimalProductType().getTexture(), x, y, tileSize/2, tileSize/2);
+                }
             }
         }
     }
@@ -637,8 +641,10 @@ private void updateAnimals(float delta) {
         if (keycode == Input.Keys.Z) {
             Tile tile = currentPlayer.getCurrentTile();
             Machine machine = (Machine) tile.getContainedItem();
+            if(machine != null){
             machine.useMachine("Coffee", currentPlayer);
             MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse().getMachines().add(machine);
+            }
         }
         if (keycode == Input.Keys.U) {
             Tile tile = currentPlayer.getCurrentTile();
@@ -995,14 +1001,8 @@ private void updateAnimals(float delta) {
                         gameTickTask.cancel();
                     }
                     MainApp.getInstance().setCurrentGame(null);
-                    MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
-                    MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
-//                    Gdx.app.postRunnable(() -> {
-//                        Timer.instance().stop();
-//                        MainApp.getInstance().setCurrentGame(null);
-//                        MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
-//                        MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
-//                    });
+                    MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                    MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
                 }
                 return true;
             }
@@ -1017,6 +1017,13 @@ private void updateAnimals(float delta) {
                 if(equippedItem != null) {
                     equippedItem = null;
                 }
+                //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
+//                System.out.println("touchdown");
+//                if (isAnyDialogOpen()) {
+//                    //showErrorDialog(stage,"Cannot end turn while another menu is open.");
+//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+//                    return true;
+//                }
                 Result result = controller.nextTurn();
                 if (!result.isSuccessful()) {
                     showErrorDialog(stage, result.message());
@@ -1167,6 +1174,7 @@ private void updateAnimals(float delta) {
                                     showPurchaseDialog();
                                 }
                                 shopMenuDialog.hide();
+                                shopMenuDialog.setVisible(false);
                             }
                         });
 
@@ -1307,6 +1315,7 @@ private void updateAnimals(float delta) {
                 Result result = storeController.purchase(selectedShop,selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
                 shopPurchaseDialog.hide();
+                shopPurchaseDialog.setVisible(false);
                 showErrorDialog(stage, result.message());
                 //Gdx.input.setInputProcessor(GameView.this);
             }
@@ -1316,6 +1325,7 @@ private void updateAnimals(float delta) {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 shopPurchaseDialog.hide();
+                shopPurchaseDialog.setVisible(false);
                 Gdx.input.setInputProcessor(GameView.this);
             }
         });
@@ -1465,7 +1475,7 @@ private void createAnimalDialog() {
     };
 
     animalMenuDialog.padTop(40);
-    animalMenuDialog.getContentTable().defaults().pad(10);
+    animalMenuDialog.getContentTable().defaults().pad(5);
 
     // ========== TOP INFO AREA ==========
     animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
@@ -1481,7 +1491,7 @@ private void createAnimalDialog() {
 
     HorizontalGroup shepherdGroup = new HorizontalGroup();
     shepherdGroup.space(10);
-    shepherdGroup.addActor(new Label("To:", GameAssetManager.skin));
+    shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
     shepherdGroup.addActor(xField);
     shepherdGroup.addActor(yField);
 
@@ -1505,6 +1515,14 @@ private void createAnimalDialog() {
     animalMenuDialog.getContentTable().add(shepherdButton).row();
 
     // ========== BUTTONS ==========
+    TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
+    releaseButton.addListener(new ClickListener() {
+        public void clicked(InputEvent event, float x, float y) {
+            animalMenuDialog.hide();
+            handleAnimalMenuChoice("release");
+        }
+    });
+    animalMenuDialog.getContentTable().add(releaseButton).row();
     TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
     feedButton.addListener(new ClickListener() {
         public void clicked(InputEvent event, float x, float y) {
@@ -1563,7 +1581,8 @@ private void createAnimalDialog() {
 
         StringBuilder info = new StringBuilder();
         info.append("Name: ").append(selectedAnimal.getName()).append("\n");
-        info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+       // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+        info.append("Friendship: ").append(selectedAnimal.getFriendship()).append("\n");
         info.append("Fed: ").append(selectedAnimal.isFedToday()).append("\n");
         info.append("Petted: ").append(selectedAnimal.isPettedToday()).append("\n");
         info.append("In Habitat: ").append(selectedAnimal.isInHabitat()).append("\n");
@@ -1578,6 +1597,7 @@ private void createAnimalDialog() {
                 .append(")-(").append(currentFarm.getX() + currentFarm.getWidth()-1).append(",").append(currentFarm.getY()+currentFarm.getHeight()-1).append(")\n");
         }
         animalInfoLabel.setText(info.toString());
+        animalInfoLabel.setFontScale(0.5f);
     }
 
     private void createMachineDialog() {
@@ -1998,6 +2018,7 @@ private void createAnimalDialog() {
                 case "pet": result = controller.petAnimal(selectedAnimal.getName()); break;
                 case "sell": result = controller.sellAnimal(selectedAnimal.getName()); break;
                 case "collect": result = controller.collectProduct(selectedAnimal.getName()); break;
+                case "release": result = controller.releaseAnimal(selectedAnimal.getName()); break;
                 case "cancel": result = new Result(true, ""); break;
                 default: result = new Result(false, choice); break;
             }
@@ -2008,6 +2029,22 @@ private void createAnimalDialog() {
         selectedAnimal = null;
     }
 
+    private boolean isAnyDialogOpen() {
+        System.out.println(shopMenuDialog != null);
+        System.out.println(shopMenuDialog.isVisible());
+        System.out.println(shopPurchaseDialog != null);
+        System.out.println(shopPurchaseDialog.isVisible());
+        System.out.println("/////////////////////////////");
+
+        return
+            //(skillsDialog != null && skillsDialog.isVisible()) ||
+            (shopMenuDialog != null && shopMenuDialog.isVisible()) ||
+           // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
+            (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
+            //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
+           // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
+           // (friendsDialog != null && friendsDialog.isVisible());
+    }
 
     @Override
     public void show() {
@@ -2027,7 +2064,6 @@ private void createAnimalDialog() {
         friendsButton.setColor(Color.PURPLE);
         friendsButton.setPosition(Gdx.graphics.getWidth() - 100, 10);
         friendsButton.setTouchable(Touchable.enabled);
-
         stage.addActor(friendsButton);
 
         nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
@@ -2035,7 +2071,27 @@ private void createAnimalDialog() {
         nextTurnButton.setColor(Color.MAGENTA);
         nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
         nextTurnButton.setTouchable(Touchable.enabled);
+        nextTurnButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (Gdx.input.getInputProcessor() != GameView.this) {
+                    // showErrorDialog(stage, "Cannot end turn while another menu is open.");
+                    showTimedErrorLabel( stage, "Cannot end turn while another menu is open.", 2f) ;
+                    // return;
+                }
+//                if (isAnyDialogOpen()) {
+//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+//                    return;
+//                }
+
+//                Result result = controller.nextTurn();
+//                if (!result.isSuccessful()) {
+//                    showErrorDialog(stage, result.message());
+//                }
+            }
+        });
         stage.addActor(nextTurnButton);
+
 
         exitGameButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
         exitGameButton.setSize(100, 100);
@@ -2196,6 +2252,27 @@ private void createAnimalDialog() {
     @Override
     public void render(float v) {
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+//        if (currentPlayer.hasFainted()) {
+//            if (!hasShownFaintMessage) {
+//                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f);
+//                hasShownFaintMessage = true;
+//            }
+//        } else {
+//            hasShownFaintMessage = false; // Reset if player regains energy
+//        }
+        if (currentPlayer.hasFainted()) {
+            if (!hasShownFaintMessage) {
+                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
+                    controller.nextTurn();
+                });
+                hasShownFaintMessage = true;
+            }
+        } else {
+            hasShownFaintMessage = false;
+        }
+
+
         determineAvatar();
         showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());
@@ -3622,8 +3699,8 @@ private void createAnimalDialog() {
                             gameTickTask.cancel();
                         }
                         MainApp.getInstance().setCurrentGame(null);
-                        MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
-                        MainApp.getInstance().setScreen(new PreGameMenuView(new PreGameMenuController()));
+                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
                     }
                 } else {
                     Result result = controller.voteToTerminate(false, currentPlayer);
@@ -3912,57 +3989,176 @@ private void createAnimalDialog() {
         }
     }
 
-    public void showErrorDialog(Stage stage, String message) {
-        Skin skin = GameAssetManager.skin;
+//    public void showErrorDialog(Stage stage, String message) {
+//        Skin skin = GameAssetManager.skin;
+//
+//        Dialog dialog = new Dialog("", skin) {
+//            @Override
+//            protected void result(Object object) {
+//                // Optional: Handle result
+//            }
+//        };
+//
+//        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+//
+//        Label messageLabel = new Label(message, skin, "custom-label");
+//        messageLabel.setWrap(true);
+//        messageLabel.setAlignment(Align.center);
+//        messageLabel.setFontScale(0.7f); // Optional
+//
+//        TextButton okButton = new TextButton("OK", skin, "custom-button");
+//        okButton.pad(10f);
+//        okButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                dialog.hide(); // Close dialog
+//                Gdx.input.setInputProcessor(GameView.this); // return control to GameView if needed
+//            }
+//        });
+//
+//        Table contentTable = new Table();
+//        contentTable.defaults().pad(10f);
+//        contentTable.add(messageLabel).width(stage.getWidth() * 0.5f).row();
+//        contentTable.add(okButton).center();
+//
+//        dialog.getContentTable().clear();
+//        dialog.getContentTable().add(contentTable).expand().fill();
+//
+//        dialog.setMovable(false);
+//        dialog.setModal(true);
+//        dialog.setResizable(false);
+//
+//        float dialogWidth = stage.getWidth() * 0.4f;
+//        float dialogHeight = stage.getHeight() * 0.25f;
+//        dialog.setSize(dialogWidth, dialogHeight);
+//        dialog.setPosition(
+//            (stage.getWidth() - dialogWidth) / 2f,
+//            (stage.getHeight() - dialogHeight) / 2f
+//        );
+//
+//        stage.addActor(dialog);
+//        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
+//    }
+public void showErrorDialog(Stage stage, String message) {
+    Skin skin = GameAssetManager.skin;
 
-        Dialog dialog = new Dialog("", skin) {
-            @Override
-            protected void result(Object object) {
-                // Optional: Handle result
+    Dialog dialog = new Dialog("", skin) {
+        @Override
+        protected void result(Object object) {
+            // Optional: Handle result
+        }
+    };
+
+    dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+
+    Label messageLabel = new Label(message, skin, "custom-label");
+    messageLabel.setWrap(true);
+    messageLabel.setAlignment(Align.center);
+    messageLabel.setFontScale(0.7f);
+
+    float maxWidth = stage.getWidth() * 0.6f;
+    messageLabel.setWidth(maxWidth); // Required for wrapping to work
+    messageLabel.invalidateHierarchy(); // Force layout to recalculate size
+
+    // Let the label wrap and calculate the height
+    Table contentTable = new Table();
+    contentTable.defaults().pad(10f);
+    contentTable.add(messageLabel).width(maxWidth).row();
+
+    TextButton okButton = new TextButton("OK", skin, "custom-button");
+    okButton.pad(10f);
+    okButton.addListener(new ClickListener() {
+        @Override
+        public void clicked(InputEvent event, float x, float y) {
+            dialog.hide();
+            Gdx.input.setInputProcessor(GameView.this);
+        }
+    });
+
+    contentTable.add(okButton).center().padTop(10f);
+
+    dialog.getContentTable().clear();
+    dialog.getContentTable().add(contentTable).expand().fill();
+    dialog.setMovable(false);
+    dialog.setModal(true);
+    dialog.setResizable(false);
+
+    dialog.pack(); // Automatically size dialog based on contents
+
+    // Clamp width/height to screen size if needed
+    float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
+    float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
+    dialog.setSize(clampedWidth, clampedHeight);
+
+    // Center on screen
+    dialog.setPosition(
+        (stage.getWidth() - clampedWidth) / 2f,
+        (stage.getHeight() - clampedHeight) / 2f
+    );
+
+    stage.addActor(dialog);
+    Gdx.input.setInputProcessor(stage);
+}
+
+//    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
+//        Skin skin = GameAssetManager.skin;
+//
+//        Label errorLabel = new Label(message, skin, "custom-label");
+//        errorLabel.setAlignment(Align.center);
+//        errorLabel.setColor(Color.SCARLET);
+//        errorLabel.setFontScale(1.2f);
+//
+//        // Optional background for visibility
+////       errorLabel.setBackground(skin.getDrawable("window"));
+//
+//        float width = Gdx.graphics.getWidth() * 0.4f;
+//        float height = Gdx.graphics.getHeight() * 0.15f;
+//
+//        errorLabel.setSize(width, height);
+//        errorLabel.setPosition(
+//            (Gdx.graphics.getWidth() - width) / 2f,
+//            (Gdx.graphics.getHeight() - height) / 2f
+//        );
+//
+//        stage.addActor(errorLabel);
+//
+//        // Fade out and remove after delay
+//        errorLabel.addAction(Actions.sequence(
+//            Actions.delay(durationSeconds),
+//            Actions.fadeOut(0.5f),
+//            Actions.run(errorLabel::remove)
+//        ));
+//    }
+public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
+    Skin skin = GameAssetManager.skin;
+
+    Label errorLabel = new Label(message, skin, "custom-label");
+    errorLabel.setAlignment(Align.center);
+    errorLabel.setColor(Color.SCARLET);
+    errorLabel.setFontScale(1.2f);
+
+    float width = Gdx.graphics.getWidth() * 0.4f;
+    float height = Gdx.graphics.getHeight() * 0.15f;
+
+    errorLabel.setSize(width, height);
+    errorLabel.setPosition(
+        (Gdx.graphics.getWidth() - width) / 2f,
+        (Gdx.graphics.getHeight() - height) / 2f
+    );
+
+    stage.addActor(errorLabel);
+
+    errorLabel.addAction(Actions.sequence(
+        Actions.delay(durationSeconds),
+        Actions.fadeOut(0.5f),
+        Actions.run(() -> {
+            errorLabel.remove();
+            if (onComplete != null) {
+                onComplete.run();
             }
-        };
-
-        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
-
-        Label messageLabel = new Label(message, skin, "custom-label");
-        messageLabel.setWrap(true);
-        messageLabel.setAlignment(Align.center);
-        messageLabel.setFontScale(0.7f); // Optional
-
-        TextButton okButton = new TextButton("OK", skin, "custom-button");
-        okButton.pad(10f);
-        okButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                dialog.hide(); // Close dialog
-                Gdx.input.setInputProcessor(GameView.this); // return control to GameView if needed
-            }
-        });
-
-        Table contentTable = new Table();
-        contentTable.defaults().pad(10f);
-        contentTable.add(messageLabel).width(stage.getWidth() * 0.5f).row();
-        contentTable.add(okButton).center();
-
-        dialog.getContentTable().clear();
-        dialog.getContentTable().add(contentTable).expand().fill();
-
-        dialog.setMovable(false);
-        dialog.setModal(true);
-        dialog.setResizable(false);
-
-        float dialogWidth = stage.getWidth() * 0.4f;
-        float dialogHeight = stage.getHeight() * 0.25f;
-        dialog.setSize(dialogWidth, dialogHeight);
-        dialog.setPosition(
-            (stage.getWidth() - dialogWidth) / 2f,
-            (stage.getHeight() - dialogHeight) / 2f
-        );
-
-        stage.addActor(dialog);
-        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
-    }
-
+        })
+    ));
+}
     public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
         Skin skin = GameAssetManager.skin;
 
@@ -3993,8 +4189,3 @@ private void createAnimalDialog() {
         ));
     }
 }
-
-
-
-
-

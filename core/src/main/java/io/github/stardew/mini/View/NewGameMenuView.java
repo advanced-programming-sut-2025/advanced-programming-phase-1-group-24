@@ -32,7 +32,7 @@ public class NewGameMenuView implements AppMenu, Screen {
     private ArrayList<String> playerNames = new ArrayList<>();
 
     private TextField nameInput;
-    private Label errorLabel;
+//    private Label errorLabel;
     private TextButton addPlayerButton;
     private TextButton startGameButton;
     private TextButton backButton;
@@ -85,8 +85,8 @@ public class NewGameMenuView implements AppMenu, Screen {
         backButton =  new TextButton("Back", skin, "custom-button");
         startGameButton.setDisabled(true); // disabled initially
 
-        errorLabel = new Label("", skin);
-        errorLabel.setColor(Color.RED);
+//        errorLabel = new Label("", skin);
+//        errorLabel.setColor(Color.RED);
 
         float buttonWidth = Gdx.graphics.getWidth() / 4f;
         float buttonHeight = Gdx.graphics.getHeight() / 8f;
@@ -98,7 +98,7 @@ public class NewGameMenuView implements AppMenu, Screen {
         table.add(titleLabel).colspan(2).padBottom(bottomPad * 2).row();
         table.add(nameInput).width(buttonWidth).height(buttonHeight / 2).padBottom(bottomPad);
         table.add(addPlayerButton).width(buttonWidth ).height(buttonHeight).padBottom(bottomPad).row();
-        table.add(errorLabel).colspan(2).padBottom(bottomPad).row();
+      //  table.add(errorLabel).colspan(2).padBottom(bottomPad).row();
 
         // Placeholder for player list display
         updatePlayerListUI();
