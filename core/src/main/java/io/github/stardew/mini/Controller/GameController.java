@@ -209,7 +209,7 @@ public class GameController implements MenuController {
     public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
         Game currentGame = app.getCurrentGame();
-        User currentUser = app.getLoggedInUser();
+        User currentUser = app.getCurrentGame().getCurrentPlayer();
 
         if (currentUser == null || currentGame == null)
             return new Result(false, "no active game!");
@@ -379,7 +379,7 @@ public class GameController implements MenuController {
         if (!approve) {
             currentGame.setVoteInProgress(false);
             currentGame.getTerminationVotes().clear();
-            return new Result(true, "you voted NO. game termination cancelled.");
+            return new Result(false, "you voted NO. game termination cancelled.");
         }
 
         // Check if all players have voted yes
@@ -396,7 +396,7 @@ public class GameController implements MenuController {
             return new Result(true, "game terminated by unanimous vote. returning to game menu...");
         }
 
-        return new Result(true, "your vote is recorded as YES.");
+        return new Result(false, "your vote is recorded as YES.");
     }
 
     public void handleEndOfDay() {
