@@ -221,24 +221,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                             System.out.println( user.getUsername() + " " + number +"\n");
                         }
                     }
-                    /// /////////// hard code ///////////////////////////////////////////////////////////////
-                    Machine machine = new Machine(MachineType.KEG);
 
-
-                    Animal moo = new Animal("moo", AnimalType.COW);
-                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
-                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    moo.setCurrentTile(new_tile);
-                    tiles2.setContainedItem(machine);
-                    new_tile.setContainedAnimal(moo);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
-                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
-                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    heny.setCurrentTile(new_tile_heny);
-                    new_tile.setContainedAnimal(heny);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
-                    /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
 
 

@@ -75,16 +75,6 @@ public class NewGameMenuController implements MenuController{
         players.add(creator);
         players.addAll(invitedUsers);
 
-        for (User player : players) {
-            player.updateGameFields(); // whatever this does
-            if(player.isGender()){
-                player.setAvatar(FEMALE_AVATARS[random.nextInt(FEMALE_AVATARS.length)]);
-            }
-            else{
-                player.setAvatar(MALE_AVATARS[random.nextInt(MALE_AVATARS.length)]);
-            }
-        }
-
         Game newGame = new Game(players, creator, creator);
 
         if (FarmTemplateManager.getTemplates() == null) {
