@@ -14,7 +14,7 @@ public enum TreeType {
     OrangeTree("Orange Tree", SourceType.OrangeSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Orange, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),
     PeachTree("Peach Tree", SourceType.PeachSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Peach, false, new ArrayList<>(Arrays.asList(Season.SUMMER)), null),
     AppleTree("Apple Tree", SourceType.AppleSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Apple, false, new ArrayList<>(Arrays.asList(Season.AUTUMN)), null),
-    PomegranateTree("Pomegranate Tree", SourceType.PomegranateSapling, Arrays.asList(7, 7, 7, 7), 28, FruitType.Pomegranate, false, new ArrayList<>(Arrays.asList(Season.AUTUMN)), null),
+    PomegranateTree("Pomegranate Tree", SourceType.PomegranateSapling, Arrays.asList(2, 2, 2, 2), 8, FruitType.Pomegranate, false, new ArrayList<>(Arrays.asList(Season.AUTUMN)), null),
     OakTree("Oak Tree", SourceType.Acorns, Arrays.asList(7, 7, 7, 7), 28, FruitType.OakResin, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     MapleTree("Maple Tree", SourceType.MapleSeeds, Arrays.asList(7, 7, 7, 7), 28, FruitType.MapleSyrup, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
     PineTree("Pine Tree", SourceType.PineCones, Arrays.asList(7, 7, 7, 7), 28, FruitType.PineTar, true, new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER)), new ArrayList<>(Arrays.asList(Season.SPRING, Season.SUMMER, Season.AUTUMN, Season.WINTER))),
@@ -132,7 +132,7 @@ public enum TreeType {
             }
             case PomegranateTree -> {
                 textures = TreeAssets.pomegranateTextures;
-                fruitedTexture = new Texture("Trees/Pomegranate_Stage_5.png");
+                fruitedTexture = new Texture("Trees/Pomegranate_Stage_5_Fruit.png");
                 burnTexture = new Texture("Trees/PomegranateTreeLightning.png");
             }
         }

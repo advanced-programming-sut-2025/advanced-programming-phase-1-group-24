@@ -525,11 +525,14 @@ public class User {
 
     //always call this function before any task that consumes energy if it returns false cant do the task
     public boolean tryConsumeEnergy(int energyRequired) {
-        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
-            //System.out.println("not enough energy!");
+//        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+//            //System.out.println("not enough energy!");
+//            return false;
+//        }
+        if(energy < energyRequired){
             return false;
         }
-        currentTurnEnergy -= energyRequired;
+        //currentTurnEnergy -= energyRequired;
         energy -= energyRequired;
         handleFainting();
         return true;
