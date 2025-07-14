@@ -75,6 +75,10 @@ public class NewGameMenuController implements MenuController{
         players.add(creator);
         players.addAll(invitedUsers);
 
+        for(User player : players) {
+            player.updateGameFields();
+        }
+
         Game newGame = new Game(players, creator, creator);
 
         if (FarmTemplateManager.getTemplates() == null) {

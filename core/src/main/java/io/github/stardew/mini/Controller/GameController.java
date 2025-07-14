@@ -78,10 +78,14 @@ public class GameController implements MenuController {
     public Result useTool(String direction) {
 //        MainApp.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getTools().get(0));
         //MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(GrowableFactory.getInstance().create(SourceType.CauliflowerSeeds), 10);
+        System.out.println("tool" + direction);
         User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tool currentTool = player.getEquippedTool();
+        System.out.println(currentTool);
         if (currentTool == null) {
+            System.out.println("Tool not found");
             return new Result(false, "You don't have an equipped tool");
+
         }
         int x = 0;
         int y = 0;
@@ -109,6 +113,7 @@ public class GameController implements MenuController {
             } else if (currentTool instanceof PickAxe) {
                 return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Scythe) {
+                System.out.println("Scythe");
                 return ((Scythe) currentTool).useScythe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof WateringCan) {
                 return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
