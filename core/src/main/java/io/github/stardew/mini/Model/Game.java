@@ -1,20 +1,25 @@
 package io.github.stardew.mini.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.NPCManagement.NPCtype;
+import io.github.stardew.mini.Model.Places.Farm;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
-
+import io.github.stardew.mini.Model.Places.Habitat;
 import java.util.*;
 import io.github.stardew.mini.Model.MapManagement.*;
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
     private MapOfGame map;
@@ -31,6 +36,8 @@ public class Game {
     private boolean isVoteInProgress = false;
 
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
+
+    private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
 
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
@@ -52,6 +59,8 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+    }
+    public Game() {
     }
 
     private ArrayList<NPC> npcs;
@@ -355,5 +364,18 @@ public class Game {
                 !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
             currentPlayer.getCookingRecepies().add(FoodRecipe.MinersTreat);
     }
+    public void reloadExtraData(){
+        for (Tile[] row : map.getMap()) {
+            for (Tile tile : row) {
+                Animal animal = tile.getContainedAnimal();
+                if (animal != null) {
+                    animal.reloadAfterLoad(tile);
+                }
+            }
+        }
+    }
 
+    public Map<String, List<NPCMission>> getPlayerAddedMissions() {
+        return playerAddedMissions;
+    }
 }

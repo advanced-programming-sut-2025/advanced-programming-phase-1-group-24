@@ -16,6 +16,8 @@ public class Scythe extends Tool{
         super(type);
     }
 
+    public Scythe() {}
+
     @Override
     public void upgrade(ToolMaterial material) {
         return;
@@ -70,6 +72,7 @@ public class Scythe extends Tool{
                 nextTile.setProductOfGrowable(null);
             }
             currentPlayer.addSkillExperience(Skill.FARMING);
+            nextTile.setWalkable(true);
             return new Result(true, "Harvested " + productOfGrowable.getName());
         }
     }

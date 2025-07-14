@@ -8,4 +8,6 @@ public class Quarry extends Place{
         this.height = height;
     }
 
+    public Quarry() {
+    }
 }

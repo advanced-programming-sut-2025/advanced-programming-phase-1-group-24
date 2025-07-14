@@ -3,6 +3,7 @@ package io.github.stardew.mini.Model.Places;
 import java.util.ArrayList;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Things.StorageType;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 
 public class Habitat extends Place{
     //type of cage and barn delux and ...
+    @JsonIgnore
     ArrayList<Animal> livingAnimals = new ArrayList<>();
     StorageType storageType;
     HabitatType habitatType;
@@ -22,6 +24,9 @@ public class Habitat extends Place{
         this.height = height;
         this.storageType = storageType;
         this.habitatType = habitatType;
+    }
+
+    public Habitat() {
     }
 
     public ArrayList<Animal> getLivingAnimals() {

@@ -1,6 +1,7 @@
 package io.github.stardew.mini.Controller;
 
 import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Places.Farm;
@@ -79,27 +80,19 @@ public class HouseMenuController implements MenuController {
         return new Result(true, itemName + " crafted successfully!");
     }
 
-    public Result placeItem(String itemName, String direction) {
+    public Result placeItem(String itemName, Tile tile) {
         User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player);
         House house = farm.getHouse();
         Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
-        int x = player.getCurrentTile().getX();
-        int y = player.getCurrentTile().getY();
-        if(direction.equals("up")) y--;
-        else if(direction.equals("down")) y++;
-        else if(direction.equals("left")) x--;
-        else if(direction.equals("right")) x++;
-        if(x < 0 || y < 0 || x >= map[0].length || y >= map.length || !direction.matches("up|down|left|right")) {
-            return new Result(false, "direction is invalid.");
-        }
 
-        if(map[y][x].getProductOfGrowable() != null || map[y][x].getContainedGrowable() != null ||
-                map[y][x].getContainedItem() != null || !map[y][x].getisWalkable()){
+
+        if(tile.getProductOfGrowable() != null || tile.getContainedGrowable() != null ||
+                tile.getContainedItem() != null || !tile.getisWalkable()){
             return new Result(false, "tile is full!");
         }
 
-        if(map[y][x].getType() == TileType.SHIPPINGBIN){
+        if(tile.getType() == TileType.SHIPPINGBIN){
             return new Result(false, "You cannot place item in shipping bin!");
         }
 
@@ -108,7 +101,7 @@ public class HouseMenuController implements MenuController {
             return new Result(false, "the item is not placeable or doesn't exist!");
         }
 
-        map[y][x].setContainedItem(item);
+        tile.setContainedItem(item);
         if(item instanceof Machine) house.getMachines().add((Machine) item);
         return new Result(true, itemName + " placed successfully!");
 
