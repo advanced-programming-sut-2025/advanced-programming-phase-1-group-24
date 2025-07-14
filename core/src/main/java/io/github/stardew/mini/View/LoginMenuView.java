@@ -71,7 +71,7 @@ public class LoginMenuView implements Screen,AppMenu {
 
         loginButton = new TextButton("Login", skin, "custom-button");
         forgetPasswordButton = new TextButton("Forget Password", skin, "custom-button");
-        //registerButton = new TextButton("Register", skin);
+        registerButton = new TextButton("Register", skin, "custom-button");
         errorLabel = new Label("", skin, "custom-label");
 
         table.add(title).colspan(2).padBottom(20);
@@ -81,6 +81,8 @@ public class LoginMenuView implements Screen,AppMenu {
         table.row().pad(10);
         table.add(new Label("Password:", skin,"custom-label")).right().padRight(10);
         table.add(passwordField).width(200).height(50);
+        table.row().pad(10);
+
         table.row().pad(20);
 
         stayLoggedInCheckbox.setTransform(true);
@@ -90,6 +92,7 @@ public class LoginMenuView implements Screen,AppMenu {
         table.add(loginButton).width(400).padRight(10).height(60);
 
         table.add(forgetPasswordButton).width(400).padRight(10).height(60);
+        table.add(registerButton).width(400).padRight(10).height(60);
         table.row().pad(10);
         errorLabel.setColor(Color.ROYAL);
         table.add(errorLabel).colspan(2);
@@ -118,6 +121,13 @@ public class LoginMenuView implements Screen,AppMenu {
                     )
                 );
 
+            }
+        });
+
+        registerButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MainApp.getInstance().setScreen(new SignupMenuView(new SignupMenuController(), skin));
             }
         });
 
