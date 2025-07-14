@@ -30,6 +30,8 @@ public class FishingMinigameDialog extends Group {
     private Image greenBar;
     private ProgressBar catchProgressBar;
     private TextButton cancelButton;
+    private TextButton sonarBobberButton;
+    private Image sonarDisplaySlot;
 
     // Minigame state variables
     private float fishPosition;
@@ -41,6 +43,7 @@ public class FishingMinigameDialog extends Group {
     private float catchProgress;
     private FishMovementType currentMovementType;
     private float fishMovementTimer;
+    private Fish currentFishForSonar;
 
     // Callback for when the minigame ends
     public interface FishingMinigameCallback {
@@ -111,11 +114,39 @@ public class FishingMinigameDialog extends Group {
             }
         });
 
+        sonarBobberButton = new TextButton("Sonar Bobber", GameAssetManager.skin, "custom-button");
+        sonarBobberButton.setSize(100, 40);
+        sonarBobberButton.setColor(Color.BLUE);
+        sonarBobberButton.setPosition(this.getWidth() / 2 - sonarBobberButton.getWidth() / 2, cancelButton.getY() - sonarBobberButton.getHeight() - 5);
+        this.addActor(sonarBobberButton);
+
+        sonarDisplaySlot = new Image(new TextureRegionDrawable(GameAssetManager.pixel));
+        sonarDisplaySlot.setColor(Color.DARK_GRAY);
+        sonarDisplaySlot.setSize(FISH_ICON_SIZE * 2, FISH_ICON_SIZE * 2);
+        sonarDisplaySlot.setPosition(this.getWidth() / 2 - sonarDisplaySlot.getWidth() / 2, sonarBobberButton.getY() - sonarDisplaySlot.getHeight() - 5);
+        this.addActor(sonarDisplaySlot);
+
+        sonarBobberButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (isMinigameActive && currentFishForSonar != null) {
+                    Texture fishTexture = currentFishForSonar.getType().getTexture();
+                    if (fishTexture != null) {
+                        sonarDisplaySlot.setDrawable(new TextureRegionDrawable(fishTexture));
+                        sonarDisplaySlot.setColor(Color.WHITE);
+                    } else {
+                        sonarDisplaySlot.setDrawable(new TextureRegionDrawable(new Texture("Fish/Perch.png")));
+                        sonarDisplaySlot.setColor(Color.WHITE);
+                    }
+                }
+            }
+        });
+
         ProgressBar.ProgressBarStyle style = new ProgressBar.ProgressBarStyle();
         style.background = new TextureRegionDrawable(new TextureRegion(GameAssetManager.pixel)).tint(Color.DARK_GRAY);
         style.knobBefore = new TextureRegionDrawable(new TextureRegion(GameAssetManager.pixel)).tint(Color.GREEN);
         catchProgressBar = new ProgressBar(0, 100, 1, true, style);
-        catchProgressBar.setSize(100f, BAR_HEIGHT);
+        catchProgressBar.setSize(BAR_WIDTH, BAR_HEIGHT);
         catchProgressBar.setPosition(containerTable.getX() + BAR_WIDTH + 10, containerTable.getY());
         this.addActor(catchProgressBar);
     }
@@ -128,10 +159,15 @@ public class FishingMinigameDialog extends Group {
         this.setVisible(true);
         isMinigameActive = true;
 
+        this.currentFishForSonar = fishToCatch;
+
+        sonarDisplaySlot.setDrawable(new TextureRegionDrawable(GameAssetManager.pixel));
+        sonarDisplaySlot.setColor(Color.DARK_GRAY);
+
         if (fishToCatch != null && fishToCatch.getType().getRareness() == RarenessType.LEGENDARY) {
-            fishIcon.setDrawable(new TextureRegionDrawable(new Texture("Fish/Legend.png")));
-            fishIcon.setSize(FISH_ICON_SIZE , FISH_ICON_SIZE);
-            }
+            fishIcon.setDrawable(new TextureRegionDrawable(new Texture("Fish/Legendary_Fish.png")));
+            fishIcon.setSize(FISH_ICON_SIZE * 1.5f , FISH_ICON_SIZE * 1.5f);
+        }
 
         fishPosition = 0.5f;
 
@@ -267,7 +303,7 @@ public class FishingMinigameDialog extends Group {
         greenBar.setHeight(greenBarHeight * BAR_HEIGHT);
 
         fishIcon.setPosition(
-            (BAR_WIDTH / 2) - (FISH_ICON_SIZE / 2),
+            (BAR_WIDTH / 2) - (fishIcon.getWidth() / 2),
             fishPosition * BAR_HEIGHT
         );
 
