@@ -19,6 +19,7 @@ public class WateringCan extends Tool{
         this.maxCapacity = 40;
         this.waterLeft = 0;
     }
+    public WateringCan(){}
 
 
     public int getMaxCapacity() { return maxCapacity; }

@@ -28,7 +28,7 @@ public class Machine extends Item {
         this.isActivated = false;
         this.isReady = false;
     }
-
+    public Machine(){}
     public MachineType getType() {
         return type;
     }
@@ -78,7 +78,6 @@ public class Machine extends Item {
     }
 
     public Result useMachine(String productName, User currentPlayer) {
-        System.out.println(productName);
         for (randomStuffType item : this.type.getProducts()) {
             if (item.getName().equals(productName)) {
                 if(item.getIngredients() == null)

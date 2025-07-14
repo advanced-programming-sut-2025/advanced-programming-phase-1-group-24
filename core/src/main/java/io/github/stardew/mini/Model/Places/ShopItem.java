@@ -1,5 +1,7 @@
 package io.github.stardew.mini.Model.Places;
 
+import io.github.stardew.mini.Model.Things.Item;
+
 public class ShopItem {
     private int springPrice;
     private int summerPrice;
@@ -8,7 +10,7 @@ public class ShopItem {
     private String name;
     private Object item; // Better to use a generic or interface
     private int soldToday = 0;
-    private final int dailyLimit;
+    private int dailyLimit;
     private ShopItemType shopItemType;
 
     public ShopItem(String name, int dailyLimit, Object item, ShopItemType shopItemType, int springPrice, int summerPrice, int autumnPrice, int winterPrice) {
@@ -20,6 +22,9 @@ public class ShopItem {
         this.summerPrice = summerPrice;
         this.autumnPrice = autumnPrice;
         this.winterPrice = winterPrice;
+    }
+
+    public ShopItem() {
     }
 
     public boolean isAvailable(int quantity) {

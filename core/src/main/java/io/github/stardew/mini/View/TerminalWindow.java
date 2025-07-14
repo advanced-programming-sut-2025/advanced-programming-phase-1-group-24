@@ -144,73 +144,6 @@ private void initializeUI() {
     });
 
 }
-//    public void createUI() {
-//        Skin skin = GameAssetManager.skin;
-//        stage = new Stage(new FitViewport(gameWidth, gameHeight));
-//        Gdx.input.setInputProcessor(stage);
-//
-//        table = new Table();
-//        table.setFillParent(true);
-//
-//        background = GameAssetManager.getBackground();
-//
-//        Label titleLabel = new Label("NEW GAME MENU", skin);
-//        titleLabel.setFontScale(2.5f);
-//        titleLabel.setAlignment(Align.center);
-//        titleLabel.setStyle(new Label.LabelStyle(skin.getFont("custom-font"), Color.GOLD));
-//
-//        nameInput = new TextField("", skin);
-//        nameInput.getStyle().font.getData().setScale(2.2f);
-//        nameInput.setAlignment(Align.center);
-//        nameInput.setMessageText("Enter username");
-//
-//        addPlayerButton = new TextButton("Add Player", skin, "custom-button");
-//        startGameButton = new TextButton("Start Game", skin, "custom-button");
-//        startGameButton.setDisabled(true); // disabled initially
-//
-//        errorLabel = new Label("", skin);
-//        errorLabel.setColor(Color.RED);
-//
-//        float buttonWidth = (float) gameWidth / 4;
-//        float buttonHeight = (float) gameHeight / 8;
-//        float bottomPad = (float) gameHeight / 30;
-//
-//        table.add(titleLabel).colspan(2).padBottom(bottomPad * 2).row();
-//        table.add(nameInput).width(buttonWidth).height(buttonHeight / 2).padBottom(bottomPad);
-//        table.add(addPlayerButton).width(buttonWidth ).height(buttonHeight).padBottom(bottomPad).row();
-//        table.add(errorLabel).colspan(2).padBottom(bottomPad).row();
-//
-//        // Placeholder for player list display
-//        updatePlayerListUI();
-//
-//        table.add(startGameButton).colspan(2).padTop(bottomPad * 2).width(buttonWidth).height(buttonHeight).row();
-//
-//        // Add listeners
-//        addPlayerButton.addListener(new ClickListener() {
-//            public void clicked(InputEvent event, float x, float y) {
-//                String username = nameInput.getText().trim();
-//                playerNames.add(username);
-//                nameInput.setText("");
-//                updatePlayerListUI();
-//            }
-//        });
-//
-//        startGameButton.addListener(new ClickListener() {
-//            public void clicked(InputEvent event, float x, float y) {
-//                String usersString = String.join(" ", playerNames);
-//                Result result = controller.createGame(usersString);
-//                if(!result.isSuccessful()){
-//                    showErrorDialog(stage,result.message());
-//                    usersString = "";
-//                    playerNames.clear();
-//                    updatePlayerListUI();
-//                } else {
-//                    MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
-//                }
-//            }
-//        });
-//        stage.addActor(table);
-//    }
 
     private void executeCommand() {
         String command = inputField.getText().trim();
@@ -222,26 +155,7 @@ private void initializeUI() {
         }
     }
 
-//    private String processCommand(String command) {
-//        // Create a Scanner that reads from our string
-//        Scanner scanner = new Scanner(new ByteArrayInputStream(command.getBytes()));
-//
-//        try {
-//            // Handle the command using your existing menu logic
-//            currentMenu.handleCommand(scanner);
-//
-//            // In your original code, output goes to System.out
-//            // You'll need to modify your controllers to return strings instead of printing
-//            // Or capture System.out output (more complex)
-//
-//            // For now, just return the command as if it was processed
-//            return "Executed: " + command;
-//        } catch (Exception e) {
-//            return "Error: " + e.getMessage();
-//        } finally {
-//            scanner.close();
-//        }
-//    }
+
     private String processCommand(String command) {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         PrintStream oldOut = System.out;

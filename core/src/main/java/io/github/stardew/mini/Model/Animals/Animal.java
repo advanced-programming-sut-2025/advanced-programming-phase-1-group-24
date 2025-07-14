@@ -2,9 +2,9 @@ package io.github.stardew.mini.Model.Animals;
 
 
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
-import io.github.stardew.mini.MainApp;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Things.ProductQuality;
@@ -12,11 +12,17 @@ import io.github.stardew.mini.Model.Things.ProductQuality;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class Animal {
     private String name;
-    private final AnimalType animalType;
+    private AnimalType animalType;
+
+    @JsonIgnore
     private Tile currentTile;
+
     private Habitat livingPlace;
     private int friendship = 0;
     private boolean pettedToday = false;
@@ -27,9 +33,15 @@ public class Animal {
 
     //new fields added
     private float movementCooldown = 0f;
+
+    @JsonIgnore
     private Queue<Tile> pathToTarget = new LinkedList<>();
+
+    @JsonIgnore
     private Tile movingFrom = null;
+    @JsonIgnore
     private Tile movingTo = null;
+
     private float moveProgress = 0f; // 0.0 -> 1.0
     private float moveSpeed = 2f; // tiles per second
 
@@ -39,6 +51,9 @@ public class Animal {
         this.currentTile = null;
         this.livingPlace = null;
         this.daysLeftToProduce = animalType.getDaysToProduce();
+    }
+
+    public Animal() {
     }
 
     public void pet() {
@@ -131,10 +146,6 @@ public class Animal {
         return friendship;
     }
 
-    public AnimalProduct getProducts() {
-        return product;
-    }
-
     public void setDaysLeftToProduce(int days) {
         this.daysLeftToProduce = days;
     }
@@ -222,7 +233,7 @@ public class Animal {
         return copy;
     }
 
-    public boolean isMoving() {
+    public boolean itMoving() {
         return movingTo != null;
     }
 
@@ -281,6 +292,18 @@ public class Animal {
 
     public void resetCooldown() {
         movementCooldown = (3f + MathUtils.random(2f));
+    }
+    public void reloadAfterLoad(Tile tile) {
+        this.currentTile = tile;
+        this.pathToTarget = new LinkedList<>();
+        this.movingFrom = null;
+        this.movingTo = null;
+        this.movementCooldown = 0f;
+        this.moveProgress = 0f;
+
+        if (livingPlace != null && !livingPlace.getLivingAnimals().contains(this)) {
+            livingPlace.getLivingAnimals().add(this);
+        }
     }
 
 }

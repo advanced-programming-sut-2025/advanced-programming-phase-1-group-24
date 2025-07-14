@@ -1,7 +1,12 @@
 package io.github.stardew.mini.Model.Places;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 abstract public class Place {
     protected int x;
     protected int y;

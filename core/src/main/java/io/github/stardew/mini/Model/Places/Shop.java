@@ -26,6 +26,8 @@ public class Shop extends Place {
 
     }
 
+    public Shop() {
+    }
 
     public ShopType getShopType() {
         return shopType;

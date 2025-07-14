@@ -44,7 +44,9 @@ public class PreGameMenuController implements MenuController{
             return new Result(false, "no saved game found!");
 
         savedGameToLoad.setMainPlayer(user);
+        savedGameToLoad.reloadExtraData();
         app.setCurrentGame(savedGameToLoad);
+       // app.getCurrentGame().reloadExtraData();
         //app.setCurrentMenu(Menu.GameMenu);
         return new Result(true, "game loaded successfully!");
     }
