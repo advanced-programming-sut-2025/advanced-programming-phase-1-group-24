@@ -320,7 +320,7 @@ public class GameController implements MenuController {
 
         if (allFainted) {
             // Special case: set hour to 22 and exit early
-            game.getTimeAndDate().setHour(22);
+            game.getTimeAndDate().setHour(23);
             handleEndOfDay();
             // // Exit method here, no loop
         }
@@ -611,7 +611,7 @@ public class GameController implements MenuController {
 
         for (int i = 0; i < days; i++) {
             // Force day to end if not already at 22
-            game.getTimeAndDate().setHour(22);
+            game.getTimeAndDate().setHour(23);
             handleEndOfDay(); // Will skip to 9 AM next day and apply effects
         }
 

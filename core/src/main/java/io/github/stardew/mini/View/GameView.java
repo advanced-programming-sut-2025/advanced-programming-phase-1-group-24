@@ -2373,9 +2373,7 @@ private void createAnimalDialog() {
 //        } else {
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
-        List<User> players = MainApp.getInstance().getCurrentGame().getPlayers();
-        boolean allFainted = players.stream().allMatch(User::hasFainted);
-        if(!allFainted) {
+
             if (currentPlayer.hasFainted()) {
                 if (!hasShownFaintMessage) {
                     showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
@@ -2386,7 +2384,6 @@ private void createAnimalDialog() {
             } else {
                 hasShownFaintMessage = false;
             }
-        }
 
 
 
