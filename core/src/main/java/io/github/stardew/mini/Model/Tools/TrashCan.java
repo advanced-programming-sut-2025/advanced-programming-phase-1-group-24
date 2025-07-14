@@ -10,7 +10,7 @@ public class TrashCan extends Tool {
     public TrashCan(ToolType type) {
         super(type);
     }
-
+    public TrashCan(){}
     public void upgrade(ToolMaterial material){
         this.material = material;
     }

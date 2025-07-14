@@ -1,6 +1,11 @@
 package io.github.stardew.mini.Model.MapManagement;
 
 import com.badlogic.gdx.math.MathUtils;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -27,7 +32,10 @@ import io.github.stardew.mini.View.GameView;
 
 import java.util.*;
 
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
 public class MapOfGame {
 
     private Tile[][] map;
@@ -72,12 +80,12 @@ public class MapOfGame {
                 for (int x = startX; x < startX + width; x++) {
                     Tile tile = map[y][x];
                     tile.setType(TileType.SHOP); // mark tile as shop
-                    tile.setWalkable(true);       // optionally restrict if needed
+                    tile.setWalkable(false);       // optionally restrict if needed
                 }
             }
         }
-        //initialize npcHouses
-// Initialize NPC Houses
+        // initialize npcHouses
+        // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
                 {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
         };
@@ -138,7 +146,7 @@ public class MapOfGame {
 
             for (int index : selectedIndices) {
                 Tile tile = farmTiles.get(index);
-                applyLightningEffect(tile);
+                applyLightningEffect(tile, false);
             }
         }
     }
@@ -161,12 +169,15 @@ public class MapOfGame {
     }
 
 
-    public void applyLightningEffect(Tile tile) {
+    public void applyLightningEffect(Tile tile, boolean isCheat) {
         if (tile.getType() == TileType.GREENHOUSE) {
             return;
         }
 
         int flashHour = MathUtils.random(9, 18); // Random hour between 9 and 22
+        if(isCheat) {
+            flashHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour();
+        }
         System.out.println(flashHour);
 
         LightningFlash flash = new LightningFlash();
@@ -225,7 +236,7 @@ public class MapOfGame {
                 "Clint",
                 9, 16,
                 createBlacksmithItems(),
-                52, 52, 4, 4
+                52, 52, 6, 4
         );
 
         Shop jojamart = new Shop(
@@ -243,7 +254,7 @@ public class MapOfGame {
                 "Pierre",
                 9, 17,
                 createPierreStoreItems(),
-                52, 72, 3, 4
+                52, 72, 4, 5
         );
 
         Shop carpenterShop = new Shop(
@@ -252,7 +263,7 @@ public class MapOfGame {
                 "Robin",
                 9, 20,
                 createCarpenterShopItems(),
-                52, 82, 4, 4
+                52, 82, 6, 6
         );
 
         Shop fishShop = new Shop(
@@ -270,7 +281,7 @@ public class MapOfGame {
                 "Marnie",
                 9, 16,
                 createMarnieRanchItems(),
-                92, 65, 4, 5
+                90, 67, 7, 5
         );
 
         Shop starDropSaloon = new Shop(
@@ -279,7 +290,7 @@ public class MapOfGame {
                 "Gus",
                 12, 24,
                 createSaloonItems(),
-                92, 75, 5, 4
+                92, 80, 6, 5
         );
 
         shops.addAll(Arrays.asList(
@@ -310,17 +321,26 @@ public class MapOfGame {
         items.add(new ShopItem("Coal", Integer.MAX_VALUE, new ForagingMineral(ProductQuality.Normal, ForagingMineralType.Coal), ShopItemType.FORAGINGMINERAL, 150, 150, 150, 150));
         items.add(new ShopItem("Gold", Integer.MAX_VALUE, new ForagingMineral(ProductQuality.Normal, ForagingMineralType.Gold), ShopItemType.FORAGINGMINERAL, 400, 400, 400, 400));
 
-        // Adding tools and their corresponding prices and ingredients
-        items.add(new ShopItem("Copper Tool", 1, null, ShopItemType.TOOL_UPGRADE, 2000, 2000, 2000, 2000));
-        items.add(new ShopItem("Iron Tool", 1, null, ShopItemType.TOOL_UPGRADE, 5000, 5000, 5000, 5000));
-        items.add(new ShopItem("Gold Tool", 1, null, ShopItemType.TOOL_UPGRADE, 10000, 10000, 10000, 10000));
-        items.add(new ShopItem("Iridium Tool", 1, null, ShopItemType.TOOL_UPGRADE, 25000, 25000, 25000, 25000));
+//        // Adding tools and their corresponding prices and ingredients
+//        items.add(new ShopItem("Copper Tool", 1, null, ShopItemType.TOOL_UPGRADE, 2000, 2000, 2000, 2000));
+//        items.add(new ShopItem("Iron Tool", 1, null, ShopItemType.TOOL_UPGRADE, 5000, 5000, 5000, 5000));
+//        items.add(new ShopItem("Gold Tool", 1, null, ShopItemType.TOOL_UPGRADE, 10000, 10000, 10000, 10000));
+//        items.add(new ShopItem("Iridium Tool", 1, null, ShopItemType.TOOL_UPGRADE, 25000, 25000, 25000, 25000));
+//
+//        // Adding trash cans with materials and corresponding prices
+//        items.add(new ShopItem("Copper Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 1000, 1000, 1000, 1000));
+//        items.add(new ShopItem("Iron Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 2500, 2500, 2500, 2500));
+//        items.add(new ShopItem("Gold Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 5000, 5000, 5000, 5000));
+//        items.add(new ShopItem("Iridium Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 12500, 12500, 12500, 12500));
 
-        // Adding trash cans with materials and corresponding prices
-        items.add(new ShopItem("Copper Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 1000, 1000, 1000, 1000));
-        items.add(new ShopItem("Iron Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 2500, 2500, 2500, 2500));
-        items.add(new ShopItem("Gold Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 5000, 5000, 5000, 5000));
-        items.add(new ShopItem("Iridium Trash Can", 1, new TrashCan(ToolType.TRASHCAN), ShopItemType.TRASHCAN, 12500, 12500, 12500, 12500));
+        items.add(new ShopItem("hoe", 1, null, ShopItemType.TOOL_UPGRADE, 2000, 2000, 2000, 2000));
+        items.add(new ShopItem("pick axe", 1, null, ShopItemType.TOOL_UPGRADE, 5000, 5000, 5000, 5000));
+        items.add(new ShopItem("watering can", 1, null, ShopItemType.TOOL_UPGRADE, 10000, 10000, 10000, 10000));
+        items.add(new ShopItem("fishing pole", 1, null, ShopItemType.TOOL_UPGRADE, 25000, 25000, 25000, 25000));
+        items.add(new ShopItem("scythe", 1,null, ShopItemType.TOOL_UPGRADE, 1000, 1000, 1000, 1000));
+        items.add(new ShopItem("milkPail", 1,null, ShopItemType.TOOL_UPGRADE, 2500, 2500, 2500, 2500));
+        items.add(new ShopItem("shear", 1, null, ShopItemType.TOOL_UPGRADE, 5000, 5000, 5000, 5000));
+        items.add(new ShopItem("trash can", 1, null, ShopItemType.TOOL_UPGRADE, 12500, 12500, 12500, 12500));
 
         return items;
     }
@@ -378,7 +398,7 @@ public class MapOfGame {
         items.add(new ShopItem("Sugar", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.Sugar), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Wheat Flour", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.WheatFlower), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Rice", Integer.MAX_VALUE, new randomStuff(250, randomStuffType.Rice), ShopItemType.RANDOMSTUFF, 250, 250, 250, 250));
-        //items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
+        items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
 
         return items;
     }

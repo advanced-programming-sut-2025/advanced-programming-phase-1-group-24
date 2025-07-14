@@ -5,13 +5,15 @@ import java.util.Objects;
 public class Food extends Item {
     FoodType type;
     int energy;
-
     public Food(FoodType type) {
         super(type.getName(), true, type.getSellPrice(), false, ProductQuality.Normal,true
         );
         this.type = type;
         this.energy = type.getEnergy();
     }
+
+
+    public Food(){}
     @Override
     public Food copy() {
         Food newFood = new Food(type);

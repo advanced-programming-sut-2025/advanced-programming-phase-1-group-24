@@ -82,7 +82,7 @@ public class ProfileMenuController implements MenuController {
         MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
 
-        if (nickname == null){
+        if (nickname == null) {
             return new Result(false, "nickname is null!");
         }
         if (user == null)
@@ -95,6 +95,7 @@ public class ProfileMenuController implements MenuController {
         UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "nickname changed successfully!");
     }
+
     public Result changeAvatar(Avatar avatarName) {
         MainApp app = MainApp.getInstance();
         User user = app.getLoggedInUser();
@@ -103,7 +104,7 @@ public class ProfileMenuController implements MenuController {
         user.setAvatar(avatarName);
         UserDatabase.saveUsers(app.getUsers());
         return new Result(true, "avatar changed!");
-        }
+    }
 
 
     public Result showUserInfo() {
@@ -114,8 +115,8 @@ public class ProfileMenuController implements MenuController {
             return new Result(false, "please login first!");
 
         String info = String.format(
-                "username: %s\nemail: %s\nnickname: %s\nAvatar: %s\nMax money in a game: %d\nplayed games: %d\n",
-                user.getUsername(), user.getEmail(), user.getNickname(),user.getAvatar(), user.getMaxMoneyInGames(), user.getPlayedGames()
+            "username: %s\nemail: %s\nnickname: %s\nAvatar: %s\nMax money in a game: %d\nplayed games: %d\n",
+            user.getUsername(), user.getEmail(), user.getNickname(), user.getAvatar(), user.getMaxMoneyInGames(), user.getPlayedGames()
         );
 
         return new Result(true, info);
@@ -124,7 +125,7 @@ public class ProfileMenuController implements MenuController {
     public void setView(ProfileMenuView view) {
         this.view = view;
     }
-
 }
+
 
 

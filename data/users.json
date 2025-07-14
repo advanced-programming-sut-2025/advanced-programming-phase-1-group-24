@@ -55,8 +55,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -86,7 +84,13 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Abigail"
+    "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "kimia8",
@@ -144,8 +148,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -175,7 +177,13 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Abigail"
+    "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "john11",
@@ -233,8 +241,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -264,7 +270,13 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Abigail"
+    "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "john11",
@@ -322,8 +334,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -353,7 +363,13 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Abigail"
+    "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "ashkan22",
@@ -411,8 +427,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -442,7 +456,13 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Alex"
+    "avatar": "Alex",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   },
   {
     "username": "ashkan22",
@@ -500,8 +520,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "WATERINGCAN",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -531,6 +549,12 @@
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
-    "avatar": "Alex"
+    "avatar": "Alex",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
   }
 ]
