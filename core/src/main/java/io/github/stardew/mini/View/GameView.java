@@ -127,6 +127,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private Dialog npcFriendshipDialog;
     private Dialog npcSpeechBubbleDialog;
     private Map<NPC, TextButton> npcTalkButtons = new HashMap<>();
+    private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -168,6 +169,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private Item equippedItem = null;
     private Table equippedItemSlotTable;
 
+    private Dialog socialMenuDialog;
+    private Dialog MissionsMenuDialog;
+
     private FishingMinigameDialog fishingMinigameDialog;
     private Fish currentCaughtFish;
     private boolean isFishingActive = false;
@@ -192,6 +196,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         this.batch = MainApp.getBatch();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         loadFont();
+        for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            playerAddedMissions.put(user.getUsername(), new ArrayList<>());
+        }
     }
 
     public void startPlacingBuilding(Habitat building) {
@@ -451,6 +458,10 @@ private void updateAnimals(float delta) {
             }
         }
         if (keycode == Input.Keys.E) {
+            if (socialMenuDialog != null && socialMenuDialog.getStage() != null && socialMenuDialog.isVisible()) {
+                socialMenuDialog.hide();
+                return true;
+            }
             if (showBackpackMenu) {
                 showBackpackMenu = false;
                 backpackMenuTable.setVisible(false);
@@ -1680,7 +1691,7 @@ private void updateAnimals(float delta) {
             questsTable.add(new Label("No missions available from " + npc.getNpcName().getName() + ".", GameAssetManager.skin, "custom-label")).colspan(2).row();
         } else {
             int missionIndex = 1;
-            for (final NPCMission mission : missionsForPlayer) {
+            for (NPCMission mission : missionsForPlayer) {
                 Label missionLabel = new Label("Mission " + missionIndex + ":", GameAssetManager.skin, "custom-label");
                 missionLabel.setColor(Color.CORAL);
                 missionLabel.setFontScale(0.8f);
@@ -1731,16 +1742,19 @@ private void updateAnimals(float delta) {
                     statusLabel.setColor(Color.RED);
                 }
                 statusLabel.setFontScale(0.6f);
-                TextButton doMissionButton = new TextButton("Complete", GameAssetManager.skin, "custom-button");
+                TextButton doMissionButton = new TextButton("Add", GameAssetManager.skin, "custom-button");
                 doMissionButton.getLabel().setFontScale(0.7f);
                 doMissionButton.setDisabled(mission.getAlreadyDone());
 
-                final int currentMissionIndex = missionIndex;
                 doMissionButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
-                        Result result = controller.doMission(currentMissionIndex);
-                        showErrorDialog(stage, result.message());
+                        if (playerAddedMissions.get(currentPlayer.getUsername()).contains(mission)) {
+                            showErrorDialog(stage, "Mission is already in your mission list!");
+                        } else {
+                            playerAddedMissions.get(player.getUsername()).add(mission);
+                            showErrorDialog(stage, "Mission added successfully!");
+                        }
                         npcQuestDialog.hide();
                     }
                 });
@@ -2065,6 +2079,8 @@ private void updateAnimals(float delta) {
         missionsBtn.setColor(Color.TEAL);
         TextButton mapBtn = new TextButton("Map", GameAssetManager.skin, "custom-button");
         mapBtn.setColor(Color.YELLOW);
+        TextButton settingBtn = new TextButton("Setting", GameAssetManager.skin, "custom-button");
+        settingBtn.setColor(Color.ORANGE);
 
         inventoryBtn.addListener(new ClickListener() {
             @Override
@@ -2081,11 +2097,13 @@ private void updateAnimals(float delta) {
         socialBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                showSocialMenu();
             }
         });
         missionsBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                showMissionsMenu();
             }
         });
         mapBtn.addListener(new ClickListener() {
@@ -2095,6 +2113,11 @@ private void updateAnimals(float delta) {
                 setCameraPosition();
                 showInventoryMenu = false;
                 if (inventoryMenuTable != null) inventoryMenuTable.setVisible(false);
+            }
+        });
+        settingBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
             }
         });
 
@@ -2107,6 +2130,7 @@ private void updateAnimals(float delta) {
         inventoryMenuTable.add(socialBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
         inventoryMenuTable.add(missionsBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
         inventoryMenuTable.add(mapBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
+        inventoryMenuTable.add(settingBtn).width(buttonWidth).height(buttonHeight).pad(buttonPad).row();
 
         inventoryMenuTable.setVisible(false);
         stage.addActor(inventoryMenuTable);
@@ -2407,6 +2431,7 @@ private void updateAnimals(float delta) {
 
             Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
             if (addFishResult.isSuccessful()) {
+                if (perfectCatch) showErrorDialog(stage,"Perfect catch!");
                 showErrorDialog(stage, "You caught a " + finalQuality.name() + " " + finalFish.getName() + "!");
                 currentPlayer.addSkillExperience(Skill.FISHING);
             } else {
@@ -3284,6 +3309,281 @@ private void updateAnimals(float delta) {
             return null;
         }
 
+    private void showSocialMenu() {
+        if (socialMenuDialog != null && socialMenuDialog.getStage() != null && socialMenuDialog.isVisible()) {
+            socialMenuDialog.hide();
+            return;
+        }
+
+        socialMenuDialog = new Dialog("Social Menu", GameAssetManager.skin, "custom-window");
+
+        socialMenuDialog.padTop(80);
+        socialMenuDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
+        socialMenuDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+
+        float dialogWidth = Gdx.graphics.getWidth() * 0.4f;
+        float dialogHeight = Gdx.graphics.getHeight() * 0.6f;
+
+        socialMenuDialog.setSize(dialogWidth, dialogHeight);
+
+
+        Table contentTable = new Table(GameAssetManager.skin);
+        contentTable.defaults().pad(5).align(com.badlogic.gdx.utils.Align.left);
+        contentTable.row();
+
+        // --- NPC Friendship Section ---
+        Label npcTitle = new Label("NPC Friendship Levels:", GameAssetManager.skin, "custom-label");
+        npcTitle.setColor(Color.YELLOW);
+        contentTable.add(npcTitle).colspan(4).padBottom(10).row();
+
+        int XP_PER_LEVEL = 200;
+
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+            int level = npc.getFriendshipLevels().get(currentPlayer.getUsername());
+            int currentXP = npc.getFriendshipPoints().get(currentPlayer.getUsername());
+
+            if (currentXP >= XP_PER_LEVEL) currentXP %= XP_PER_LEVEL;
+
+            Label nameLabel = new Label(npc.getNpcName().getName(), new Label.LabelStyle(smallFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
+
+            ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+            TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
+
+            Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
+            progressBarStyle.background = progressBarBackground;
+            progressBarStyle.background.setMinHeight(20);
+
+            progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
+            progressBarStyle.knob.setMinWidth(0);
+
+            Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(Color.YELLOW);
+            progressBarStyle.knobBefore = progressBarKnobBefore;
+            progressBarStyle.knobBefore.setMinHeight(20);
+
+            ProgressBar xpBar = new ProgressBar(0, XP_PER_LEVEL, 1, false, progressBarStyle);
+            xpBar.setValue(currentXP);
+
+            Label xpTextLabel = new Label(currentXP + "/" + XP_PER_LEVEL, GameAssetManager.skin, "custom-label");
+            xpTextLabel.setFontScale(0.5f);
+            xpTextLabel.setColor(Color.LIGHT_GRAY);
+
+            contentTable.add(nameLabel).width(150);
+            contentTable.add(levelLabel).width(80).row();
+            contentTable.add(xpBar).width(200).height(20).padLeft(10).colspan(2);
+            contentTable.add(xpTextLabel).width(70).padLeft(5).row();
+        }
+
+        // --- Player Friendship Section ---
+        Label playerTitle = new Label("Player Friendship Levels:", GameAssetManager.skin, "custom-label");
+        playerTitle.setColor(Color.YELLOW);
+        contentTable.add(playerTitle).colspan(4).padTop(20).padBottom(10).row();
+
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if (player.getUsername().equals(currentPlayer.getUsername())) continue;
+            Friendship friendship = MainApp.getInstance().getCurrentGame().getFriendship(player.getUsername(), currentPlayer.getUsername());
+            int level = friendship.getLevel();
+            int XP_PER_LEVEL_Player = 100 * (1 + level);
+
+            int currentXP = friendship.getXp();
+            if (currentXP >= XP_PER_LEVEL_Player) currentXP %= XP_PER_LEVEL_Player;
+
+            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(smallFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
+
+            ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+            TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
+
+            Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
+            progressBarStyle.background = progressBarBackground;
+            progressBarStyle.background.setMinHeight(20);
+
+            progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
+            progressBarStyle.knob.setMinWidth(0);
+
+            Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(Color.YELLOW);
+            progressBarStyle.knobBefore = progressBarKnobBefore;
+            progressBarStyle.knobBefore.setMinHeight(20);
+
+            ProgressBar xpBar = new ProgressBar(0, XP_PER_LEVEL_Player, 1, false, progressBarStyle);
+            xpBar.setValue(currentXP);
+
+            Label xpTextLabel = new Label(currentXP + "/" + XP_PER_LEVEL_Player, GameAssetManager.skin, "custom-label");
+            xpTextLabel.setFontScale(0.5f);
+            xpTextLabel.setColor(Color.LIGHT_GRAY);
+
+            contentTable.add(nameLabel).width(150);
+            contentTable.add(levelLabel).width(80).row();
+            contentTable.add(xpBar).width(200).height(20).padLeft(10).colspan(2);
+            contentTable.add(xpTextLabel).width(70).padLeft(5).row();
+        }
+
+        ScrollPane scrollPane = new ScrollPane(contentTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+
+        socialMenuDialog.getContentTable().add(scrollPane)
+            .width(dialogWidth)
+            .height(dialogHeight - 150)
+            .expand().fill().row();
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.setColor(Color.RED);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                socialMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        socialMenuDialog.getButtonTable().add(closeButton).pad(10);
+
+        socialMenuDialog.setPosition(
+            (Gdx.graphics.getWidth() - socialMenuDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - socialMenuDialog.getHeight()) / 2
+        );
+        stage.addActor(socialMenuDialog);
+    }
+
+    private void showMissionsMenu() {
+        float dialogWidth = Gdx.graphics.getWidth() * 0.4f;
+        float dialogHeight = Gdx.graphics.getHeight() * 0.6f;
+
+        if (MissionsMenuDialog != null && MissionsMenuDialog.getStage() != null && MissionsMenuDialog.isVisible()) {
+            MissionsMenuDialog.hide();
+            Gdx.input.setInputProcessor(this);
+            return;
+        }
+        if (MissionsMenuDialog == null) {
+            MissionsMenuDialog = new Dialog("Missions", GameAssetManager.skin, "custom-window");
+            MissionsMenuDialog.padTop(80);
+            MissionsMenuDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
+            MissionsMenuDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+
+            MissionsMenuDialog.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    if (!MissionsMenuDialog.isVisible()) {
+                        Gdx.input.setInputProcessor(GameView.this);
+                    }
+                }
+            });
+            MissionsMenuDialog.setSize(dialogWidth, dialogHeight);
+
+            stage.addActor(MissionsMenuDialog);
+        } else {
+            MissionsMenuDialog.getContentTable().clear();
+            MissionsMenuDialog.getButtonTable().clear();
+            MissionsMenuDialog.setSize(dialogWidth, dialogHeight);
+        }
+
+        Table questsTable = new Table(GameAssetManager.skin);
+        questsTable.defaults().pad(5).align(Align.left);
+
+        List<NPCMission> missionsForPlayer = playerAddedMissions.get(currentPlayer.getUsername());
+
+        if (missionsForPlayer == null || missionsForPlayer.isEmpty()) {
+            questsTable.add(new Label("No missions selected.", GameAssetManager.skin, "custom-label")).colspan(2).row();
+        } else {
+            int missionIndex = 1;
+            for (NPCMission mission : missionsForPlayer) {
+                Label missionLabel = new Label("Mission " + missionIndex + ":", GameAssetManager.skin, "custom-label");
+                missionLabel.setColor(Color.CORAL);
+                missionLabel.setFontScale(0.8f);
+                questsTable.add(missionLabel).colspan(2).row();
+
+                Label requiredLabel = new Label("  Required:", GameAssetManager.skin, "custom-label");
+                requiredLabel.setFontScale(0.7f);
+                requiredLabel.setColor(Color.ORANGE);
+                questsTable.add(requiredLabel).row();
+                Table requiredItemsTable = new Table(GameAssetManager.skin);
+                requiredItemsTable.defaults().padLeft(10);
+                if (mission.getRequiredItems().isEmpty()) {
+                    Label itemLabel = new Label("None", GameAssetManager.skin, "custom-label");
+                    itemLabel.setFontScale(0.5f);
+                    requiredItemsTable.add(itemLabel);
+                } else {
+                    for (Map.Entry<String, Integer> entry : mission.getRequiredItems().entrySet()) {
+                        Label itemLabel = new Label(entry.getKey() + ": " + entry.getValue(), GameAssetManager.skin, "custom-label");
+                        itemLabel.setFontScale(0.5f);
+                        requiredItemsTable.add(itemLabel).row();
+                    }
+                }
+                questsTable.add(requiredItemsTable).colspan(2).row();
+
+                Label prizeLabel = new Label("  Prizes:", GameAssetManager.skin, "custom-label");
+                prizeLabel.setFontScale(0.7f);
+                prizeLabel.setColor(Color.ORANGE);
+                questsTable.add(prizeLabel).row();
+                Table prizeItemsTable = new Table(GameAssetManager.skin);
+                prizeItemsTable.defaults().padLeft(10);
+                if (mission.getPrizeItems().isEmpty()) {
+                    Label itemLabel = new Label("None", GameAssetManager.skin, "custom-label");
+                    itemLabel.setFontScale(0.5f);
+                    prizeItemsTable.add(itemLabel);
+                } else {
+                    for (Map.Entry<String, Integer> entry : mission.getPrizeItems().entrySet()) {
+                        Label itemLabel = new Label(entry.getKey() + ": " + entry.getValue(), GameAssetManager.skin, "custom-label");
+                        itemLabel.setFontScale(0.5f);
+                        prizeItemsTable.add(itemLabel).row();
+                    }
+                }
+                questsTable.add(prizeItemsTable).colspan(2).row();
+
+                Label statusLabel = new Label(mission.getAlreadyDone() ? "Status: Done" : "Status: Not Done", GameAssetManager.skin, "custom-label");
+                if (mission.getAlreadyDone()) {
+                    statusLabel.setColor(Color.GREEN);
+                } else {
+                    statusLabel.setColor(Color.RED);
+                }
+                statusLabel.setFontScale(0.6f);
+                TextButton doMissionButton = new TextButton("Complete", GameAssetManager.skin, "custom-button");
+                doMissionButton.getLabel().setFontScale(0.7f);
+                doMissionButton.setDisabled(mission.getAlreadyDone());
+
+                doMissionButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Result result = NPCMission.doMission(mission, currentPlayer);
+                        showErrorDialog(stage, result.getMessage());
+                        MissionsMenuDialog.hide();
+                    }
+                });
+
+                questsTable.add(statusLabel).padRight(10);
+                questsTable.add(doMissionButton).width(120).height(30).padBottom(10).row();
+                questsTable.add().colspan(2).height(10).row();
+                missionIndex++;
+            }
+        }
+
+        ScrollPane scrollPane = new ScrollPane(questsTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+
+        MissionsMenuDialog.getContentTable().add(scrollPane).expand().fill().row();
+
+        // Close button
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.setColor(Color.RED);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MissionsMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        MissionsMenuDialog.getButtonTable().add(closeButton).pad(10);
+
+        MissionsMenuDialog.show(stage);
+        MissionsMenuDialog.setSize(dialogWidth, dialogHeight);
+        MissionsMenuDialog.setPosition(
+            (Gdx.graphics.getWidth() - MissionsMenuDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - MissionsMenuDialog.getHeight()) / 2
+        );
+        Gdx.input.setInputProcessor(stage);
+    }
+
         private void toggleSkillsDialog() {
             if (skillsDialog != null && skillsDialog.getStage() != null) {
                 skillsDialog.hide();
@@ -3307,7 +3607,6 @@ private void updateAnimals(float delta) {
             skillsDialog = new Dialog("Skills", GameAssetManager.skin, "custom-window");
             skillsDialog.padTop(120);
             skillsDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
-
 
             skillsDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
 

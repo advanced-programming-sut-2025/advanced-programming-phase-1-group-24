@@ -1,6 +1,9 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.Item;
+import io.github.stardew.mini.Model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,5 +34,18 @@ public class NPCMission {
 
     public void setAlreadyDone(Boolean alreadyDone) {
         isAlreadyDone = alreadyDone;
+    }
+
+    public static Result doMission(NPCMission selectedMission, User currentUser) {
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+            int missionIndex = 1;
+            for (NPCMission mission : npc.getMissions()){
+                if (mission.equals(selectedMission)) {
+                    return npc.doMission(missionIndex, currentUser);
+                }
+                missionIndex++;
+            }
+        }
+        return new Result(false,"No mission found");
     }
 }
