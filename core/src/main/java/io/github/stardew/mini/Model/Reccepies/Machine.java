@@ -28,7 +28,7 @@ public class Machine extends Item {
         this.isActivated = false;
         this.isReady = false;
     }
-
+    public Machine(){}
     public MachineType getType() {
         return type;
     }

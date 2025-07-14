@@ -4,16 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.MainApp;
@@ -22,119 +23,19 @@ import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.Things.StorageType;
 import io.github.stardew.mini.Model.User;
 
 import java.util.Scanner;
 
-//
-//public class MapSelectionMenuView implements AppMenu, Screen {
-//    private MapSelectionMenuController controller;
-//    private Stage stage;
-//    public Table table;
-//    private Texture background;
-//    private int gameWidth = Gdx.graphics.getWidth();
-//    private int gameHeight = Gdx.graphics.getHeight();
-//
-//    public MapSelectionMenuView(MapSelectionMenuController controller) {
-//        createUI();
-//        this.controller = controller;
-//        controller.setView(this);
-//    }
-//    public void createUI() {
-//        Skin skin = GameAssetManager.skin;
-//        stage = new Stage(new FitViewport(gameWidth, gameHeight));
-//        Gdx.input.setInputProcessor(stage);
-//
-//        Table table = new Table();
-//        table.setFillParent(true);
-//
-//        // Add title label (new code)
-//        Label titleLabel = new Label("Map SELECTION MENU", skin);
-//        titleLabel.setFontScale(2.5f); // Make title larger
-//        titleLabel.setAlignment(Align.center);
-//
-//        // Create title style from skin or customize
-//        Label.LabelStyle titleStyle = new Label.LabelStyle(
-//            skin.getFont("custom-font"),
-//            Color.GOLD
-//        );
-//        titleLabel.setStyle(titleStyle);
-//
-//        TextButton newGameButton = new TextButton("ready", skin, "custom-button");
-//
-//        float buttonWidth = (float) gameWidth / 4;
-//        float buttonHeight = (float) gameHeight / 7;
-//        float bottomPad = (float) gameHeight / 10;
-//        table.add(titleLabel).colspan(1).padBottom(bottomPad).row();
-//        table.add(newGameButton).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
-//        table.row();
-//
-//        newGameButton.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                MainApp.getInstance().setCurrentMenu(Menu.NewGameMenu);
-//            }
-//        });
-//        newGameButton.getStyle().over = skin.getDrawable("button-normal-over");
-//
-//        stage.addActor(table);
-//        background = GameAssetManager.getBackground();
-//    }
-//    @Override
-//    public void show() {
-//
-//    }
-//
-//    @Override
-//    public void render(float v) {
-//        ScreenUtils.clear(0, 0, 0, 1);
-//        MainApp.getBatch().begin();
-//        MainApp.getBatch().draw(GameAssetManager.getBackground(), 0, 0, gameWidth, gameHeight);
-//        MainApp.getBatch().end();
-//        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-//        stage.draw();
-//    }
-//
-//    @Override
-//    public void resize(int i, int i1) {
-//
-//    }
-//
-//    @Override
-//    public void pause() {
-//
-//    }
-//
-//    @Override
-//    public void resume() {
-//
-//    }
-//
-//    @Override
-//    public void hide() {
-//
-//    }
-//
-//    @Override
-//    public void dispose() {
-//
-//    }
-//
-//    @Override
-//    public void handleCommand(Scanner scanner) {
-//
-//    }
-//}
 public class MapSelectionMenuView implements AppMenu, Screen {
     private MapSelectionMenuController controller;
     private Stage stage;
     public Table table;
-    private Texture background;
-    private int gameWidth = Gdx.graphics.getWidth();
-    private int gameHeight = Gdx.graphics.getHeight();
     private String selectedMap = null; // To track the selected map
 
     public MapSelectionMenuView(MapSelectionMenuController controller) {
@@ -145,7 +46,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
 
     public void createUI() {
         Skin skin = GameAssetManager.skin;
-        stage = new Stage(new FitViewport(gameWidth, gameHeight));
+        stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
@@ -163,8 +64,15 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         titleLabel.setStyle(titleStyle);
 
         // Create map selection buttons
+        TextureRegionDrawable map1Drawable = new TextureRegionDrawable(new TextureRegion(GameAssetManager.farm1));
+        TextureRegionDrawable map2Drawable = new TextureRegionDrawable(new TextureRegion(GameAssetManager.farm2));
+        Image map1Image = new Image(map1Drawable);
+        Image map2Image = new Image(map2Drawable);
+        map1Image.setScaling(Scaling.fit);  // Optional: scale images to fit
+        map2Image.setScaling(Scaling.fit);
         TextButton map1Button = new TextButton("Map 1", skin, "custom-button");
         TextButton map2Button = new TextButton("Map 2", skin, "custom-button");
+
         TextButton confirmButton = new TextButton("Confirm", skin, "custom-button");
         confirmButton.setDisabled(true);
 
@@ -173,17 +81,25 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         TextButton.TextButtonStyle selectedStyle = new TextButton.TextButtonStyle(originalStyle);
         selectedStyle.fontColor = Color.GREEN;
 
-        float buttonWidth = (float) gameWidth / 4;
-        float buttonHeight = (float) gameHeight / 7;
-        float bottomPad = (float) gameHeight / 10;
+        float buttonWidth = (float) Gdx.graphics.getWidth() / 4;
+        float buttonHeight = (float) Gdx.graphics.getHeight() / 7;
+        float bottomPad = (float) Gdx.graphics.getHeight() / 10;
 
         table.add(titleLabel).colspan(2).padBottom(bottomPad).row();
-//
-//        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20);
-//        table.add(map2Button).width(buttonWidth).height(buttonHeight).padBottom(bottomPad).row();
         // Add map selection buttons side by side with consistent padding
-        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20).padBottom(bottomPad);
-        table.add(map2Button).width(buttonWidth).height(buttonHeight).padLeft(20).padBottom(bottomPad).row();
+        Table map1Table = new Table();
+        map1Table.add(map1Image).width(buttonWidth * 1.8f).height(buttonHeight * 1.8f).row();
+        map1Table.add(map1Button).width(buttonWidth).height(buttonHeight);
+
+        Table map2Table = new Table();
+        map2Table.add(map2Image).width(buttonWidth * 1.8f).height(buttonHeight * 1.8f).row();
+        map2Table.add(map2Button).width(buttonWidth).height(buttonHeight);
+
+        table.add(map1Table).padRight(20).padBottom(bottomPad);
+        table.add(map2Table).padLeft(20).padBottom(bottomPad).row();
+//
+//        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20).padBottom(bottomPad);
+//        table.add(map2Button).width(buttonWidth).height(buttonHeight).padLeft(20).padBottom(bottomPad).row();
         table.add(confirmButton).colspan(2).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
 
         // Map selection button listeners
@@ -222,119 +138,42 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                         }
                     }
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
-                    Machine machine = new Machine(MachineType.KEG);
-
-
-                    Animal moo = new Animal("moo", AnimalType.COW);
-                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
-                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    moo.setCurrentTile(new_tile);
-                    tiles2.setContainedItem(machine);
-                    new_tile.setContainedAnimal(moo);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
-                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
-                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-                    heny.setCurrentTile(new_tile_heny);
-                    new_tile.setContainedAnimal(heny);
-                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
+//                    Machine machine = new Machine(MachineType.KEG);
+//
+//
+//                    Animal moo = new Animal("moo", AnimalType.COW);
+//                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
+//                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    moo.setCurrentTile(new_tile);
+//                    moo.setInHabitat(false);
+//                    moo.setLivingPlace(new Habitat(0,0,1,1, StorageType.INITIAL, Habitat.HabitatType.Barn));
+//                    tiles2.setContainedItem(machine);
+//                    new_tile.setContainedAnimal(moo);
+//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
+//                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
+//                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
+//                    heny.setCurrentTile(new_tile_heny);
+//                    new_tile.setContainedAnimal(heny);
+//                    heny.setInHabitat(false);
+//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
                     /// /////////// hard code ///////////////////////////////////////////////////////////////
                     MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
-
 
                 }
             }
         });
-
+        Texture bg = GameAssetManager.getBackground();
+        Image bgImage = new Image(bg);
+        bgImage.setFillParent(true);
+        stage.addActor(bgImage);
         stage.addActor(table);
-        background = GameAssetManager.getBackground();
-    }
-//    public void createUI() {
-//        Skin skin = GameAssetManager.skin;
-//        stage = new Stage(new FitViewport(gameWidth, gameHeight));
-//        Gdx.input.setInputProcessor(stage);
-//
-//        Table table = new Table();
-//        table.setFillParent(true);
-//
-//        // Add title label
-//        Label titleLabel = new Label("SELECT YOUR MAP", skin);
-//        titleLabel.setFontScale(2.5f);
-//        titleLabel.setAlignment(Align.center);
-//
-//        Label.LabelStyle titleStyle = new Label.LabelStyle(
-//            skin.getFont("custom-font"),
-//            Color.GOLD
-//        );
-//        titleLabel.setStyle(titleStyle);
-//
-//        // Create map selection buttons
-//        TextButton map1Button = new TextButton("Map 1", skin, "custom-button");
-//        TextButton map2Button = new TextButton("Map 2", skin, "custom-button");
-//        TextButton confirmButton = new TextButton("Confirm Selection", skin, "custom-button");
-//        confirmButton.setDisabled(true); // Disabled until a map is selected
-//
-//        float buttonWidth = (float) gameWidth / 4;
-//        float buttonHeight = (float) gameHeight / 7;
-//        float bottomPad = (float) gameHeight / 10;
-//
-//        table.add(titleLabel).colspan(2).padBottom(bottomPad).row();
-//
-//        // Add map selection buttons side by side
-//        table.add(map1Button).width(buttonWidth).height(buttonHeight).padRight(20);
-//        table.add(map2Button).width(buttonWidth).height(buttonHeight).padBottom(bottomPad).row();
-//
-//        // Add confirm button
-//        table.add(confirmButton).colspan(2).width(buttonWidth).height(buttonHeight).padBottom(bottomPad);
-//
-//        // Map selection button listeners
-//        map1Button.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                selectedMap = "map1";
-//                confirmButton.setDisabled(false);
-//                map1Button.getStyle().fontColor = Color.GREEN;
-//                map2Button.getStyle().fontColor = Color.WHITE;
-//            }
-//        });
-//
-//        map2Button.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                selectedMap = "map2";
-//                confirmButton.setDisabled(false);
-//                map2Button.getStyle().fontColor = Color.GREEN;
-//                map1Button.getStyle().fontColor = Color.WHITE;
-//            }
-//        });
-//
-//        // Confirm button listener
-//        confirmButton.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                if (selectedMap != null) {
-//                    //controller.notifyMapSelected(selectedMap);
-//                    // The controller will handle the transition to the game
-//                    // after all players have selected their maps
-//                }
-//            }
-//        });
-//
-//        // Style adjustments
-//        map1Button.getStyle().over = skin.getDrawable("button-normal-over");
-//        map2Button.getStyle().over = skin.getDrawable("button-normal-over");
-//        confirmButton.getStyle().over = skin.getDrawable("button-normal-over");
-//
-//        stage.addActor(table);
 //        background = GameAssetManager.getBackground();
-//    }
+    }
 
     @Override
     public void render(float v) {
         ScreenUtils.clear(0, 0, 0, 1);
-        MainApp.getBatch().begin();
-        MainApp.getBatch().draw(GameAssetManager.getBackground(), 0, 0, gameWidth, gameHeight);
-        MainApp.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -345,8 +184,8 @@ public class MapSelectionMenuView implements AppMenu, Screen {
         readyLabel.setFontScale(1.5f);
         readyLabel.setColor(Color.GREEN);
         readyLabel.setPosition(
-            gameWidth / 2 - readyLabel.getWidth() / 2,
-            gameHeight / 2 - readyLabel.getHeight() / 2
+            Gdx.graphics.getWidth() / 2 - readyLabel.getWidth() / 2,
+            Gdx.graphics.getHeight() / 2 - readyLabel.getHeight() / 2
         );
         stage.addActor(readyLabel);
     }
@@ -357,9 +196,9 @@ public class MapSelectionMenuView implements AppMenu, Screen {
     }
 
     @Override
-    public void resize(int i, int i1) {
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
     }
-
     @Override
     public void pause() {
     }

@@ -27,7 +27,7 @@ public class FishingPole extends Tool {
         super(type);
         this.poleMaterial = poleMaterial;
     }
-
+    public FishingPole(){}
     public FishingPoleMaterial getPoleMaterial() {
         return poleMaterial;
     }

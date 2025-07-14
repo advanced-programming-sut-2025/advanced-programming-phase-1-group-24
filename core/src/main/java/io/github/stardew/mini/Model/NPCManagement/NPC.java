@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
@@ -13,10 +16,13 @@ import io.github.stardew.mini.Model.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NPC {
     private NPCtype npcName;
-    //private Tile currentTile;
     private Map <String, Integer> friendshipLevels;
     private Map <String, Integer> friendshipPoints;
     private Map <String, Boolean> talkedToNPCToday;
@@ -28,7 +34,6 @@ public class NPC {
     public NPC(NPCtype npcName, ArrayList<User> users,
                ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission) {
         this.npcName = npcName;
-        //this.currentTile = currentTile;
         this.friendshipLevels = new HashMap<>();
         this.friendshipPoints = new HashMap<>();
         this.talkedToNPCToday = new HashMap<>();
@@ -46,6 +51,9 @@ public class NPC {
         this.daysLeftToUnlockThirdMission = daysLeftToUnlockThirdMission;
     }
 
+    public NPC() {
+    }
+
     public String getName() {
         return npcName.getName();
     }
@@ -53,10 +61,6 @@ public class NPC {
     public NPCtype getNpcName() {
         return npcName;
     }
-
-//    public Tile getCurrentTile() {
-//        return currentTile;
-//    }
 
 
     public Map<String, Integer> getFriendshipLevels() {
@@ -212,7 +216,7 @@ public class NPC {
         return false;
     }
 
-    public Tile getCurrentTile() {
+    public Tile currentTileGetter() {
         MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
         if (map.getTile(72, 55).getContainedNPC().equals(this))
             return map.getTile(72, 55);

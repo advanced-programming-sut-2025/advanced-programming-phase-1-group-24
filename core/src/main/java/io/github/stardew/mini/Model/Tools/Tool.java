@@ -1,7 +1,31 @@
 package io.github.stardew.mini.Model.Tools;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Things.ToolMaterial;
-
+@JsonIdentityInfo(
+    generator = ObjectIdGenerators.IntSequenceGenerator.class,
+    property = "@id"
+)
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "toolType"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = Hoe.class, name = "Hoe"),
+    @JsonSubTypes.Type(value = WateringCan.class, name = "WateringCan"),
+    @JsonSubTypes.Type(value = TrashCan.class, name = "TrashCan"),
+    @JsonSubTypes.Type(value = Scythe.class, name = "Scythe"),
+    @JsonSubTypes.Type(value = PickAxe.class, name = "PickAxe"),
+    @JsonSubTypes.Type(value = Axe.class, name = "Axe"),
+    @JsonSubTypes.Type(value = Shear.class, name = "Shear"),
+    @JsonSubTypes.Type(value = MilkPail.class, name = "MilkPail"),
+    @JsonSubTypes.Type(value = FishingPole.class, name = "FishingPole"),
+    // Add others...
+})
 public  class Tool {
     String name;
     ToolType type;
@@ -11,6 +35,9 @@ public  class Tool {
         this.name =type.getName();
         this.type = type;
         this.material = ToolMaterial.Initial;
+    }
+
+    public Tool() {
     }
 
     public ToolType getType() {

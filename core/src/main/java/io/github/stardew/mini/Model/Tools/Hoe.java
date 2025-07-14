@@ -11,7 +11,7 @@ public class Hoe extends Tool{
     public Hoe(ToolType type) {
         super(type);
     }
-
+    public Hoe(){}
     public Result useHoe(int xDirection, int yDirection, Tile currentTile,
                          MapOfGame map, User currentPlayer, double energyWeatherModifier) {
         int currentX = currentTile.getX();
