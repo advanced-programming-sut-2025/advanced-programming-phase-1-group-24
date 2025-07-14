@@ -129,11 +129,11 @@ public class GameController implements MenuController {
         } else {
             if (currentTool instanceof Axe) {
                 return ((Axe) currentTool).useAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player,
-                    MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof FishingPole) {
-                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
-                    player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof Hoe) {
+                        MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+//            } else if (currentTool instanceof FishingPole) {
+//                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
+//                        player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+           } else if (currentTool instanceof Hoe) {
                 Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
                 return result;
@@ -1265,21 +1265,21 @@ public Result releaseAnimal(String name) {
         return currentPlayer.getBackpack().showTools();
     }
 
-    public Result fish(String fishingPole) {
-        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        Game currentGame = MainApp.getInstance().getCurrentGame();
-        MapOfGame map = currentGame.getMap();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        FishingPole pole;
-        for (Tool tool : currentPlayer.getBackpack().getTools()) {
-            if (tool.getName().equalsIgnoreCase(fishingPole)) {
-                pole = (FishingPole) tool;
-                double modifier = currentGame.getCurrentWeatherType().getEnergyOfToolsModifier();
-                return pole.useFishingPole(pole, map, currentTile, currentPlayer, currentGame, modifier);
-            }
-        }
-        return new Result(false, "No fishing pole found.");
-    }
+//    public Result fish(String fishingPole) {
+//        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//        Game currentGame = MainApp.getInstance().getCurrentGame();
+//        MapOfGame map = currentGame.getMap();
+//        Tile currentTile = currentPlayer.getCurrentTile();
+//        FishingPole pole;
+//        for (Tool tool : currentPlayer.getBackpack().getTools()) {
+//            if (tool.getName().equalsIgnoreCase(fishingPole)) {
+//                pole = (FishingPole) tool;
+//                double modifier = currentGame.getCurrentWeatherType().getEnergyOfToolsModifier();
+//                return pole.useFishingPole(pole, map, currentTile, currentPlayer, currentGame, modifier);
+//            }
+//        }
+//        return new Result(false, "No fishing pole found.");
+//    }
 
     public Result sellAnimal(String name) {
         Game game = MainApp.getInstance().getCurrentGame();

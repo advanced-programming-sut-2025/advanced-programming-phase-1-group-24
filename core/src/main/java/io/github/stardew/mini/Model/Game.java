@@ -37,6 +37,8 @@ public class Game {
 
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
+    private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
+
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
         this.mainPlayer = mainPlayer;
@@ -212,7 +214,7 @@ public class Game {
         if (this.npcs == null) {
             this.npcs = new ArrayList<>();
         }
-        Tile nextTile = this.map.getTile(72, 54);
+        Tile nextTile = this.map.getTile(72, 55);
         Map<String, Integer> requieredItems = new HashMap<>();
         Map<String, Integer> prize = new HashMap<>();
         requieredItems.put("Iron Bar", 50);
@@ -236,7 +238,7 @@ public class Game {
         npcs.add(sebastian);
         nextTile.setContainedNPC(sebastian);
 
-        nextTile = this.map.getTile(72, 64);
+        nextTile = this.map.getTile(72, 65);
         requieredItems.clear();
         prize.clear();
         requieredItems.put("Gold Bar", 1);
@@ -260,7 +262,7 @@ public class Game {
         npcs.add(abigail);
         nextTile.setContainedNPC(abigail);
 
-        nextTile = this.map.getTile(72, 74);
+        nextTile = this.map.getTile(72, 75);
         requieredItems.clear();
         prize.clear();
         requieredItems.put("Strawberry", 12);
@@ -284,7 +286,7 @@ public class Game {
         npcs.add(harvey);
         nextTile.setContainedNPC(harvey);
 
-        nextTile = this.map.getTile(72, 84);
+        nextTile = this.map.getTile(72, 85);
         requieredItems.clear();
         prize.clear();
         requieredItems.put("Wood", 10);
@@ -308,7 +310,7 @@ public class Game {
         npcs.add(leah);
         nextTile.setContainedNPC(leah);
 
-        nextTile = this.map.getTile(72, 94);
+        nextTile = this.map.getTile(72, 95);
         requieredItems.clear();
         prize.clear();
         requieredItems.put("Wood", 80);
@@ -373,4 +375,7 @@ public class Game {
         }
     }
 
+    public Map<String, List<NPCMission>> getPlayerAddedMissions() {
+        return playerAddedMissions;
+    }
 }
