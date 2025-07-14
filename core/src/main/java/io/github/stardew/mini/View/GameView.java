@@ -8,6 +8,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -38,6 +42,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.stardew.mini.Controller.GameController;
 import io.github.stardew.mini.Controller.MainMenuController;
 import io.github.stardew.mini.Controller.PreGameMenuController;
+import io.github.stardew.mini.Controller.HouseMenuController;
 import io.github.stardew.mini.Controller.StoreMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
@@ -47,6 +52,7 @@ import io.github.stardew.mini.Model.Animals.CrowFlight;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Assets.InventoryAssets;
 import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.Friendships.Friendship;
@@ -77,6 +83,7 @@ import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
+import io.github.stardew.mini.Model.User;
 import org.jetbrains.annotations.NotNull;
 
 //import java.awt.*;
@@ -117,7 +124,10 @@ public class GameView implements Screen, InputProcessor, AppMenu {
 
     private Dialog machineMenuDialog;
     private Machine selectedMachine;
-
+    private TextButton recipesButton, cancelButton, cheatButton, exitButton, grabButton;
+    private String pendingMachineName;
+    private String pendingProductName;
+    private Item itemToPlace;
 
     private float moveCooldown = 0f;
     private static final float MOVE_INTERVAL = 0.1f; // seconds between steps
@@ -131,6 +141,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     private Dialog buyAnimalDialog;
 
     private StoreMenuController storeController;
+    private HouseMenuController houseMenuController;
     private int gameWidth = Gdx.graphics.getWidth();
     private int gameHeight = Gdx.graphics.getHeight();
 
@@ -188,6 +199,7 @@ public class GameView implements Screen, InputProcessor, AppMenu {
     public GameView(GameController controller) {
         this.controller = controller;
         storeController = new StoreMenuController();
+        houseMenuController = new HouseMenuController();
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -202,6 +214,18 @@ public class GameView implements Screen, InputProcessor, AppMenu {
         camera.update();
         Gdx.input.setInputProcessor(this);
         showErrorDialog(stage, "Select a tile inside your farm to build");
+        //+ building.getDisplayName());
+    }
+
+    public void startPlacingItem(Item item) {
+        showFullMap = false;
+        this.isPlacingBuilding = true;
+        this.itemToPlace = item;
+        this.currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
+        setCameraPosition();
+        camera.update();
+        Gdx.input.setInputProcessor(this);
+        showErrorDialog(stage, "Select a tile inside your farm to place item");
         //+ building.getDisplayName());
     }
 
@@ -641,10 +665,8 @@ private void updateAnimals(float delta) {
         if (keycode == Input.Keys.Z) {
             Tile tile = currentPlayer.getCurrentTile();
             Machine machine = (Machine) tile.getContainedItem();
-            if(machine != null){
-            machine.useMachine("Coffee", currentPlayer);
+            //machine.useMachine("Coffee",currentPlayer);
             MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer).getHouse().getMachines().add(machine);
-            }
         }
         if (keycode == Input.Keys.U) {
             Tile tile = currentPlayer.getCurrentTile();
@@ -687,10 +709,15 @@ private void updateAnimals(float delta) {
             controller.crowAttack();
         }
 
-        if (keycode == Input.Keys.R) {
-            Tile tile = currentPlayer.getCurrentTile();
-            Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
-             System.out.println(map[tile.getX() + 1][tile.getY()].getContainedGrowable().getGrowableType());
+        if(keycode == Input.Keys.R){
+            if(equippedItem == null){
+                showErrorDialog(stage,"First choose an item!");
+            }
+            else {
+                itemToPlace = equippedItem;
+                startPlacingItem(itemToPlace);
+            }
+
         }
         if (keycode == Input.Keys.I) {
             currentPlayer.setEnergy(200);
@@ -721,114 +748,11 @@ private void updateAnimals(float delta) {
                 }
             }
         }
+
         if (showFullMap) return true;
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
 }
-
-    private void showNumItemDialog() {
-        purchaseQuantity = 1;
-        //numItemDialog.getContentTable().clearChildren();
-        //numItemDialog.getTitleLabel().setText("Select Quantity " + selectedShopItem.getName());
-        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
-        numItemDialog.padTop(40f);
-        numItemDialog.setKeepWithinStage(true);
-        numItemDialog.setMovable(false);
-        numItemDialog.setVisible(false);
-        numItemDialog.setModal(true);
-        numItemDialog.setResizable(false);
-        showBackpackMenu = false;
-        backpackMenuTable.setVisible(false);
-        inventoryMenuTable.setVisible(false);
-        showInventoryMenu = false;
-
-        Table content = numItemDialog.getContentTable();
-        content.clear();
-        content.defaults().pad(10);
-
-        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
-        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
-        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
-        TextButton applyButton = new TextButton("Apply", GameAssetManager.skin, "custom-button");
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
-
-
-        plusButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                purchaseQuantity++;
-                quantityLabel.setText("Quantity: " + purchaseQuantity);
-            }
-        });
-
-        minusButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (purchaseQuantity > 1) {
-                    purchaseQuantity--;
-                    quantityLabel.setText("Quantity: " + purchaseQuantity);
-                }
-            }
-        });
-
-        applyButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Result result;
-                switch (scenario){
-                    case "Gift":
-                        result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
-                        break;
-                    case "Machine":
-                        result=controller.artisanUse(artisanName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
-                        break;
-                    case "Sell":
-                        result=storeController.placeInShippingBin(equippedItem.getName(),purchaseQuantity);
-                        break;
-                    default:
-                        result = new Result(true,"");
-                        break;
-
-                }
-                scenario = "";
-                giftReciever = "";
-                artisanName = "";
-                //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
-                numItemDialog.hide();
-                if(!result.message().equals("")){
-                    showTimedErrorLabel(stage, result.message(), 2);
-                }
-                Gdx.input.setInputProcessor(GameView.this);
-            }
-        });
-
-        cancelButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                numItemDialog.hide();
-                Gdx.input.setInputProcessor(GameView.this);
-            }
-        });
-
-        content.add(quantityLabel).colspan(2).row();
-        content.add(minusButton).padRight(5);
-        content.add(plusButton).row();
-        content.add(applyButton).colspan(2).row();
-        content.add(cancelButton).colspan(2);
-
-        numItemDialog.add(content);
-        numItemDialog.pack();
-        numItemDialog.setPosition(
-            (Gdx.graphics.getWidth() - numItemDialog.getWidth()) / 2,
-            (Gdx.graphics.getHeight() - numItemDialog.getHeight()) / 2
-        );
-        numItemDialog.pack();
-        numItemDialog.setVisible(true);
-        stage.addActor(numItemDialog);
-        Gdx.input.setInputProcessor(stage);
-
-    }
-
     private Animal getAnimalNearPlayer() {
         int playerX = currentPlayer.getCurrentTile().getX();
         int playerY = currentPlayer.getCurrentTile().getY();
@@ -853,6 +777,34 @@ private void updateAnimals(float delta) {
             return stage.touchDown(screenX, screenY, pointer, button);
         }
 
+
+        if (isPlacingBuilding && currentFarm != null && !terminalVisible && itemToPlace != null) {
+            Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
+            int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
+            int tileY = MainApp.getInstance().getCurrentGame().getMap().getHeight() - (int) (worldCoords.y / GameAssetManager.TILE_SIZE) - 1;
+
+            if (isInsideFarm(tileX, tileY)) {
+
+                Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
+
+                if (tile != null && tile.canBuildOn()) {
+
+                    Result result = houseMenuController.placeItem(itemToPlace.getName(),tile);
+                    showErrorDialog(stage,result.getMessage());
+
+                } else {
+                    showErrorDialog(stage, "Tile is not buildable.");
+                }
+            } else {
+                showErrorDialog(stage, "Please click inside your farm.");
+            }
+            //setBuilding(new Building(buildingToPlace));
+            isPlacingBuilding = false;
+            itemToPlace = null;
+            buildingToPlace = null;
+            currentFarm = null;
+            return true;
+        }
         if (isPlacingBuilding && currentFarm != null && !terminalVisible) {
             Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0));
             int tileX = (int) (worldCoords.x / GameAssetManager.TILE_SIZE);
@@ -931,11 +883,14 @@ private void updateAnimals(float delta) {
                         return true;
                     }
                 }
-//                if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
-//                    //TODO: open inventory
-//                    //TODO: open a very similar dialog to purchase window
-//                    //TODO: call storeController.placingInShippingBin
-//                }
+                if (tile != null && tile.getType() == TileType.SHIPPINGBIN) {
+                    //TODO: open inventory
+                    //TODO: open a very similar dialog to purchase window
+                    //TODO: call storeController.placingInShippingBin
+                    scenario = "Sell";
+                    Gdx.input.setInputProcessor(GameView.this);
+                    showBackpack();
+                }
                 if (tile != null && tile.getContainedItem() != null && tile.getContainedItem() instanceof Machine) {
                     System.out.println("machine");
                     selectedMachine = (Machine) tile.getContainedItem();
@@ -1348,6 +1303,111 @@ private void updateAnimals(float delta) {
         Gdx.input.setInputProcessor(stage);
     }
 
+    private void showNumItemDialog() {
+        purchaseQuantity = 1;
+        //numItemDialog.getContentTable().clearChildren();
+        //numItemDialog.getTitleLabel().setText("Select Quantity " + selectedShopItem.getName());
+        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
+        numItemDialog.padTop(40f);
+        numItemDialog.setKeepWithinStage(true);
+        numItemDialog.setMovable(false);
+        numItemDialog.setVisible(false);
+        numItemDialog.setModal(true);
+        numItemDialog.setResizable(false);
+        showBackpackMenu = false;
+        backpackMenuTable.setVisible(false);
+        inventoryMenuTable.setVisible(false);
+        showInventoryMenu = false;
+
+        Table content = numItemDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(10);
+
+        Label quantityLabel = new Label("Quantity: " + purchaseQuantity, GameAssetManager.skin, "custom-label");
+        TextButton plusButton = new TextButton("+", GameAssetManager.skin, "custom-button");
+        TextButton minusButton = new TextButton("-", GameAssetManager.skin, "custom-button");
+        TextButton applyButton = new TextButton("Apply", GameAssetManager.skin, "custom-button");
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+
+
+        plusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                purchaseQuantity++;
+                quantityLabel.setText("Quantity: " + purchaseQuantity);
+            }
+        });
+
+        minusButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (purchaseQuantity > 1) {
+                    purchaseQuantity--;
+                    quantityLabel.setText("Quantity: " + purchaseQuantity);
+                }
+            }
+        });
+
+        applyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Result result;
+                switch (scenario){
+                    case "Gift":
+                        result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
+                        break;
+                    case "Machine":
+
+                        result=controller.artisanUse(pendingMachineName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
+                        break;
+                    case "Sell":
+                        result=storeController.placeInShippingBin(equippedItem.getName(),purchaseQuantity);
+                        break;
+                    default:
+                        result = new Result(true,"");
+                        break;
+
+                }
+                scenario = "";
+                giftReciever = "";
+                pendingMachineName = null;
+                pendingProductName = null;
+                //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
+                numItemDialog.hide();
+                if(!result.message().equals("")){
+                    showTimedErrorLabel(stage, result.message(), 2);
+                }
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                numItemDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        content.add(quantityLabel).colspan(2).row();
+        content.add(minusButton).padRight(5);
+        content.add(plusButton).row();
+        content.add(applyButton).colspan(2).row();
+        content.add(cancelButton).colspan(2);
+
+        numItemDialog.add(content);
+        numItemDialog.pack();
+        numItemDialog.setPosition(
+            (Gdx.graphics.getWidth() - numItemDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - numItemDialog.getHeight()) / 2
+        );
+        numItemDialog.pack();
+        numItemDialog.setVisible(true);
+        stage.addActor(numItemDialog);
+        Gdx.input.setInputProcessor(stage);
+
+    }
+
     public void createUI() {
         createTerminal();
 
@@ -1357,7 +1417,17 @@ private void updateAnimals(float delta) {
 
         createMachineDialog();
     }
+    private void createNumItemDialog() {
+        numItemDialog = new Dialog("select Number", GameAssetManager.skin);
+        numItemDialog.padTop(40f);
+        numItemDialog.setKeepWithinStage(true);
+        numItemDialog.setMovable(false);
+        numItemDialog.setVisible(false);
+        numItemDialog.setModal(true);
+        numItemDialog.setResizable(false);
 
+        stage.addActor(numItemDialog);
+    }
     private void createShopMenusDialogs() {
         shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "custom-window");
         shopMenuDialog.padTop(40f);
@@ -1612,8 +1682,8 @@ private void createAnimalDialog() {
         machineMenuDialog.getContentTable().defaults().pad(10);
 
         // Add buttons with their result objects
-        TextButton RecepiesButton = new TextButton("Recepies", GameAssetManager.skin);
-        RecepiesButton.addListener(new ClickListener() {
+        recipesButton = new TextButton("Recepies", GameAssetManager.skin);
+        recipesButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 machineMenuDialog.hide();                       // hide the main menu
@@ -1621,7 +1691,7 @@ private void createAnimalDialog() {
             }
         });
 
-        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin);
+        cancelButton = new TextButton("Cancel", GameAssetManager.skin);
         cancelButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1631,7 +1701,7 @@ private void createAnimalDialog() {
             }
         });
 
-        TextButton cheatButton = new TextButton("Cheat", GameAssetManager.skin);
+        cheatButton = new TextButton("Cheat", GameAssetManager.skin);
         cheatButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1641,7 +1711,8 @@ private void createAnimalDialog() {
         });
 
 
-        TextButton exitButton = new TextButton("Exit", GameAssetManager.skin);
+
+        exitButton = new TextButton("Exit", GameAssetManager.skin);
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -1651,19 +1722,38 @@ private void createAnimalDialog() {
             }
         });
 
-        machineMenuDialog.getContentTable().add(RecepiesButton).row();
+
+        grabButton = new TextButton("Grab Product", GameAssetManager.skin);
+        grabButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                machineMenuDialog.hide();
+                handleMachineMenuChoice("Grab Product");
+                Gdx.input.setInputProcessor(GameView.this);  // Return input to game
+                selectedMachine = null;
+            }
+        });
+
+        grabButton.setVisible(false);
+
+
+
+
+        machineMenuDialog.getContentTable().add(recipesButton).row();
         machineMenuDialog.getContentTable().add(cancelButton).row();
         machineMenuDialog.getContentTable().add(cheatButton).row();
         machineMenuDialog.getContentTable().add(exitButton).row();
+        machineMenuDialog.getContentTable().add(grabButton).row();
 
         machineMenuDialog.setKeepWithinStage(true);
         machineMenuDialog.setMovable(false);
         machineMenuDialog.setVisible(false);  // Add this after creation
         stage.addActor(machineMenuDialog);
+
     }
 
     private void showRecipeDialog(Machine machine) {
-        Dialog dlg = new Dialog("Recipes for " + machine.getType().getName(), GameAssetManager.skin) {
+        Dialog dlg = new Dialog("", GameAssetManager.skin) {
             @Override
             protected void result(Object obj) {
                 // only “Close” exists here, so just hide
@@ -1678,7 +1768,7 @@ private void createAnimalDialog() {
         // Header row
         tbl.add(new Label("Product", GameAssetManager.skin)).padRight(20);
         tbl.add(new Label("Ingredients", GameAssetManager.skin)).row();
-
+        tbl.add(new Label("", GameAssetManager.skin)).row();
         // One line per product
         for (randomStuffType prod : machine.getType().getProducts()) {
             StringBuilder ing = new StringBuilder();
@@ -1691,6 +1781,24 @@ private void createAnimalDialog() {
             tbl.add(new Label(prod.getName(), GameAssetManager.skin));
             tbl.add(new Label(ing.length() > 0 ? ing.toString() : "—", GameAssetManager.skin))
                 .row();
+
+            TextButton makeBtn = new TextButton("Make", GameAssetManager.skin, "custom-button");
+            makeBtn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    // این‌جا فراخوانی می‌کنید که محصول prod ساخته شود
+                    //handleMakeRecipe(machine, prod);
+                    pendingMachineName = machine.getName();
+                    pendingProductName = prod.getName();
+                    scenario = "Machine";
+                    showBackpack();
+                    dlg.hide();
+                    Gdx.input.setInputProcessor(GameView.this);
+                }
+            });
+            tbl.add(makeBtn).colspan(3).padTop(4).row();
+
+
         }
 
         // Close button
@@ -1728,6 +1836,11 @@ private void createAnimalDialog() {
                 //selectedMachine.setActivated(false);
                 Gdx.input.setInputProcessor(this);
                 // Do nothing
+                break;
+            case "Grab Product":
+                Result resultt = selectedMachine.grabPreparedProduct(currentPlayer);
+                System.out.println(resultt.message());
+                Gdx.input.setInputProcessor(this);
                 break;
             default:
                 result = new Result(false, choice);
@@ -2023,7 +2136,6 @@ private void createAnimalDialog() {
                 default: result = new Result(false, choice); break;
             }
         }
-
         showErrorDialog(stage, result.message());
         animalMenuDialog.hide();
         selectedAnimal = null;
@@ -2261,16 +2373,21 @@ private void createAnimalDialog() {
 //        } else {
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
-        if (currentPlayer.hasFainted()) {
-            if (!hasShownFaintMessage) {
-                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
-                    controller.nextTurn();
-                });
-                hasShownFaintMessage = true;
+        List<User> players = MainApp.getInstance().getCurrentGame().getPlayers();
+        boolean allFainted = players.stream().allMatch(User::hasFainted);
+        if(!allFainted) {
+            if (currentPlayer.hasFainted()) {
+                if (!hasShownFaintMessage) {
+                    showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
+                        controller.nextTurn();
+                    });
+                    hasShownFaintMessage = true;
+                }
+            } else {
+                hasShownFaintMessage = false;
             }
-        } else {
-            hasShownFaintMessage = false;
         }
+
 
 
         determineAvatar();
@@ -2533,8 +2650,9 @@ private void createAnimalDialog() {
                 x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
-        } else if (tiles[y][x].getContainedItem() instanceof Machine machine) {
-            batch.draw(GameAssetManager.FLOORING_01, x * tileSize,
+        }
+        else if(tiles[y][x].getContainedItem() instanceof Machine machine) {
+            batch.draw(machine.getType().getTexture(), x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
 
@@ -2553,6 +2671,7 @@ private void createAnimalDialog() {
                 batch.setColor(Color.WHITE);
             } else if (machine.getReady()) {
                 GameAssetManager.customFont.draw(batch, "Done!", drawX + tileSize / 2f - 50, drawY + 20);
+                grabButton.setVisible(true);
             }
         }
     }

@@ -142,7 +142,6 @@ public class MainApp extends com.badlogic.gdx.Game {
             return new ArrayList<>();
         }
     }
-/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -216,7 +215,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
-
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }

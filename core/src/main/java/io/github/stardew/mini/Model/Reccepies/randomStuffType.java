@@ -37,9 +37,9 @@ public enum randomStuffType {
         Pickles("Pickles",570,150,6,Map.of("Red Cabbage",1),true),
         Jelly("Jelly",225,80,72,Map.of("Orange",1),true),
         Smoked_Fish("Smoked Fish",150,200,72,Map.of("Salmon",1),true),
-        Copper_Bar("Copper Bar",50,0,4,Map.of("Copper",5,"Coal",1),false),
-        Iron_Bar("Iron Bar",100,0,4,Map.of("Iron",5,"Coal",1),false),
-        Gold_Bar("Gold Bar",250,0,4,Map.of("Gold",5,"Coal",1),false),
+        Copper_Bar("Copper Bar",50,0,4,Map.of("Copper",5),false),
+        Iron_Bar("Iron Bar",100,0,4,Map.of("Iron",5),false),
+        Gold_Bar("Gold Bar",250,0,4,Map.of("Gold",5),false),
         Stone("Stone", 20,0, 0,Map.of(), false),
         Hay("Hay", 50, 0, 0, Map.of(), false),
         Joja_Cola("Joja Cola", 75, 0, 0, Map.of(), false),
@@ -47,7 +47,7 @@ public enum randomStuffType {
         SpeedGro("Speed-Gro",100, 0, 0, Map.of(), false),
         Bouquet("Bouquet",1000,0,0,Map.of(), false),
         WeddingRing("Wedding Ring",10000,0,0,Map.of(), false),
-        Iridium_Bar("Iridium Bar",1000,0,4,Map.of("Iridium",5,"Coal",1),false);
+        Iridium_Bar("Iridium Bar",1000,0,4,Map.of("Iridium",5),false);
 
 
 
