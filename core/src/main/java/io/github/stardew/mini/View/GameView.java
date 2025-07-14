@@ -2635,54 +2635,107 @@ private void updateAnimals(float delta) {
             batch.draw(itemTex, drawX, drawY, tileSize, tileSize);
         }
 
-        private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
-            if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
-                if (toolMenuTable != null) toolMenuTable.setVisible(false);
-                return;
-            }
+//        private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
+//            if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+//                if (toolMenuTable != null) toolMenuTable.setVisible(false);
+//                return;
+//            }
+//
+//            ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
+//            if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
+//                return;
+//            }
+//
+//            Tool toolToUse = tools.get(selectedSlot);
+//            currentPlayer.setEquippedTool(toolToUse);
+//
+//            int tileSize = GameAssetManager.TILE_SIZE;
+//
+//            float playerTileGridX = currentPlayer.getCurrentTile().getX();
+//            float playerTileGridY = currentPlayer.getCurrentTile().getY();
+//
+//            float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
+//            float playerWorldY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
+//
+//            Vector3 touchPosOnScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+//            camera.unproject(touchPosOnScreen);
+//            float actualMouseWorldX = touchPosOnScreen.x;
+//            float actualMouseWorldY = touchPosOnScreen.y;
+//
+//            float deltaX = actualMouseWorldX - playerWorldX;
+//            float deltaY = actualMouseWorldY - playerWorldY;
+//
+//            int direction = get4DirectionalAngle(deltaX, deltaY);
+//
+//            float angleRad = MathUtils.atan2(deltaY, deltaX);
+//            float angleDeg = angleRad * MathUtils.radDeg;
+//            if (angleDeg < 0) {
+//                angleDeg += 360;
+//            }
+//
+//            // Start the tool usage animation
+//            isToolBeingUsed = true;
+//            toolUsageStateTime = 0f;
+//
+//            if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
+//                Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+//                System.out.println(result.message());
+//            } else {
+//                Result result=controller.useTool("Down");
+//                System.out.println(result.message());
+//            }
+//
+//        }
+private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
+    if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+        if (toolMenuTable != null) toolMenuTable.setVisible(false);
+        return;
+    }
 
-            ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
-            if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
-                return;
-            }
+    ArrayList<Tool> tools = currentPlayer.getBackpack().getTools();
+    if (tools == null || tools.isEmpty() || selectedSlot >= tools.size()) {
+        return;
+    }
 
-            Tool toolToUse = tools.get(selectedSlot);
-            currentPlayer.setEquippedTool(toolToUse);
+    Tool toolToUse = tools.get(selectedSlot);
+    currentPlayer.setEquippedTool(toolToUse);
 
-            int tileSize = GameAssetManager.TILE_SIZE;
+    int tileSize = GameAssetManager.TILE_SIZE;
 
-            float playerTileGridX = currentPlayer.getCurrentTile().getX();
-            float playerTileGridY = currentPlayer.getCurrentTile().getY();
+    float playerTileGridX = currentPlayer.getCurrentTile().getX();
+    float playerTileGridY = currentPlayer.getCurrentTile().getY();
 
-            float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
-            float playerWorldY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
+    float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
+    float playerWorldY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
 
-            Vector3 touchPosOnScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            camera.unproject(touchPosOnScreen);
-            float actualMouseWorldX = touchPosOnScreen.x;
-            float actualMouseWorldY = touchPosOnScreen.y;
+    Vector3 touchPosOnScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+    camera.unproject(touchPosOnScreen);
+    float actualMouseWorldX = touchPosOnScreen.x;
+    float actualMouseWorldY = touchPosOnScreen.y;
 
-            float deltaX = actualMouseWorldX - playerWorldX;
-            float deltaY = actualMouseWorldY - playerWorldY;
+    float deltaX = actualMouseWorldX - playerWorldX;
+    float deltaY = actualMouseWorldY - playerWorldY;
 
-            int direction = get4DirectionalAngle(deltaX, deltaY);
+    int direction = get4DirectionalAngle(deltaX, deltaY);
 
-            float angleRad = MathUtils.atan2(deltaY, deltaX);
-            float angleDeg = angleRad * MathUtils.radDeg;
-            if (angleDeg < 0) {
-                angleDeg += 360;
-            }
+    float angleRad = MathUtils.atan2(deltaY, deltaX);
+    float angleDeg = angleRad * MathUtils.radDeg;
+    if (angleDeg < 0) {
+        angleDeg += 360;
+    }
 
-            // Start the tool usage animation
-            isToolBeingUsed = true;
-            toolUsageStateTime = 0f;
+    // Start the tool usage animation
+    isToolBeingUsed = true;
+    toolUsageStateTime = 0f;
 
-            if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
-                controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
-            } else {
-                controller.useTool("Down");
-            }
-        }
+    if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
+        Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+    } else {
+        Result result = controller.useTool("Down");
+        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+    }
+}
 
         private int get4DirectionalAngle(float dx, float dy) {
             if (dx == 0 && dy == 0) {
