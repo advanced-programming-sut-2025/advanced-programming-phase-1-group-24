@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Model.MapManagement;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 public enum TileType {
     EMPTY("E", "\u001B[47m"),          // White background

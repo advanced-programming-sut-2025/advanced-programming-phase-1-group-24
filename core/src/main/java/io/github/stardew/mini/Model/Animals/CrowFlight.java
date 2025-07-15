@@ -1,11 +1,9 @@
 package io.github.stardew.mini.Model.Animals;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import io.github.stardew.mini.MainApp;
 
 public class CrowFlight {
     public float x;         // Current X position in world coordinates
