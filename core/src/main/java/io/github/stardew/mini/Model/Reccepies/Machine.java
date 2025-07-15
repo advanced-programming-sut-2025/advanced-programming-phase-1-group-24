@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Model.Reccepies;
 
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.Things.Item;
