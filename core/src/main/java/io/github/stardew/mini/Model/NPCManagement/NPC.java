@@ -3,7 +3,7 @@ package io.github.stardew.mini.Model.NPCManagement;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;

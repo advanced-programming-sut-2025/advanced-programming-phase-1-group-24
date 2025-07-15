@@ -1,9 +1,8 @@
 package io.github.stardew.mini.Model.Growables;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.CropAssets;
+import io.github.stardew.mini.client.Assets.CropAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
-import java.util.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -2,12 +2,10 @@ package io.github.stardew.mini.Model.NPCManagement;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 @JsonIdentityInfo(
