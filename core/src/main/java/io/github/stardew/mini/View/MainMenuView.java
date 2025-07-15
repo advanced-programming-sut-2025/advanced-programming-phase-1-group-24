@@ -2,6 +2,7 @@ package io.github.stardew.mini.View;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -15,6 +16,8 @@ import io.github.stardew.mini.Controller.PreGameMenuController;
 import io.github.stardew.mini.Controller.ProfileMenuController;
 import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.Model.Avatar;
+import io.github.stardew.mini.Model.Result;
 
 import java.util.Scanner;
 
@@ -26,6 +29,9 @@ public class MainMenuView implements Screen,AppMenu {
     private TextButton logoutButton;
     private TextButton profileButton;
     private TextButton pregameButton;
+    private Label infoLabelMainMenu;
+    private Image avatarImage;
+    private TextButton exitGame;
 
     public MainMenuView(MainMenuController controller, Skin skin) {
         this.controller = controller;
@@ -49,21 +55,32 @@ public class MainMenuView implements Screen,AppMenu {
         table.setFillParent(true);
         table.center();
         stage.addActor(table);
+        Avatar avatarName = MainApp.getInstance().getLoggedInUser().getAvatar();
+
 
         Label title = new Label("Main Menu", skin, "custom-label");
         title.setFontScale(2);
-
+        avatarImage = new Image(GameAssetManager.getAvatarDrawable(avatarName));
+        infoLabelMainMenu = new Label("", skin,"custom-label");
         logoutButton = new TextButton("Logout", skin, "custom-button");
         profileButton = new TextButton("Profile", skin, "custom-button");
         pregameButton = new TextButton("Pre-Game", skin, "custom-button");
+        exitGame = new TextButton("Exit Game", skin, "custom-button");
 
         // Row layout
-        table.add(title).colspan(2).padBottom(20);
-        table.row().pad(10);
+
+
+        table.add(title).colspan(2).padBottom(20).row();
+        avatarImage.setSize(100, 100);  // or TILE_SIZE, whatever you like
+        table.add(avatarImage).colspan(2).padBottom(20).row();
+        infoLabelMainMenu.setColor(Color.BLACK);
+        table.add(infoLabelMainMenu).colspan(2).padBottom(20).row();
         table.add(profileButton).width(300).padRight(10).height(70);
         table.add(pregameButton).width(300).height(70);
         table.row().pad(10);
+        table.add(exitGame).width(300).padRight(10).height(70);
         table.add(logoutButton).colspan(2).width(300).height(70);
+        showInfoMainMenu();
 
         // Button listeners
         profileButton.addListener(new ClickListener() {
@@ -86,8 +103,21 @@ public class MainMenuView implements Screen,AppMenu {
                 controller.userLogout();
             }
         });
-    }
 
+        exitGame.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // اول LibGDX رو ببند
+                Gdx.app.exit();
+                // بعد JVM رو کامل خاموش کن
+//                System.exit(0);
+            }
+        });
+    }
+    private void showInfoMainMenu() {
+        Result res = controller.showUserInfoMainMenu();
+        infoLabelMainMenu.setText(res.message());
+    }
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);

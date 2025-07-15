@@ -102,13 +102,19 @@ public class GameController implements MenuController {
     }
 
 
+
+
     public Result useTool(String direction) {
 //        MainApp.getInstance().getCurrentGame().getCurrentPlayer().setEquippedTool(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getTools().get(0));
         //MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(GrowableFactory.getInstance().create(SourceType.CauliflowerSeeds), 10);
+        System.out.println("tool" + direction);
         User player = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         Tool currentTool = player.getEquippedTool();
+        System.out.println(currentTool);
         if (currentTool == null) {
+            System.out.println("Tool not found");
             return new Result(false, "You don't have an equipped tool");
+
         }
         int x = 0;
         int y = 0;
@@ -123,11 +129,11 @@ public class GameController implements MenuController {
         } else {
             if (currentTool instanceof Axe) {
                 return ((Axe) currentTool).useAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player,
-                    MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof FishingPole) {
-                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
-                    player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof Hoe) {
+                        MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+//            } else if (currentTool instanceof FishingPole) {
+//                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
+//                        player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+           } else if (currentTool instanceof Hoe) {
                 Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
                 return result;
@@ -136,6 +142,7 @@ public class GameController implements MenuController {
             } else if (currentTool instanceof PickAxe) {
                 return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Scythe) {
+                System.out.println("Scythe");
                 return ((Scythe) currentTool).useScythe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof WateringCan) {
                 return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
@@ -313,7 +320,7 @@ public class GameController implements MenuController {
 
         if (allFainted) {
             // Special case: set hour to 22 and exit early
-            game.getTimeAndDate().setHour(22);
+            game.getTimeAndDate().setHour(23);
             handleEndOfDay();
             // // Exit method here, no loop
         }
@@ -404,7 +411,7 @@ public class GameController implements MenuController {
         Game game = app.getCurrentGame();
         Tile[][] map = game.getMap().getMap();
 
-        if (game.getTimeAndDate().getHour() == 22) {
+        if (game.getTimeAndDate().getHour() == 23) {
 
             for (Shop shop : game.getMap().getShops()) {
                 for (ShopItem shopItem : shop.getProducts()) {
@@ -604,7 +611,7 @@ public class GameController implements MenuController {
 
         for (int i = 0; i < days; i++) {
             // Force day to end if not already at 22
-            game.getTimeAndDate().setHour(22);
+            game.getTimeAndDate().setHour(23);
             handleEndOfDay(); // Will skip to 9 AM next day and apply effects
         }
 
@@ -834,7 +841,7 @@ public class GameController implements MenuController {
 
             Tile targetTile = map[yCoord][xCoord]; // note: map[y][x] because map is row-major
 
-            mapOfGame.applyLightningEffect(targetTile);
+            mapOfGame.applyLightningEffect(targetTile, true);
 
             return new Result(true, "Lightning striked the tile (" + xCoord + "," + yCoord + ").");
         } catch (NumberFormatException e) {
@@ -1258,21 +1265,21 @@ public Result releaseAnimal(String name) {
         return currentPlayer.getBackpack().showTools();
     }
 
-    public Result fish(String fishingPole) {
-        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        Game currentGame = MainApp.getInstance().getCurrentGame();
-        MapOfGame map = currentGame.getMap();
-        Tile currentTile = currentPlayer.getCurrentTile();
-        FishingPole pole;
-        for (Tool tool : currentPlayer.getBackpack().getTools()) {
-            if (tool.getName().equalsIgnoreCase(fishingPole)) {
-                pole = (FishingPole) tool;
-                double modifier = currentGame.getCurrentWeatherType().getEnergyOfToolsModifier();
-                return pole.useFishingPole(pole, map, currentTile, currentPlayer, currentGame, modifier);
-            }
-        }
-        return new Result(false, "No fishing pole found.");
-    }
+//    public Result fish(String fishingPole) {
+//        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//        Game currentGame = MainApp.getInstance().getCurrentGame();
+//        MapOfGame map = currentGame.getMap();
+//        Tile currentTile = currentPlayer.getCurrentTile();
+//        FishingPole pole;
+//        for (Tool tool : currentPlayer.getBackpack().getTools()) {
+//            if (tool.getName().equalsIgnoreCase(fishingPole)) {
+//                pole = (FishingPole) tool;
+//                double modifier = currentGame.getCurrentWeatherType().getEnergyOfToolsModifier();
+//                return pole.useFishingPole(pole, map, currentTile, currentPlayer, currentGame, modifier);
+//            }
+//        }
+//        return new Result(false, "No fishing pole found.");
+//    }
 
     public Result sellAnimal(String name) {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -1657,12 +1664,10 @@ public Result releaseAnimal(String name) {
 //            return result;
 //        }
     }
-
     private ForagingMineralType getRandomForagingMineral() {
         ForagingMineralType[] minerals = ForagingMineralType.values();
         return minerals[new Random().nextInt(minerals.length)];
     }
-
     public Result fertalizeGrowable(String fertalizer, String direction) {
         Result result = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -1692,7 +1697,7 @@ public Result releaseAnimal(String name) {
 //                    }
 //                }
 //            }
-            return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
+            return new Result(true, growable.getName() + " has been fertalized.");
         } else if (result.isSuccessful() && randomStuffType.fromName(fertalizer) == randomStuffType.SpeedGro) {
             System.out.println(result.message());
             //map[y][x].getContainedGrowable().setHasBeenFertalized(true);
@@ -1709,7 +1714,7 @@ public Result releaseAnimal(String name) {
 //                    }
 //                }
 //            }
-            return new Result(true, "Growable with name '" + growable.getName() + "' has been fertalized.");
+            return new Result(true, growable.getName() + " has been fertalized.");
         } else {
             return result;
         }
@@ -2365,13 +2370,13 @@ public Result releaseAnimal(String name) {
         String senderUsername = game.getCurrentPlayer().getUsername();
         User sender = game.getCurrentPlayer();
         User receiver = game.getPlayerByUsername(receiverUsername);
-        Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
         if (sender == null) {
             return new Result(false, "Sender not found.");
         }
         if (receiver == null) {
             return new Result(false, "Receiver not found.");
         }
+        Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
         if (friendship == null) {
             return new Result(false, "Friendship not found between users.");
         }
@@ -2409,7 +2414,7 @@ public Result releaseAnimal(String name) {
         receiver.addToNotifications(new Message(senderUsername, receiverUsername, "You received " + amount + " of " + itemToGift.getName()));
         receiver.addRecievedGift(gift);
 
-        return new Result(true, "Gift sent successfully. Waiting for receiver to rate the gift.");
+        return new Result(true, "Gift sent successfully.");
     }
 
 
@@ -2576,7 +2581,7 @@ public Result releaseAnimal(String name) {
             return new Result(false, "Receiver's inventory is full.");
         }
 
-        sender.getBackpack().grabItem(FLOWER_ITEM_NAME, 1);
+        //sender.getBackpack().grabItem(FLOWER_ITEM_NAME, 1);
         String reez = receiver.isGender() ? "pretty" : "handsome";
         receiver.addToNotifications(new Message(senderUsername, receiverUsername, "Here is a flower " + reez + " :)"));
         // Friendship level logic
@@ -2913,6 +2918,7 @@ public Result releaseAnimal(String name) {
         }
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().decreaseMoney(1000);
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
+        greenHouse.setGreenHouseFixed(true);
         return new Result(true, "green house build successful");
     }
 

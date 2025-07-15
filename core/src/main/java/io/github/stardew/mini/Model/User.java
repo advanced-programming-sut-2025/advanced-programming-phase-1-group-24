@@ -4,25 +4,17 @@ package io.github.stardew.mini.Model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
-import io.github.stardew.mini.Model.Reccepies.Craft;
-import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Tools.Tool;
-import io.github.stardew.mini.Model.Tools.ToolType;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Growables.*;
@@ -162,6 +154,13 @@ public class User {
         this.nickname = nickname;
         this.email = email;
         this.gender = gender;
+
+        if(gender){
+            this.avatar = Avatar.Abigail;
+        }
+        else{
+            this.avatar = Avatar.Alex;
+        }
 
         this.skillsLevel = new HashMap<>();
         for (Skill skill : Skill.values()) {
@@ -518,11 +517,14 @@ public class User {
 
     //always call this function before any task that consumes energy if it returns false cant do the task
     public boolean tryConsumeEnergy(int energyRequired) {
-        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
-            //System.out.println("not enough energy!");
+//        if (currentTurnEnergy < energyRequired || energy < energyRequired) {
+//            //System.out.println("not enough energy!");
+//            return false;
+//        }
+        if(energy < energyRequired){
             return false;
         }
-        currentTurnEnergy -= energyRequired;
+        //currentTurnEnergy -= energyRequired;
         energy -= energyRequired;
         handleFainting();
         return true;
