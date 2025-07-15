@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 public class ClockHud {
 

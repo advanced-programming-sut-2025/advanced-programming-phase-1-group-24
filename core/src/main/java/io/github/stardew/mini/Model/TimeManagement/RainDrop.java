@@ -3,8 +3,7 @@ package io.github.stardew.mini.Model.TimeManagement;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
-import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 public class RainDrop {
     float x, y;

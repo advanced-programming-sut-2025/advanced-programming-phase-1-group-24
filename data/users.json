@@ -5,7 +5,7 @@
     "nickname": "kimiooli",
     "email": "kim05hey@gmail.com",
     "gender": true,
-    "playedGames": 0,
+    "playedGames": 2,
     "maxMoneyInGames": 0,
     "securityQuestion": "What is your favorite food?",
     "securityAnswer": "morgh",
@@ -18,14 +18,14 @@
     "skillsLevel": {
       "FISHING": 0,
       "FARMING": 0,
-      "FORAGING": 0,
-      "MINING": 0
+      "MINING": 0,
+      "FORAGING": 0
     },
     "skillExperience": {
       "FISHING": 0,
       "FARMING": 0,
-      "FORAGING": 0,
-      "MINING": 0
+      "MINING": 0,
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -40,38 +40,49 @@
       "inventoryItems": {},
       "tools": [
         {
-          "name": "HOE",
+          "name": "hoe",
           "type": "HOE",
           "material": "Initial"
         },
         {
-          "name": "PICKAXE",
+          "name": "pick axe",
           "type": "PICKAXE",
           "material": "Initial"
         },
         {
-          "name": "AXE",
+          "name": "axe",
           "type": "AXE",
           "material": "Initial"
         },
         {
-          "name": "WATERINGCAN",
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "watering can",
           "type": "WATERINGCAN",
           "material": "Initial"
         },
         {
-          "name": "SCYTHE",
+          "name": "scythe",
           "type": "SCYTHE",
           "material": "Initial"
         }
       ],
       "trashcan": {
-        "name": "TRASHCAN",
+        "name": "trash can",
         "type": "TRASHCAN",
         "material": "Initial"
       }
     },
     "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia8",
+      "x": 126,
+      "y": 8,
+      "hasBeenBurt": false
+    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -83,7 +94,7 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 0,
+    "movingDirection": 1,
     "avatar": "Abigail",
     "isProposing": false,
     "isAccepting": false,
@@ -613,8 +624,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "watering can",
           "type": "WATERINGCAN",
           "material": "Initial"
@@ -708,8 +717,6 @@
           "material": "Initial"
         },
         {
-          "maxCapacity": 40,
-          "waterLeft": 0,
           "name": "watering can",
           "type": "WATERINGCAN",
           "material": "Initial"
