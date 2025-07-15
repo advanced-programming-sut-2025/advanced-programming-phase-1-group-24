@@ -10,6 +10,8 @@ import java.util.List;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
+import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
@@ -42,6 +44,10 @@ public class GameSaver {
         module.addKeyDeserializer(Growable.class, new GenericKeyDeserializer<>());
         module.addKeySerializer(Animal.class, new GenericKeySerializer<>());
         module.addKeyDeserializer(Animal.class, new GenericKeyDeserializer<>());
+        module.addKeySerializer(NPC.class, new GenericKeySerializer<>());
+        module.addKeyDeserializer(NPC.class, new GenericKeyDeserializer<>());
+        module.addKeySerializer(NPCMission.class, new GenericKeySerializer<>());
+        module.addKeyDeserializer(NPCMission.class, new GenericKeyDeserializer<>());
 
 
         mapper.registerModule(module);

@@ -1,5 +1,8 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +18,7 @@ public enum NPCtype {
     private final ArrayList<Dialog> dialogs;
     private final List<String> favoriteItems;
     private final List<String> randomGifts;
+    private TextureRegion textureRegion;
 
     NPCtype(String name, List<String> favoriteItems, List<String> randomGifts) {
         this.name = name;
@@ -36,4 +40,12 @@ public enum NPCtype {
     }
 
     public List<String> getRandomGifts() {return randomGifts;}
+
+    public TextureRegion getTextureRegion() {return textureRegion;}
+
+    public void initTexture() {
+        Texture fullTexture = new Texture("game/character/" + name + ".png");
+        TextureRegion[][] frames = TextureRegion.split(fullTexture, 16, 32);
+        this.textureRegion = frames[0][0];
+    }
 }

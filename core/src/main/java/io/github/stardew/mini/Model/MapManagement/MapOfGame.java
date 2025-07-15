@@ -3,6 +3,9 @@ package io.github.stardew.mini.Model.MapManagement;
 import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.github.stardew.mini.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -84,19 +87,39 @@ public class MapOfGame {
         // initialize npcHouses
         // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
-                {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
+            {70, 53}, {70, 63}, {70, 73}, {70, 83}, {70, 93}
         };
 
         for (int[] coordinates : npsHouseCoordinates) {
             int startX = coordinates[0];
             int startY = coordinates[1];
 
-            // Loop over each 5x5 area to set NPC HOUSE type
-            for (int y = startY; y < startY + 6; y++) {
-                for (int x = startX; x < startX + 6; x++) {
-                    Tile tile = map[y][x];
-                    tile.setType(TileType.NPCHOUSE); // mark tile as NPC house
-                    // tile.setWalkable(true);          // optionally adjust walkability
+            int houseWidth = 6;
+            int houseHeight = 6;
+
+            int doorX = startX + 2;
+            int doorY = startY + houseHeight - 1;
+
+            for (int y = startY; y < startY + houseHeight; y++) {
+                for (int x = startX; x < startX + houseWidth; x++) {
+                    if (y >= 0 && y < map.length && x >= 0 && x < map[0].length) {
+                        Tile tile = map[y][x];
+
+                        if (x == startX || x == startX + houseWidth - 1 ||
+                            y == startY || y == startY + houseHeight - 1) {
+
+                            if (x == doorX && y == doorY) {
+                                tile.setType(TileType.DOOR);
+                                tile.setWalkable(true);
+                            } else {
+                                tile.setType(TileType.NPCWALL);
+                                tile.setWalkable(false);
+                            }
+                        } else {
+                            tile.setType(TileType.NPCHOUSE);
+                            tile.setWalkable(true);
+                        }
+                    }
                 }
             }
         }
@@ -143,7 +166,7 @@ public class MapOfGame {
 
             for (int index : selectedIndices) {
                 Tile tile = farmTiles.get(index);
-                applyLightningEffect(tile);
+                applyLightningEffect(tile, false);
             }
         }
     }
@@ -166,12 +189,15 @@ public class MapOfGame {
     }
 
 
-    public void applyLightningEffect(Tile tile) {
+    public void applyLightningEffect(Tile tile, boolean isCheat) {
         if (tile.getType() == TileType.GREENHOUSE) {
             return;
         }
 
         int flashHour = MathUtils.random(9, 18); // Random hour between 9 and 22
+        if(isCheat) {
+            flashHour = MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour();
+        }
         System.out.println(flashHour);
 
         LightningFlash flash = new LightningFlash();
@@ -392,7 +418,7 @@ public class MapOfGame {
         items.add(new ShopItem("Sugar", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.Sugar), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Wheat Flour", Integer.MAX_VALUE, new randomStuff(125, randomStuffType.WheatFlower), ShopItemType.RANDOMSTUFF, 125, 125, 125, 125));
         items.add(new ShopItem("Rice", Integer.MAX_VALUE, new randomStuff(250, randomStuffType.Rice), ShopItemType.RANDOMSTUFF, 250, 250, 250, 250));
-        //items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
+        items.add(new ShopItem("Mixed Seeds", Integer.MAX_VALUE, GrowableFactory.getInstance().create(SourceType.MixedSeeds), ShopItemType.Source, 50, 50, 50, 50));
 
         return items;
     }

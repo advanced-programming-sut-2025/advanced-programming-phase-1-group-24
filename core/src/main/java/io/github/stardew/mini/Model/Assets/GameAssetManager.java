@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
+import io.github.stardew.mini.Model.Avatar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +33,10 @@ public class GameAssetManager {
     public static Texture LIGHT_GREEN_FLOOR;
     public static Texture DARK_GREEN_FLOOR;
     public static Texture FLOORING_01;
+    public static Texture FLOORING_02;
     public static Texture FLOORING_03;
+    public static Texture FLOORING_06;
+    public static Texture FLOORING_08;
     public static Texture FLOORING_09;
     public static Texture FLOORING_10;
     public static Texture FLOORING_17;
@@ -42,9 +46,13 @@ public class GameAssetManager {
     public static Texture FLOORING_29;
     public static Texture FLOORING_52;
     public static Texture FLOORING_55;
+    public static Texture FLOORING_62;
     public static Texture FLOORING_71;
     public static Texture FLOORING_84;
     public static Texture FLOORING_86;
+    public static Texture FlOORING_50;
+    public static Texture FLOORING_25;
+    public static Texture FLOORING_64;
     public static Texture burntTile;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
@@ -104,6 +112,10 @@ public class GameAssetManager {
     public static TextureRegion shaneFaint;
     public static TextureRegion shaneProposing;
     public static ArrayList<Animation<TextureRegion>> shaneAnimations = new ArrayList<>();
+    public static Texture alexxTexture;
+    public static Texture abigaillTexture;
+    public static Texture haleyyTexture;
+    public static Texture shaneeTexture;
 
     public static Texture SECRET_HEART ;
 
@@ -125,7 +137,10 @@ public class GameAssetManager {
         LIGHT_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_44.png"));
         DARK_GREEN_FLOOR = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
         FLOORING_01 = new Texture(Gdx.files.internal("Flooring/Flooring_01.png"));
+        FLOORING_02 = new Texture(Gdx.files.internal("Flooring/Flooring_02.png"));
         FLOORING_03 = new Texture(Gdx.files.internal("Flooring/Flooring_03.png"));
+        FLOORING_06 = new Texture(Gdx.files.internal("Flooring/Flooring_06.png"));
+        FLOORING_08 = new Texture(Gdx.files.internal("Flooring/Flooring_08.png"));
         FLOORING_09 = new Texture(Gdx.files.internal("Flooring/Flooring_09.png"));
         FLOORING_10 = new Texture(Gdx.files.internal("Flooring/Flooring_10.png"));
         FLOORING_17 = new Texture(Gdx.files.internal("Flooring/Flooring_17.png"));
@@ -135,9 +150,13 @@ public class GameAssetManager {
         FLOORING_29 = new Texture(Gdx.files.internal("Flooring/Flooring_29.png"));
         FLOORING_52 = new Texture(Gdx.files.internal("Flooring/Flooring_52.png"));
         FLOORING_55 = new Texture(Gdx.files.internal("Flooring/Flooring_55.png"));
+        FLOORING_62 = new Texture(Gdx.files.internal("Flooring/Flooring_62.png"));
         FLOORING_71 = new Texture(Gdx.files.internal("Flooring/Flooring_71.png"));
         FLOORING_84 = new Texture(Gdx.files.internal("Flooring/Flooring_84.png"));
         FLOORING_86 = new Texture(Gdx.files.internal("Flooring/Flooring_86.png"));
+        FLOORING_25 = new Texture(Gdx.files.internal("Flooring/Flooring_25.png"));
+        FLOORING_64 = new Texture(Gdx.files.internal("Flooring/Flooring_64.png"));
+        FlOORING_50 = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
         burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
@@ -145,7 +164,10 @@ public class GameAssetManager {
         stormOverlay = new Texture(Gdx.files.internal("Weather/Storm.png"));
         dropTexture = new Texture(Gdx.files.internal("Weather/Rain.png"));
         TextureRegion[][] tmp = TextureRegion.split(dropTexture, dropTexture.getWidth() / 11, dropTexture.getHeight());
-
+        alexxTexture = new Texture(Gdx.files.internal("assets/Villagers/Alex.png"));
+        haleyyTexture = new Texture(Gdx.files.internal("assets/Villagers/Haley.png"));
+        shaneeTexture = new Texture(Gdx.files.internal("assets/Villagers/Shane.png"));
+        abigaillTexture = new Texture(Gdx.files.internal("assets/Villagers/Abigail.png"));
         // Only one column
         System.arraycopy(tmp[0], 0, dropFrames, 0, 11);
 
@@ -308,6 +330,7 @@ public class GameAssetManager {
         Shipping_Bin = new Texture(Gdx.files.internal("Habitat/Shipping_Bin.png"));
 
         SECRET_HEART =  new Texture("Heart/Secret_Heart.png");
+
     }
 
     public static void dispose() {
@@ -335,6 +358,13 @@ public class GameAssetManager {
         if (stormOverlay != null) stormOverlay.dispose();
         if (dropTexture != null) dropTexture.dispose();
         if (crowSheet != null) crowSheet.dispose();
+        if (abigaillTexture != null) abigaillTexture.dispose();
+        if (alexxTexture != null) alexxTexture.dispose();
+        if(haleyyTexture != null) haleyyTexture.dispose();
+        if (shaneeTexture != null) shaneeTexture.dispose();
+        if(FlOORING_50 != null) FlOORING_50.dispose();
+        if(FLOORING_64 != null) FLOORING_64.dispose();
+        if(FLOORING_25 != null) FLOORING_25.dispose();
 
         disposeAnimals();
         if (farm1 != null) farm1.dispose();
@@ -391,6 +421,27 @@ public class GameAssetManager {
 
         return animations;
     }
+    public static Drawable getAvatarDrawable(Avatar avatar) {
+        TextureRegion region;
+        switch (avatar) {
+            case Abigail:
+                region = new TextureRegion(abigaillTexture);
+                break;
+            case Alex:
+                region = new TextureRegion(alexxTexture);
+                break;
+            case Haley:
+                region = new TextureRegion(haleyyTexture);
+                break;
+            case Shane:
+                region = new TextureRegion(shaneeTexture);
+                break;
+            default:
+                region = new TextureRegion(abigaillTexture);
+        }
+        return new TextureRegionDrawable(region);
+    }
+
 
 
 }

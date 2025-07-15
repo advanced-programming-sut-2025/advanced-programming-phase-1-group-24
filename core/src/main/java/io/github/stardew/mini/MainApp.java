@@ -19,7 +19,10 @@ import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.Model.NPCManagement.NPCtype;
 import io.github.stardew.mini.Model.Places.Habitat;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
+import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
@@ -81,6 +84,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             foragingCropType.initTexture();
         }
         for (CropType cropType : CropType.values()) {
+            if(cropType == CropType.MixedCrop) continue;
             cropType.initTexture();
         }
         for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
@@ -94,6 +98,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
+        }
+        for(NPCtype npCtype : NPCtype.values()) {
+            npCtype.initTexture();
         }
         // Initialize game data
         activeGames = loadActiveGames();
@@ -141,7 +148,6 @@ public class MainApp extends com.badlogic.gdx.Game {
             return new ArrayList<>();
         }
     }
-/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -215,7 +221,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
-
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
