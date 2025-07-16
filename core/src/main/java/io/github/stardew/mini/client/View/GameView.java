@@ -39,6 +39,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.HouseMenuController;
@@ -55,7 +56,6 @@ import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Growables.*;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Menus.Menu;
@@ -3083,6 +3083,8 @@ private void createAnimalDialog() {
                 }
             }
         }
+        setCameraPosition();
+        camera.update();
 
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
@@ -3656,8 +3658,8 @@ private void createAnimalDialog() {
 //            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.reduceEnergy(1);
             currentPlayer.setMovingDirection(direction);
-            setCameraPosition();
-            camera.update();
+            //setCameraPosition();
+            //camera.update();
             return true;
         }
         return false;
@@ -4546,13 +4548,13 @@ private void createAnimalDialog() {
         }
 
     private void showNotifications() {
-        List<Message> notifications = currentPlayer.getNotifications();
+        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
         if (notifications.isEmpty()) return;
         Gdx.input.setInputProcessor(stage);
 
         StringBuilder generalNotifications = new StringBuilder();
 
-        for (Message notification : notifications) {
+        for (FriendshipMessage notification : notifications) {
             String message = notification.getMessage();
 
             if (message.endsWith("has asked to marry you")) {
@@ -4592,7 +4594,7 @@ private void createAnimalDialog() {
     }
 
     @NotNull
-    private Dialog proposalNotification(Message notification) {
+    private Dialog proposalNotification(FriendshipMessage notification) {
         String sender = notification.getSender();
 
         Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {

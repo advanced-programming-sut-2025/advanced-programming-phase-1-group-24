@@ -2,6 +2,7 @@ package io.github.stardew.mini.server.Controller;
 
 
 import com.badlogic.gdx.math.MathUtils;
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
@@ -9,7 +10,6 @@ import io.github.stardew.mini.Model.Animals.AnimalProduct;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Growables.*;
 import io.github.stardew.mini.Model.Growables.ForagingCropType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -45,6 +45,35 @@ public class GameController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
+
+//    private boolean tryMove(int dx, int dy, int direction) {
+//        int x = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile().getX();
+//        int y = currentPlayer.getCurrentTile().getY();
+//        int newX = x + dx;
+//        int newY = y + dy;
+//
+//        if (newX >= 0 && newY >= 0 &&
+//            newY < MainApp.getInstance().getCurrentGame().getMap().getMap().length &&
+//            newX < MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length &&
+//            MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getisWalkable() &&
+//            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+//                !(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getUsername()) ||
+//                    (currentPlayer.getPartner() != null &&
+//                        MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
+//
+//            currentPlayer.setCurrentTile(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX]);
+////            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+////            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+////            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+//            currentPlayer.reduceEnergy(1);
+//            currentPlayer.setMovingDirection(direction);
+//            //setCameraPosition();
+//            //camera.update();
+//            return true;
+//        }
+//        return false;
+//    }
+
 
     public Result exitGame() {
         MainApp app = MainApp.getInstance();
@@ -172,7 +201,7 @@ public class GameController implements MenuController {
 //            return new Result(false, "you can specify up to 3 usernames!");
 //
 //        // Check if the creator is already in a game
-//        for (Game game : app.getActiveGames()) {
+//        for (Game game : app.getAllGames()) {
 //            if (game.hasUser(creator))
 //                return new Result(false, "you are already in another game!");
 //        }
@@ -204,7 +233,7 @@ public class GameController implements MenuController {
 //        //create a new game and put it as currentgame in app
 //        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
 //
-//        app.getActiveGames().add(newGame);
+//        app.getAllGames().add(newGame);
 //        app.setCurrentGame(newGame);
 //
 //        handleMapSelection(players, scanner);
@@ -230,7 +259,7 @@ public class GameController implements MenuController {
         currentGame.getTerminationVotes().put(currentUser, true);
         for (User player : currentGame.getPlayers()) {
             if (currentUser.equals(player)) continue;
-            player.addToNotifications(new Message(currentUser.getUsername(), player.getUsername(), "force terminate has started!"));
+            player.addToNotifications(new FriendshipMessage(currentUser.getUsername(), player.getUsername(), "force terminate has started!"));
         }
 
         return new Result(true, "termination vote started. your vote is recorded as YES.");
@@ -273,7 +302,7 @@ public class GameController implements MenuController {
 //        result.append("next turn started for " + currentUser.getUsername());
 //        if (!currentUser.getNotifications().isEmpty()) {
 //            result.append("\nYou have new notifications:\n");
-//            for (Message notification : currentUser.getNotifications()) {
+//            for (FriendshipMessage notification : currentUser.getNotifications()) {
 //                result.append("- From ").append(notification.getSender())
 //                        .append(": ").append(notification.getMessage()).append("\n");
 //            }
@@ -2048,8 +2077,8 @@ public Result releaseAnimal(String name) {
             sender.addEnergy(50);
             receiver.addEnergy(50);
         } else friendship.addXp(20);
-        receiver.addToNotifications(new Message(senderUsername, receiver.getUsername(), senderUsername + "sent you a message :" + message));
-        friendship.getTalkHistory().add(new Message(sender.getUsername(), receiver.getUsername(), message));
+        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiver.getUsername(), senderUsername + "sent you a message :" + message));
+        friendship.getTalkHistory().add(new FriendshipMessage(sender.getUsername(), receiver.getUsername(), message));
         return new Result(true, "message sent successfully to " + receiver.getUsername());
     }
 
@@ -2057,10 +2086,10 @@ public Result releaseAnimal(String name) {
         Game game = MainApp.getInstance().getCurrentGame();
         User player = game.getCurrentPlayer();
         Friendship friendship = game.getFriendship(player.getUsername(), username);
-        ArrayList<Message> relevantMessages = new ArrayList<>();
+        ArrayList<FriendshipMessage> relevantMessages = new ArrayList<>();
 
         StringBuilder historyBuilder = new StringBuilder();
-        ArrayList<Message> talkHistory = friendship.getTalkHistory();
+        ArrayList<FriendshipMessage> talkHistory = friendship.getTalkHistory();
 
         if (talkHistory.isEmpty()) {
             return new Result(false, "No messages found between you and " + username);
@@ -2068,7 +2097,7 @@ public Result releaseAnimal(String name) {
 
         historyBuilder.append("Talk history with ").append(username).append(":\n");
 
-        for (Message msg : talkHistory) {
+        for (FriendshipMessage msg : talkHistory) {
             String direction = msg.getSender().equals(player.getUsername()) ? "You" : msg.getSender();
             String recipient = msg.getRecipient().equals(player.getUsername()) ? "You" : msg.getRecipient();
 
@@ -2126,7 +2155,7 @@ public Result releaseAnimal(String name) {
         //Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
         if (!sender.getBackpack().hasItem("Wedding Ring", 1))
             return new Result(false, "You don't have any ring!");
-        receiver.addToNotifications(new Message(senderUsername, receiver.getUsername(), senderUsername + "has asked to marry you"));
+        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiver.getUsername(), senderUsername + "has asked to marry you"));
         return new Result(true, "You're marriage request has been sent successfully to " + receiver.getUsername());
     }
 
@@ -2157,7 +2186,7 @@ public Result releaseAnimal(String name) {
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         if (!currentPlayer.getTradeNotifications().isEmpty()) {
             System.out.println("You have the following trade notifications:");
-            for (Message message : currentPlayer.getTradeNotifications()) {
+            for (FriendshipMessage message : currentPlayer.getTradeNotifications()) {
                 System.out.println("- " + message.getMessage());
             }
         } else {
@@ -2411,7 +2440,7 @@ public Result releaseAnimal(String name) {
         friendship.addToGifts(gift);
 
         // Notify receiver to rate the gift
-        receiver.addToNotifications(new Message(senderUsername, receiverUsername, "You received " + amount + " of " + itemToGift.getName()));
+        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiverUsername, "You received " + amount + " of " + itemToGift.getName()));
         receiver.addRecievedGift(gift);
 
         return new Result(true, "Gift sent successfully.");
@@ -2583,7 +2612,7 @@ public Result releaseAnimal(String name) {
 
         //sender.getBackpack().grabItem(FLOWER_ITEM_NAME, 1);
         String reez = receiver.isGender() ? "pretty" : "handsome";
-        receiver.addToNotifications(new Message(senderUsername, receiverUsername, "Here is a flower " + reez + " :)"));
+        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiverUsername, "Here is a flower " + reez + " :)"));
         // Friendship level logic
         if (friendship.getLevel() == 2) {
             friendship.setLevel(3);

@@ -1,13 +1,12 @@
 package io.github.stardew.mini.server;
 
-
 import io.javalin.Javalin;
 
 public class MainServer {
     private Javalin app;
 
     public void start() {
-        app = Javalin.create().start(7000);
+        app = Javalin.create().start(8080);
 
         app.before(ctx -> ctx.contentType("application/json"));
 
