@@ -1,12 +1,12 @@
 package io.github.stardew.mini.server.Controller;
 
+import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Avatar;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.client.View.NewGameMenuView;
+import io.github.stardew.mini.server.AppSocket;
+import io.github.stardew.mini.server.GameServer;
+import io.javalin.http.Context;
 
 import java.util.*;
 import java.util.List;
@@ -79,6 +79,23 @@ public class NewGameMenuController implements MenuController{
 
         return new Result(true, "game created successfully!");
     }
+    public void handleGetRequests(Context ctx) {
+        String gameId = ctx.pathParam("gameId");
+        GameServer gs = AppSocket.getActiveGameById(gameId);
+        if (gs == null) {
+            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
+            return;
+        }
+        gs.handleRequests(ctx);
+    }
 
-
+    public void handlePostRequests(Context ctx) {
+        String gameId = ctx.pathParam("gameId");
+        GameServer gs = AppSocket.getActiveGameById(gameId);
+        if (gs == null) {
+            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
+            return;
+        }
+        gs.handleRequests(ctx);
+    }
 }

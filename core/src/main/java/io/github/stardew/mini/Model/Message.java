@@ -1,0 +1,83 @@
+package io.github.stardew.mini.Model;
+
+
+public class Message<T> {
+    public static final Message<?> UNAUTHORIZED = new Message<>(401, "Unauthorized", null, MessageType.RESPONSE);
+    public static final Message<?> FORBIDDEN = new Message<>(403, "Forbidden", null, MessageType.RESPONSE);
+    public static final Message<?> NOT_FOUND = new Message<>(404, "Not Found", null, MessageType.RESPONSE);
+    public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
+    public static final Message<?> BAD_REQUEST = new Message<>(400);
+    public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
+
+    private int status;
+    private String message;
+    private T body;
+    private long timestamp;
+    private MessageType messageType;
+    private String username; // optional, used in handshake
+    private String type;     // optional, e.g. "connect", "move", etc.
+
+    public enum MessageType {
+        REQUEST, RESPONSE
+    }
+
+    public Message(int status, String message, T body, MessageType messageType) {
+        this.status = status;
+        this.message = message;
+        this.body = body;
+        this.messageType = messageType;
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public Message(int status, String message) {
+        this(status, message, null, null);
+    }
+
+    public Message(int status) {
+        this(status, null, null, null);
+    }
+
+    // --- Getters and setters ---
+
+    public int getStatus() { return status; }
+
+    public Message<T> setStatus(int status) {
+        this.status = status;
+        return this;
+    }
+
+    public String getMessage() { return message; }
+
+    public Message<T> setMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
+    public T getBody() { return body; }
+
+    public Message<T> setBody(T body) {
+        this.body = body;
+        return this;
+    }
+
+    public long getTimestamp() { return timestamp; }
+
+    public MessageType getMessageType() { return messageType; }
+
+    public Message<T> setMessageType(MessageType messageType) {
+        this.messageType = messageType;
+        return this;
+    }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getType() { return type; }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+}
