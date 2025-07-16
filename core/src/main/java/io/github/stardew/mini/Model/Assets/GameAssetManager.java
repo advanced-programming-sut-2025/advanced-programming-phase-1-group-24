@@ -56,6 +56,7 @@ public class GameAssetManager {
     public static Texture burntTile;
     public static Texture GREENHOUSE;
     public static TextureRegion greenhouseTexture;
+    public static Texture fridgeTexture;
     public static Texture pixel;
     public static Texture snowOverlay;
     public static Texture stormOverlay;
@@ -157,6 +158,7 @@ public class GameAssetManager {
         FLOORING_25 = new Texture(Gdx.files.internal("Flooring/Flooring_25.png"));
         FLOORING_64 = new Texture(Gdx.files.internal("Flooring/Flooring_64.png"));
         FlOORING_50 = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
+        fridgeTexture = new Texture(Gdx.files.internal("Decor/fridgeAsset.png"));
         burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
@@ -352,6 +354,7 @@ public class GameAssetManager {
         if (FLOORING_71 != null) FLOORING_71.dispose();
         if (FLOORING_84 != null) FLOORING_84.dispose();
         if (FLOORING_86 != null) FLOORING_86.dispose();
+        if (fridgeTexture != null) fridgeTexture.dispose();
         if (burntTile != null) burntTile.dispose();
         if (GREENHOUSE != null) GREENHOUSE.dispose();
         if (snowOverlay != null) snowOverlay.dispose();
