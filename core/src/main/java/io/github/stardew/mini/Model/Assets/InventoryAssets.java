@@ -60,6 +60,11 @@ public class InventoryAssets {
     public static Texture IronTRASHCAN;
     public static Texture GoldTRASHCAN;
     public static Texture IridiumTRASHCAN;
+    public static Texture maxEnergyBuff;
+    public static Texture fishingBuff;
+    public static Texture foragingBuff;
+    public static Texture farmingBuff;
+    public static Texture miningBuff;
 
     public static final Map<String, Texture> toolMap = new HashMap<>();
 
@@ -99,6 +104,11 @@ public class InventoryAssets {
         IronTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Steel.png"));
         GoldTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Gold.png"));
         IridiumTRASHCAN = new Texture(Gdx.files.internal("Tools/Trash_Can_Iridium.png"));
+        maxEnergyBuff = new Texture(Gdx.files.internal("Buff/Max_Energy_Buff.png"));
+        fishingBuff = new Texture(Gdx.files.internal("Buff/Fishing_Skill_Icon.png"));
+        farmingBuff = new Texture(Gdx.files.internal("Buff/Farming_Skill_Icon.png"));
+        foragingBuff = new Texture(Gdx.files.internal("Buff/Foraging_Skill_Icon.png"));
+        miningBuff = new Texture(Gdx.files.internal("Buff/Mining_Skill_Icon.png"));
         toolMap.put("INITIALHOE", InitialHOE);
         toolMap.put("COPPERHOE", CopperHOE);
         toolMap.put("IRONHOE", IronHOE);
@@ -143,6 +153,11 @@ public class InventoryAssets {
         if (slot != null) slot.dispose();
         if (highlightedSlot != null) highlightedSlot.dispose();
         if (inventoryMenuBackground != null) inventoryMenuBackground.dispose();
+        if (miningBuff != null) miningBuff.dispose();
+        if (farmingBuff != null) farmingBuff.dispose();
+        if (foragingBuff != null) foragingBuff.dispose();
+        if (fishingBuff != null) fishingBuff.dispose();
+        if (maxEnergyBuff != null) maxEnergyBuff.dispose();
         disposeToolTextures();
     }
 
