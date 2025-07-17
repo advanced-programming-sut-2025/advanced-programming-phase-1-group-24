@@ -15,8 +15,10 @@ public class Message<T> {
     private long timestamp;
     private MessageType messageType;
     private String username; // optional, used in handshake
-    private String type;     // optional, e.g. "connect", "move", etc.
-
+    private String type;  // optional, e.g. "connect", "move", etc.
+    private String controllerName;
+    private String methodName;
+    private String requestId;
     public enum MessageType {
         REQUEST, RESPONSE
     }
@@ -79,5 +81,33 @@ public class Message<T> {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getControllerName() {
+        return controllerName;
+    }
+
+    public void setControllerName(String controllerName) {
+        this.controllerName = controllerName;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
     }
 }

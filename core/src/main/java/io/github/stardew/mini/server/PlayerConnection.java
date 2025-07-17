@@ -15,7 +15,6 @@ public class PlayerConnection {
         return username;
     }
 
-
     public WsContext getWsContext() {
         return wsContext;
     }
@@ -26,4 +25,3 @@ public class PlayerConnection {
         }
     }
 }
-

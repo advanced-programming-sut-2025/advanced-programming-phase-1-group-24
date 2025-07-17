@@ -3,13 +3,10 @@ package io.github.stardew.mini.server;
 import io.javalin.Javalin;
 
 import java.util.concurrent.ConcurrentHashMap;
-import io.javalin.websocket.*;
+
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Message;
-import io.javalin.Javalin;
-import io.javalin.websocket.WsContext;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AppSocket {
@@ -34,6 +31,13 @@ public class AppSocket {
                 String rawMessage = ctx.message();
                 System.out.println("Received message: " + rawMessage);
 
+                // Handle ping messages (e.g., from client keep-alive)
+                if ("ping".equals(rawMessage)) {
+                    // Optionally respond with pong (not required unless client expects it)
+                    ctx.send("pong");
+                    return;
+                }
+
                 try {
                     Message<?> message = gson.fromJson(rawMessage, Message.class);
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {
@@ -41,11 +45,15 @@ public class AppSocket {
                         connectedPlayers.put(ctx.sessionId(), connection);
                         System.out.println("User connected: " + message.getUsername());
                     }
+
+                    // Handle other message types here...
+
                 } catch (Exception e) {
                     System.err.println("Failed to parse message: " + e.getMessage());
                     ctx.send(gson.toJson(Message.BAD_REQUEST));
                 }
             });
+
 
             // ✅ WsCloseContext
             ws.onClose(ctx -> {
@@ -88,4 +96,6 @@ public class AppSocket {
         }
         return null;
     }
+
+
 }

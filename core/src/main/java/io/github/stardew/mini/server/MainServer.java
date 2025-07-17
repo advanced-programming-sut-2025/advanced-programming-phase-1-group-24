@@ -7,12 +7,13 @@ public class MainServer {
 
     public void start() {
         app = Javalin.create().start(8080);
-
         app.before(ctx -> ctx.contentType("application/json"));
-
         app.get("/", ctx -> ctx.result("{\"message\":\"Hello from Stardew Mini Server!\"}"));
-    }
 
+        // ✅ Initialize and start WebSocket endpoints
+        AppSocket socketHandler = new AppSocket(app);
+        socketHandler.start();
+    }
 
     public void stop() {
         if (app != null) {
@@ -22,11 +23,9 @@ public class MainServer {
 
     public static void main(String[] args) {
         System.out.println("Starting the server...");
-
         MainServer server = new MainServer();
         try {
             server.start();
-            System.out.println("Server started successfully!");
             // Keep the main thread alive if needed
             // For example, block here or wait for shutdown signal
             Thread.currentThread().join();
@@ -36,5 +35,4 @@ public class MainServer {
             System.exit(1);
         }
     }
-
 }

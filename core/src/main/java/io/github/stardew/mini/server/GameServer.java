@@ -4,7 +4,6 @@ import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.server.Controller.ServerController;
 import io.javalin.http.Context;
 import io.javalin.http.HandlerType;
-import org.eclipse.jetty.server.Server;
 
 import java.util.List;
 
