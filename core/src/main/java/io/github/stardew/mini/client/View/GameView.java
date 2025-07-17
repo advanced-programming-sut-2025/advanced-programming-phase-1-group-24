@@ -3083,6 +3083,8 @@ private void createAnimalDialog() {
                 }
             }
         }
+        setCameraPosition();
+        camera.update();
 
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
@@ -3656,8 +3658,8 @@ private void createAnimalDialog() {
 //            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.reduceEnergy(1);
             currentPlayer.setMovingDirection(direction);
-            setCameraPosition();
-            camera.update();
+            //setCameraPosition();
+            //camera.update();
             return true;
         }
         return false;
