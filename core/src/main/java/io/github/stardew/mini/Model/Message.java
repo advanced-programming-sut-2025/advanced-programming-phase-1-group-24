@@ -8,18 +8,35 @@ public class Message<T> {
     public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
     public static final Message<?> BAD_REQUEST = new Message<>(400);
     public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
-
     private int status;
     private String message;
     private T body;
     private long timestamp;
     private MessageType messageType;
     private String username; // optional, used in handshake
-    private String type;     // optional, e.g. "connect", "move", etc.
+    private String type;  // optional, e.g. "connect", "move", etc.
+    private String controllerName;
+    private String methodName;
+    private String requestId;
+    private String gameID;
+
+    public String getGameID() {
+        return gameID;
+    }
+
+    public void setGameID(String gameID) {
+        this.gameID = gameID;
+    }
 
     public enum MessageType {
         REQUEST, RESPONSE
     }
+
+
+    public static <T> Message<T> ok(T body) {
+        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
+    }
+
 
     public Message(int status, String message, T body, MessageType messageType) {
         this.status = status;
@@ -36,7 +53,6 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
-
     // --- Getters and setters ---
 
     public int getStatus() { return status; }
@@ -80,4 +96,34 @@ public class Message<T> {
     public void setType(String type) {
         this.type = type;
     }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getControllerName() {
+        return controllerName;
+    }
+
+    public void setControllerName(String controllerName) {
+        this.controllerName = controllerName;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
 }
+
+

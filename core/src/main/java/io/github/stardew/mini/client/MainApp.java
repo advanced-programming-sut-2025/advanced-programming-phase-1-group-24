@@ -1,7 +1,10 @@
 package io.github.stardew.mini.client;
 
+
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.client.Assets.CropAssets;
@@ -22,8 +25,10 @@ import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
 
 import java.io.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +39,32 @@ public class MainApp extends com.badlogic.gdx.Game {
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
-    private ArrayList<User> users = UserDatabase.loadUsers(); // we should delete this
+    private ArrayList<User> users;
+    //UserDatabase.loadUsers(); // we should delete this
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
+    private NetworkClient networkClient;
 
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
+    }
 
     @Override
     public void create() {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
-        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-        if (loggedInUser == null) {
-            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-        } else
-            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        connectToServer();
+        loggedInUser = new User("nikki", "1234", "nik", "aa", true);
+//        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+//        if (loggedInUser == null) {
+//            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+//        } else
+//            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
 //       // Initialize game data
-       //loadGameData();
+        //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -94,7 +107,41 @@ public class MainApp extends com.badlogic.gdx.Game {
         // Initialize game data
         activeGames = loadActiveGames();
     }
+    private void connectToServer() {
+        try {
+            URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
+            networkClient = new NetworkClient(serverUri);
+            networkClient.connect();
 
+            // Wait for WebSocket to open and then send the connect message
+            new Thread(() -> {
+                while (!networkClient.isOpen()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {}
+                }
+
+                if (loggedInUser != null) {
+                    Message<String> connectMsg = new Message<>(200);
+                    connectMsg.setType("connect"); // AppSocket listens for "connect"
+                    connectMsg.setUsername(loggedInUser.getUsername());
+                    connectMsg.setMessageType(Message.MessageType.REQUEST);
+
+                    String json = new Gson().toJson(connectMsg);
+                    networkClient.send(json); // Sends to AppSocket
+                    System.out.println("Connect message sent to server for user: " + loggedInUser.getUsername());
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to connect to WebSocket server.");
+        }
+    }
+
+    public NetworkClient getNetworkClient() {
+        return networkClient;
+    }
 
     @Override
     public void render() {
@@ -117,7 +164,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         saveActiveGames();
 
     }
-////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
+    ////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
     public void saveActiveGames() {
         try {
             GameSaver.saveGames(activeGames, "data/active_games.json.gz");
