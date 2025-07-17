@@ -22,7 +22,7 @@ public class GameRouter {
         app.get("/api/game/{gameId}", controller::handleGetRequests);
 
         // POST routes
-        app.post("/api/game/{gameId}/{controllerName}", controller::handlePostRequests);
+        app.post("/api/game/{gameId}/{controllerName}/{methodName}", controller::handlePostRequests);
     }
 }
 

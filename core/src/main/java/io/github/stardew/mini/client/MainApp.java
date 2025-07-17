@@ -34,7 +34,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
-    private ArrayList<User> users = UserDatabase.loadUsers();
+    private ArrayList<User> users = UserDatabase.loadUsers(); // we should delete this
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
 

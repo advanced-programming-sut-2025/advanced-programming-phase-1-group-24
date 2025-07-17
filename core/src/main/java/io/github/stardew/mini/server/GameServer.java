@@ -1,8 +1,10 @@
 package io.github.stardew.mini.server;
 
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.server.Controller.ServerController;
 import io.javalin.http.Context;
 import io.javalin.http.HandlerType;
+import org.eclipse.jetty.server.Server;
 
 import java.util.List;
 
@@ -10,6 +12,8 @@ public class GameServer extends Thread {
     private final List<PlayerConnection> players;
     private volatile boolean running = true;
     private Game game;
+    private final ServerController controller = new ServerController();
+
 
     public GameServer(List<PlayerConnection> players) {
         this.players = players;
@@ -41,7 +45,11 @@ public class GameServer extends Thread {
     }
 
     public void handleRequests(Context ctx) {
+        if (ctx.method() == HandlerType.POST) {
+            controller.routingTheRequests(ctx , this);
+        } else if (ctx.method() == HandlerType.GET) {
 
+        }
     }
 
     public Game getGame() {

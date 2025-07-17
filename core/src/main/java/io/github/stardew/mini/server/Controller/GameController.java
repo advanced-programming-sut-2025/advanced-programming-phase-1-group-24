@@ -46,6 +46,35 @@ public class GameController implements MenuController {
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
 
+//    private boolean tryMove(int dx, int dy, int direction) {
+//        int x = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile().getX();
+//        int y = currentPlayer.getCurrentTile().getY();
+//        int newX = x + dx;
+//        int newY = y + dy;
+//
+//        if (newX >= 0 && newY >= 0 &&
+//            newY < MainApp.getInstance().getCurrentGame().getMap().getMap().length &&
+//            newX < MainApp.getInstance().getCurrentGame().getMap().getMap()[0].length &&
+//            MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getisWalkable() &&
+//            !(MainApp.getInstance().getCurrentGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+//                !(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getUsername()) ||
+//                    (currentPlayer.getPartner() != null &&
+//                        MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX].getTileOwner().equals(currentPlayer.getPartner().getUsername()))))) {
+//
+//            currentPlayer.setCurrentTile(MainApp.getInstance().getCurrentGame().getMap().getMap()[newY][newX]);
+////            currentPlayer.setEnergy((int) (currentPlayer.getEnergy() - (0.0005 * currentPlayer.getEnergy())));
+////            int newTurnEnergy = Math.max(0, (int) (currentPlayer.getCurrentTurnEnergy() - (0.0005 * currentPlayer.getEnergy())));
+////            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
+//            currentPlayer.reduceEnergy(1);
+//            currentPlayer.setMovingDirection(direction);
+//            //setCameraPosition();
+//            //camera.update();
+//            return true;
+//        }
+//        return false;
+//    }
+
+
     public Result exitGame() {
         MainApp app = MainApp.getInstance();
         User currentUser = app.getLoggedInUser();
@@ -172,7 +201,7 @@ public class GameController implements MenuController {
 //            return new Result(false, "you can specify up to 3 usernames!");
 //
 //        // Check if the creator is already in a game
-//        for (Game game : app.getActiveGames()) {
+//        for (Game game : app.getAllGames()) {
 //            if (game.hasUser(creator))
 //                return new Result(false, "you are already in another game!");
 //        }
@@ -204,7 +233,7 @@ public class GameController implements MenuController {
 //        //create a new game and put it as currentgame in app
 //        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
 //
-//        app.getActiveGames().add(newGame);
+//        app.getAllGames().add(newGame);
 //        app.setCurrentGame(newGame);
 //
 //        handleMapSelection(players, scanner);
