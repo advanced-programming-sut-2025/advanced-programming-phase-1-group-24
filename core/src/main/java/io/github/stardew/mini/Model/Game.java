@@ -25,7 +25,7 @@ import io.github.stardew.mini.Model.MapManagement.*;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
-    private final String NetworkId = UUID.randomUUID().toString();
+    private  String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -390,4 +390,9 @@ public class Game {
     public String getNetworkId() {
         return NetworkId;
     }
+
+    public void setNetworkId(String networkId) {
+        NetworkId = networkId;
+    }
+
 }
