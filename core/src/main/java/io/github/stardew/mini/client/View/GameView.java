@@ -2698,7 +2698,7 @@ private void createAnimalDialog() {
             public void run() {
                 MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
                 controller.handleEndOfDay();
-                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
             }
         }, 5, 5);
 
@@ -2836,6 +2836,7 @@ private void createAnimalDialog() {
 
     @Override
     public void render(float v) {
+        updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
 //        if (currentPlayer.hasFainted()) {
