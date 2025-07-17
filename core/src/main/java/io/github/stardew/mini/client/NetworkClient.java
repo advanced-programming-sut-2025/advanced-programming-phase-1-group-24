@@ -2,69 +2,81 @@ package io.github.stardew.mini.client;
 
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
+import java.util.concurrent.*;
 
 public class NetworkClient extends WebSocketClient {
-//    public void onLoginSuccess(User loggedInUser) {
-//        NetworkClient.connectWebSocket(loggedInUser.getUsername());
-//        MainApp.getInstance().setLoggedInUser(loggedInUser);
-//        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-//    }
-
 
     private static final Gson gson = new Gson();
 
-    // Map requestId -> CompletableFuture to complete on response
+    // Map to track requests waiting for a response by requestId
     private final Map<String, CompletableFuture<Message<?>>> pendingRequests = new ConcurrentHashMap<>();
-
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     public NetworkClient(URI serverUri) {
         super(serverUri);
     }
 
+    //    @Override
+//    public void onOpen(ServerHandshake handshakedata) {
+//        System.out.println("WebSocket connected");
+//    }
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        System.out.println("Connected");
-        // You can send a handshake message if needed
-        // send("{\"type\": \"connect\", \"username\": \"zahraa\"}");
+        System.out.println("WebSocket connected");
+
+        // Schedule ping every 10 seconds
+        scheduler.scheduleAtFixedRate(() -> {
+            if (this.isOpen()) {
+                try {
+                    this.send("ping"); // or a proper ping JSON if your server expects it
+                } catch (Exception e) {
+                    System.err.println("Failed to send ping: " + e.getMessage());
+                }
+            }
+        }, 10, 10, TimeUnit.SECONDS);
     }
 
+
     @Override
-    public void onMessage(String message) {
-        System.out.println("Received: " + message);
+    public void onMessage(String messageJson) {
+        System.out.println("Received: " + messageJson);
 
-        // Parse the incoming JSON message
-        JsonObject json = gson.fromJson(message, JsonObject.class);
+        // Deserialize incoming message to Message class
+        Message<?> message = gson.fromJson(messageJson, Message.class);
 
-        // Extract requestId from the response to match it to a request
-        if (json.has("requestId")) {
-            String requestId = json.get("requestId").getAsString();
-
-            // Complete the waiting CompletableFuture with the response Message
+        String requestId = message.getRequestId();
+        if (requestId != null) {
             CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
             if (future != null) {
-                Message<?> response = gson.fromJson(message, Message.class);
-                future.complete(response);
+                future.complete(message);
             }
         } else {
-            // Handle other incoming server messages (broadcasts, etc.)
+            // Handle unsolicited messages if any (e.g., broadcasts)
         }
     }
 
+    //    @Override
+//    public void onClose(int code, String reason, boolean remote) {
+//        System.out.println("WebSocket closed: " + reason);
+//        // Fail all pending requests
+//        pendingRequests.forEach((id, future) -> future.completeExceptionally(
+//            new RuntimeException("Connection closed before response")));
+//        pendingRequests.clear();
+//    }
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        System.out.println("Closed: " + reason);
-        // Optionally fail all pending requests
-        pendingRequests.forEach((id, future) -> future.completeExceptionally(new RuntimeException("Connection closed")));
+        System.out.println("WebSocket closed: " + reason);
+        scheduler.shutdownNow(); // stop pings
+        pendingRequests.forEach((id, future) -> future.completeExceptionally(
+            new RuntimeException("Connection closed before response")));
         pendingRequests.clear();
     }
+
 
     @Override
     public void onError(Exception ex) {
@@ -72,9 +84,16 @@ public class NetworkClient extends WebSocketClient {
     }
 
     /**
-     * Send a request over WebSocket and return a CompletableFuture that completes when response arrives.
+     * Send a request using Message object and return CompletableFuture for the response.
      */
-    public CompletableFuture<Message<?>> sendRequest(String controllerName, String methodName, String type, Map<String, Object> params) {
+    public CompletableFuture<Message<?>> sendRequest(
+        String gameId,
+        String controllerName,
+        String methodName,
+        String httpMethod,
+        Map<String, Object> params,
+        String username // optionally pass username if you want
+    ) {
         if (!isOpen()) {
             CompletableFuture<Message<?>> failedFuture = new CompletableFuture<>();
             failedFuture.completeExceptionally(new IllegalStateException("WebSocket is not open"));
@@ -83,17 +102,24 @@ public class NetworkClient extends WebSocketClient {
 
         String requestId = UUID.randomUUID().toString();
 
-        // Build the request message object
+        // Create Message object with all relevant info
         Message<Map<String, Object>> requestMessage = new Message<>(0, "Client Request", params, Message.MessageType.REQUEST);
-        requestMessage.setType(type);
-        requestMessage.setUsername(null); // or set if you have username
-        // add your requestId for correlation
-        JsonObject jsonObject = (JsonObject) gson.toJsonTree(requestMessage);
-        jsonObject.addProperty("controllerName", controllerName);
-        jsonObject.addProperty("methodName", methodName);
-        jsonObject.addProperty("requestId", requestId);
+        requestMessage.setControllerName(controllerName);
+        requestMessage.setMethodName(methodName);
+        requestMessage.setRequestId(requestId);
+        requestMessage.setType(httpMethod); // "GET" or "POST"
+        requestMessage.setUsername(username);
+        requestMessage.setMessageType(Message.MessageType.REQUEST);
 
-        String json = gson.toJson(jsonObject);
+        // Optionally include gameId in the body or add a field if needed (depends on server design)
+        if (params != null && gameId != null) {
+            params.put("gameId", gameId);
+        }
+
+        // Serialize and send
+        String json = gson.toJson(requestMessage);
+
+        System.out.println("Sending JSON: " + json);
 
         CompletableFuture<Message<?>> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);
@@ -103,12 +129,39 @@ public class NetworkClient extends WebSocketClient {
         return future;
     }
 
-    // Convenience methods to simulate GET and POST (by convention)
-    public CompletableFuture<Message<?>> sendGet(String controllerName, String methodName, Map<String, Object> params) {
-        return sendRequest(controllerName, methodName, "GET", params);
+    // Convenience overloads without username parameter:
+
+    public CompletableFuture<Message<?>> sendGet(
+        String gameId,
+        String controllerName,
+        String methodName,
+        Map<String, Object> params
+    ) {
+        return sendRequest(gameId, controllerName, methodName, "GET", params, null);
     }
 
-    public CompletableFuture<Message<?>> sendPost(String controllerName, String methodName, Map<String, Object> params) {
-        return sendRequest(controllerName, methodName, "POST", params);
+    public CompletableFuture<Message<?>> sendPost(
+        String gameId,
+        String controllerName,
+        String methodName,
+        Map<String, Object> params,
+        String username
+    ) {
+        return sendRequest(gameId, controllerName, methodName, "POST", params, username);
     }
+
+    public void sendConnect(String username) {
+        if (!isOpen()) {
+            System.err.println("WebSocket is not open");
+            return;
+        }
+
+        Message<String> connectMsg = new Message(0, "connect", null, Message.MessageType.REQUEST);
+        connectMsg.setUsername(username);
+
+        String json = gson.toJson(connectMsg);
+        send(json);
+        System.out.println("Sent connect for user: " + username);
+    }
+
 }

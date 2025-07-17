@@ -44,13 +44,13 @@ public class GameServer extends Thread {
         running = false;
     }
 
-    public void handleRequests(Context ctx) {
-        if (ctx.method() == HandlerType.POST) {
-            controller.routingTheRequests(ctx , this);
-        } else if (ctx.method() == HandlerType.GET) {
-
-        }
-    }
+//    public void handleRequests(Context ctx) {
+//        if (ctx.method() == HandlerType.POST) {
+//            controller.routingTheRequests(ctx , this);
+//        } else if (ctx.method() == HandlerType.GET) {
+//
+//        }
+//    }
 
     public Game getGame() {
         return game;

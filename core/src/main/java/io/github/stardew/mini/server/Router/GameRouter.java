@@ -13,16 +13,16 @@ public class GameRouter {
         this.app = app;
     }
 
-    public void initializeRoutes() {
-        // Apply auth middleware to all game endpoints
-       // app.before("/api/game/*", Auth::validate);
-
-        // GET routes
-       // app.get("/api/game/startGame/{lobbyId}", controller::createGame);
-        app.get("/api/game/{gameId}", controller::handleGetRequests);
-
-        // POST routes
-        app.post("/api/game/{gameId}/{controllerName}/{methodName}", controller::handlePostRequests);
-    }
+//    public void initializeRoutes() {
+//        // Apply auth middleware to all game endpoints
+//       // app.before("/api/game/*", Auth::validate);
+//
+//        // GET routes
+//       // app.get("/api/game/startGame/{lobbyId}", controller::createGame);
+//        app.get("/api/game/{gameId}", controller::handleGetRequests);
+//
+//        // POST routes
+//        app.post("/api/game/{gameId}/{controllerName}/{methodName}", controller::handlePostRequests);
+//    }
 }
 

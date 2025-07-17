@@ -1,6 +1,9 @@
 package io.github.stardew.mini.server;
 
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.Model.UserDatabase;
+
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -10,14 +13,26 @@ public class ServerApp {
 
     private final ConcurrentHashMap<String, User> allUsers = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<GameServer> allGames = new CopyOnWriteArrayList<>();
-//    List<User> loadedUsers = UserDatabase.loadUsers();
-//for (User user : loadedUsers) {
-//        UserManager.registerUser(user);
-//    }
 
+    public User getUserByUsername(String username) {
+        for(User user : allUsers.values()) {
+            if(user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
+
+
+    public void loadUsers() {
+            List<User> loadedUsers = UserDatabase.loadUsers();
+            for (User user : loadedUsers) {
+                  allUsers.put(user.getUsername(), user);
+            }
+    }
 
     private ServerApp() {
-        // private constructor for singleton
+        loadUsers();
     }
 
     public static ServerApp getInstance() {

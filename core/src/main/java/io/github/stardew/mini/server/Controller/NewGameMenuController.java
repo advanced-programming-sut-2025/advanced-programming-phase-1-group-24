@@ -6,6 +6,7 @@ import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.client.View.NewGameMenuView;
 import io.github.stardew.mini.server.AppSocket;
 import io.github.stardew.mini.server.GameServer;
+import io.github.stardew.mini.server.PlayerConnection;
 import io.javalin.http.Context;
 
 import java.util.*;
@@ -21,6 +22,59 @@ public class NewGameMenuController implements MenuController{
     private static final Avatar[] MALE_AVATARS = {Avatar.Shane, Avatar.Alex};
 
     private static final Random random = new Random();
+
+    public Message<?> createGameOnServer(List<String> usernames) {
+        System.out.println("called2");
+        if (usernames == null || usernames.isEmpty())
+            return Message.FORBIDDEN;
+        if (usernames.size() > 4)
+            return Message.FORBIDDEN;
+
+        List<PlayerConnection> connections = new ArrayList<>();
+        Set<String> usersInGames = AppSocket.getActiveGames().stream()
+            .flatMap(gs -> gs.getGame().getPlayers().stream())
+            .map(user -> user.getUsername())
+            .collect(Collectors.toSet());
+
+        for (String username : usernames) {
+            PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(username);
+            if (pc == null) return Message.NOT_FOUND.setMessage("Player not found");
+            if (usersInGames.contains(username))
+                return Message.FORBIDDEN;
+            connections.add(pc);
+        }
+
+        // Create User list from connections
+        ArrayList<User> users = (ArrayList<User>) connections.stream()
+            .map(PlayerConnection::getUser)
+            .toList();
+
+        // Update game fields for each user
+        for (User user : users) {
+            user.updateGameFields();
+        }
+
+        Game game = new Game(users, users.get(0), users.get(0));
+
+
+        if (FarmTemplateManager.getTemplates() == null) {
+            FarmTemplateManager.loadTemplates();
+        }
+
+        GameServer gameServer = new GameServer(connections);
+        gameServer.setGame(game);
+
+        AppSocket.addGame(gameServer);
+        gameServer.start();  // Start the game loop thread
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("gameId", game.getNetworkId());
+        body.put("message", "Game created successfully");
+
+        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+    }
+
+
 
     public Result createGame(String users) {
         MainApp app = MainApp.getInstance();
@@ -79,23 +133,23 @@ public class NewGameMenuController implements MenuController{
 
         return new Result(true, "game created successfully!");
     }
-    public void handleGetRequests(Context ctx) {
-        String gameId = ctx.pathParam("gameId");
-        GameServer gs = AppSocket.getActiveGameById(gameId);
-        if (gs == null) {
-            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
-            return;
-        }
-        gs.handleRequests(ctx);
-    }
-
-    public void handlePostRequests(Context ctx) {
-        String gameId = ctx.pathParam("gameId");
-        GameServer gs = AppSocket.getActiveGameById(gameId);
-        if (gs == null) {
-            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
-            return;
-        }
-        gs.handleRequests(ctx);
-    }
+//    public void handleGetRequests(Context ctx) {
+//        String gameId = ctx.pathParam("gameId");
+//        GameServer gs = AppSocket.getActiveGameById(gameId);
+//        if (gs == null) {
+//            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
+//            return;
+//        }
+//        gs.handleRequests(ctx);
+//    }
+//
+//    public void handlePostRequests(Context ctx) {
+//        String gameId = ctx.pathParam("gameId");
+//        GameServer gs = AppSocket.getActiveGameById(gameId);
+//        if (gs == null) {
+//            ctx.json(Message.NOT_FOUND.setMessage("Game not found"));
+//            return;
+//        }
+//        gs.handleRequests(ctx);
+//    }
 }

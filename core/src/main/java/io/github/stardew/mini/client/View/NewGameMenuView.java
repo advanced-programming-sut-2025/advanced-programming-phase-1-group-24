@@ -11,12 +11,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
+import com.sun.tools.javac.Main;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.NewGameMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class NewGameMenuView implements AppMenu, Screen {
@@ -103,34 +109,108 @@ public class NewGameMenuView implements AppMenu, Screen {
         table.add(startGameButton).colspan(2).padTop(bottomPad * 2).width(buttonWidth).height(buttonHeight).row();
 
         // Add listeners
+//        addPlayerButton.addListener(new ClickListener() {
+//            public void clicked(InputEvent event, float x, float y) {
+//                String username = nameInput.getText().trim();
+//                    playerNames.add(username);
+//                    nameInput.setText("");
+//                    updatePlayerListUI();
+//            }
+//        });
         addPlayerButton.addListener(new ClickListener() {
+            @Override
             public void clicked(InputEvent event, float x, float y) {
                 String username = nameInput.getText().trim();
-                    playerNames.add(username);
-                    nameInput.setText("");
-                    updatePlayerListUI();
+                if (username.isEmpty()) return;
+
+                playerNames.add(username);
+                nameInput.setText("");
+                updatePlayerListUI();
+
+                // Use your network client to send the connect message
+                if (MainApp.getInstance().getNetworkClient() != null && MainApp.getInstance().getNetworkClient().isOpen()) {
+                    MainApp.getInstance().getNetworkClient().sendConnect(username);
+                } else {
+                    System.err.println("NetworkClient is not connected.");
+                }
             }
         });
+
+
         backButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
                 MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
             }
         });
 
+//        startGameButton.addListener(new ClickListener() {
+//            public void clicked(InputEvent event, float x, float y) {
+//                String usersString = String.join(" ", playerNames);
+//                Result result = controller.createGame(usersString);
+//                if(!result.isSuccessful()){
+//                    showErrorDialog(stage,result.message());
+//                    usersString = "";
+//                    playerNames.clear();
+//                    updatePlayerListUI();
+//                } else {
+//                    MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+//                }
+//            }
+//        });
         startGameButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                String usersString = String.join(" ", playerNames);
-                Result result = controller.createGame(usersString);
-                if(!result.isSuccessful()){
-                    showErrorDialog(stage,result.message());
-                    usersString = "";
-                    playerNames.clear();
-                    updatePlayerListUI();
-                } else {
-                    MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+                if (playerNames.isEmpty()) {
+                    showErrorDialog(stage, "You must add at least one player!");
+                    return;
                 }
+
+                String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                Map<String, Object> params = new HashMap<>();
+                params.put("usernames", new ArrayList<>(playerNames));
+
+                NetworkClient client = MainApp.getInstance().getNetworkClient(); // adjust if needed
+
+                System.out.println("Sending createGameOnServer request: " + params);
+                client.sendPost(
+                    null,                     // gameId (null for new game)
+                    "NewGameMenuController",  // controller name to route to
+                    "createGameOnServer",     // method name
+                    params,
+                    username
+                ).thenAccept(response -> {
+                    if (response.getStatus() == 200) {
+                        Object bodyRaw = response.getBody();
+
+                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                            Object gameIdObj = bodyMap.get("gameId");
+                            if (gameIdObj instanceof String gameId) {
+                                // Now you can use gameId
+                                System.out.println("Game ID: " + gameId);
+                                MainApp.getInstance().setCurrentGameId(gameId);
+                            } else {
+                                System.err.println("gameId is not a string or is null");
+                            }
+                        } else {
+                            System.err.println("Response body is not a map");
+                        }
+                        Gdx.app.postRunnable(() -> {
+                            MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+                        });
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, response.getMessage());
+                        });
+                    }
+                }).exceptionally(ex -> {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+                    });
+                    return null;
+                });
             }
         });
+
         stage.addActor(table);
     }
 
