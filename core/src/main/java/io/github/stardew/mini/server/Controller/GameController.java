@@ -47,7 +47,8 @@ public class GameController implements MenuController {
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
 
-    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+    public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+        System.out.println(player.getUsername());
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();
         int newX = x + dx;
@@ -65,9 +66,9 @@ public class GameController implements MenuController {
             player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
             player.reduceEnergy(1);
             player.setMovingDirection(direction);
-            return new Result(true, "You can move.");
+            return Message.OK;
         }
-        return new Result(false, "You can't move.");
+        return Message.FORBIDDEN;
     }
 
 

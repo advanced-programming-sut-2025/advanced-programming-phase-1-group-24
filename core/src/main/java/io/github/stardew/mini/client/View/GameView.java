@@ -39,6 +39,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
@@ -174,8 +175,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private boolean showToolsMenu = false;
     private boolean showInventoryMenu = false;
     private boolean showBackpackMenu = false;
-    private BitmapFont smallFont;
-    private BitmapFont smallerButtonFont;
+    //private BitmapFont smallFont;
+    //private BitmapFont smallerButtonFont;
     private int selectedSlot = 0;
     private Table toolMenuTable;
     private Table inventoryMenuTable;
@@ -206,18 +207,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private String scenario = "";
     String giftReciever, artisanName;
 
-    private void loadFont() {
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
-        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 32;
-        smallFont = generator.generateFont(parameter);
-
-        FreeTypeFontGenerator.FreeTypeFontParameter smallerParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        smallerParameter.size = 24;
-        smallerButtonFont = generator.generateFont(smallerParameter);
-
-        generator.dispose();
-    }
+//    private void loadFont() {
+//        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
+//        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+//        parameter.size = 32;
+//        smallFont = generator.generateFont(parameter);
+//
+//        FreeTypeFontGenerator.FreeTypeFontParameter smallerParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+//        smallerParameter.size = 24;
+//        smallerButtonFont = generator.generateFont(smallerParameter);
+//
+//        generator.dispose();
+//    }
 
     public GameView(GameController controller) {
         this.controller = controller;
@@ -226,7 +227,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        loadFont();
+        //loadFont();
         for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
             MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().put(user.getUsername(), new ArrayList<>());
         }
@@ -2451,7 +2452,7 @@ private void createAnimalDialog() {
         TextButton.TextButtonStyle smallerButtonStyle = new TextButton.TextButtonStyle(
             GameAssetManager.skin.get("custom-button", TextButton.TextButtonStyle.class)
         );
-        smallerButtonStyle.font = smallerButtonFont;
+        smallerButtonStyle.font = GameAssetManager.customFont;
 
 
         TextButton giftButton = new TextButton("Gift", smallerButtonStyle);
@@ -3069,11 +3070,44 @@ private void createAnimalDialog() {
 //        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
 //            Integer.toString(currentPlayer.getMoney()));
 
+//        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+//            moveCooldown -= v;
+//            if (moveCooldown <= 0f) {
+//                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+//                }
+//            }
+//        }
         if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("dx","0");
+                    params.put("dy","-1");
+                    params.put("direction","3");
+                    System.out.println("1 :" + MainApp.getInstance().getCurrentGame().getNetworkId());
+                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+                        if (response.getStatus() == 200) {
+                            moveCooldown = MOVE_INTERVAL;
+                        }else {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, response.getMessage());
+                            });
+                        }
+                    }).exceptionally(ex -> {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+                        });
+                        return null;
+                    });
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
                     if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
@@ -3339,9 +3373,9 @@ private void createAnimalDialog() {
                 float centerX = drawX + (8 * tileSize) / 2f;
                 float centerY = drawY + (7 * tileSize) / 2f;
 
-                layout.setText(smallFont, message, Color.WHITE, 8 * tileSize, Align.center, true);
+                layout.setText(GameAssetManager.customFont, message, Color.WHITE, 8 * tileSize, Align.center, true);
 
-                smallFont.draw(batch, layout, centerX - layout.width / 2f - 200, centerY + layout.height / 2f - 100);
+                GameAssetManager.customFont.draw(batch, layout, centerX - layout.width / 2f - 200, centerY + layout.height / 2f - 100);
             }
         }
     }
@@ -3474,9 +3508,9 @@ private void createAnimalDialog() {
     public void dispose() {
         clockHud.dispose();
         stage.dispose();
-        if (smallFont != null) {
-            smallFont.dispose();
-        }
+//        if (smallFont != null) {
+//            smallFont.dispose();
+//        }
     }
 
 
@@ -3727,7 +3761,7 @@ private void createAnimalDialog() {
             } else if (GameAssetManager.skin.has("custom-label", Label.LabelStyle.class)) {
                 labelStyle = GameAssetManager.skin.get("custom-label", Label.LabelStyle.class);
             } else {
-                labelStyle = new Label.LabelStyle(smallFont, Color.WHITE);
+                labelStyle = new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE);
             }
 
             float slotImageSize = GameAssetManager.TILE_SIZE * 1.0f;
@@ -3970,7 +4004,7 @@ private void createAnimalDialog() {
                     Gdx.app.error("GameView", "Texture for item " + item.getName() + " is null!");
                 }
 
-                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
                 Container<Label> labelContainer = new Container<>(countLabel);
                 labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
                 labelContainer.padRight(labelOffset);
@@ -4171,8 +4205,8 @@ private void createAnimalDialog() {
 
             if (currentXP >= XP_PER_LEVEL) currentXP %= XP_PER_LEVEL;
 
-            Label nameLabel = new Label(npc.getNpcName().getName(), new Label.LabelStyle(smallFont, Color.WHITE));
-            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
+            Label nameLabel = new Label(npc.getNpcName().getName(), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
 
             ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
             TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
@@ -4215,8 +4249,8 @@ private void createAnimalDialog() {
             int currentXP = friendship.getXp();
             if (currentXP >= XP_PER_LEVEL_Player) currentXP %= XP_PER_LEVEL_Player;
 
-            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(smallFont, Color.WHITE));
-            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
+            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
 
             ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
             TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
@@ -5161,7 +5195,7 @@ public void showTimedErrorLabel(Stage stage, String message, float durationSecon
 
             Integer count = currentPlayer.getBackpack().getInventoryItems().get(equippedItem);
             if (count != null && count > 1) {
-                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
                 Container<Label> labelContainer = new Container<>(countLabel);
                 labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
                 labelContainer.padRight(labelOffset);

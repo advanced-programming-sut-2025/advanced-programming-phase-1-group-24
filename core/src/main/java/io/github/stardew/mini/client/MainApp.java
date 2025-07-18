@@ -1,7 +1,9 @@
 package io.github.stardew.mini.client;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -88,7 +90,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             foragingCropType.initTexture();
         }
         for (CropType cropType : CropType.values()) {
-            if(cropType == CropType.MixedCrop) continue;
+            if (cropType == CropType.MixedCrop) continue;
             cropType.initTexture();
         }
         for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
@@ -103,10 +105,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-        for(NPCtype npCtype : NPCtype.values()) {
+        for (NPCtype npCtype : NPCtype.values()) {
             npCtype.initTexture();
         }
-        for(FoodType foodType : FoodType.values()) {
+        for (FoodType foodType : FoodType.values()) {
             foodType.initTexture();
         }
         // Initialize game data
@@ -115,6 +117,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             FarmTemplateManager.loadTemplates(); // only once
         }
     }
+
     private void connectToServer() {
 
         try {
