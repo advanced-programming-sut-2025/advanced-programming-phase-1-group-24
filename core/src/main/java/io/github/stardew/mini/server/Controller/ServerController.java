@@ -18,6 +18,7 @@ public class ServerController {
     private final StoreMenuController storeMenuController = new StoreMenuController();
     private final TradeMenuController tradeMenuController = new TradeMenuController();
     private final NewGameMenuController newGameMenuController = new NewGameMenuController();
+    private final MapSelectionMenuController mapSelectionMenuController = new MapSelectionMenuController();
 
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server){
         String controllerName = message.getControllerName();
@@ -33,6 +34,7 @@ public class ServerController {
         if (player == null) {
             return Message.NOT_FOUND.setMessage("User not found: " + username);
         }
+
 
         switch (controllerName) {
             case "GameController":
@@ -52,6 +54,9 @@ public class ServerController {
                 case "NewGameMenuController":
                     return routeToNewGameController(methodName, body, server, player);
 
+                    case "MapSelectionMenuController":
+                        return routeToMapSelectionMenuController(methodName, body, server, player);
+
             default:
                 return routeToGameController(methodName, body, server, player);
         }
@@ -68,8 +73,7 @@ public class ServerController {
                 String dx = (String) body.get("dx");
                 String dy = (String) body.get("dy");
                 String direction = (String) body.get("direction");
-                result = gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
-                return Message.ok(result);
+                return gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
             }
 
             case "useTool": {
@@ -130,6 +134,26 @@ public class ServerController {
                 return Message.BAD_REQUEST.setMessage("Unknown method: " + methodName);
         }
     }
+
+    private Message<?> routeToMapSelectionMenuController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        switch (methodName) {
+            case "pickGameMap": {
+                Object mapNumberRaw = body.get("mapNumber");
+
+                if (mapNumberRaw == null || !(mapNumberRaw instanceof Number)) {
+                    return Message.BAD_REQUEST.setMessage("Invalid or missing mapNumber");
+                }
+
+                int mapNumber = ((Number) mapNumberRaw).intValue();
+
+                return mapSelectionMenuController.pickGameMap(player, mapNumber, server);
+            }
+
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
+
 //    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
 //        Result result = null;
 //        switch (methodName) {

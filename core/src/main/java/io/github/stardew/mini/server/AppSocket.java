@@ -100,6 +100,7 @@ public class AppSocket {
                     } else {
                         // Other messages need a game ID
                         GameServer gameServer = getActiveGameById(message.getGameID());
+                        System.out.println("2:" + message.getGameID());
                         if (gameServer == null) {
                             ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("Game not found for user.")));
                             return;

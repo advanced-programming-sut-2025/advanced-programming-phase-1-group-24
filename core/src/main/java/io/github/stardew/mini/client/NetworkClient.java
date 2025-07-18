@@ -139,10 +139,11 @@ public class NetworkClient extends WebSocketClient {
         requestMessage.setUsername(username);
         requestMessage.setMessageType(Message.MessageType.REQUEST);
 
-        // Optionally include gameId in the body or add a field if needed (depends on server design)
-        if (params != null && gameId != null) {
-            params.put("gameId", gameId);
-        }
+//        // Optionally include gameId in the body or add a field if needed (depends on server design)
+//        if (params != null && gameId != null) {
+//            params.put("gameId", gameId);
+//        }
+        requestMessage.setGameID(gameId);
 
         // Serialize and send
         String json = gson.toJson(requestMessage);
