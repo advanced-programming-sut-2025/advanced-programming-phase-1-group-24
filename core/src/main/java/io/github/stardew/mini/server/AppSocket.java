@@ -59,9 +59,14 @@ public class AppSocket {
                 try {
                     Message<?> message = gson.fromJson(rawMessage, Message.class);
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {
+                        System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
 
+                        System.out.println("[WS CONNECTED USERS]");
+                        for (Map.Entry<String, PlayerConnection> entry : connectedPlayers.entrySet()) {
+                            System.out.println("- " + entry.getKey() + " → " + entry.getValue().getUsername());
+                        }
                         User player = new User(message.getUsername(), "", "", "", true);
                         ServerApp.getInstance().addUser(player);
 
@@ -87,8 +92,8 @@ public class AppSocket {
                     System.out.println("message.getMethodName(): " + message.getMethodName());
 
 
-                    if ("NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
-                        && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
+                    if (message.getControllerName()!= null && "NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
+                        && message.getMethodName() != null && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
                         System.out.println("hereeeeeeeeee");
                         // This method doesn't require a game ID
                         response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
@@ -102,6 +107,7 @@ public class AppSocket {
                         response = serverController.routingTheRequests((Message<Map<String, Object>>) message, gameServer);
                     }
 
+                    response.setRequestId(message.getRequestId());
                     ctx.send(gson.toJson(response));
 
                     // Handle other message types here...
@@ -115,10 +121,13 @@ public class AppSocket {
 
             // ✅ WsCloseContext
             ws.onClose(ctx -> {
+                System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
                 String sessionId = ctx.sessionId(); // this is the correct method
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
+                } else {
+                    System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
                 }
             });
 

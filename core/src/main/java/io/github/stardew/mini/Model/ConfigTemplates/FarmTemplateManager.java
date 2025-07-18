@@ -10,6 +10,7 @@ public class FarmTemplateManager {
     private static List<FarmTemplate> templates;
 
     public static void loadTemplates() {
+        System.out.println("Loading templates");
         if (templates == null) {
             templates = FarmLoader.loadFarmTemplates();
         }

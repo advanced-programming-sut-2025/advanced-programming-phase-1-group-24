@@ -231,7 +231,7 @@ public class MapSelectionMenuController implements MenuController {
             //System.out.println(map[p.y][p.x].getContainedGrowable().getTreeType());
         }
         player.setCurrentTile(playerFarm.getRandomFarmTile(map));
-        System.out.println("You are starting at coordinates " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
+        System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
     }
 
     public TreeType findTreeBySourceName(String sourceName) {
