@@ -40,12 +40,16 @@ public class MapOfGame {
     private ArrayList<Shop> shops = new ArrayList<>();
 
     public MapOfGame() {
+        System.out.println("0");
         initializeMap();
     }
 
     private void initializeMap() {
+        System.out.println("1");
         this.map = new Tile[height][width];
+        System.out.println("2");
         initializeShops();
+        System.out.println("3");
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Tile tile = new Tile();
@@ -64,6 +68,7 @@ public class MapOfGame {
                 map[y][x] = tile;
             }
         }
+        System.out.println("4");
         //initialize shops
         for (Shop shop : shops) {
             int startX = shop.getX();
@@ -243,7 +248,9 @@ public class MapOfGame {
 
 
     public void initializeShops() {
+        System.out.println("6");
         shops.clear();
+        System.out.println("7");
 
         Shop blacksmith = new Shop(
                 ShopType.BLACKSMITH,
@@ -253,6 +260,7 @@ public class MapOfGame {
                 createBlacksmithItems(),
                 52, 52, 6, 4
         );
+        System.out.println("8");
 
         Shop jojamart = new Shop(
                 ShopType.JOJA_MART,
@@ -262,6 +270,7 @@ public class MapOfGame {
                 createJojaMartItems(),
                 52, 62, 4, 4
         );
+        System.out.println("9");
 
         Shop pierreStore = new Shop(
                 ShopType.PIERRE_GENERAL_SHOP,
@@ -271,6 +280,7 @@ public class MapOfGame {
                 createPierreStoreItems(),
                 52, 72, 4, 5
         );
+        System.out.println("10");
 
         Shop carpenterShop = new Shop(
                 ShopType.CARPENTER_SHOP,
@@ -281,6 +291,7 @@ public class MapOfGame {
                 52, 82, 6, 6
         );
 
+        System.out.println("11");
         Shop fishShop = new Shop(
                 ShopType.FISH_SHOP,
                 "Fish Shop",
@@ -290,6 +301,7 @@ public class MapOfGame {
                 92, 55, 5, 4
         );
 
+        System.out.println("12");
         Shop marnieRanch = new Shop(
                 ShopType.MARNIE_RANCH,
                 "Marnie’s Ranch",
@@ -298,6 +310,7 @@ public class MapOfGame {
                 createMarnieRanchItems(),
                 90, 67, 7, 5
         );
+        System.out.println("13");
 
         Shop starDropSaloon = new Shop(
                 ShopType.STAR_DROP_SALOON,
@@ -307,11 +320,13 @@ public class MapOfGame {
                 createSaloonItems(),
                 92, 80, 6, 5
         );
+        System.out.println("14");
 
         shops.addAll(Arrays.asList(
                 blacksmith, jojamart, pierreStore, carpenterShop,
                 fishShop, marnieRanch, starDropSaloon
         ));
+        System.out.println("15");
     }
     public Shop getShopAtPosition(int x, int y) {
         for (Shop shop : shops) {
@@ -567,16 +582,24 @@ public class MapOfGame {
 
 
     private ArrayList<ShopItem> createSaloonItems() {
+        System.out.println("16");
         ArrayList<ShopItem> items = new ArrayList<>();
 
+        System.out.println("17");
         // Foods (unlimited purchase)
         items.add(new ShopItem("Beer", Integer.MAX_VALUE, new randomStuff(400, randomStuffType.Coffee), ShopItemType.FOOD, 400, 400, 400, 400));
-        items.add(new ShopItem("Salad", Integer.MAX_VALUE, new Food(FoodType.Salad), ShopItemType.FOOD, 220, 220, 220, 220));
-        items.add(new ShopItem("Bread", Integer.MAX_VALUE, new Food(FoodType.Bread), ShopItemType.FOOD, 120, 120, 120, 120));
-        items.add(new ShopItem("Spaghetti", Integer.MAX_VALUE, new Food(FoodType.Spaghetti), ShopItemType.FOOD, 240, 240, 240, 240));
-        items.add(new ShopItem("Pizza", Integer.MAX_VALUE, new Food(FoodType.Pizza), ShopItemType.FOOD, 600, 600, 600, 600));
+        System.out.println("18");
+        //items.add(new ShopItem("Salad", Integer.MAX_VALUE, new Food(FoodType.Salad), ShopItemType.FOOD, 220, 220, 220, 220));
+        System.out.println("19");
+        //items.add(new ShopItem("Bread", Integer.MAX_VALUE, new Food(FoodType.Bread), ShopItemType.FOOD, 120, 120, 120, 120));
+        System.out.println("20");
+        //items.add(new ShopItem("Spaghetti", Integer.MAX_VALUE, new Food(FoodType.Spaghetti), ShopItemType.FOOD, 240, 240, 240, 240));
+        System.out.println("21");
+        //items.add(new ShopItem("Pizza", Integer.MAX_VALUE, new Food(FoodType.Pizza), ShopItemType.FOOD, 600, 600, 600, 600));
+        System.out.println("22");
         items.add(new ShopItem("Coffee", Integer.MAX_VALUE, new randomStuff(300, randomStuffType.Coffee), ShopItemType.FOOD, 300, 300, 300, 300));
 
+        System.out.println("18");
         // Recipes (limited to 1 purchase)
         items.add(new ShopItem("HashBrown Recipe", 1, null, ShopItemType.FOODRECIPE, 50, 50, 50, 50));
         items.add(new ShopItem("Omelet Recipe", 1, null, ShopItemType.FOODRECIPE, 100, 100, 100, 100));
@@ -588,6 +611,7 @@ public class MapOfGame {
         items.add(new ShopItem("TripleShotEspresso Recipe", 1, null, ShopItemType.FOODRECIPE, 5000, 5000, 5000, 5000));
         items.add(new ShopItem("Cookie Recipe", 1, null, ShopItemType.FOODRECIPE, 300, 300, 300, 300));
 
+        System.out.println("19");
         return items;
     }
 

@@ -123,7 +123,8 @@ public class ServerController {
                     usernames.add(0, player.getUsername());
                 }
 
-                return newGameMenuController.createGameOnServer(usernames); // <-- Updated
+                //return newGameMenuController.createGameOnServer(usernames); // <-- Updated
+                return newGameMenuController.createGameOnServer(usernames, player);
             }
             default:
                 return Message.BAD_REQUEST.setMessage("Unknown method: " + methodName);

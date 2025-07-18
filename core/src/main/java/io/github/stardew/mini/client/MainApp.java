@@ -4,7 +4,9 @@ package io.github.stardew.mini.client;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.FoodType;
 import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.client.Assets.CropAssets;
@@ -104,14 +106,32 @@ public class MainApp extends com.badlogic.gdx.Game {
         for(NPCtype npCtype : NPCtype.values()) {
             npCtype.initTexture();
         }
+        for(FoodType foodType : FoodType.values()) {
+            foodType.initTexture();
+        }
         // Initialize game data
         activeGames = loadActiveGames();
+        if (FarmTemplateManager.getTemplates() == null) {
+            FarmTemplateManager.loadTemplates(); // only once
+        }
     }
     private void connectToServer() {
+
         try {
             URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
             networkClient = new NetworkClient(serverUri);
             networkClient.connect();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (networkClient != null && networkClient.isOpen()) {
+                    try {
+                        networkClient.close();
+                        System.out.println("WebSocket closed via shutdown hook.");
+                    } catch (Exception e) {
+                        System.err.println("Error in shutdown hook: " + e.getMessage());
+                    }
+                }
+            }));
+
 
             // Wait for WebSocket to open and then send the connect message
             new Thread(() -> {
@@ -139,6 +159,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
+
+
     public NetworkClient getNetworkClient() {
         return networkClient;
     }
@@ -161,7 +183,16 @@ public class MainApp extends com.badlogic.gdx.Game {
         if( currentGame!=null ) {
             currentGame.getMap().getShops().clear();
         }
-        saveActiveGames();
+        //saveActiveGames();
+        // ✅ Gracefully close WebSocket
+        if (networkClient != null && networkClient.isOpen()) {
+            try {
+                networkClient.close();  // This triggers server's onClose
+                System.out.println("WebSocket connection closed gracefully.");
+            } catch (Exception e) {
+                System.err.println("Error while closing WebSocket: " + e.getMessage());
+            }
+        }
 
     }
     ////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////

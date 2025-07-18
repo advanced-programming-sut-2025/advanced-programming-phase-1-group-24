@@ -24,7 +24,7 @@ public class GameServer extends Thread {
         System.out.println("GameServer started for players: " + players.size());
         while (running) {
             // game loop (tick, update state, send updates)
-            broadcastGameState();
+            //broadcastGameState();
 
             try {
                 Thread.sleep(100); // ~10 FPS game tick

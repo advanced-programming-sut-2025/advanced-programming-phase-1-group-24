@@ -42,23 +42,51 @@ public class NetworkClient extends WebSocketClient {
     }
 
 
+//    @Override
+//    public void onMessage(String messageJson) {
+//        System.out.println("Received: " + messageJson);
+//
+//        // Deserialize incoming message to Message class
+//        Message<?> message = gson.fromJson(messageJson, Message.class);
+//
+//        String requestId = message.getRequestId();
+//        if (requestId != null) {
+//            CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
+//            if (future != null) {
+//                future.complete(message);
+//            }
+//        } else {
+//            // Handle unsolicited messages if any (e.g., broadcasts)
+//        }
+//    }
+
     @Override
     public void onMessage(String messageJson) {
-        System.out.println("Received: " + messageJson);
+        System.out.println("Received raw JSON: " + messageJson);
 
-        // Deserialize incoming message to Message class
-        Message<?> message = gson.fromJson(messageJson, Message.class);
+        try {
+            Message<?> message = gson.fromJson(messageJson, Message.class);
+            System.out.println("Parsed message object: " + message);
+            System.out.println("RequestId: " + message.getRequestId());
 
-        String requestId = message.getRequestId();
-        if (requestId != null) {
-            CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
-            if (future != null) {
-                future.complete(message);
+            String requestId = message.getRequestId();
+            if (requestId != null) {
+                CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
+                if (future != null) {
+                    System.out.println("✅ Completing future for requestId: " + requestId);
+                    future.complete(message);
+                } else {
+                    System.err.println("❌ No future found for requestId: " + requestId);
+                }
+            } else {
+                System.err.println("❌ requestId was null");
             }
-        } else {
-            // Handle unsolicited messages if any (e.g., broadcasts)
+        } catch (Exception e) {
+            System.err.println("❌ Failed to parse message: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
 
     //    @Override
 //    public void onClose(int code, String reason, boolean remote) {

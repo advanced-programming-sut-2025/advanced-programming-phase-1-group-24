@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.google.gson.Gson;
 import com.sun.tools.javac.Main;
+import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.NewGameMenuController;
@@ -34,7 +35,7 @@ public class NewGameMenuView implements AppMenu, Screen {
     private ArrayList<String> playerNames = new ArrayList<>();
 
     private TextField nameInput;
-//    private Label errorLabel;
+    //    private Label errorLabel;
     private TextButton addPlayerButton;
     private TextButton startGameButton;
     private TextButton backButton;
@@ -100,7 +101,7 @@ public class NewGameMenuView implements AppMenu, Screen {
         table.add(titleLabel).colspan(2).padBottom(bottomPad * 2).row();
         table.add(nameInput).width(buttonWidth).height(buttonHeight / 2).padBottom(bottomPad);
         table.add(addPlayerButton).width(buttonWidth ).height(buttonHeight).padBottom(bottomPad).row();
-      //  table.add(errorLabel).colspan(2).padBottom(bottomPad).row();
+        //  table.add(errorLabel).colspan(2).padBottom(bottomPad).row();
 
         // Placeholder for player list display
         updatePlayerListUI();
@@ -159,10 +160,10 @@ public class NewGameMenuView implements AppMenu, Screen {
 //        });
         startGameButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
-                if (playerNames.isEmpty()) {
-                    showErrorDialog(stage, "You must add at least one player!");
-                    return;
-                }
+//                if (playerNames.isEmpty()) {
+//                    showErrorDialog(stage, "You must add at least one player!");
+//                    return;
+//                }
 
                 String username = MainApp.getInstance().getLoggedInUser().getUsername();
 
@@ -179,6 +180,7 @@ public class NewGameMenuView implements AppMenu, Screen {
                     params,
                     username
                 ).thenAccept(response -> {
+                    System.out.println("Response received");
                     if (response.getStatus() == 200) {
                         Object bodyRaw = response.getBody();
 
@@ -187,6 +189,14 @@ public class NewGameMenuView implements AppMenu, Screen {
                             if (gameIdObj instanceof String gameId) {
                                 // Now you can use gameId
                                 System.out.println("Game ID: " + gameId);
+                                Object gameObj = bodyMap.get("game");
+
+                                Gson gson = new Gson();
+                                String json = gson.toJson(gameObj); // serialize raw object to JSON string
+                                Game game = gson.fromJson(json, Game.class); // deserialize back into Game object
+
+                                MainApp.getInstance().setCurrentGame(game);
+                                System.out.println(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
                                 MainApp.getInstance().setCurrentGameId(gameId);
                             } else {
                                 System.err.println("gameId is not a string or is null");
@@ -259,7 +269,7 @@ public class NewGameMenuView implements AppMenu, Screen {
 
     }
 
-//    @Override
+    //    @Override
 //    public void resize(int i, int i1) {
 //
 //    }

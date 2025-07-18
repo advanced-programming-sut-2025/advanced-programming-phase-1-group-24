@@ -1,5 +1,7 @@
 package io.github.stardew.mini.server.Controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -70,6 +72,54 @@ public class NewGameMenuController implements MenuController{
         Map<String, Object> body = new HashMap<>();
         body.put("gameId", game.getNetworkId());
         body.put("message", "Game created successfully");
+
+        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+    }
+
+    public Message<?> createGameOnServer(List<String> usernames, User creator) {
+        ArrayList<User> players = new ArrayList<>();
+        players.add(creator);
+
+        List<PlayerConnection> connections = new ArrayList<>();
+        System.out.println("[SERVER] Creating game for: " + creator.getUsername());
+        PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(creator.getUsername());
+        if (pc == null) {
+            return Message.NOT_FOUND.setMessage("Creator's connection not found");
+        } else {
+            System.out.println("[SERVER] Found player connection for " + creator.getUsername() + ", sessionId = " + pc.getWsContext().sessionId());
+        }
+
+        connections.add(pc);
+
+        for (User player : players) {
+            player.updateGameFields();
+        }
+
+        Game game = new Game(players, creator, creator);
+
+        if (FarmTemplateManager.getTemplates() == null) {
+            FarmTemplateManager.loadTemplates(); // only once
+        }
+
+
+        GameServer gameServer = new GameServer(connections);
+        gameServer.setGame(game);
+
+        AppSocket.addGame(gameServer);
+            gameServer.start();
+        Map<String, Object> body = new HashMap<>();
+        body.put("gameId", game.getNetworkId());
+        body.put("message", "Game created successfully");
+//        String jsonGame = null;
+//        try {
+//            ObjectMapper mapper = new ObjectMapper();
+//            jsonGame = mapper.writeValueAsString(game);
+//            // send jsonGame in response
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
+//        }
+        body.put("game", game);
 
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }

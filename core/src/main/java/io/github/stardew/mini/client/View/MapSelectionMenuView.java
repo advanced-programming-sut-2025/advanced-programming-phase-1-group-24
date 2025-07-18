@@ -118,7 +118,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
             public void clicked(InputEvent event, float x, float y) {
                 if (selectedMap != null) {
                     //  controller.notifyMapSelected(selectedMap);
-                    controller.pickGameMap(MainApp.getInstance().getLoggedInUser(), Integer.parseInt(selectedMap));
+                    controller.pickGameMap(MainApp.getInstance().getCurrentGame().getCurrentPlayer(), Integer.parseInt(selectedMap));
                     System.out.println("logged in user " + MainApp.getInstance().getLoggedInUser().getUsername() + " " + selectedMap);
                     for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
                         if (!user.equals(MainApp.getInstance().getLoggedInUser())) {
