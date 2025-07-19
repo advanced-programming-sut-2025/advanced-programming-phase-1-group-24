@@ -13,7 +13,8 @@ public enum Menu {
     GameMenu,
     ProfileMenu,
     TradeMenu,
-    ExitMenu;
+    ExitMenu,
+    LobbyMenu;
 
     public static Menu fromString(String menuName) {
         for (Menu menu : Menu.values()) {

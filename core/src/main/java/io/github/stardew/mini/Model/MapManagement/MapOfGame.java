@@ -229,9 +229,7 @@ public class MapOfGame {
     public void changeTile(TileType newTile, TileType oldTile) {}
 
     public Farm getFarmByOwner(User owner) {
-        System.out.println("salam "+owner.getUsername());
         for (Farm farm : farms) {
-            System.out.println("khodafez "+farm.getOwner().getUsername());
             if (farm.getOwner().equals(owner)) {
                 return farm;
             }

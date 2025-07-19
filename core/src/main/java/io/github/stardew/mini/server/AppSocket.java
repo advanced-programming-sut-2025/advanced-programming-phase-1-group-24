@@ -56,24 +56,25 @@ public class AppSocket {
                     System.out.println("message.getControllerName(): " + message.getControllerName());
                     System.out.println("message.getMethodName(): " + message.getMethodName());
 
-                   // if (message.getControllerName() != null) {
-                        if ("NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
-                            && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
-                            // This method doesn't require a game ID
-                            response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
-                        } else {
-                            // Other messages need a game ID
-                            GameServer gameServer = getActiveGameById(message.getGameID());
-                            if (gameServer == null) {
-                                ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("Game not found for user.")));
-                                return;
-                            }
-                            response = serverController.routingTheRequests((Message<Map<String, Object>>) message, gameServer);
+                    // if (message.getControllerName() != null) {
+//                        if ("NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
+//                            && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
+                    if (message.getGameID() == null) {
+                        // This method doesn't require a game ID
+                        response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
+                    } else {
+                        // Other messages need a game ID
+                        GameServer gameServer = getActiveGameById(message.getGameID());
+                        if (gameServer == null) {
+                            ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("Game not found for user.")));
+                            return;
                         }
+                        response = serverController.routingTheRequests((Message<Map<String, Object>>) message, gameServer);
+                    }
 
-                        response.setRequestId(message.getRequestId());
-                        ctx.send(gson.toJson(response));
-                   // }
+                    response.setRequestId(message.getRequestId());
+                    ctx.send(gson.toJson(response));
+                    // }
                     // Handle other message types here...
 
                 } catch (Exception e) {
