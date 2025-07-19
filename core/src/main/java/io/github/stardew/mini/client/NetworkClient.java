@@ -3,6 +3,8 @@ package io.github.stardew.mini.client;
 
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
+import io.github.stardew.mini.Model.TimeManagement.Season;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -40,21 +42,82 @@ public class NetworkClient extends WebSocketClient {
     }
 
 
+//    @Override
+//    public void onMessage(String messageJson) {
+//        System.out.println("Received: " + messageJson);
+//
+//        // Deserialize incoming message to Message class
+//        Message<?> message = gson.fromJson(messageJson, Message.class);
+//
+//        String requestId = message.getRequestId();
+//        if (requestId != null) {
+//            CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
+//            if (future != null) {
+//                future.complete(message);
+//            }
+//        } else {
+//                if ("time-update".equalsIgnoreCase(message.getType())) {
+//                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+//                    int hour = ((Double) data.get("hour")).intValue();
+//                    int day = ((Double) data.get("day")).intValue();
+//                    String dayOfWeekString = (String) data.get("dayOfWeek");
+//                    String seasonString = (String) data.get("season");
+//                    DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
+//                    Season season = Season.fromString(seasonString);
+//
+//                    // Optional: store or update this data somewhere globally
+//                    MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
+//
+//                    // Notify your UI or game loop (if any)
+//                    System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
+//                        hour, day, dayOfWeek, seasonString);
+//                }
+//            }
+//
+////        } else {
+////            // Handle unsolicited messages if any (e.g., broadcasts)
+////        }
+//    }
     @Override
     public void onMessage(String messageJson) {
-        System.out.println("Received: " + messageJson);
+        System.out.println("Received raw JSON: " + messageJson);
 
-        // Deserialize incoming message to Message class
-        Message<?> message = gson.fromJson(messageJson, Message.class);
+        try {
+            Message<?> message = gson.fromJson(messageJson, Message.class);
+            System.out.println("Parsed message object: " + message);
+            System.out.println("RequestId: " + message.getRequestId());
 
-        String requestId = message.getRequestId();
-        if (requestId != null) {
-            CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
-            if (future != null) {
-                future.complete(message);
+            String requestId = message.getRequestId();
+            if (requestId != null) {
+                CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
+                if (future != null) {
+                    System.out.println("✅ Completing future for requestId: " + requestId);
+                    future.complete(message);
+                } else {
+                    System.err.println("❌ No future found for requestId: " + requestId);
+                }
+            } else {
+                if ("time-update".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    int hour = ((Double) data.get("hour")).intValue();
+                    int day = ((Double) data.get("day")).intValue();
+                    String dayOfWeekString = (String) data.get("dayOfWeek");
+                    String seasonString = (String) data.get("season");
+                    DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
+                    Season season = Season.fromString(seasonString);
+
+                    // Optional: store or update this data somewhere globally
+                    MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
+
+                    // Notify your UI or game loop (if any)
+                    System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
+                        hour, day, dayOfWeek, seasonString);
+                }
+                System.err.println("❌ requestId was null");
             }
-        } else {
-            // Handle unsolicited messages if any (e.g., broadcasts)
+        } catch (Exception e) {
+            System.err.println("❌ Failed to parse message: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -102,9 +165,10 @@ public class NetworkClient extends WebSocketClient {
         requestMessage.setMessageType(Message.MessageType.REQUEST);
 
         // Optionally include gameId in the body or add a field if needed (depends on server design)
-        if (params != null && gameId != null) {
-            params.put("gameId", gameId);
-        }
+//        if (params != null && gameId != null) {
+//            params.put("gameId", gameId);
+//        }
+        requestMessage.setGameID(gameId);
 
         // Serialize and send
         String json = gson.toJson(requestMessage);
@@ -123,17 +187,32 @@ public class NetworkClient extends WebSocketClient {
         String gameId,
         String controllerName,
         String methodName,
-        Map<String, Object> params
+        Map<String, Object> params,
+        String username
     ) {
-        return sendRequest(gameId, controllerName, methodName, "GET", params, null);
+        return sendRequest(gameId, controllerName, methodName, "GET", params, username);
     }
 
     public CompletableFuture<Message<?>> sendPost(
         String gameId,
         String controllerName,
         String methodName,
-        Map<String, Object> params
+        Map<String, Object> params,
+        String username
     ) {
-        return sendRequest(gameId, controllerName, methodName, "POST", params, null);
+        return sendRequest(gameId, controllerName, methodName, "POST", params, username);
+    }
+    public void sendConnect(String username) {
+        if (!isOpen()) {
+            System.err.println("WebSocket is not open");
+            return;
+        }
+
+        Message<String> connectMsg = new Message(0, "connect", null, Message.MessageType.REQUEST);
+        connectMsg.setUsername(username);
+
+        String json = gson.toJson(connectMsg);
+        send(json);
+        System.out.println("Sent connect for user: " + username);
     }
 }

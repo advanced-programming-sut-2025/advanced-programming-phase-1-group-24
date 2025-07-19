@@ -1,7 +1,9 @@
 package io.github.stardew.mini.server;
 
+import io.github.stardew.mini.server.Controller.ServerController;
 import io.javalin.Javalin;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
@@ -14,6 +16,7 @@ public class AppSocket {
     private static final Gson gson = new Gson();
     private static final ConcurrentHashMap<String, PlayerConnection> connectedPlayers = new ConcurrentHashMap<>();
     private static final CopyOnWriteArrayList<GameServer> activeGames = new CopyOnWriteArrayList<>();
+    private final ServerController serverController = new ServerController();
 
     public AppSocket(Javalin app) {
         this.app = app;
@@ -34,7 +37,8 @@ public class AppSocket {
                 // Handle ping messages (e.g., from client keep-alive)
                 if ("ping".equals(rawMessage)) {
                     // Optionally respond with pong (not required unless client expects it)
-                    ctx.send("pong");
+                    //ctx.send("pong");
+                    ctx.send(gson.toJson(Message.ok("pong")));
                     return;
                 }
 
@@ -46,6 +50,30 @@ public class AppSocket {
                         System.out.println("User connected: " + message.getUsername());
                     }
 
+                    Message<?> response;
+                    System.out.println("message.getType(): " + message.getType());
+                    System.out.println("message.getUsername(): " + message.getUsername());
+                    System.out.println("message.getControllerName(): " + message.getControllerName());
+                    System.out.println("message.getMethodName(): " + message.getMethodName());
+
+                   // if (message.getControllerName() != null) {
+                        if ("NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
+                            && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
+                            // This method doesn't require a game ID
+                            response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
+                        } else {
+                            // Other messages need a game ID
+                            GameServer gameServer = getActiveGameById(message.getGameID());
+                            if (gameServer == null) {
+                                ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("Game not found for user.")));
+                                return;
+                            }
+                            response = serverController.routingTheRequests((Message<Map<String, Object>>) message, gameServer);
+                        }
+
+                        response.setRequestId(message.getRequestId());
+                        ctx.send(gson.toJson(response));
+                   // }
                     // Handle other message types here...
 
                 } catch (Exception e) {
@@ -54,15 +82,24 @@ public class AppSocket {
                 }
             });
 
-
             // ✅ WsCloseContext
+//            ws.onClose(ctx -> {
+//                String sessionId = ctx.sessionId(); // this is the correct method
+//                PlayerConnection connection = connectedPlayers.remove(sessionId);
+//                if (connection != null) {
+//                    System.out.println("User disconnected: " + connection.getUsername());
+//                }
+//            });
             ws.onClose(ctx -> {
                 String sessionId = ctx.sessionId(); // this is the correct method
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
+                } else {
+                    System.out.println("Unknown session disconnected: " + sessionId);
                 }
             });
+
 
             // ✅ WsErrorContext
             ws.onError(ctx -> {
@@ -94,6 +131,17 @@ public class AppSocket {
                 return gs;
             }
         }
+        return null;
+    }
+
+    public static PlayerConnection getPlayerConnectionByUsername(String username) {
+        for (PlayerConnection pc : connectedPlayers.values()) {
+            System.out.println("Connected: " + pc.getUsername());
+            if (pc.getUsername().equals(username)) {
+                return pc;
+            }
+        }
+        System.out.println("PlayerConnection not found for: " + username);
         return null;
     }
 
