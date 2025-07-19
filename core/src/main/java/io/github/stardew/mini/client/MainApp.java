@@ -3,7 +3,11 @@ package io.github.stardew.mini.client;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.Food;
+import io.github.stardew.mini.Model.Things.FoodType;
 import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.client.Assets.CropAssets;
@@ -30,6 +34,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
@@ -37,7 +42,8 @@ public class MainApp extends com.badlogic.gdx.Game {
     private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
-    private ArrayList<User> users =UserDatabase.loadUsers(); // we should delete this
+    private ArrayList<User> users;
+    //=UserDatabase.loadUsers(); // we should delete this
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
@@ -48,15 +54,15 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
-       // connectToServer();
+        connectToServer();
         setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
         if (loggedInUser == null) {
             setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
         } else
             setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
-       // Initialize game data
-       //loadGameData();
+        // Initialize game data
+        //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -78,7 +84,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             foragingCropType.initTexture();
         }
         for (CropType cropType : CropType.values()) {
-            if(cropType == CropType.MixedCrop) continue;
+            if (cropType == CropType.MixedCrop) continue;
             cropType.initTexture();
         }
         for (ForagingMineralType foragingMineralType : ForagingMineralType.values()) {
@@ -93,43 +99,66 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-        for(NPCtype npCtype : NPCtype.values()) {
+        for (FoodType foodType : FoodType.values()) {
+            foodType.initTexture();
+        }
+        for (NPCtype npCtype : NPCtype.values()) {
             npCtype.initTexture();
         }
         // Initialize game data
         activeGames = loadActiveGames();
+        if (FarmTemplateManager.getTemplates() == null) {
+            FarmTemplateManager.loadTemplates();
+        }
     }
-private void connectToServer() {
-    try {
-        URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
-        networkClient = new NetworkClient(serverUri);
-        networkClient.connect();
 
-        // Wait for WebSocket to open and then send the connect message
-        new Thread(() -> {
-            while (!networkClient.isOpen()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ignored) {}
-            }
-
-            if (loggedInUser != null) {
-                Message<String> connectMsg = new Message<>(200);
-                connectMsg.setType("connect"); // AppSocket listens for "connect"
-                connectMsg.setUsername(loggedInUser.getUsername());
-                connectMsg.setMessageType(Message.MessageType.REQUEST);
-
-                String json = new Gson().toJson(connectMsg);
-                networkClient.send(json); // Sends to AppSocket
-                System.out.println("Connect message sent to server for user: " + loggedInUser.getUsername());
-            }
-        }).start();
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        System.err.println("Failed to connect to WebSocket server.");
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
     }
-}
+
+    private void connectToServer() {
+        try {
+            URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
+            networkClient = new NetworkClient(serverUri);
+            networkClient.connect();
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (networkClient != null && networkClient.isOpen()) {
+                    try {
+                        networkClient.close();
+                        System.out.println("WebSocket closed via shutdown hook.");
+                    } catch (Exception e) {
+                        System.err.println("Error in shutdown hook: " + e.getMessage());
+                    }
+                }
+            }));
+
+
+            // Wait for WebSocket to open and then send the connect message
+            new Thread(() -> {
+                while (!networkClient.isOpen()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+
+                if (loggedInUser != null) {
+                    Message<String> connectMsg = new Message<>(200);
+                    connectMsg.setType("connect"); // AppSocket listens for "connect"
+                    connectMsg.setUsername(loggedInUser.getUsername());
+                    connectMsg.setMessageType(Message.MessageType.REQUEST);
+
+                    String json = new Gson().toJson(connectMsg);
+                    networkClient.send(json); // Sends to AppSocket
+                    System.out.println("Connect message sent to server for user: " + loggedInUser.getUsername());
+                }
+            }).start();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Failed to connect to WebSocket server.");
+        }
+    }
 
     public NetworkClient getNetworkClient() {
         return networkClient;
@@ -150,13 +179,22 @@ private void connectToServer() {
         ShopAssets.dispose();
         batch.dispose();
         // save games
-        if( currentGame!=null ) {
+        if (currentGame != null) {
             currentGame.getMap().getShops().clear();
         }
-        saveActiveGames();
-
+        //saveActiveGames();
+        // ✅ Gracefully close WebSocket
+        if (networkClient != null && networkClient.isOpen()) {
+            try {
+                networkClient.close();  // This triggers server's onClose
+                System.out.println("WebSocket connection closed gracefully.");
+            } catch (Exception e) {
+                System.err.println("Error while closing WebSocket: " + e.getMessage());
+            }
+        }
     }
-////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
+
+    /// /////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
     public void saveActiveGames() {
         try {
             GameSaver.saveGames(activeGames, "data/active_games.json.gz");
@@ -164,6 +202,7 @@ private void connectToServer() {
             e.printStackTrace();
         }
     }
+
     private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
         File file = new File("data/active_games.json.gz");
         if (!file.exists()) return new ArrayList<>();
@@ -249,6 +288,7 @@ private void connectToServer() {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
+
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
@@ -257,6 +297,7 @@ private void connectToServer() {
         this.currentMenu = currentMenu;
         changeScreen();
     }
+
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:

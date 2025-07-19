@@ -64,6 +64,7 @@ public class MapOfGame {
                 map[y][x] = tile;
             }
         }
+        System.out.println("5");
         //initialize shops
         for (Shop shop : shops) {
             int startX = shop.getX();
@@ -79,6 +80,7 @@ public class MapOfGame {
                 }
             }
         }
+        System.out.println("6");
         // initialize npcHouses
         // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
@@ -227,13 +229,16 @@ public class MapOfGame {
     public void changeTile(TileType newTile, TileType oldTile) {}
 
     public Farm getFarmByOwner(User owner) {
+        System.out.println("salam "+owner.getUsername());
         for (Farm farm : farms) {
+            System.out.println("khodafez "+farm.getOwner().getUsername());
             if (farm.getOwner().equals(owner)) {
                 return farm;
             }
         }
         return null;
     }
+
     public Tile getTile(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return map[y][x];

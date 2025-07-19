@@ -1,14 +1,15 @@
 package io.github.stardew.mini.server;
 
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
+import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.ServerController;
-import io.javalin.http.Context;
-import io.javalin.http.HandlerType;
 
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 public class GameServer extends Thread {
     private final List<PlayerConnection> players;
@@ -21,26 +22,37 @@ public class GameServer extends Thread {
     public GameServer(List<PlayerConnection> players) {
         this.players = players;
     }
+
     @Override
     public void run() {
         System.out.println("GameServer started for players: " + players.size());
 
-        // Start global timer
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (game == null) return;
-
-                game.getTimeAndDate().advanceHour();  // Advance time in game
-                gameController.handleEndOfDay();
-
-                // Send game state to all connected clients
-//                for (User player : game.getPlayers()) {
-//                    WebSocketManager.send(player.getId(), new GameStateUpdateMessage(game));
+//        // Start global timer
+//        timer = new Timer();
+//        timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (game == null ) return;
+//
+//                game.advanceTimeByOneHour();  // Advance time in game
+//                gameController.handleEndOfDay(GameServer.this);
+//                // Step 2: Prepare message to send to players
+//                for (PlayerConnection player : players) {
+//                    if (player.getWsContext().session.isOpen()) {
+//                        Map<String, Object> timeUpdate = new HashMap<>();
+//                        timeUpdate.put("gameId", game.getNetworkId());
+//                        timeUpdate.put("hour", game.getTimeAndDate().getHour());
+//                        timeUpdate.put("day", game.getTimeAndDate().getDay());
+//                        timeUpdate.put("dayOfWeek", game.getTimeAndDate().getDayOfWeek());
+//                        timeUpdate.put("season", game.getTimeAndDate().getSeason());
+//
+//                        Message<Map<String, Object>> msg = new Message<>(200, "TimeUpdate", timeUpdate, Message.MessageType.RESPONSE);
+//                        msg.setType("time-update");
+//                        player.getWsContext().send(new Gson().toJson(msg));
+//                    }
 //                }
-            }
-        }, 5000, 5000); // delay 5s, repeat every 5s
+//            }
+//        }, 5000, 5000); // delay 5s, repeat every 5s
 
         // Optional game loop (e.g., for animation ticks or events)
         while (running) {
@@ -53,6 +65,35 @@ public class GameServer extends Thread {
         }
     }
 
+    public void startGameTimer() {
+        if (timer != null) return; // Prevent double start
+
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (game == null ) return;
+
+                game.advanceTimeByOneHour();
+                gameController.handleEndOfDay(GameServer.this);
+
+                for (PlayerConnection player : players) {
+                    if (player.getWsContext().session.isOpen()) {
+                        Map<String, Object> timeUpdate = new HashMap<>();
+                        timeUpdate.put("gameId", game.getNetworkId());
+                        timeUpdate.put("hour", game.getTimeAndDate().getHour());
+                        timeUpdate.put("day", game.getTimeAndDate().getDay());
+                        timeUpdate.put("dayOfWeek", game.getTimeAndDate().getDayOfWeek());
+                        timeUpdate.put("season", game.getTimeAndDate().getSeason());
+
+                        Message<Map<String, Object>> msg = new Message<>(200, "TimeUpdate", timeUpdate, Message.MessageType.RESPONSE);
+                        msg.setType("time-update");
+                        player.getWsContext().send(new Gson().toJson(msg));
+                    }
+                }
+            }
+        }, 5000, 5000);
+    }
 
     public void stopServer() {
         running = false;
@@ -66,19 +107,16 @@ public class GameServer extends Thread {
 
     public void broadcastGameState() {
         for (PlayerConnection player : players) {
-            player.send("{\"type\": \"gameState\", \"data\": \"...\"}");
+            // player.send("{\"type\": \"gameState\", \"data\": \"...\"}");
         }
     }
 
-
-
-    public void handleRequests(Context ctx) {
-        if (ctx.method() == HandlerType.POST) {
-            controller.routingTheRequests(ctx , this);
-        } else if (ctx.method() == HandlerType.GET) {
-
-        }
-    }
+//    public void handleRequests(Context ctx) {
+//        if (ctx.method() == HandlerType.POST) {
+//            controller.routingTheRequests(ctx , this);
+//        } else if (ctx.method() == HandlerType.GET) {
+//        }
+//    }
 
     public Game getGame() {
         return game;

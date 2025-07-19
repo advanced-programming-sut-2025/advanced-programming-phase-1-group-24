@@ -14,13 +14,20 @@ public class ServerApp {
     private final CopyOnWriteArrayList<GameServer> allGames = new CopyOnWriteArrayList<>();
 
     private ServerApp() {
-        //loadAllUsers();
+        loadAllUsers();
     }
 
     public static ServerApp getInstance() {
         return instance;
     }
-
+    public User getUserByUsername(String username) {
+        for(User user : allUsers.values()) {
+            if(user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
     private void loadAllUsers() {
         ArrayList<User> loadedUsers = UserDatabase.loadUsers();
         for (User user : loadedUsers) {

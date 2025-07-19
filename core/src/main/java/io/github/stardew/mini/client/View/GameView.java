@@ -2693,14 +2693,14 @@ private void createAnimalDialog() {
         updateEquippedItemSlot();
 
 
-        gameTickTask = Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
-                controller.handleEndOfDay();
-               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
-            }
-        }, 5, 5);
+//        gameTickTask = Timer.schedule(new Timer.Task() {
+//            @Override
+//            public void run() {
+//                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+//                controller.handleEndOfDay();
+//               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+//            }
+//        }, 5, 5);
 
         determineAvatar();
 
@@ -2836,7 +2836,11 @@ private void createAnimalDialog() {
 
     @Override
     public void render(float v) {
-        updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+        //////////////////////hard code /////////////////////////
+//        currentPlayer =  MainApp.getInstance().getLoggedInUser();
+//        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
+        //////////////////////hard code /////////////////////////
+     updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
 //        if (currentPlayer.hasFainted()) {
