@@ -316,6 +316,8 @@ public class MainApp extends com.badlogic.gdx.Game {
             case MapSelectionMenu:
                 getInstance().setScreen(new MapSelectionMenuView(new MapSelectionMenuController()));
                 break;
+                case LobbyMenu:
+                    getInstance().setScreen(new LobbyMenuView(new LobbyMenuController()));
 
 
             // ... other cases

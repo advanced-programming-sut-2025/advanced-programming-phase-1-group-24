@@ -92,12 +92,18 @@ public class AppSocket {
                     System.out.println("message.getMethodName(): " + message.getMethodName());
 
 
-                    if (message.getControllerName()!= null && "NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
-                        && message.getMethodName() != null && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
+//                    if (message.getControllerName()!= null && "NewGameMenuController".equalsIgnoreCase(message.getControllerName().trim())
+//                        && message.getMethodName() != null && "createGameOnServer".equalsIgnoreCase(message.getMethodName().trim())) {
+//                        System.out.println("hereeeeeeeeee");
+//                        // This method doesn't require a game ID
+//                        response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
+//                    }
+                    if (message.getGameID() == null) {
                         System.out.println("hereeeeeeeeee");
                         // This method doesn't require a game ID
                         response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
-                    } else {
+                    }
+                    else {
                         // Other messages need a game ID
                         GameServer gameServer = getActiveGameById(message.getGameID());
                         System.out.println("2:" + message.getGameID());
