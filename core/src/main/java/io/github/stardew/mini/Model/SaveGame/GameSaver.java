@@ -22,7 +22,7 @@ import java.util.zip.GZIPOutputStream;
 
 public class GameSaver {
 
-    private static ObjectMapper createCustomObjectMapper() {
+    public static ObjectMapper createCustomObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.findAndRegisterModules();

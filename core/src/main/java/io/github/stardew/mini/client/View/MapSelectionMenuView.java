@@ -14,7 +14,14 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.google.gson.Gson;
 import com.sun.tools.javac.Main;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.client.MainApp;
@@ -132,6 +139,7 @@ public class MapSelectionMenuView implements AppMenu, Screen {
 //                        }
 //                    }
 //                    MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+
                     Map<String, Object> params = new HashMap<>();
                     if(selectedMap.equals("1")) params.put("mapNumber", 1);
                     else if(selectedMap.equals("2")) params.put("mapNumber", 2);
@@ -139,7 +147,29 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                         "MapSelectionMenuController","pickGameMap",params,
                         MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername()).thenAccept(response -> {
                             if(response.getStatus() == 200) {
-                                MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+                                Object bodyRaw = response.getBody();
+
+                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                    Object gameJsonObj = bodyMap.get("game");
+
+                                    if (gameJsonObj instanceof  String json) {
+                                        System.out.println("////////////////////////////////////////////////////");
+                                        try {
+                                                Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                                MainApp.getInstance().setCurrentGame(game);
+                                            System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+                                            System.out.println("Game successfully deserialized");
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            showErrorDialog(stage, "Deserialization failed: " + e.getMessage());
+                                        }
+                                    }
+                                } else {
+                                    System.err.println("Response body is not a map");
+                                }
+                                Gdx.app.postRunnable(() -> {
+                                    MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+                                });
                             }
                             else {
                                 Gdx.app.postRunnable(() -> {
