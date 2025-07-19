@@ -1,8 +1,12 @@
 
 package io.github.stardew.mini.client;
 
+import com.badlogic.gdx.Gdx;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import org.java_websocket.client.WebSocketClient;
@@ -112,6 +116,26 @@ public class NetworkClient extends WebSocketClient {
                     // Notify your UI or game loop (if any)
                     System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
                         hour, day, dayOfWeek, seasonString);
+                }
+                if ("endOfDay".equalsIgnoreCase(message.getType())) {
+                        Object bodyRaw = message.getBody();
+
+                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                            Object gameJsonObj = bodyMap.get("game");
+
+                            if (gameJsonObj instanceof  String json) {
+                                System.out.println("////////////////////////////////////////////////////");
+                                try {
+                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                    MainApp.getInstance().setCurrentGame(game);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else {
+                            System.err.println("Response body is not a map");
+                        }
+                    System.out.printf("[CLIENT] Game updated handle end of day");
                 }
                 System.err.println("❌ requestId was null");
             }

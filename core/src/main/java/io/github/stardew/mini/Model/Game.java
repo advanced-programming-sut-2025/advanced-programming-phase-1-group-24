@@ -121,8 +121,8 @@ public class Game {
 
     public void advanceTimeByOneHour() {
       timeAndDate.advanceHour();
-//      getCurrentPlayer().handleSpecialFoodsEffects();
-//      updateMachines();
+      getCurrentPlayer().handleSpecialFoodsEffects();
+      updateMachines();
     }
     public  void updateMachines() {  //use this method every hour
         for (User user : players) {

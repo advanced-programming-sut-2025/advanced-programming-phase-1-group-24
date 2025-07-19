@@ -171,7 +171,7 @@ public class NPC {
             if (npc.getDaysLeftToUnlockThirdMission() > 0)
                 npc.setDaysLeftToUnlockThirdMission(npc.getDaysLeftToUnlockThirdMission() - 1);
             for (String username : npc.getTalkedToNPCToday().keySet()) {
-                User user = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
+                User user = currentGame.getPlayerByUsername(username);
                 npc.getTalkedToNPCToday().put(user.getUsername(), false);
                 npc.getGaveGiftToNPCToday().put(user.getUsername(), false);
                 if (npc.getFriendshipLevels().get(user.getUsername()) == 3) {

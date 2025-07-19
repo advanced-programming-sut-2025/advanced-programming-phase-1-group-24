@@ -1,8 +1,10 @@
 package io.github.stardew.mini.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
@@ -122,5 +124,8 @@ public class GameServer extends Thread {
         return game;
     }
 
+    public List<PlayerConnection> getPlayers() {
+        return players;
+    }
 }
 
