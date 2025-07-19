@@ -4,6 +4,7 @@ import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.GameServer;
+import io.github.stardew.mini.server.LobbyManager;
 import io.github.stardew.mini.server.ServerApp;
 import io.javalin.http.Context;
 import org.eclipse.jetty.server.Server;
@@ -19,6 +20,7 @@ public class ServerController {
     private final TradeMenuController tradeMenuController = new TradeMenuController();
     private final NewGameMenuController newGameMenuController = new NewGameMenuController();
     private final MapSelectionMenuController mapSelectionMenuController = new MapSelectionMenuController();
+    private final LobbyController lobbyController = new LobbyController();
 
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server){
         String controllerName = message.getControllerName();
@@ -56,6 +58,9 @@ public class ServerController {
 
                     case "MapSelectionMenuController":
                         return routeToMapSelectionMenuController(methodName, body, server, player);
+                        case "LobbyController":
+                            return  routeToLobbyController(methodName, body, server, player);
+
 
             default:
                 return routeToGameController(methodName, body, server, player);
@@ -153,6 +158,30 @@ public class ServerController {
                 return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
         }
     }
+
+    private Message<?> routeToLobbyController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        switch (methodName) {
+            case "createLobby": {
+                String lobbyName = (String) body.get("name");
+                String lobbyPassword = (String) body.get("password");
+                Boolean isPrivate = (Boolean) body.get("isPrivate");
+
+                lobbyController.createLobby(lobbyName, lobbyPassword, isPrivate, player);
+                return Message.OK.setMessage("lobby created");
+            }
+            case "getAllLobbies": {
+                return lobbyController.getAllLobbies();
+            }
+            case "joinLobby" : {
+                String lobbyID = (String) body.get("lobbyID");
+                String lobbyPassword = (String) body.get("lobbyPassword");
+                return lobbyController.joinLobby(lobbyID, lobbyPassword, player);
+            }
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
+
 
 //    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
 //        Result result = null;

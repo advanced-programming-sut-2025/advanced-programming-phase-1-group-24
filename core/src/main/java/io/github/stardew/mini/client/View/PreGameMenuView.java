@@ -120,7 +120,8 @@ public class PreGameMenuView implements AppMenu, Screen {
         newGameButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                MainApp.getInstance().setCurrentMenu(Menu.NewGameMenu);
+                //MainApp.getInstance().setCurrentMenu(Menu.NewGameMenu);
+                MainApp.getInstance().setCurrentMenu(Menu.LobbyMenu);
             }
         });
         newGameButton.getStyle().over = skin.getDrawable("button-normal-over");

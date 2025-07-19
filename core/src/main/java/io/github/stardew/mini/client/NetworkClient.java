@@ -164,9 +164,10 @@ public class NetworkClient extends WebSocketClient {
         String gameId,
         String controllerName,
         String methodName,
-        Map<String, Object> params
+        Map<String, Object> params,
+        String username
     ) {
-        return sendRequest(gameId, controllerName, methodName, "GET", params, null);
+        return sendRequest(gameId, controllerName, methodName, "GET", params, username);
     }
 
     public CompletableFuture<Message<?>> sendPost(
