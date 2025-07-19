@@ -239,6 +239,16 @@ public class MapOfGame {
         }
         return null;
     }
+
+    public Farm getFarmByUsername(String username) {
+        for (Farm farm : farms) {
+            if(farm.getOwner().getUsername().equals(username)) {
+                return farm;
+            }
+        }
+        return null;
+    }
+
     public Tile getTile(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return map[y][x];

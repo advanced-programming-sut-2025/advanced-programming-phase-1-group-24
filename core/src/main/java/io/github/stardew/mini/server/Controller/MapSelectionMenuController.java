@@ -1,6 +1,8 @@
 package io.github.stardew.mini.server.Controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -412,9 +414,23 @@ public class MapSelectionMenuController implements MenuController {
         }
         player.setCurrentTile(playerFarm.getRandomFarmTile(map));
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
-        Map<String, Object> params = new HashMap<>();
+
+
+        ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+
+        Map<String, Object> body = new HashMap<>();
+        try {
+            String jsonGame = mapper.writeValueAsString(currentGame); // serialize Game to JSON string
+            body.put("game", jsonGame);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
+        }
+//        String jsonGame = mapper.writeValueAsString(currentGame);
+//        body.put("game", jsonGame); // game is a String
+
         return new Message<>(200, "You are starting at coordinates "+ " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
-            params, Message.MessageType.RESPONSE);
+           body, Message.MessageType.RESPONSE);
     }
 
     public TreeType findTreeBySourceName(String sourceName) {

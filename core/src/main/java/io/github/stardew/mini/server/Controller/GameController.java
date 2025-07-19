@@ -66,9 +66,15 @@ public class GameController implements MenuController {
             player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
             player.reduceEnergy(1);
             player.setMovingDirection(direction);
-            return Message.OK;
+            Map<String, Object> params = new HashMap<>();
+            params.put("tile", player.getCurrentTile());
+            params.put("energy", player.getEnergy());
+            params.put("movingDirection", player.getMovingDirection());
+
+            return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
+            //return Message.OK.setMessage("You can walk there.");
         }
-        return Message.FORBIDDEN;
+        return Message.FORBIDDEN.setMessage("You can not move there.");
     }
 
 
