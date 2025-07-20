@@ -77,111 +77,111 @@
 //        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
 //    }
 //
-////    public Message<?> createGameOnServer(List<String> usernames, User creator) {
-////        ArrayList<User> players = new ArrayList<>();
-////        players.add(creator);
-////
-////        List<PlayerConnection> connections = new ArrayList<>();
-////        System.out.println("[SERVER] Creating game for: " + creator.getUsername());
-////        PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(creator.getUsername());
-////        if (pc == null) {
-////            return Message.NOT_FOUND.setMessage("Creator's connection not found");
-////        } else {
-////            System.out.println("[SERVER] Found player connection for " + creator.getUsername() + ", sessionId = " + pc.getWsContext().sessionId());
-////        }
-////
-////        connections.add(pc);
-////
-////        for (User player : players) {
-////            player.updateGameFields();
-////        }
-////
-////        Game game = new Game(players, creator, creator);
-////
-////        if (FarmTemplateManager.getTemplates() == null) {
-////            FarmTemplateManager.loadTemplates(); // only once
-////        }
-////
-////        GameServer gameServer = new GameServer(connections);
-////        gameServer.setGame(game);
-////
-////        AppSocket.addGame(gameServer);
-////        gameServer.start();
-////
-////        Map<String, Object> body = new HashMap<>();
-////        body.put("gameId", game.getNetworkId());
-////        body.put("message", "Game created successfully");
-////// Serialize game to JSON and compress it
-////        ObjectMapper mapper = createCustomObjectMapper();
-////        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-////        try (GZIPOutputStream gzip = new GZIPOutputStream(byteStream);
-////             OutputStreamWriter writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
-////            mapper.writeValue(writer, game);
-////        } catch (StreamWriteException e) {
-////            throw new RuntimeException(e);
-////        } catch (DatabindException e) {
-////            throw new RuntimeException(e);
-////        } catch (IOException e) {
-////            throw new RuntimeException(e);
-////        }
-////        byte[] compressedData = byteStream.toByteArray();
-////        String base64Game = Base64.getEncoder().encodeToString(compressedData);
-////
-////      // put encoded game into the body
-////        body.put("compressedGame", Base64.getEncoder().encodeToString(byteStream.toByteArray()));
-////
-////        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
-////    }
-////    public Message<?> createGameOnServer(List<String> usernames) {
-////        System.out.println("called2");
-////        if (usernames == null || usernames.isEmpty())
-////            return Message.FORBIDDEN;
-////        if (usernames.size() > 4)
-////            return Message.FORBIDDEN;
-////
-////        List<PlayerConnection> connections = new ArrayList<>();
-////        Set<String> usersInGames = AppSocket.getActiveGames().stream()
-////            .flatMap(gs -> gs.getGame().getPlayers().stream())
-////            .map(user -> user.getUsername())
-////            .collect(Collectors.toSet());
-////
-////        for (String username : usernames) {
-////            PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(username);
-////            if (pc == null) return Message.NOT_FOUND.setMessage("Player not found");
-////            if (usersInGames.contains(username))
-////                return Message.FORBIDDEN;
-////            connections.add(pc);
-////        }
-////
-////        // Create User list from connections
-////        ArrayList<User> users = (ArrayList<User>) connections.stream()
-////            .map(PlayerConnection::getUser)
-////            .toList();
-////
-////        // Update game fields for each user
-////        for (User user : users) {
-////            user.updateGameFields();
-////        }
-////
-////        Game game = new Game(users, users.get(0), users.get(0));
-////
-////
-////        if (FarmTemplateManager.getTemplates() == null) {
-////            FarmTemplateManager.loadTemplates();
-////        }
-////
-////        GameServer gameServer = new GameServer(connections);
-////        gameServer.setGame(game);
-////
-////        AppSocket.addGame(gameServer);
-////        gameServer.start();  // Start the game loop thread
-////
-////        Map<String, Object> body = new HashMap<>();
-////        body.put("gameId", game.getNetworkId());
-////        body.put("message", "Game created successfully");
-////
-////        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
-////    }
+/// /    public Message<?> createGameOnServer(List<String> usernames, User creator) {
+/// /        ArrayList<User> players = new ArrayList<>();
+/// /        players.add(creator);
+/// /
+/// /        List<PlayerConnection> connections = new ArrayList<>();
+/// /        System.out.println("[SERVER] Creating game for: " + creator.getUsername());
+/// /        PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(creator.getUsername());
+/// /        if (pc == null) {
+/// /            return Message.NOT_FOUND.setMessage("Creator's connection not found");
+/// /        } else {
+/// /            System.out.println("[SERVER] Found player connection for " + creator.getUsername() + ", sessionId = " + pc.getWsContext().sessionId());
+/// /        }
+/// /
+/// /        connections.add(pc);
+/// /
+/// /        for (User player : players) {
+/// /            player.updateGameFields();
+/// /        }
+/// /
+/// /        Game game = new Game(players, creator, creator);
+/// /
+/// /        if (FarmTemplateManager.getTemplates() == null) {
+/// /            FarmTemplateManager.loadTemplates(); // only once
+/// /        }
+/// /
+/// /        GameServer gameServer = new GameServer(connections);
+/// /        gameServer.setGame(game);
+/// /
+/// /        AppSocket.addGame(gameServer);
+/// /        gameServer.start();
+/// /
+/// /        Map<String, Object> body = new HashMap<>();
+/// /        body.put("gameId", game.getNetworkId());
+/// /        body.put("message", "Game created successfully");
+/// /// Serialize game to JSON and compress it
+/// /        ObjectMapper mapper = createCustomObjectMapper();
+/// /        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+/// /        try (GZIPOutputStream gzip = new GZIPOutputStream(byteStream);
+/// /             OutputStreamWriter writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
+/// /            mapper.writeValue(writer, game);
+/// /        } catch (StreamWriteException e) {
+/// /            throw new RuntimeException(e);
+/// /        } catch (DatabindException e) {
+/// /            throw new RuntimeException(e);
+/// /        } catch (IOException e) {
+/// /            throw new RuntimeException(e);
+/// /        }
+/// /        byte[] compressedData = byteStream.toByteArray();
+/// /        String base64Game = Base64.getEncoder().encodeToString(compressedData);
+/// /
+/// /      // put encoded game into the body
+/// /        body.put("compressedGame", Base64.getEncoder().encodeToString(byteStream.toByteArray()));
+/// /
+/// /        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+/// /    }
+/// /    public Message<?> createGameOnServer(List<String> usernames) {
+/// /        System.out.println("called2");
+/// /        if (usernames == null || usernames.isEmpty())
+/// /            return Message.FORBIDDEN;
+/// /        if (usernames.size() > 4)
+/// /            return Message.FORBIDDEN;
+/// /
+/// /        List<PlayerConnection> connections = new ArrayList<>();
+/// /        Set<String> usersInGames = AppSocket.getActiveGames().stream()
+/// /            .flatMap(gs -> gs.getGame().getPlayers().stream())
+/// /            .map(user -> user.getUsername())
+/// /            .collect(Collectors.toSet());
+/// /
+/// /        for (String username : usernames) {
+/// /            PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(username);
+/// /            if (pc == null) return Message.NOT_FOUND.setMessage("Player not found");
+/// /            if (usersInGames.contains(username))
+/// /                return Message.FORBIDDEN;
+/// /            connections.add(pc);
+/// /        }
+/// /
+/// /        // Create User list from connections
+/// /        ArrayList<User> users = (ArrayList<User>) connections.stream()
+/// /            .map(PlayerConnection::getUser)
+/// /            .toList();
+/// /
+/// /        // Update game fields for each user
+/// /        for (User user : users) {
+/// /            user.updateGameFields();
+/// /        }
+/// /
+/// /        Game game = new Game(users, users.get(0), users.get(0));
+/// /
+/// /
+/// /        if (FarmTemplateManager.getTemplates() == null) {
+/// /            FarmTemplateManager.loadTemplates();
+/// /        }
+/// /
+/// /        GameServer gameServer = new GameServer(connections);
+/// /        gameServer.setGame(game);
+/// /
+/// /        AppSocket.addGame(gameServer);
+/// /        gameServer.start();  // Start the game loop thread
+/// /
+/// /        Map<String, Object> body = new HashMap<>();
+/// /        body.put("gameId", game.getNetworkId());
+/// /        body.put("message", "Game created successfully");
+/// /
+/// /        return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+/// /    }
 //    public Result createGame(String users) {
 //        MainApp app = MainApp.getInstance();
 //        User creator = app.getLoggedInUser();
@@ -263,7 +263,9 @@ package io.github.stardew.mini.server.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.*;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.client.View.NewGameMenuView;
@@ -276,11 +278,13 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NewGameMenuController implements MenuController{
+public class NewGameMenuController implements MenuController {
     private NewGameMenuView view;
+
     public void setView(NewGameMenuView view) {
         this.view = view;
     }
+
     private static final Avatar[] FEMALE_AVATARS = {Avatar.Abigail, Avatar.Haley};
     private static final Avatar[] MALE_AVATARS = {Avatar.Shane, Avatar.Alex};
 
@@ -337,21 +341,24 @@ public class NewGameMenuController implements MenuController{
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
 
-    public Message<?> createGameOnServer(List<String> usernames, User creator) {
+    public Message<?> createGameOnServer(List<String> usernames,User creator) {
         ArrayList<User> players = new ArrayList<>();
-        players.add(creator);
-
-        List<PlayerConnection> connections = new ArrayList<>();
-        System.out.println("[SERVER] Creating game for: " + creator.getUsername());
-        PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(creator.getUsername());
-        if (pc == null) {
-            return Message.NOT_FOUND.setMessage("Creator's connection not found");
-        } else {
-            System.out.println("[SERVER] Found player connection for " + creator.getUsername() + ", sessionId = " + pc.getWsContext().sessionId());
+        if (usernames.size() < 2) {
+            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
         }
+        List<PlayerConnection> connections = new ArrayList<>();
 
-        connections.add(pc);
-
+        for(String user : usernames) {
+            System.out.println("[SERVER] Creating game for: " + user);
+            PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(user);
+            if (pc == null) {
+                return Message.NOT_FOUND.setMessage(user+" connection not found");
+            } else {
+                System.out.println("[SERVER] Found player connection for " + user+ ", sessionId = " + pc.getWsContext().sessionId());
+            }
+            players.add(pc.getUser());
+            connections.add(pc);
+        }
         for (User player : players) {
             player.updateGameFields();
         }
@@ -381,10 +388,36 @@ public class NewGameMenuController implements MenuController{
 //            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
 //        }
         body.put("game", game);
+//        for (PlayerConnection player : connections) {
+//            if (player.getWsContext().session.isOpen()) {
+//                Map<String, Object> body1 = new HashMap<>();
+//                body1.put("gameId", game.getNetworkId());
+//                body1.put("message", "Game created successfully");
+//                body1.put("game", game);
+//                Message<Map<String, Object>> msg = new Message<>(200, "Game created", body1, Message.MessageType.RESPONSE);
+//                msg.setType("start-map-selection");
+//                player.getWsContext().send(new Gson().toJson(msg));
+//            }
+//        }
+//        ObjectMapper objectMapper = GameSaver.createCustomObjectMapper();
+//        String gameJson = objectMapper.writeValueAsString(game);
+//
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("gameId", game.getNetworkId());
+//        body.put("message", "Game created successfully");
+//        body.put("game", gameJson);  // ✅ Important: serialized game as string
+//
+//        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+//        msg.setType("start-map-selection");
+//
+//        for (PlayerConnection player : connections) {
+//            if (player.getWsContext().session.isOpen()) {
+//                player.getWsContext().send(new Gson().toJson(msg));
+//            }
+//        }
 
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
-
 
 
     public Result createGame(String users) {

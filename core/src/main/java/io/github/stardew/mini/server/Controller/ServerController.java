@@ -173,8 +173,8 @@ public class ServerController {
                 return lobbyController.getAllLobbies();
             }
             case "joinLobby" : {
-                String lobbyID = (String) body.get("lobbyID");
-                String lobbyPassword = (String) body.get("lobbyPassword");
+                String lobbyID = (String) body.get("lobbyId");
+                String lobbyPassword = (String) body.get("password");
                 return lobbyController.joinLobby(lobbyID, lobbyPassword, player);
             }
             default:

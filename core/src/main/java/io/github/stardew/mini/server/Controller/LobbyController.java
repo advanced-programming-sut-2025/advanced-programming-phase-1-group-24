@@ -24,8 +24,9 @@ public class LobbyController {
     }
     public Message<?> joinLobby(String id, String password, User user) {
         boolean canJoinLobby = LobbyManager.getInstance().joinLobby(id, password, user);
+        Map<String,Object> body = new HashMap<>();
         if (canJoinLobby) {
-            return new Message<>(200, "joined lobby", null, Message.MessageType.RESPONSE);
+            return new Message<>(200, "joined lobby", body, Message.MessageType.RESPONSE);
         }
         else
             return Message.FORBIDDEN.setMessage("You are not allowed to join this lobby");

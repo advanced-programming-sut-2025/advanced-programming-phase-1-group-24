@@ -137,6 +137,42 @@ public class NetworkClient extends WebSocketClient {
                         }
                     System.out.printf("[CLIENT] Game updated handle end of day");
                 }
+                if ("start-map-selection".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        //TODO:first parse the gaem
+                        Game game = MainApp.getInstance().getCurrentGame(); // Already stored on client
+                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Switch to main game screen
+                    });
+                }
+//                if ("start-game".equalsIgnoreCase(message.getType())) {
+//                    Gdx.app.postRunnable(() -> {
+//                        Game game = MainApp.getInstance().getCurrentGame(); // Already stored on client
+//                        MainApp.getInstance().setCurrentMenu(Menu.GameMenu); // Switch to main game screen
+//                    });
+//                }
+                if ("start-map-selection".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        try {
+                            Object bodyRaw = message.getBody();
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                Object gameJsonObj = bodyMap.get("game");
+
+                                if (gameJsonObj instanceof String json) {
+                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                    MainApp.getInstance().setCurrentGame(game);
+                                    System.out.println("✔️ Game deserialized successfully in start-map-selection");
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.err.println("❌ Failed to parse game in start-map-selection");
+                        }
+
+                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                    });
+                }
+
+
                 System.err.println("❌ requestId was null");
             }
         } catch (Exception e) {

@@ -1,6 +1,8 @@
 package io.github.stardew.mini.client.View;
 
-import com.badlogic.gdx.*;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.*;
@@ -9,14 +11,17 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
+import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.client.LobbyMenuController;
 import io.github.stardew.mini.Model.LobbyInfo;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.MainApp;
+import io.github.stardew.mini.client.NetworkClient;
 
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
 
 public class LobbyMenuView implements Screen, AppMenu {
 
@@ -78,7 +83,7 @@ public class LobbyMenuView implements Screen, AppMenu {
         table.add(createLobbyButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
         table.add(refreshButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
         table.add(new Label("Available Lobbies:", skin, "custom-label")).left().padTop(pad).colspan(2).row();
-        table.add(scrollPane).width(buttonWidth).height(buttonHeight * 2f).colspan(2).row();
+        table.add(scrollPane).width(buttonWidth*2f).height(buttonHeight * 2f).colspan(2).row();
         table.add(backButton).width(buttonWidth).height(buttonHeight).padTop(pad).colspan(2);
 
 
@@ -117,13 +122,13 @@ public class LobbyMenuView implements Screen, AppMenu {
         controller.refreshLobbies();
     }
 
-    public void updateLobbyList(List<LobbyInfo> lobbies) {
+        public void updateLobbyList(List<LobbyInfo> lobbies) {
         lobbyListTable.clear();
         Skin skin = GameAssetManager.skin;
 
         for (LobbyInfo lobby : lobbies) {
             Table row = new Table();
-            row.align(Align.center).pad(10);
+            row.align(Align.left).pad(10);
 
             Label nameLabel = new Label(lobby.getName(), skin, "custom-label");
             nameLabel.setColor(Color.BLUE);
@@ -131,7 +136,7 @@ public class LobbyMenuView implements Screen, AppMenu {
             playerCountLabel.setColor(Color.BLUE);
             TextButton joinButton = new TextButton("Join", skin, "custom-button");
             joinButton.setColor(Color.BLUE);
-            TextButton startButton = new TextButton("start", skin, "custom-button");
+            TextButton startButton = new TextButton("Start", skin, "custom-button");
             startButton.setColor(Color.BLUE);
             joinButton.addListener(new ClickListener() {
                 @Override
@@ -139,18 +144,76 @@ public class LobbyMenuView implements Screen, AppMenu {
                     controller.joinLobby(lobby.getId(), lobby.isPrivate());
                 }
             });
-
-            row.add(nameLabel).width(200).left();
-            row.add(playerCountLabel).width(60).padRight(20).padLeft(20);
-            row.add(joinButton).width(80).padRight(20).padLeft(20);
-            row.add(startButton).width(80).padRight(20).padLeft(20);
+            startButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if(lobby.getOwner().endsWith(MainApp.getInstance().getLoggedInUser().getUsername())) {
+                        List<String> dummyPlayers = lobby.getPlayers();
+                        System.out.println("players salam:" + dummyPlayers);
+                        startGameFromLobby(dummyPlayers);
+                    } else {
+                        showErrorDialog(stage,"Only the creator can start the game!");
+                    }
+                }
+            });
+            row.add(nameLabel).width(200).left().padRight(5);
+            row.add(playerCountLabel).width(30).padRight(8).padLeft(8);
+            row.add(joinButton).width(80).padRight(8).padLeft(8);
+            row.add(startButton).width(80).padRight(8).padLeft(8);
             lobbyListTable.add(row).row();
         }
     }
 
+    private void startGameFromLobby(List<String> playerNames) {
+        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("usernames", new ArrayList<>(playerNames)); // you may need to fetch this from lobby info
+
+        NetworkClient client = MainApp.getInstance().getNetworkClient();
+
+        System.out.println("Sending createGameOnServer request: " + params);
+        client.sendPost(
+            null,
+            "NewGameMenuController",
+            "createGameOnServer",
+            params,
+            username
+        ).thenAccept(response -> {
+            System.out.println("Response received");
+            if (response.getStatus() == 200) {
+                Object bodyRaw = response.getBody();
+
+                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                    Object gameIdObj = bodyMap.get("gameId");
+                    if (gameIdObj instanceof String gameId) {
+                        Gson gson = new Gson();
+                        String json = gson.toJson(bodyMap.get("game"));
+                        Game game = gson.fromJson(json, Game.class);
+
+                        MainApp.getInstance().setCurrentGame(game);
+                        MainApp.getInstance().setCurrentGameId(gameId);
+                    }
+                }
+                Gdx.app.postRunnable(() -> {
+                    MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+                });
+            } else {
+                Gdx.app.postRunnable(() -> {
+                    showErrorDialog(stage, response.getMessage());
+                });
+            }
+        }).exceptionally(ex -> {
+            Gdx.app.postRunnable(() -> {
+                showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+            });
+            return null;
+        });
+    }
 
     @Override
-    public void show() {}
+    public void show() {
+    }
 
     @Override
     public void render(float delta) {
@@ -164,10 +227,21 @@ public class LobbyMenuView implements Screen, AppMenu {
         stage.getViewport().update(width, height, true);
     }
 
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
-    @Override public void dispose() {}
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
+    }
 
     public LobbyMenuController getController() {
         return controller;
