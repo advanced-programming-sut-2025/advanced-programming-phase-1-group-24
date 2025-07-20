@@ -21,16 +21,18 @@ public class LobbyManager {
         return instance;
     }
 
-    public Lobby createLobby(String name, String password, boolean isPrivate, User creator) {
+    public Lobby createLobby(String name, String password, boolean isPrivate, boolean isInvisible, User creator) {
         String id = UUID.randomUUID().toString();
-        Lobby lobby = new Lobby(id, name, password, creator, false,isPrivate);
+        Lobby lobby = new Lobby(id, name, password, creator, false, isPrivate, isInvisible);
         activeLobbies.put(id, lobby);
+        joinLobby(id, password, creator);
+        System.out.println("Lobby created successfully! : ID: " + id);
         return lobby;
     }
 
     public List<Lobby> listAvailableLobbies() {
         return activeLobbies.values().stream()
-            .filter(lobby -> !lobby.isPrivate() && !lobby.isStarted())
+            .filter(lobby -> !lobby.isInvisible() && !lobby.isStarted())
             .collect(Collectors.toList());
     }
 
@@ -43,6 +45,12 @@ public class LobbyManager {
                 info.setName(Lobby.getName());
                 info.setPlayerCount(Lobby.getPlayers().size());
                 info.setPrivate(Lobby.isPrivate());
+                info.setInvisible(Lobby.isInvisible());
+                List<String> usernames = Lobby.getPlayers()
+                    .stream()
+                    .map(User::getUsername)
+                    .toList();
+                info.setPlayers(usernames);
                 return info;
             }).collect(Collectors.toList());
         Map<String, Object> body = new HashMap<>();
@@ -55,6 +63,7 @@ public class LobbyManager {
         if (lobby != null && lobby.getPlayers().size() < Lobby.MAX_PLAYERS) {
             if (lobby.isPrivate() && !lobby.getPassword().equals(password)) return false;
             lobby.getPlayers().add(user);
+            lobby.setCreatedAt(System.currentTimeMillis());
             return true;
         }
         return false;
@@ -74,4 +83,10 @@ public class LobbyManager {
             // transition to game session
         }
     }
+
+    public Map<String, Lobby> getActiveLobbies() {
+        return activeLobbies;
+    }
+
+
 }
