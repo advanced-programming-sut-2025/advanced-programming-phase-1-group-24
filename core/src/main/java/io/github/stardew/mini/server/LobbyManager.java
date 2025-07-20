@@ -24,6 +24,7 @@ public class LobbyManager {
         String id = UUID.randomUUID().toString();
         Lobby lobby = new Lobby(id, name, password, creator, false,isPrivate);
         activeLobbies.put(id, lobby);
+        joinLobby(id, password, creator);
         return lobby;
     }
 
@@ -33,21 +34,43 @@ public class LobbyManager {
             .collect(Collectors.toList());
     }
 
-    public Message<?> getAllLobbies() {
-        List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
-        List<LobbyInfo> LobbyInfoList = lobbies.stream().map(
-            Lobby -> {
-                LobbyInfo info = new LobbyInfo();
-                info.setId(Lobby.getId());
-                info.setName(Lobby.getName());
-                info.setPlayerCount(Lobby.getPlayers().size());
-                info.setPrivate(Lobby.isPrivate());
-                return info;
-            }).collect(Collectors.toList());
-        Map<String, Object> body = new HashMap<>();
-        body.put("lobbies", LobbyInfoList);
-        return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
-    }
+//    public Message<?> getAllLobbies() {
+//        List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
+//        List<LobbyInfo> LobbyInfoList = lobbies.stream().map(
+//            Lobby -> {
+//                LobbyInfo info = new LobbyInfo();
+//                info.setId(Lobby.getId());
+//                info.setName(Lobby.getName());
+//                info.setPlayerCount(Lobby.getPlayers().size());
+//                info.setPrivate(Lobby.isPrivate());
+//                return info;
+//            }).collect(Collectors.toList());
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("lobbies", LobbyInfoList);
+//        return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
+//    }
+public Message<?> getAllLobbies() {
+    List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
+    List<LobbyInfo> lobbyInfoList = lobbies.stream().map(lobby -> {
+        LobbyInfo info = new LobbyInfo();
+        info.setId(lobby.getId());
+        info.setName(lobby.getName());
+        info.setOwner(lobby.getCreator().getUsername());
+        List<String> usernames = lobby.getPlayers().stream()
+            .map(User::getUsername)
+            .collect(Collectors.toList());
+
+        info.setPlayerCount(usernames.size());
+        info.setPlayers(usernames);
+        info.setPrivate(lobby.isPrivate());
+        return info;
+    }).collect(Collectors.toList());
+
+    Map<String, Object> body = new HashMap<>();
+    body.put("lobbies", lobbyInfoList);
+    return new Message<>(200, "sent all lobbies", body, Message.MessageType.RESPONSE);
+}
+
 
     public boolean joinLobby(String id, String password, User user) {
         Lobby lobby = activeLobbies.get(id);

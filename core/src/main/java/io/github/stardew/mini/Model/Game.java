@@ -45,9 +45,12 @@ public class Game {
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
-
+    private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
+        for (User player : players) {
+            mapSelectionStatus.put(player.getUsername(), false);
+        }
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
         this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
@@ -416,4 +419,16 @@ public class Game {
         NetworkId = networkId;
     }
 
+    public void markPlayerSelectedMap(String username) {
+        mapSelectionStatus.put(username, true);
+    }
+
+    public boolean haveAllPlayersSelectedMap() {
+        for (User user : players) {
+            if (!mapSelectionStatus.getOrDefault(user.getUsername(), false)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
