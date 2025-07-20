@@ -165,17 +165,26 @@ public class ServerController {
                 String lobbyName = (String) body.get("name");
                 String lobbyPassword = (String) body.get("password");
                 Boolean isPrivate = (Boolean) body.get("isPrivate");
+                Boolean isInvisible = (Boolean) body.get("isInvisible");
 
-                lobbyController.createLobby(lobbyName, lobbyPassword, isPrivate, player);
+                lobbyController.createLobby(lobbyName, lobbyPassword, isPrivate, isInvisible, player);
                 return Message.OK.setMessage("lobby created");
             }
             case "getAllLobbies": {
                 return lobbyController.getAllLobbies();
             }
             case "joinLobby" : {
-                String lobbyID = (String) body.get("lobbyID");
-                String lobbyPassword = (String) body.get("lobbyPassword");
+                String lobbyID = (String) body.get("lobbyId");
+                String lobbyPassword = (String) body.get("password");
                 return lobbyController.joinLobby(lobbyID, lobbyPassword, player);
+            }
+            case "searchLobbyById": {
+                String lobbyID = (String) body.get("lobbyID");
+                return lobbyController.searchLobbyById(lobbyID);
+            }
+            case "leaveLobby": {
+                String lobbyID = (String) body.get("lobbyId");
+                return lobbyController.leaveLobby(lobbyID, player);
             }
             default:
                 return Message.NOT_FOUND.setMessage("Method not found: " + methodName);

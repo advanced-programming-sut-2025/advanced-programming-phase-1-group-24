@@ -1,10 +1,14 @@
 package io.github.stardew.mini.Model;
 
+import java.util.List;
+
 public class LobbyInfo {
     private String id;
     private String name;
     private int playerCount;
     private boolean isPrivate;
+    private boolean isInvisible;
+    private List<String> players;
 
     public String getId() {
         return id;
@@ -36,5 +40,21 @@ public class LobbyInfo {
 
     public void setPrivate(boolean aPrivate) {
         isPrivate = aPrivate;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
+    }
+
+    public List<String> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<String> players) {
+        this.players = players;
     }
 }

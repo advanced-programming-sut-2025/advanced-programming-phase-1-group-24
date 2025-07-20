@@ -23,11 +23,12 @@ public class LobbyMenuController {
         this.view = view;
     }
 
-    public void createLobby(String name, String password, boolean isPrivate) {
+    public void createLobby(String name, String password, boolean isPrivate, boolean invisible) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
         params.put("isPrivate", isPrivate);
         params.put("password", password);
+        params.put("isInvisible", invisible);
         String gameId = null;
         String controllerName = "LobbyController";
         String methodName = "createLobby";
@@ -119,7 +120,7 @@ public class LobbyMenuController {
                 if (response.getStatus() == 200) {
                     System.out.println("✅ Joined lobby successfully!");
                     Gdx.app.postRunnable(() -> {
-                        //view.showSuccessDialog(view.getStage(), "Joined lobby successfully!");
+                        view.showErrorDialog(view.getStage(), "Joined lobby successfully!");
                     });
                 } else {
                     System.err.println("❌ Failed to join lobby: " + response.getMessage());
@@ -132,4 +133,64 @@ public class LobbyMenuController {
                 return null;
             });
     }
+
+    public void leaveLobby(String lobbyId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("lobbyId", lobbyId);
+        String gameId = null;
+        String controllerName = "LobbyController";
+        String methodName = "leaveLobby";
+        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+        MainApp.getInstance().getNetworkClient().sendPost(gameId, controllerName, methodName, params, username)
+            .thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    System.out.println("Left lobby successfully!");
+                }
+                else {
+                    Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(), "Failed to join lobby: " + response.getMessage()));
+                }
+            }).exceptionally(ex -> {
+                System.err.println("❌ Error joining lobby: " + ex.getMessage());
+                Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(), "Error leaving the lobby: " + ex.getMessage()));
+                return null;
+            });
+    }
+
+    public void searchLobbyById(String id) {
+        String gameId = null;
+        String controllerName = "LobbyController";
+        String methodName = "searchLobbyById";
+        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+        Map<String, Object> params = new HashMap<>();
+        params.put("lobbyID", id);
+        MainApp.getInstance().getNetworkClient()
+            .sendGet(gameId, controllerName, methodName, params, username)
+            .thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    Object body = response.getBody();
+                    if (body instanceof Map<?, ?> bodyMap) {
+                        Object lobbyData = bodyMap.get("lobby");
+                        if (lobbyData instanceof Map) {
+                            Gson gson = new Gson();
+                            LobbyInfo lobby = gson.fromJson(gson.toJson(lobbyData), LobbyInfo.class);
+                            if (lobby != null && lobby.isInvisible()) {
+                                System.out.println("lobby found");
+                                Gdx.app.postRunnable(() -> view.updateLobbyList(List.of(lobby)));
+                            } else {
+                                System.err.println("❌ Failed to fetch lobby: lobby is null or visible");
+                                Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(), "No lobby found with the given ID!"));
+                            }
+                        }
+                    }
+                } else {
+                    System.err.println("❌ Failed to fetch lobby: " + response.getMessage());
+                    Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(),"Failed to get lobby: " + response.getMessage()));
+                }
+            })
+            .exceptionally(ex -> {
+                System.err.println("❌ Error fetching lobby: " + ex.getMessage());
+                return null;
+            });
+    }
+
 }

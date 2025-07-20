@@ -2,6 +2,11 @@ package io.github.stardew.mini.server;
 
 import io.javalin.Javalin;
 
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class MainServer {
     private Javalin app;
 
@@ -16,6 +21,8 @@ public class MainServer {
 
         // (Optional) Create a hardcoded game for testing
         // AppSocket.createHardcodedGame();
+        // ✅ Start the periodic cleanup task
+        startCleanupTask();
     }
 
     public void stop() {
@@ -38,5 +45,17 @@ public class MainServer {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private static void startCleanupTask() {
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(() -> {
+            for (Lobby lobby : LobbyManager.getInstance().getActiveLobbies().values()) {
+                if (lobby.isExpired()) {
+                    System.out.println("🗑️ Removing expired lobby: " + lobby.getId());
+                    LobbyManager.getInstance().getActiveLobbies().remove(lobby.getId());
+                }
+            }
+        }, 0, 1, TimeUnit.MINUTES);
     }
 }

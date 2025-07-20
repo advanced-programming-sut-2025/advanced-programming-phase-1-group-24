@@ -28,6 +28,10 @@ public class LobbyMenuView implements Screen, AppMenu {
     private TextField lobbyNameField;
     private TextField passwordField;
     private CheckBox privateCheckBox;
+    private CheckBox invisibleCheckBox;
+    private TextField lobbyIdSearchField;
+    private TextButton searchLobbyButton;
+
 
     public LobbyMenuView(LobbyMenuController controller) {
         this.controller = controller;
@@ -37,11 +41,17 @@ public class LobbyMenuView implements Screen, AppMenu {
 
     private void createUI() {
         Skin skin = GameAssetManager.skin;
+        Table leftTable = new Table();
+        Table rightTable = new Table();
+
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+//        table = new Table();
+//        table.setFillParent(true);
         table = new Table();
         table.setFillParent(true);
+        table.defaults().pad((float) Gdx.graphics.getHeight() / 40);
 
         Label titleLabel = new Label("LOBBY MENU", skin);
         titleLabel.setFontScale(2.5f);
@@ -57,6 +67,7 @@ public class LobbyMenuView implements Screen, AppMenu {
         passwordField.setPasswordMode(true);
 
         privateCheckBox = new CheckBox("Private Lobby", skin);
+        invisibleCheckBox = new CheckBox("Invisible Lobby", skin);
 
         TextButton createLobbyButton = new TextButton("Create Lobby", skin, "custom-button");
         TextButton refreshButton = new TextButton("Refresh List", skin, "custom-button");
@@ -67,20 +78,48 @@ public class LobbyMenuView implements Screen, AppMenu {
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
 
+        lobbyIdSearchField = new TextField("", skin);
+        lobbyIdSearchField.setMessageText("Enter Lobby ID");
+        searchLobbyButton = new TextButton("Search by ID", skin, "custom-button");
+
         float buttonWidth = (float) Gdx.graphics.getWidth() / 4;
         float buttonHeight = (float) Gdx.graphics.getHeight() / 10;
         float pad = (float) Gdx.graphics.getHeight() / 40;
 
 
-        table.add(titleLabel).colspan(2).padBottom(pad).row();
-        table.add(lobbyNameField).width(buttonWidth).padBottom(pad).colspan(2).row();
-        table.add(passwordField).width(buttonWidth).padBottom(pad).colspan(2).row();
-        table.add(privateCheckBox).colspan(2).padBottom(pad).row();
-        table.add(createLobbyButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
-        table.add(refreshButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
-        table.add(new Label("Available Lobbies:", skin, "custom-label")).left().padTop(pad).colspan(2).row();
-        table.add(scrollPane).width(buttonWidth).height(buttonHeight * 2f).colspan(2).row();
-        table.add(backButton).width(buttonWidth).height(buttonHeight).padTop(pad).colspan(2);
+//        table.add(titleLabel).colspan(2).padBottom(pad).row();
+//        table.add(lobbyNameField).width(buttonWidth).padBottom(pad).colspan(2).row();
+//        table.add(passwordField).width(buttonWidth).padBottom(pad).colspan(2).row();
+//        table.add(privateCheckBox).colspan(2).padBottom(pad).row();
+//        table.add(invisibleCheckBox).colspan(2).padBottom(pad).row();
+//        table.add(createLobbyButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
+//        table.add(refreshButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
+        table.add(titleLabel).colspan(2).center().padBottom(10).row();
+        //leftTable.add(titleLabel).colspan(1).row();
+        leftTable.add(new Label("Create Lobby:", skin, "custom-label")).left().row();
+        leftTable.add(lobbyNameField).width(buttonWidth).padBottom(pad).row();
+        leftTable.add(passwordField).width(buttonWidth).padTop(pad).padBottom(pad).row();
+        leftTable.add(privateCheckBox).height(buttonHeight/2).pad(pad).row();
+        leftTable.add(invisibleCheckBox).height(buttonHeight/2).pad(pad).row();
+        leftTable.add(createLobbyButton).width(buttonWidth).height(buttonHeight).padTop(pad).row();
+        //leftTable.add(refreshButton).width(buttonWidth).height(buttonHeight).row();
+
+//        table.add(new Label("Available Lobbies:", skin, "custom-label")).left().padTop(pad).colspan(2).row();
+//        table.add(lobbyIdSearchField).width(buttonWidth).colspan(2).padBottom(pad).row();
+//        table.add(searchLobbyButton).width(buttonWidth).height(buttonHeight).padBottom(pad).colspan(2).row();
+//        table.add(scrollPane).width(buttonWidth).height(buttonHeight).colspan(2).row();
+        rightTable.add(new Label("Available Lobbies:", skin, "custom-label")).left().row();
+        rightTable.add(lobbyIdSearchField).width(buttonWidth).row();
+        rightTable.add(searchLobbyButton).width(buttonWidth).height(buttonHeight).row();
+        rightTable.add(scrollPane).width((float) (buttonWidth * 1.5)).height(buttonHeight * 2f).row();
+        rightTable.add(refreshButton).width(buttonWidth).height(buttonHeight).padTop(pad).row();
+
+        table.add(leftTable).top().left();
+        table.add(rightTable).top().right();
+        table.row();
+
+        //table.add(backButton).width(buttonWidth).height(buttonHeight).padTop(pad).colspan(2);
+        table.add(backButton).colspan(2).center().padTop(pad).width(buttonWidth).height(buttonHeight);
 
 
         createLobbyButton.addListener(new ClickListener() {
@@ -89,7 +128,8 @@ public class LobbyMenuView implements Screen, AppMenu {
                 controller.createLobby(
                     lobbyNameField.getText(),
                     passwordField.getText(),
-                    privateCheckBox.isChecked()
+                    privateCheckBox.isChecked(),
+                    invisibleCheckBox.isChecked()
                 );
             }
         });
@@ -107,6 +147,17 @@ public class LobbyMenuView implements Screen, AppMenu {
                 MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
             }
         });
+
+        searchLobbyButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                String lobbyId = lobbyIdSearchField.getText();
+                if (!lobbyId.isEmpty()) {
+                    controller.searchLobbyById(lobbyId);
+                }
+            }
+        });
+
 
         Texture bg = GameAssetManager.getBackground();
         Image bgImage = new Image(bg);
@@ -130,8 +181,12 @@ public class LobbyMenuView implements Screen, AppMenu {
             nameLabel.setColor(Color.BLUE);
             Label playerCountLabel = new Label("(" + lobby.getPlayerCount() + "/4)", skin, "custom-label");
             playerCountLabel.setColor(Color.BLUE);
+            String playerListText = String.join(", ", lobby.getPlayers());
+            Label playersLabel = new Label("Players: " + playerListText, skin, "custom-label");
             TextButton joinButton = new TextButton("Join", skin, "custom-button");
             joinButton.setColor(Color.BLUE);
+            TextButton leaveButton = new TextButton("Leave", skin, "custom-button");
+            leaveButton.setColor(Color.BLUE);
 
             joinButton.addListener(new ClickListener() {
                 @Override
@@ -140,10 +195,21 @@ public class LobbyMenuView implements Screen, AppMenu {
                 }
             });
 
+            leaveButton.addListener(new ClickListener() {
+               @Override
+               public void clicked(InputEvent event, float x, float y) {
+                   controller.leaveLobby(lobby.getId());
+               }
+            });
+
             row.add(nameLabel).width(200).left();
             row.add(playerCountLabel).width(60).padRight(20).padLeft(20);
             row.add(joinButton).width(80).padRight(20).padLeft(20);
+            row.add(leaveButton).width(80).padRight(20).padLeft(20);
             lobbyListTable.add(row).row();
+            Table playersRow = new Table();
+            playersRow.add(playersLabel).colspan(3).left().padLeft(30).padBottom(10); // ⬅️ align and indent
+            lobbyListTable.add(playersRow).row();
         }
     }
 
