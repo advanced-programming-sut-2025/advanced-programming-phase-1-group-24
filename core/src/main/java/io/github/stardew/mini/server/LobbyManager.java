@@ -43,6 +43,7 @@ public class LobbyManager {
                 LobbyInfo info = new LobbyInfo();
                 info.setId(Lobby.getId());
                 info.setName(Lobby.getName());
+                info.setOwner(Lobby.getCreator().getUsername());
                 info.setPlayerCount(Lobby.getPlayers().size());
                 info.setPrivate(Lobby.isPrivate());
                 info.setInvisible(Lobby.isInvisible());
@@ -78,7 +79,7 @@ public class LobbyManager {
 
     public void startGame(String id) {
         Lobby lobby = activeLobbies.get(id);
-        if (lobby != null && lobby.getPlayers().size() >= 2) {
+        if (lobby != null && lobby.getPlayers().size() >= 2 ) {
             lobby.setStarted(true);
             // transition to game session
         }

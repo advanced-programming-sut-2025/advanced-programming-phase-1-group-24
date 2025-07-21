@@ -53,13 +53,13 @@ public class ServerController {
             case "TradeMenuController":
                 // TODO: Implement this
                 return Message.BAD_REQUEST.setMessage("TradeMenuController not implemented yet");
-                case "NewGameMenuController":
-                    return routeToNewGameController(methodName, body, server, player);
+            case "NewGameMenuController":
+                return routeToNewGameController(methodName, body, server, player);
 
-                    case "MapSelectionMenuController":
-                        return routeToMapSelectionMenuController(methodName, body, server, player);
-                        case "LobbyController":
-                            return  routeToLobbyController(methodName, body, server, player);
+            case "MapSelectionMenuController":
+                return routeToMapSelectionMenuController(methodName, body, server, player);
+            case "LobbyController":
+                return  routeToLobbyController(methodName, body, server, player);
 
 
             default:

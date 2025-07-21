@@ -6,6 +6,7 @@ import java.io.*;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Game;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.stardew.mini.Model.Growables.Growable;
@@ -50,8 +51,6 @@ public class GameSaver {
         module.addKeyDeserializer(NPC.class, new GenericKeyDeserializer<>());
         module.addKeySerializer(NPCMission.class, new GenericKeySerializer<>());
         module.addKeyDeserializer(NPCMission.class, new GenericKeyDeserializer<>());
-
-
         mapper.registerModule(module);
 
         return mapper;
@@ -88,6 +87,16 @@ public class GameSaver {
             return mapper.readValue(reader,
                 mapper.getTypeFactory().constructCollectionType(List.class, Game.class));
         }
+    }
+    public static String serializeAndCompressGame(Game game) throws IOException {
+        ObjectMapper mapper = createCustomObjectMapper();
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        try (GZIPOutputStream gzip = new GZIPOutputStream(byteStream);
+             OutputStreamWriter writer = new OutputStreamWriter(gzip, StandardCharsets.UTF_8)) {
+            mapper.writeValue(writer, game);
+        }
+        byte[] compressed = byteStream.toByteArray();
+        return Base64.getEncoder().encodeToString(compressed);
     }
 
     public static <T> T convertObject(Object rawObj, Class<T> clazz) {

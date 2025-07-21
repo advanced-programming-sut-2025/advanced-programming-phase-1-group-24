@@ -4,6 +4,11 @@ package io.github.stardew.mini.server.Controller;
 import com.badlogic.gdx.math.MathUtils;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.client.MainApp;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalProduct;
@@ -29,6 +34,9 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Tools.*;
+import io.github.stardew.mini.client.View.GameView;
+import io.github.stardew.mini.server.GameServer;
+import io.github.stardew.mini.server.PlayerConnection;
 import io.github.stardew.mini.client.View.GameView;
 import io.github.stardew.mini.server.GameServer;
 
@@ -370,8 +378,8 @@ public class GameController implements MenuController {
 //
 //            if (turnCounter == players.size()) {
 //                turnCounter = 0;
-////                game.advanceTimeByOneHour();
-////                handleEndOfDay();
+    ////                game.advanceTimeByOneHour();
+    ////                handleEndOfDay();
 //            }
 //        } while (currentPlayer.hasFainted());
 //
@@ -520,7 +528,7 @@ public class GameController implements MenuController {
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(tiles[j][i]);
+                    updateGrowable(game,tiles[j][i]);
                     tiles[j][i].setHasBeenBurt(false);
                     if (tiles[j][i].getContainedGrowable() == null &&
                         tiles[j][i].getProductOfGrowable() == null &&
@@ -535,7 +543,7 @@ public class GameController implements MenuController {
             // Update weather for the new day
             game.setCurrentWeatherType(game.getTomorrowWeatherType());
             game.predictTomorrowWeather();
-            rainOnGrowables(game.getCurrentWeatherType());
+            rainOnGrowables(game,game.getCurrentWeatherType());
             game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
             // the lightning strike logic should go into your handleEndOfDay() function — specifically after the new day
             //starts and the weather is known, but before or during crop updates (so the lightning can damage crops befor growth).
@@ -554,7 +562,7 @@ public class GameController implements MenuController {
         }
     }
 
-    public void handleEndOfDay(GameServer gs, User player) {
+    public void handleEndOfDay(GameServer gs) {
         Game game = gs.getGame();
         Tile[][] map = game.getMap().getMap();
 
@@ -581,13 +589,13 @@ public class GameController implements MenuController {
                 if (user.getDaysSinceRejection() != 0) {
                     user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
                 }
-
+               // crowAttack(gs, user);
             }
-            crowAttack(gs, player);
+
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(tiles[j][i]);
+                    updateGrowable(game,tiles[j][i]);
                     tiles[j][i].setHasBeenBurt(false);
                     if (tiles[j][i].getContainedGrowable() == null &&
                         tiles[j][i].getProductOfGrowable() == null &&
@@ -601,11 +609,31 @@ public class GameController implements MenuController {
 
             game.setCurrentWeatherType(game.getTomorrowWeatherType());
             game.predictTomorrowWeather();
-            rainOnGrowables(game.getCurrentWeatherType());
+            rainOnGrowables(game,game.getCurrentWeatherType());
             game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
             NPC.endOfDay(game);
             for (User user : game.getPlayers()) {
                 game.handleFoodRecipe(user);
+            }
+            for (PlayerConnection player : gs.getPlayers()) {
+                if (player.getWsContext().session.isOpen()) {
+                    ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+
+                    Map<String, Object> body = new HashMap<>();
+                    try {
+                        User user = gs.getGame().getPlayerByUsername(player.getUsername());
+                        gs.getGame().setCurrentPlayer(user);
+                        System.out.println("?????????????????????????????????" + gs.getGame().getCurrentPlayer().getCurrentTile());
+                        String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
+                        body.put("game", jsonGame);
+                        Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
+                        msg.setType("endOfDay");
+                        player.getWsContext().send(new Gson().toJson(msg));
+                        System.out.println("handle end of day!");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
@@ -777,7 +805,7 @@ public class GameController implements MenuController {
         if (game == null) return new Result(false, "no active game!");
 
         for (int i = 0; i < hours; i++) {
-            game.getTimeAndDate().advanceHour(); // You need to implement this method
+            game.advanceTimeByOneHour(); // You need to implement this method
             if (game.getTimeAndDate().getHour() == 22) {
                 handleEndOfDay();
             }
@@ -1185,7 +1213,7 @@ public class GameController implements MenuController {
         return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
     }
 
-//    public Result releaseAnimal(String name) {
+    //    public Result releaseAnimal(String name) {
 //        Game game = MainApp.getInstance().getCurrentGame();
 //        User player = game.getCurrentPlayer();
 //        Animal animal = player.getAnimalByName(name);
@@ -1228,72 +1256,72 @@ public class GameController implements MenuController {
 //
 //        return new Result(true, name + " is moving to (" + targetX + ", " + targetY + ").");
 //    }
-public Result releaseAnimal(String name) {
-    Game game = MainApp.getInstance().getCurrentGame();
-    User player = game.getCurrentPlayer();
-    Animal animal = player.getAnimalByName(name);
-    Farm farm = game.getMap().getFarmByOwner(player);
+    public Result releaseAnimal(String name) {
+        Game game = MainApp.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        Animal animal = player.getAnimalByName(name);
+        Farm farm = game.getMap().getFarmByOwner(player);
 
-    if (animal == null) {
-        return new Result(false, "No animal named " + name + " found.");
-    }
+        if (animal == null) {
+            return new Result(false, "No animal named " + name + " found.");
+        }
 
-    Tile animalTile = animal.getCurrentTile();
-    if (animalTile == null) {
-        return new Result(false, "Error: animal tile not found.");
-    }
+        Tile animalTile = animal.getCurrentTile();
+        if (animalTile == null) {
+            return new Result(false, "Error: animal tile not found.");
+        }
 
-    if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
-        return new Result(false, "Cannot shepherd animals outside in bad weather.");
-    }
+        if (game.getCurrentWeatherType() != WeatherType.SUNNY) {
+            return new Result(false, "Cannot shepherd animals outside in bad weather.");
+        }
 
-    Habitat habitat = animal.getLivingPlace();
-    if (habitat == null) {
-        return new Result(false, "Animal habitat not found.");
-    }
+        Habitat habitat = animal.getLivingPlace();
+        if (habitat == null) {
+            return new Result(false, "Animal habitat not found.");
+        }
 
-    // Try to find a walkable tile adjacent or near the habitat (but not inside it)
-    List<Tile> candidates = new ArrayList<>();
-    Tile[][] mapTiles = game.getMap().getMap();
+        // Try to find a walkable tile adjacent or near the habitat (but not inside it)
+        List<Tile> candidates = new ArrayList<>();
+        Tile[][] mapTiles = game.getMap().getMap();
 
-    int margin = 2; // How far outside the habitat to consider
-    for (int x = habitat.getX() - margin; x <= habitat.getX() + habitat.getWidth() + margin; x++) {
-        for (int y = habitat.getY() - margin; y <= habitat.getY() + habitat.getHeight() + margin; y++) {
-            // Skip tiles inside the habitat
-            if (x >= habitat.getX() && x < habitat.getX() + habitat.getWidth() &&
-                y >= habitat.getY() && y < habitat.getY() + habitat.getHeight()) {
-                continue;
-            }
+        int margin = 2; // How far outside the habitat to consider
+        for (int x = habitat.getX() - margin; x <= habitat.getX() + habitat.getWidth() + margin; x++) {
+            for (int y = habitat.getY() - margin; y <= habitat.getY() + habitat.getHeight() + margin; y++) {
+                // Skip tiles inside the habitat
+                if (x >= habitat.getX() && x < habitat.getX() + habitat.getWidth() &&
+                    y >= habitat.getY() && y < habitat.getY() + habitat.getHeight()) {
+                    continue;
+                }
 
-            if (!(x >= farm.getX() && x < farm.getX() + farm.getWidth() &&
-                y >= farm.getY() && y < farm.getY() + farm.getHeight())) continue; // only tiles inside the player's farm
+                if (!(x >= farm.getX() && x < farm.getX() + farm.getWidth() &&
+                    y >= farm.getY() && y < farm.getY() + farm.getHeight())) continue; // only tiles inside the player's farm
 
-            Tile tile = game.getMap().getTile(x, y);
-            if (tile != null && tile.getisWalkable() && tile.getContainedAnimal() == null) {
-                candidates.add(tile);
+                Tile tile = game.getMap().getTile(x, y);
+                if (tile != null && tile.getisWalkable() && tile.getContainedAnimal() == null) {
+                    candidates.add(tile);
+                }
             }
         }
+
+        if (candidates.isEmpty()) {
+            return new Result(false, "No valid nearby tile found to release the animal.");
+        }
+
+        // Pick one at random
+        Tile targetTile = candidates.get(MathUtils.random(candidates.size() - 1));
+
+        // Find path to target tile
+        List<Tile> path = findShortestPath(animalTile, targetTile, 30);
+        if (path.isEmpty()) {
+            return new Result(false, "No valid path to target location.");
+        }
+
+        // Assign movement path
+        animal.setPathToTarget(path);
+        animal.resetCooldown();
+
+        return new Result(true, name + " is moving to (" + targetTile.getX() + ", " + targetTile.getY() + ").");
     }
-
-    if (candidates.isEmpty()) {
-        return new Result(false, "No valid nearby tile found to release the animal.");
-    }
-
-    // Pick one at random
-    Tile targetTile = candidates.get(MathUtils.random(candidates.size() - 1));
-
-    // Find path to target tile
-    List<Tile> path = findShortestPath(animalTile, targetTile, 30);
-    if (path.isEmpty()) {
-        return new Result(false, "No valid path to target location.");
-    }
-
-    // Assign movement path
-    animal.setPathToTarget(path);
-    animal.resetCooldown();
-
-    return new Result(true, name + " is moving to (" + targetTile.getX() + ", " + targetTile.getY() + ").");
-}
 
 
     private List<Tile> findShortestPath(Tile start, Tile goal, int maxSteps) {
@@ -2189,10 +2217,10 @@ public Result releaseAnimal(String name) {
     }
 
 
-    public void updateGrowable(Tile tile) {
+    public void updateGrowable(Game currentGame,Tile tile) {
         //this should be called at the end of the days
         //when we are not in the required season the growables won't grow in this function so naturally they won't produce any product
-        Game currentGame = MainApp.getInstance().getCurrentGame();
+//        Game currentGame = MainApp.getInstance().getCurrentGame();
         Season currentSeason = currentGame.getTimeAndDate().getSeason();
         if (tile.getContainedGrowable() != null) {
             if (tile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
@@ -2315,8 +2343,8 @@ public Result releaseAnimal(String name) {
         }
     }
 
-    public void rainOnGrowables(WeatherType tommorowWeather) {
-        Tile[][] map = MainApp.getInstance().getCurrentGame().getMap().getMap();
+    public void rainOnGrowables(Game game,WeatherType tommorowWeather) {
+        Tile[][] map = game.getMap().getMap();
         if (tommorowWeather == WeatherType.RAIN) {
             for (int i = 0; i < map.length; i++) {
                 for (int j = 0; j < map[0].length; j++) {
@@ -3271,4 +3299,3 @@ public Result releaseAnimal(String name) {
 
 
 }
-
