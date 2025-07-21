@@ -17,11 +17,15 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
+
 import java.util.*;
+
 import io.github.stardew.mini.Model.MapManagement.*;
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
+    private String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -60,6 +64,7 @@ public class Game {
         predictTomorrowWeather();
         generateNPCs();
     }
+
     public Game() {
     }
 
@@ -194,6 +199,7 @@ public class Game {
         }
         return null;
     }
+
     public Friendship getFriendship(String name1, String name2) {
         // Ensure consistent ordering as used in Friendship constructor
         String player1 = name1.compareTo(name2) < 0 ? name1 : name2;
@@ -210,6 +216,7 @@ public class Game {
     public ArrayList<Friendship> getAllFriendships() {
         return allFriendships;
     }
+
     public void generateNPCs() {
         if (this.npcs == null) {
             this.npcs = new ArrayList<>();
@@ -234,7 +241,7 @@ public class Game {
         sebastianMissions.add(sebastianMission1);
         sebastianMissions.add(sebastianMission2);
         sebastianMissions.add(sebastianMission3);
-        NPC sebastian = new NPC(NPCtype.Sebastian, players, sebastianMissions,30);
+        NPC sebastian = new NPC(NPCtype.Sebastian, players, sebastianMissions, 30);
         npcs.add(sebastian);
         nextTile.setContainedNPC(sebastian);
 
@@ -258,7 +265,7 @@ public class Game {
         abigailMissions.add(abigailMission1);
         abigailMissions.add(abigailMission2);
         abigailMissions.add(abigailMission3);
-        NPC abigail = new NPC(NPCtype.Abigail, players,abigailMissions,60);
+        NPC abigail = new NPC(NPCtype.Abigail, players, abigailMissions, 60);
         npcs.add(abigail);
         nextTile.setContainedNPC(abigail);
 
@@ -282,7 +289,7 @@ public class Game {
         harveyMissions.add(harveyMission1);
         harveyMissions.add(harveyMission2);
         harveyMissions.add(harveyMission3);
-        NPC harvey = new NPC(NPCtype.Harvey, players, harveyMissions,40);
+        NPC harvey = new NPC(NPCtype.Harvey, players, harveyMissions, 40);
         npcs.add(harvey);
         nextTile.setContainedNPC(harvey);
 
@@ -306,7 +313,7 @@ public class Game {
         leahMissions.add(leahMission1);
         leahMissions.add(leahMission2);
         leahMissions.add(leahMission3);
-        NPC leah = new NPC(NPCtype.Leah, players, leahMissions,90);
+        NPC leah = new NPC(NPCtype.Leah, players, leahMissions, 90);
         npcs.add(leah);
         nextTile.setContainedNPC(leah);
 
@@ -330,7 +337,7 @@ public class Game {
         robinMissions.add(robinMission1);
         robinMissions.add(robinMission2);
         robinMissions.add(robinMission3);
-        NPC robin = new NPC(NPCtype.Robin, players, robinMissions,120);
+        NPC robin = new NPC(NPCtype.Robin, players, robinMissions, 120);
         npcs.add(robin);
         nextTile.setContainedNPC(robin);
     }
@@ -346,25 +353,26 @@ public class Game {
 
     public void handleFoodRecipe(User currentPlayer) {  //add this somewhere
         if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 2 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.VegetableMedley))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.VegetableMedley))
             currentPlayer.getCookingRecepies().add(FoodRecipe.VegetableMedley);
         if (currentPlayer.getSkillsLevel().get(Skill.FARMING) == 1 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.FarmersLaunch))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.FarmersLaunch))
             currentPlayer.getCookingRecepies().add(FoodRecipe.FarmersLaunch);
         if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 3 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SurvivalBurger))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.SurvivalBurger))
             currentPlayer.getCookingRecepies().add(FoodRecipe.SurvivalBurger);
         if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 2 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.DishOtheSea))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.DishOtheSea))
             currentPlayer.getCookingRecepies().add(FoodRecipe.DishOtheSea);
         if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 3 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SeaformPudding))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.SeaformPudding))
             currentPlayer.getCookingRecepies().add(FoodRecipe.SeaformPudding);
         if (currentPlayer.getSkillsLevel().get(Skill.MINING) == 1 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
             currentPlayer.getCookingRecepies().add(FoodRecipe.MinersTreat);
     }
-    public void reloadExtraData(){
+
+    public void reloadExtraData() {
         for (Tile[] row : map.getMap()) {
             for (Tile tile : row) {
                 Animal animal = tile.getContainedAnimal();
@@ -377,5 +385,13 @@ public class Game {
 
     public Map<String, List<NPCMission>> getPlayerAddedMissions() {
         return playerAddedMissions;
+    }
+
+    public String getNetworkId() {
+        return NetworkId;
+    }
+
+    public void setNetworkId(String networkId) {
+        NetworkId = networkId;
     }
 }

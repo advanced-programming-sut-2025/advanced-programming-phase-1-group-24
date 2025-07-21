@@ -3,9 +3,7 @@ package io.github.stardew.mini.Model.MapManagement;
 import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Growables.GrowableFactory;
@@ -21,14 +19,11 @@ import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.LightningFlash;
 import io.github.stardew.mini.Model.Tools.*;
-import io.github.stardew.mini.Model.Places.Farm;
-import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Things.ForagingMineral;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.Things.ProductQuality;
-import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.View.GameView;
+import io.github.stardew.mini.client.View.GameView;
 
 import java.util.*;
 

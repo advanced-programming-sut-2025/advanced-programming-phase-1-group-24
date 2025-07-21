@@ -1,6 +1,6 @@
 package io.github.stardew.mini.Model.Tools;
 
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Things.ToolMaterial;
 

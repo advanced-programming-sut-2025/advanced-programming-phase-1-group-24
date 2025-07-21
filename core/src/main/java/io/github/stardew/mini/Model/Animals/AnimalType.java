@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Model.Animals;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Things.StorageType;
 
 import java.util.List;

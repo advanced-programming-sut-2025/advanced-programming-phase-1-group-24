@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Model.Places;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.ShopAssets;
+import io.github.stardew.mini.client.Assets.ShopAssets;
 
 public enum ShopType {
     BLACKSMITH(ShopAssets.Blacksmith),
