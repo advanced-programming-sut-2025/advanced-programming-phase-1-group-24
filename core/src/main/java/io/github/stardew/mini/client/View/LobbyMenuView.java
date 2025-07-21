@@ -9,15 +9,18 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.client.LobbyMenuController;
 import io.github.stardew.mini.Model.LobbyInfo;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.MainApp;
+import io.github.stardew.mini.client.NetworkClient;
+import io.github.stardew.mini.Model.Game;
 
 import javax.swing.*;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
 
 public class LobbyMenuView implements Screen, AppMenu {
 
@@ -187,6 +190,8 @@ public class LobbyMenuView implements Screen, AppMenu {
             joinButton.setColor(Color.BLUE);
             TextButton leaveButton = new TextButton("Leave", skin, "custom-button");
             leaveButton.setColor(Color.BLUE);
+            TextButton startButton = new TextButton("Start", skin, "custom-button");
+            startButton.setColor(Color.BLUE);
 
             joinButton.addListener(new ClickListener() {
                 @Override
@@ -202,15 +207,81 @@ public class LobbyMenuView implements Screen, AppMenu {
                }
             });
 
+            startButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    if(lobby.getOwner().equals(MainApp.getInstance().getLoggedInUser().getUsername())) {
+                        System.out.println("lobby owner  "+lobby.getOwner());
+                        System.out.println("logged in user"+MainApp.getInstance().getLoggedInUser().getUsername());
+                        List<String> dummyPlayers = lobby.getPlayers();
+                        System.out.println("players salam:" + dummyPlayers);
+                        startGameFromLobby(dummyPlayers);
+                    } else {
+                        showErrorDialog(stage,"Only the creator can start the game!");
+                    }
+                    System.out.println(lobby.getPlayers());
+                }
+            });
+
             row.add(nameLabel).width(200).left();
             row.add(playerCountLabel).width(60).padRight(20).padLeft(20);
             row.add(joinButton).width(80).padRight(20).padLeft(20);
             row.add(leaveButton).width(80).padRight(20).padLeft(20);
+            row.add(startButton).width(80).padRight(8).padLeft(8);
             lobbyListTable.add(row).row();
             Table playersRow = new Table();
             playersRow.add(playersLabel).colspan(3).left().padLeft(30).padBottom(10); // ⬅️ align and indent
             lobbyListTable.add(playersRow).row();
         }
+    }
+
+    private void startGameFromLobby(List<String> playerNames) {
+        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("usernames", new ArrayList<>(playerNames)); // you may need to fetch this from lobby info
+
+        NetworkClient client = MainApp.getInstance().getNetworkClient();
+
+        System.out.println("Sending createGameOnServer request: " + params);
+        client.sendPost(
+            null,
+            "NewGameMenuController",
+            "createGameOnServer",
+            params,
+            username
+        ).thenAccept(response -> {
+            System.out.println("Response received");
+            if (response.getStatus() == 200) {
+                Object bodyRaw = response.getBody();
+
+                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                    Object gameIdObj = bodyMap.get("gameId");
+                    if (gameIdObj instanceof String gameId) {
+                        Gson gson = new Gson();
+                        String json = gson.toJson(bodyMap.get("game"));
+                        Game game = gson.fromJson(json, Game.class);
+
+                        MainApp.getInstance().setCurrentGame(game);
+                        MainApp.getInstance().setCurrentGameId(gameId);
+                    }
+                }
+                System.out.println("the owner switched to map slection //////////////////////////////////////");
+                System.out.println("MainApp.getInstance().getCurrentGame().getNetworkId() "+MainApp.getInstance().getCurrentGame().getNetworkId());
+                Gdx.app.postRunnable(() -> {
+                    MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+                });
+            } else {
+                Gdx.app.postRunnable(() -> {
+                    showErrorDialog(stage, response.getMessage());
+                });
+            }
+        }).exceptionally(ex -> {
+            Gdx.app.postRunnable(() -> {
+                showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+            });
+            return null;
+        });
     }
 
     public class PasswordPrompt {
