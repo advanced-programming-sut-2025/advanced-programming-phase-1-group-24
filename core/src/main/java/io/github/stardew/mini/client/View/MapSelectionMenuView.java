@@ -145,28 +145,28 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                     else if(selectedMap.equals("2")) params.put("mapNumber", 2);
                     MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
                         "MapSelectionMenuController","pickGameMap",params,
-                        MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername()).thenAccept(response -> {
+                        MainApp.getInstance().getLoggedInUser().getUsername()).thenAccept(response -> {
                         if(response.getStatus() == 200) {
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object gameJsonObj = bodyMap.get("game");
-
-                                if (gameJsonObj instanceof  String json) {
-                                    System.out.println("////////////////////////////////////////////////////");
-                                    try {
-                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
-                                        MainApp.getInstance().setCurrentGame(game);
-                                        System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
-                                        System.out.println("Game successfully deserialized");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        showErrorDialog(stage, "Deserialization failed: " + e.getMessage());
-                                    }
-                                }
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object gameJsonObj = bodyMap.get("game");
+//
+//                                if (gameJsonObj instanceof  String json) {
+//                                    System.out.println("////////////////////////////////////////////////////");
+//                                    try {
+//                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+//                                        MainApp.getInstance().setCurrentGame(game);
+//                                        System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+//                                        System.out.println("Game successfully deserialized");
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                        showErrorDialog(stage, "Deserialization failed: " + e.getMessage());
+//                                    }
+//                                }
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
 //                            Gdx.app.postRunnable(() -> {
 //                                MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
 //                            });

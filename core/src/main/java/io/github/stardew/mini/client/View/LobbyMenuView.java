@@ -198,6 +198,8 @@ public class LobbyMenuView implements Screen, AppMenu {
                         MainApp.getInstance().setCurrentGameId(gameId);
                     }
                 }
+                System.out.println("the owner switched to map slection //////////////////////////////////////");
+                System.out.println("MainApp.getInstance().getCurrentGame().getNetworkId() "+MainApp.getInstance().getCurrentGame().getNetworkId());
                 Gdx.app.postRunnable(() -> {
                     MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
                 });
