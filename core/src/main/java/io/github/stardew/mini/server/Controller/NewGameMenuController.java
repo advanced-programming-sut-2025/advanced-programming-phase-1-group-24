@@ -401,20 +401,20 @@ public class NewGameMenuController implements MenuController {
 //        }
 //        ObjectMapper objectMapper = GameSaver.createCustomObjectMapper();
 //        String gameJson = objectMapper.writeValueAsString(game);
-//
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("gameId", game.getNetworkId());
-//        body.put("message", "Game created successfully");
-//        body.put("game", gameJson);  // ✅ Important: serialized game as string
-//
-//        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
-//        msg.setType("start-map-selection");
-//
-//        for (PlayerConnection player : connections) {
-//            if (player.getWsContext().session.isOpen()) {
-//                player.getWsContext().send(new Gson().toJson(msg));
-//            }
-//        }
+
+        Map<String, Object> body1 = new HashMap<>();
+        body1.put("gameId", game.getNetworkId());
+        body1.put("message", "Game created successfully");
+        body.put("game", game);  // ✅ Important: serialized game as string
+
+        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body1, Message.MessageType.RESPONSE);
+        msg.setType("start-map-selection");
+
+        for (PlayerConnection player : connections) {
+            if (!player.getUser().equals(creator) && player.getWsContext().session.isOpen()) {
+                player.getWsContext().send(new Gson().toJson(msg));
+            }
+        }
 
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
