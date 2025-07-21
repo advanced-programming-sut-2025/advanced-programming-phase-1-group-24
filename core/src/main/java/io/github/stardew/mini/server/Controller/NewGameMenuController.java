@@ -388,25 +388,6 @@ public class NewGameMenuController implements MenuController {
 //            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
 //        }
         body.put("game", game);
-//        for (PlayerConnection player : connections) {
-//            if (player.getWsContext().session.isOpen()) {
-//                Map<String, Object> body1 = new HashMap<>();
-//                body1.put("gameId", game.getNetworkId());
-//                body1.put("message", "Game created successfully");
-//                body1.put("game", game);
-//                Message<Map<String, Object>> msg = new Message<>(200, "Game created", body1, Message.MessageType.RESPONSE);
-//                msg.setType("start-map-selection");
-//                player.getWsContext().send(new Gson().toJson(msg));
-//            }
-//        }
-//        ObjectMapper objectMapper = GameSaver.createCustomObjectMapper();
-//        String gameJson = objectMapper.writeValueAsString(game);
-
-//        Map<String, Object> body1 = new HashMap<>();
-//        body1.put("gameId", game.getNetworkId());
-//        body1.put("message", "Game created successfully");
-//        body.put("game", game);  // ✅ Important: serialized game as string
-
         Message<Map<String, Object>> msg = new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
         msg.setType("start-map-selection");
 

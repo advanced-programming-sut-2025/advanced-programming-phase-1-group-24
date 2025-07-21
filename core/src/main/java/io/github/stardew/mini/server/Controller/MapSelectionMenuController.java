@@ -430,11 +430,6 @@ public class MapSelectionMenuController implements MenuController {
             return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
         }
 
-//        Map<String, Object> body1 = new HashMap<>();
-//        body1.put("gameId", gs.getGame().getNetworkId());
-//        body1.put("message", "Game created successfully");
-//        body.put("game", gs.getGame());  // ✅ Important: serialized game as string
-
         Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
         msg.setType("start-game");
         if (currentGame.haveAllPlayersSelectedMap()) {
@@ -445,11 +440,6 @@ public class MapSelectionMenuController implements MenuController {
             }
             gs.startGameTimer();
         }
-//        String jsonGame = mapper.writeValueAsString(currentGame);
-//        body.put("game", jsonGame); // game is a String
-        /// /////////////////////////////////////////////////////////////////////////////
-        // gs.startGameTimer();
-        /// //////////////////////////////////////////////////////////////////////////////
         return new Message<>(200, "You are starting at coordinates " + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
             body, Message.MessageType.RESPONSE);
     }
