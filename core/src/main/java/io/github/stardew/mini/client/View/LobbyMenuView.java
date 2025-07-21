@@ -147,13 +147,16 @@ public class LobbyMenuView implements Screen, AppMenu {
             startButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if(lobby.getOwner().endsWith(MainApp.getInstance().getLoggedInUser().getUsername())) {
+                    if(lobby.getOwner().equals(MainApp.getInstance().getLoggedInUser().getUsername())) {
+                        System.out.println("lobby owner  "+lobby.getOwner());
+                        System.out.println("logged in user"+MainApp.getInstance().getLoggedInUser().getUsername());
                         List<String> dummyPlayers = lobby.getPlayers();
                         System.out.println("players salam:" + dummyPlayers);
                         startGameFromLobby(dummyPlayers);
                     } else {
                         showErrorDialog(stage,"Only the creator can start the game!");
                     }
+                    System.out.println(lobby.getPlayers());
                 }
             });
             row.add(nameLabel).width(200).left().padRight(5);

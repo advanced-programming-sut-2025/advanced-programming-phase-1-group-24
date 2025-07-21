@@ -1,6 +1,7 @@
 package io.github.stardew.mini.server.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
@@ -21,6 +22,7 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.client.View.MapSelectionMenuView;
 import io.github.stardew.mini.server.GameServer;
+import io.github.stardew.mini.server.PlayerConnection;
 import io.github.stardew.mini.server.ServerApp;
 
 import java.awt.*;
@@ -415,7 +417,7 @@ public class MapSelectionMenuController implements MenuController {
         player.setCurrentTile(playerFarm.getRandomFarmTile(map));
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
-
+        currentGame.markPlayerSelectedMap(player.getUsername());
         ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
         Map<String, Object> body = new HashMap<>();
@@ -426,12 +428,28 @@ public class MapSelectionMenuController implements MenuController {
             e.printStackTrace();
             return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
         }
+
+        Map<String, Object> body1 = new HashMap<>();
+        body1.put("gameId", gs.getGame().getNetworkId());
+        body1.put("message", "Game created successfully");
+        body.put("game", gs.getGame());  // ✅ Important: serialized game as string
+
+        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body1, Message.MessageType.RESPONSE);
+        msg.setType("start-game");
+        if (currentGame.haveAllPlayersSelectedMap()) {
+            for (PlayerConnection playerConnection : gs.getPlayers()) {
+                if (playerConnection.getWsContext().session.isOpen()) {
+                    playerConnection.getWsContext().send(new Gson().toJson(msg));
+                }
+            }
+            gs.startGameTimer();
+        }
 //        String jsonGame = mapper.writeValueAsString(currentGame);
 //        body.put("game", jsonGame); // game is a String
         /// /////////////////////////////////////////////////////////////////////////////
-        gs.startGameTimer();
+        // gs.startGameTimer();
         /// //////////////////////////////////////////////////////////////////////////////
-        return new Message<>(200, "You are starting at coordinates "+ " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
+        return new Message<>(200, "You are starting at coordinates " + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
             body, Message.MessageType.RESPONSE);
     }
 
@@ -462,7 +480,6 @@ public class MapSelectionMenuController implements MenuController {
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem("Stone", 500);
         return new Result(true, "green house build successful");
     }
-
 
 
     public Result exitGame() {

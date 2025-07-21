@@ -167,9 +167,9 @@ public class MapSelectionMenuView implements AppMenu, Screen {
                             } else {
                                 System.err.println("Response body is not a map");
                             }
-                            Gdx.app.postRunnable(() -> {
-                                MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
-                            });
+//                            Gdx.app.postRunnable(() -> {
+//                                MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+//                            });
                         }
                         else {
                             Gdx.app.postRunnable(() -> {
