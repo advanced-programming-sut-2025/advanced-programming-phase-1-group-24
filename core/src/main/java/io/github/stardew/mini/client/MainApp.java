@@ -10,6 +10,13 @@ import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.FoodType;
 import io.github.stardew.mini.server.Controller.*;
+import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.Food;
+import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.client.Assets.CropAssets;
 import io.github.stardew.mini.Model.Animals.AnimalType;
@@ -28,6 +35,7 @@ import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
 
@@ -49,9 +57,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
 
-    public void setCurrentGameId(String gameId) {
-        currentGame.setNetworkId(gameId);
-    }
 
     @Override
     public void create() {
@@ -59,15 +64,13 @@ public class MainApp extends com.badlogic.gdx.Game {
         batch = new SpriteBatch();
         GameAssetManager.load();
         connectToServer();
-        loggedInUser = new User("nikki", "1234", "nik", "aa", true);
-//        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//        if (loggedInUser == null) {
-//            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//        } else
-//            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
-        setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        if (loggedInUser == null) {
+            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        } else
+            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
-//       // Initialize game data
+        // Initialize game data
         //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
@@ -105,21 +108,24 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-        for (NPCtype npCtype : NPCtype.values()) {
-            npCtype.initTexture();
-        }
         for (FoodType foodType : FoodType.values()) {
             foodType.initTexture();
+        }
+        for (NPCtype npCtype : NPCtype.values()) {
+            npCtype.initTexture();
         }
         // Initialize game data
         activeGames = loadActiveGames();
         if (FarmTemplateManager.getTemplates() == null) {
-            FarmTemplateManager.loadTemplates(); // only once
+            FarmTemplateManager.loadTemplates();
         }
     }
 
-    private void connectToServer() {
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
+    }
 
+    private void connectToServer() {
         try {
             URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
             networkClient = new NetworkClient(serverUri);
@@ -141,7 +147,8 @@ public class MainApp extends com.badlogic.gdx.Game {
                 while (!networkClient.isOpen()) {
                     try {
                         Thread.sleep(100);
-                    } catch (InterruptedException ignored) {}
+                    } catch (InterruptedException ignored) {
+                    }
                 }
 
                 if (loggedInUser != null) {
@@ -162,8 +169,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
-
-
     public NetworkClient getNetworkClient() {
         return networkClient;
     }
@@ -183,7 +188,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
         // save games
-        if( currentGame!=null ) {
+        if (currentGame != null) {
             currentGame.getMap().getShops().clear();
         }
         //saveActiveGames();
@@ -196,9 +201,9 @@ public class MainApp extends com.badlogic.gdx.Game {
                 System.err.println("Error while closing WebSocket: " + e.getMessage());
             }
         }
-
     }
-    ////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
+
+    /// /////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
     public void saveActiveGames() {
         try {
             GameSaver.saveGames(activeGames, "data/active_games.json.gz");
@@ -218,6 +223,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             return new ArrayList<>();
         }
     }
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -291,6 +297,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
+
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
@@ -316,8 +323,9 @@ public class MainApp extends com.badlogic.gdx.Game {
             case MapSelectionMenu:
                 getInstance().setScreen(new MapSelectionMenuView(new MapSelectionMenuController()));
                 break;
-                case LobbyMenu:
-                    getInstance().setScreen(new LobbyMenuView(new LobbyMenuController()));
+            case LobbyMenu:
+                getInstance().setScreen(new LobbyMenuView(new LobbyMenuController()));
+                break;
 
 
             // ... other cases

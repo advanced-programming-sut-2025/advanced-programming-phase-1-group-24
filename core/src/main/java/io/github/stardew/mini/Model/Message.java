@@ -8,6 +8,7 @@ public class Message<T> {
     public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
     public static final Message<?> BAD_REQUEST = new Message<>(400);
     public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
+
     private int status;
     private String message;
     private T body;
@@ -53,6 +54,7 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
+
     // --- Getters and setters ---
 
     public int getStatus() { return status; }

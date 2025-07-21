@@ -1,7 +1,14 @@
+
 package io.github.stardew.mini.client;
 
+import com.badlogic.gdx.Gdx;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
+import io.github.stardew.mini.Model.TimeManagement.Season;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -21,10 +28,6 @@ public class NetworkClient extends WebSocketClient {
         super(serverUri);
     }
 
-    //    @Override
-//    public void onOpen(ServerHandshake handshakedata) {
-//        System.out.println("WebSocket connected");
-//    }
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         System.out.println("WebSocket connected");
@@ -56,10 +59,8 @@ public class NetworkClient extends WebSocketClient {
 //                future.complete(message);
 //            }
 //        } else {
-//            // Handle unsolicited messages if any (e.g., broadcasts)
 //        }
 //    }
-
     @Override
     public void onMessage(String messageJson) {
         System.out.println("Received raw JSON: " + messageJson);
@@ -79,6 +80,94 @@ public class NetworkClient extends WebSocketClient {
                     System.err.println("❌ No future found for requestId: " + requestId);
                 }
             } else {
+                if ("time-update".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    int hour = ((Double) data.get("hour")).intValue();
+                    int day = ((Double) data.get("day")).intValue();
+                    String dayOfWeekString = (String) data.get("dayOfWeek");
+                    String seasonString = (String) data.get("season");
+                    DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
+                    Season season = Season.fromString(seasonString);
+
+                    // Optional: store or update this data somewhere globally
+                    MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
+
+                    // Notify your UI or game loop (if any)
+                    System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
+                        hour, day, dayOfWeek, seasonString);
+                }
+                if ("endOfDay".equalsIgnoreCase(message.getType())) {
+                    Object bodyRaw = message.getBody();
+
+                    if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                        Object gameJsonObj = bodyMap.get("game");
+
+                        if (gameJsonObj instanceof  String json) {
+                            System.out.println("////////////////////////////////////////////////////");
+                            try {
+                                Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                MainApp.getInstance().setCurrentGame(game);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } else {
+                        System.err.println("Response body is not a map");
+                    }
+                    System.out.printf("[CLIENT] Game updated handle end of day");
+                }
+
+                if ("start-game".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        try {
+                            Object bodyRaw = message.getBody();
+
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                Object gameJsonObj = bodyMap.get("game");
+
+                                if (gameJsonObj instanceof  String json) {
+                                    try {
+                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        MainApp.getInstance().setCurrentGame(game);
+                                       // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+                                        System.out.println("Game successfully deserialized");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        System.out.println("failed to deserialize game after map selection");
+                                    }
+                                }
+                            } else {
+                                System.err.println("Response body is not a map");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.err.println("❌ Failed to parse game in start-map-selection");
+                        }
+                        MainApp.getInstance().setCurrentMenu(Menu.GameMenu); // Now the menu can read the game safely
+                    });
+                }
+                if ("start-map-selection".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        try {
+                            System.out.println("addddddddddd//////////////////////////////////////////");
+                            Object bodyRaw = message.getBody();
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                Object gameIdObj = bodyMap.get("gameId");
+                                if (gameIdObj instanceof String gameId) {
+                                    Gson gson = new Gson();
+                                    String json = gson.toJson(bodyMap.get("game"));
+                                    Game game = gson.fromJson(json, Game.class);
+                                    game.setNetworkId(gameId);
+                                    MainApp.getInstance().setCurrentGame(game);
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.err.println("❌ Failed to parse game in start-map-selection");
+                        }
+                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                    });
+                }
                 System.err.println("❌ requestId was null");
             }
         } catch (Exception e) {
@@ -87,15 +176,6 @@ public class NetworkClient extends WebSocketClient {
         }
     }
 
-
-    //    @Override
-//    public void onClose(int code, String reason, boolean remote) {
-//        System.out.println("WebSocket closed: " + reason);
-//        // Fail all pending requests
-//        pendingRequests.forEach((id, future) -> future.completeExceptionally(
-//            new RuntimeException("Connection closed before response")));
-//        pendingRequests.clear();
-//    }
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println("WebSocket closed: " + reason);
@@ -139,7 +219,6 @@ public class NetworkClient extends WebSocketClient {
         requestMessage.setUsername(username);
         requestMessage.setMessageType(Message.MessageType.REQUEST);
 
-//        // Optionally include gameId in the body or add a field if needed (depends on server design)
 //        if (params != null && gameId != null) {
 //            params.put("gameId", gameId);
 //        }
@@ -179,7 +258,6 @@ public class NetworkClient extends WebSocketClient {
     ) {
         return sendRequest(gameId, controllerName, methodName, "POST", params, username);
     }
-
     public void sendConnect(String username) {
         if (!isOpen()) {
             System.err.println("WebSocket is not open");
@@ -193,5 +271,4 @@ public class NetworkClient extends WebSocketClient {
         send(json);
         System.out.println("Sent connect for user: " + username);
     }
-
 }

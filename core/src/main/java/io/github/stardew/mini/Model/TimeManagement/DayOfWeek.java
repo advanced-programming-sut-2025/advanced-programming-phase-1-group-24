@@ -12,4 +12,12 @@ public enum DayOfWeek {
     public DayOfWeek next() {
         return values()[(this.ordinal() + 1) % values().length];
     }
+    public static DayOfWeek fromString(String value) {
+        for (DayOfWeek day : DayOfWeek.values()) {
+            if (day.name().equalsIgnoreCase(value)) {
+                return day;
+            }
+        }
+        throw new IllegalArgumentException("Invalid DayOfWeek: " + value);
+    }
 }
