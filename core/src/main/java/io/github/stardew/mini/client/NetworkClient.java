@@ -78,17 +78,17 @@ public class NetworkClient extends WebSocketClient {
 //                }
 //            }
 //
-////        } else {
-////            // Handle unsolicited messages if any (e.g., broadcasts)
-////        }
+    ////        } else {
+    ////            // Handle unsolicited messages if any (e.g., broadcasts)
+    ////        }
 //    }
     @Override
     public void onMessage(String messageJson) {
-        System.out.println("Received raw JSON: " + messageJson);
+        //System.out.println("Received raw JSON: " + messageJson);
 
         try {
             Message<?> message = gson.fromJson(messageJson, Message.class);
-            System.out.println("Parsed message object: " + message);
+           // System.out.println("Parsed message object: " + message);
             System.out.println("RequestId: " + message.getRequestId());
 
             String requestId = message.getRequestId();
@@ -118,42 +118,63 @@ public class NetworkClient extends WebSocketClient {
                         hour, day, dayOfWeek, seasonString);
                 }
                 if ("endOfDay".equalsIgnoreCase(message.getType())) {
-                        Object bodyRaw = message.getBody();
+                    Object bodyRaw = message.getBody();
 
-                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                            Object gameJsonObj = bodyMap.get("game");
+                    if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                        Object gameJsonObj = bodyMap.get("game");
 
-                            if (gameJsonObj instanceof  String json) {
-                                System.out.println("////////////////////////////////////////////////////");
-                                try {
-                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
-                                    MainApp.getInstance().setCurrentGame(game);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                        if (gameJsonObj instanceof  String json) {
+                            System.out.println("////////////////////////////////////////////////////");
+                            try {
+                                Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                MainApp.getInstance().setCurrentGame(game);
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } else {
-                            System.err.println("Response body is not a map");
                         }
+                    } else {
+                        System.err.println("Response body is not a map");
+                    }
                     System.out.printf("[CLIENT] Game updated handle end of day");
                 }
 
                 if ("start-game".equalsIgnoreCase(message.getType())) {
+                    System.out.println("the gammmmmmmmmmmmmme startedddd?????");
                     Gdx.app.postRunnable(() -> {
                         try {
                             Object bodyRaw = message.getBody();
+
                             if (bodyRaw instanceof Map<?, ?> bodyMap) {
                                 Object gameJsonObj = bodyMap.get("game");
-                                Object gameIdObj = bodyMap.get("gameId");
-                                if (gameJsonObj instanceof String json) {
-                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
-                                    MainApp.getInstance().setCurrentGame(game);
-                                    System.out.println("✔️ Game deserialized successfully in start-map-selection");
+
+                                if (gameJsonObj instanceof  String json) {
+                                    System.out.println("////////////////////////////////////////////////////");
+                                    try {
+                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        MainApp.getInstance().setCurrentGame(game);
+                                       // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+                                        System.out.println("Game successfully deserialized");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        System.out.println("failed to deserialize game after map selection");
+                                    }
                                 }
-                                if (gameIdObj instanceof String gameId) {
-                                    MainApp.getInstance().setCurrentGameId(gameId);
-                                }
+                            } else {
+                                System.err.println("Response body is not a map");
                             }
+//                            Object bodyRaw = message.getBody();
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object gameJsonObj = bodyMap.get("game");
+//                                Object gameIdObj = bodyMap.get("gameId");
+//                                if (gameJsonObj instanceof String json) {
+//                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+//                                    MainApp.getInstance().setCurrentGame(game);
+//                                    System.out.println("✔️ Game deserialized successfully in start-map-selection");
+//                                }
+//                                if (gameIdObj instanceof String gameId) {
+//                                    MainApp.getInstance().setCurrentGameId(gameId);
+//                                }
+//                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
@@ -164,25 +185,60 @@ public class NetworkClient extends WebSocketClient {
                 if ("start-map-selection".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {
+                            System.out.println("addddddddddd//////////////////////////////////////////");
                             Object bodyRaw = message.getBody();
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object gameJsonObj = bodyMap.get("game");
-                                Object gameIdObj = bodyMap.get("gameId");
-                                if (gameJsonObj instanceof String json) {
-                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
-                                    MainApp.getInstance().setCurrentGame(game);
-                                    System.out.println("✔️ Game deserialized successfully in start-map-selection");
-                                    if (gameIdObj instanceof String gameId) {
-                                        MainApp.getInstance().setCurrentGameId(gameId);
-                                        System.err.println(" Succed to parse game in start-map-selection");
-                                    }
-                                }
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object gameJsonObj = bodyMap.get("game");
+//                                Object gameIdObj = bodyMap.get("gameId");
+//                                if (gameJsonObj instanceof String json) {
+//                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+//                                    MainApp.getInstance().setCurrentGame(game);
+//                                    System.out.println("✔️ Game deserialized successfully in start-map-selection");
+//                                    if (gameIdObj instanceof String gameId) {
+//                                        MainApp.getInstance().setCurrentGameId(gameId);
+//                                        System.err.println(" Succed to parse game in start-map-selection");
+//                                    }
+//                                }
+//
+//                            }
 
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                Object gameIdObj = bodyMap.get("gameId");
+                                if (gameIdObj instanceof String gameId) {
+                                    Gson gson = new Gson();
+                                    String json = gson.toJson(bodyMap.get("game"));
+                                    Game game = gson.fromJson(json, Game.class);
+                                    game.setNetworkId(gameId);
+                                    MainApp.getInstance().setCurrentGame(game);
+//                                    MainApp.getInstance().setCurrentGameId(gameId);
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
+
+                        // if (response.getStatus() == 200) {
+//                    Object bodyRaw = message.getBody();
+//
+//                    if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                        Object gameIdObj = bodyMap.get("gameId");
+//                        if (gameIdObj instanceof String gameId) {
+//                            Gson gson = new Gson();
+//                            String json = gson.toJson(bodyMap.get("game"));
+//                            Game game = gson.fromJson(json, Game.class);
+//
+//                            game.setNetworkId(gameId);
+//                            MainApp.getInstance().setCurrentGame(game);
+//                           // MainApp.getInstance().setCurrentGameId(gameId);
+//                        }
+//                    }
+//                        System.out.println("the other members switched to map slection //////////////////////////////////////");
+//                        System.out.println("MainApp.getInstance().getCurrentGame().getNetworkId() "+MainApp.getInstance().getCurrentGame().getNetworkId());
+//                    Gdx.app.postRunnable(() -> {
+//                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+//                    });
+//                     }
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
                     });
                 }

@@ -418,6 +418,7 @@ public class MapSelectionMenuController implements MenuController {
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
         currentGame.markPlayerSelectedMap(player.getUsername());
+        System.out.println(player.getUsername() +"choosed map ");
         ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
         Map<String, Object> body = new HashMap<>();
@@ -429,12 +430,12 @@ public class MapSelectionMenuController implements MenuController {
             return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
         }
 
-        Map<String, Object> body1 = new HashMap<>();
-        body1.put("gameId", gs.getGame().getNetworkId());
-        body1.put("message", "Game created successfully");
-        body.put("game", gs.getGame());  // ✅ Important: serialized game as string
+//        Map<String, Object> body1 = new HashMap<>();
+//        body1.put("gameId", gs.getGame().getNetworkId());
+//        body1.put("message", "Game created successfully");
+//        body.put("game", gs.getGame());  // ✅ Important: serialized game as string
 
-        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body1, Message.MessageType.RESPONSE);
+        Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
         msg.setType("start-game");
         if (currentGame.haveAllPlayersSelectedMap()) {
             for (PlayerConnection playerConnection : gs.getPlayers()) {
