@@ -610,6 +610,7 @@ public class GameController implements MenuController {
 
                     Map<String, Object> body = new HashMap<>();
                     try {
+                        gs.getGame().setCurrentPlayer(player.getUser());
                         String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
                         body.put("game", jsonGame);
                         Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);

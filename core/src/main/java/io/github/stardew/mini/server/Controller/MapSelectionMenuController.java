@@ -418,7 +418,9 @@ public class MapSelectionMenuController implements MenuController {
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
         currentGame.markPlayerSelectedMap(player.getUsername());
-        System.out.println(player.getUsername() +"choosed map ");
+        currentGame.setCurrentPlayer(player);
+        System.out.println(" current  player "+currentGame.getCurrentPlayer().getUsername());
+        System.out.println(player.getUsername() +"chose map ");
         ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
         Map<String, Object> body = new HashMap<>();

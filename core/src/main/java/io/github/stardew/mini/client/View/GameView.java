@@ -2837,10 +2837,10 @@ private void createAnimalDialog() {
     @Override
     public void render(float v) {
         //////////////////////hard code /////////////////////////
-        currentPlayer =  MainApp.getInstance().getLoggedInUser();
-        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
+//        currentPlayer =  MainApp.getInstance().getLoggedInUser();
+//        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
         //////////////////////hard code /////////////////////////
-     updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+        updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
 //        if (currentPlayer.hasFainted()) {
@@ -2851,7 +2851,6 @@ private void createAnimalDialog() {
 //        } else {
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
-
             if (currentPlayer.hasFainted()) {
                 if (!hasShownFaintMessage) {
                     showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
