@@ -15,7 +15,7 @@ public class Friendship {
     private int level;
     private int xp;
     private ArrayList<Gift> gifts = new ArrayList<>();
-    private  ArrayList<Message> talkHistory = new ArrayList<>();
+    private  ArrayList<FriendshipMessage> talkHistory = new ArrayList<>();
 
     public Friendship(String player1, String player2) {
         // Always store in lexicographical order to avoid duplicates
@@ -77,7 +77,7 @@ public class Friendship {
         gifts.add(gift);
     }
 
-    public ArrayList<Message> getTalkHistory() {
+    public ArrayList<FriendshipMessage> getTalkHistory() {
         return talkHistory;
     }
 

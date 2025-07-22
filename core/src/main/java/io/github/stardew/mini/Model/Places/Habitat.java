@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import com.badlogic.gdx.graphics.Texture;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.stardew.mini.Model.Animals.Animal;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Things.StorageType;
-
-import java.util.ArrayList;
 
 public class Habitat extends Place{
     //type of cage and barn delux and ...

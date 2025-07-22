@@ -10,15 +10,19 @@ import java.util.List;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
+import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.server.GameServer;
+
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class GameSaver {
 
-    private static ObjectMapper createCustomObjectMapper() {
+    public static ObjectMapper createCustomObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.findAndRegisterModules();
@@ -42,6 +46,10 @@ public class GameSaver {
         module.addKeyDeserializer(Growable.class, new GenericKeyDeserializer<>());
         module.addKeySerializer(Animal.class, new GenericKeySerializer<>());
         module.addKeyDeserializer(Animal.class, new GenericKeyDeserializer<>());
+        module.addKeySerializer(NPC.class, new GenericKeySerializer<>());
+        module.addKeyDeserializer(NPC.class, new GenericKeyDeserializer<>());
+        module.addKeySerializer(NPCMission.class, new GenericKeySerializer<>());
+        module.addKeyDeserializer(NPCMission.class, new GenericKeyDeserializer<>());
 
 
         mapper.registerModule(module);
@@ -82,5 +90,8 @@ public class GameSaver {
         }
     }
 
+    public static <T> T convertObject(Object rawObj, Class<T> clazz) {
+        return GameSaver.createCustomObjectMapper().convertValue(rawObj, clazz);
+    }
 
 }

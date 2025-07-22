@@ -8,7 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 public class ClockHud {
 
@@ -55,7 +55,7 @@ public class ClockHud {
         clockGroup.addActor(timeLabel);
 
         moneyLabel = new Label("0", labelStyle);
-        moneyLabel.setPosition(clockBg.getWidth() * 0.70f, (clockBg.getHeight() * 0.15f) - 20);
+        moneyLabel.setPosition(clockBg.getWidth() * 0.26f, (clockBg.getHeight() * 0.15f) - 20);
         clockGroup.addActor(moneyLabel);
 
         float width = 300;

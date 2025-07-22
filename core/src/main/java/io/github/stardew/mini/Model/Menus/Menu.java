@@ -1,13 +1,5 @@
 package io.github.stardew.mini.Model.Menus;
-import com.badlogic.gdx.Screen;
-import io.github.stardew.mini.Controller.*;
-import io.github.stardew.mini.MainApp;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
 
-
-import io.github.stardew.mini.Controller.GameController;
-import io.github.stardew.mini.Controller.PreGameMenuController;
-import io.github.stardew.mini.View.*;
 
 import java.util.Scanner;
 
@@ -21,7 +13,8 @@ public enum Menu {
     GameMenu,
     ProfileMenu,
     TradeMenu,
-    ExitMenu;
+    ExitMenu,
+    LobbyMenu;
 
     public static Menu fromString(String menuName) {
         for (Menu menu : Menu.values()) {
