@@ -10,12 +10,8 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.ServerController;
-import io.javalin.http.Context;
-import io.javalin.http.HandlerType;
-import org.eclipse.jetty.server.Server;
 
 import java.util.*;
-import java.util.List;
 
 public class GameServer extends Thread {
     private final List<PlayerConnection> players;
@@ -32,6 +28,35 @@ public class GameServer extends Thread {
     @Override
     public void run() {
         System.out.println("GameServer started for players: " + players.size());
+
+//        // Start global timer
+//        timer = new Timer();
+//        timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (game == null ) return;
+//
+//                game.advanceTimeByOneHour();  // Advance time in game
+//                gameController.handleEndOfDay(GameServer.this);
+//                // Step 2: Prepare message to send to players
+//                for (PlayerConnection player : players) {
+//                    if (player.getWsContext().session.isOpen()) {
+//                        Map<String, Object> timeUpdate = new HashMap<>();
+//                        timeUpdate.put("gameId", game.getNetworkId());
+//                        timeUpdate.put("hour", game.getTimeAndDate().getHour());
+//                        timeUpdate.put("day", game.getTimeAndDate().getDay());
+//                        timeUpdate.put("dayOfWeek", game.getTimeAndDate().getDayOfWeek());
+//                        timeUpdate.put("season", game.getTimeAndDate().getSeason());
+//
+//                        Message<Map<String, Object>> msg = new Message<>(200, "TimeUpdate", timeUpdate, Message.MessageType.RESPONSE);
+//                        msg.setType("time-update");
+//                        player.getWsContext().send(new Gson().toJson(msg));
+//                    }
+//                }
+//            }
+//        }, 5000, 5000); // delay 5s, repeat every 5s
+
+        // Optional game loop (e.g., for animation ticks or events)
         while (running) {
             broadcastGameState();
             try {
@@ -49,7 +74,7 @@ public class GameServer extends Thread {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (game == null) return;
+                if (game == null ) return;
 
                 game.advanceTimeByOneHour();
                 gameController.handleEndOfDay(GameServer.this);

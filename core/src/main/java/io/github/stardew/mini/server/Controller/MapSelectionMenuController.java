@@ -448,9 +448,6 @@ public class MapSelectionMenuController implements MenuController {
             body, Message.MessageType.RESPONSE);
     }
 
-
-
-
     public TreeType findTreeBySourceName(String sourceName) {
         for (TreeType tree : TreeType.values()) {
             if (tree.getSource().getName().equalsIgnoreCase(sourceName)) {

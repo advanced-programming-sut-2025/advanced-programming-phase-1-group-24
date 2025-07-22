@@ -2,8 +2,6 @@ package io.github.stardew.mini.server.Controller;
 
 
 import com.badlogic.gdx.math.MathUtils;
-import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
-import io.github.stardew.mini.client.MainApp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
@@ -37,8 +35,6 @@ import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.client.View.GameView;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
-import io.github.stardew.mini.client.View.GameView;
-import io.github.stardew.mini.server.GameServer;
 
 import java.util.*;
 import java.util.List;
@@ -54,7 +50,6 @@ public class GameController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
-
     public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
         System.out.println(player.getUsername());
         int x = player.getCurrentTile().getX();
@@ -84,6 +79,73 @@ public class GameController implements MenuController {
         }
         return Message.FORBIDDEN.setMessage("You can not move there.");
     }
+//    public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+//        System.out.println(player.getUsername());
+//        int x = player.getCurrentTile().getX();
+//        int y = player.getCurrentTile().getY();
+//        int newX = x + dx;
+//        int newY = y + dy;
+//
+//        if (newX >= 0 && newY >= 0 &&
+//            newY < gs.getGame().getMap().getMap().length &&
+//            newX < gs.getGame().getMap().getMap()[0].length &&
+//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
+//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
+//                    (player.getPartner() != null &&
+//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
+//
+//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
+//            player.reduceEnergy(1);
+//            player.setMovingDirection(direction);
+//
+//            Map<String, Object> params = new HashMap<>();
+//            params.put("tile", player.getCurrentTile());
+//            params.put("energy", player.getEnergy());
+//            params.put("movingDirection", player.getMovingDirection());
+//
+//            // ✅ Include all players' states
+//            List<Map<String, Object>> playerStates = new ArrayList<>();
+//            for (User u : gs.getGame().getPlayers()) {
+//                Map<String, Object> playerData = new HashMap<>();
+//                playerData.put("username", u.getUsername());
+//                playerData.put("tile", u.getCurrentTile());
+//                playerData.put("energy", u.getEnergy());
+//                playerData.put("movingDirection", u.getMovingDirection());
+//                playerStates.add(playerData);
+//            }
+//
+//            params.put("players", playerStates); // ✅ Include player list in response
+//
+//            return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
+//        }
+//
+//        return Message.FORBIDDEN.setMessage("You can not move there.");
+//    }
+
+
+//    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+//        int x = player.getCurrentTile().getX();
+//        int y = player.getCurrentTile().getY();
+//        int newX = x + dx;
+//        int newY = y + dy;
+//
+//        if (newX >= 0 && newY >= 0 &&
+//            newY < gs.getGame().getMap().getMap().length &&
+//            newX < gs.getGame().getMap().getMap()[0].length &&
+//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
+//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
+//                    (player.getPartner() != null &&
+//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
+//
+//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
+//            player.reduceEnergy(1);
+//            player.setMovingDirection(direction);
+//            return new Result(true, "You can move.");
+//        }
+//        return new Result(false, "You can't move.");
+//    }
 
 
     public Result exitGame() {
@@ -169,11 +231,11 @@ public class GameController implements MenuController {
         } else {
             if (currentTool instanceof Axe) {
                 return ((Axe) currentTool).useAxe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player,
-                        MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                    MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
 //            } else if (currentTool instanceof FishingPole) {
 //                return ((FishingPole) currentTool).useFishingPole((FishingPole) currentTool, MainApp.getInstance().getCurrentGame().getMap(), currentTile,
 //                        player, MainApp.getInstance().getCurrentGame(), MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-           } else if (currentTool instanceof Hoe) {
+            } else if (currentTool instanceof Hoe) {
                 Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, MainApp.getInstance().getCurrentGame().getMap(), player, MainApp.getInstance().getCurrentGame().getCurrentWeatherType().getEnergyOfToolsModifier());
                 System.out.println(map[currentTile.getY() + y][currentTile.getX() + x].getIsPlowed());
                 return result;
@@ -589,7 +651,7 @@ public class GameController implements MenuController {
                 if (user.getDaysSinceRejection() != 0) {
                     user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
                 }
-                // crowAttack(gs, user);
+               // crowAttack(gs, user);
             }
 
             Tile[][] tiles = game.getMap().getMap();
@@ -622,7 +684,6 @@ public class GameController implements MenuController {
                     Map<String, Object> body = new HashMap<>();
                     try {
                         gs.getGame().setCurrentPlayer(player.getUser());
-                        System.out.println("???????????????????????????????????????????" + player.getUser().getCurrentTile());
                         String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
                         body.put("game", jsonGame);
                         Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
@@ -636,9 +697,6 @@ public class GameController implements MenuController {
             }
         }
     }
-
-
-
 
     public void processShippingBinsAtNight() {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -2219,7 +2277,7 @@ public class GameController implements MenuController {
     }
 
 
-    public void updateGrowable(Game currentGame,Tile tile) {
+    public void updateGrowable( Game currentGame,Tile tile) {
         //this should be called at the end of the days
         //when we are not in the required season the growables won't grow in this function so naturally they won't produce any product
 //        Game currentGame = MainApp.getInstance().getCurrentGame();

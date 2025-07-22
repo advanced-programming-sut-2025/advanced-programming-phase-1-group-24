@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.sun.tools.javac.Main;
 import io.github.stardew.mini.Model.Game;
@@ -21,10 +22,12 @@ import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 public class NewGameMenuView implements AppMenu, Screen {
 
@@ -158,6 +161,80 @@ public class NewGameMenuView implements AppMenu, Screen {
 //                }
 //            }
 //        });
+//        startGameButton.addListener(new ClickListener() {
+//            public void clicked(InputEvent event, float x, float y) {
+////                if (playerNames.isEmpty()) {
+////                    showErrorDialog(stage, "You must add at least one player!");
+////                    return;
+////                }
+//
+//                String username = MainApp.getInstance().getLoggedInUser().getUsername();
+//
+//                Map<String, Object> params = new HashMap<>();
+//                params.put("usernames", new ArrayList<>(playerNames));
+//
+//                NetworkClient client = MainApp.getInstance().getNetworkClient(); // adjust if needed
+//
+//                System.out.println("Sending createGameOnServer request: " + params);
+//                client.sendPost(
+//                    null,                     // gameId (null for new game)
+//                    "NewGameMenuController",  // controller name to route to
+//                    "createGameOnServer",     // method name
+//                    params,
+//                    username
+//                ).thenAccept(response -> {
+//                    if (response.getStatus() == 200) {
+//                        Object bodyRaw = response.getBody();
+//                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                            Object compressedGameObj = bodyMap.get("compressedGame");
+//
+//                            if (compressedGameObj instanceof String base64Game) {
+//                                System.out.println("Received compressedGame from server.");
+//
+//                                try {
+//                                    byte[] compressedBytes = Base64.getDecoder().decode(base64Game);
+//                                    ByteArrayInputStream byteStream = new ByteArrayInputStream(compressedBytes);
+//                                    GZIPInputStream gzip = new GZIPInputStream(byteStream);
+//                                    InputStreamReader reader = new InputStreamReader(gzip, StandardCharsets.UTF_8);
+//
+//                                    ObjectMapper mapper = new ObjectMapper();
+//                                    Game game = mapper.readValue(reader, Game.class);
+//
+//                                    MainApp.getInstance().setCurrentGame(game);
+//                                    MainApp.getInstance().getActiveGames().add(game);
+//
+//                                    System.out.println("Game deserialized and set successfully.");
+//
+//                                    Gdx.app.postRunnable(() -> {
+//                                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+//                                    });
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                    System.err.println("Failed to deserialize game: " + e.getMessage());
+//                                }
+//
+//                            } else {
+//                                System.err.println("Missing or invalid compressedGame in response.");
+//                            }
+//                        } else {
+//                            System.err.println("Response body is not a map: " + bodyRaw);
+//                        }
+//                    } else {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, response.getMessage());
+//                        });
+//                    }
+//                }).exceptionally(ex -> {
+//                    Gdx.app.postRunnable(() -> {
+//                        showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+//                    });
+//                    return null;
+//                });
+//            }
+//        });
+//
+//        stage.addActor(table);
+//    }
         startGameButton.addListener(new ClickListener() {
             public void clicked(InputEvent event, float x, float y) {
 //                if (playerNames.isEmpty()) {
@@ -196,7 +273,6 @@ public class NewGameMenuView implements AppMenu, Screen {
                                 Game game = gson.fromJson(json, Game.class); // deserialize back into Game object
 
                                 MainApp.getInstance().setCurrentGame(game);
-                                System.out.println(MainApp.getInstance().getCurrentGame().getCurrentPlayer());
                                 MainApp.getInstance().setCurrentGameId(gameId);
                             } else {
                                 System.err.println("gameId is not a string or is null");
@@ -223,7 +299,6 @@ public class NewGameMenuView implements AppMenu, Screen {
 
         stage.addActor(table);
     }
-
     private void updatePlayerListUI() {
         for (Label label : playerLabels) {
             table.removeActor(label);

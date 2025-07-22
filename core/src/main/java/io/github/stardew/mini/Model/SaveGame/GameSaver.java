@@ -16,8 +16,6 @@ import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Things.Food;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.server.GameServer;
-
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -98,7 +96,6 @@ public class GameSaver {
         byte[] compressed = byteStream.toByteArray();
         return Base64.getEncoder().encodeToString(compressed);
     }
-
     public static <T> T convertObject(Object rawObj, Class<T> clazz) {
         return GameSaver.createCustomObjectMapper().convertValue(rawObj, clazz);
     }

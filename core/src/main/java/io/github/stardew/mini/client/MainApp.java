@@ -1,15 +1,7 @@
 package io.github.stardew.mini.client;
 
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.FoodType;
-import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -36,13 +28,12 @@ import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
 
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
@@ -52,7 +43,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
-    //UserDatabase.loadUsers(); // we should delete this
+    //=UserDatabase.loadUsers(); // we should delete this
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
@@ -211,6 +202,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             e.printStackTrace();
         }
     }
+
     private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
         File file = new File("data/active_games.json.gz");
         if (!file.exists()) return new ArrayList<>();
@@ -223,7 +215,6 @@ public class MainApp extends com.badlogic.gdx.Game {
             return new ArrayList<>();
         }
     }
-/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private User loadLoggedInUser() {
         File file = new File("data/logged_in_user.json");
@@ -306,6 +297,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.currentMenu = currentMenu;
         changeScreen();
     }
+
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:

@@ -219,7 +219,7 @@ public class MapOfGame {
             int farmHeight = farm.getHeight();
 
             if (x >= farmX && x < farmX + farmWidth &&
-                y >= farmY && y < farmY + farmHeight) {
+                    y >= farmY && y < farmY + farmHeight) {
                 return farm;
             }
         }
@@ -231,15 +231,6 @@ public class MapOfGame {
     public Farm getFarmByOwner(User owner) {
         for (Farm farm : farms) {
             if (farm.getOwner().equals(owner)) {
-                return farm;
-            }
-        }
-        return null;
-    }
-
-    public Farm getFarmByUsername(String username) {
-        for (Farm farm : farms) {
-            if(farm.getOwner().getUsername().equals(username)) {
                 return farm;
             }
         }
@@ -258,71 +249,71 @@ public class MapOfGame {
         shops.clear();
 
         Shop blacksmith = new Shop(
-            ShopType.BLACKSMITH,
-            "Blacksmith",
-            "Clint",
-            9, 16,
-            createBlacksmithItems(),
-            52, 52, 6, 4
+                ShopType.BLACKSMITH,
+                "Blacksmith",
+                "Clint",
+                9, 16,
+                createBlacksmithItems(),
+                52, 52, 6, 4
         );
 
         Shop jojamart = new Shop(
-            ShopType.JOJA_MART,
-            "JojaMart",
-            "Morris",
-            9, 23,
-            createJojaMartItems(),
-            52, 62, 4, 4
+                ShopType.JOJA_MART,
+                "JojaMart",
+                "Morris",
+                9, 23,
+                createJojaMartItems(),
+                52, 62, 4, 4
         );
 
         Shop pierreStore = new Shop(
-            ShopType.PIERRE_GENERAL_SHOP,
-            "Pierre’s General Store",
-            "Pierre",
-            9, 17,
-            createPierreStoreItems(),
-            52, 72, 4, 5
+                ShopType.PIERRE_GENERAL_SHOP,
+                "Pierre’s General Store",
+                "Pierre",
+                9, 17,
+                createPierreStoreItems(),
+                52, 72, 4, 5
         );
 
         Shop carpenterShop = new Shop(
-            ShopType.CARPENTER_SHOP,
-            "Carpenter’s Shop",
-            "Robin",
-            9, 20,
-            createCarpenterShopItems(),
-            52, 82, 6, 6
+                ShopType.CARPENTER_SHOP,
+                "Carpenter’s Shop",
+                "Robin",
+                9, 20,
+                createCarpenterShopItems(),
+                52, 82, 6, 6
         );
 
         Shop fishShop = new Shop(
-            ShopType.FISH_SHOP,
-            "Fish Shop",
-            "Willy",
-            9, 17,
-            createFishShopItems(),
-            92, 55, 5, 4
+                ShopType.FISH_SHOP,
+                "Fish Shop",
+                "Willy",
+                9, 17,
+                createFishShopItems(),
+                92, 55, 5, 4
         );
 
         Shop marnieRanch = new Shop(
-            ShopType.MARNIE_RANCH,
-            "Marnie’s Ranch",
-            "Marnie",
-            9, 16,
-            createMarnieRanchItems(),
-            90, 67, 7, 5
+                ShopType.MARNIE_RANCH,
+                "Marnie’s Ranch",
+                "Marnie",
+                9, 16,
+                createMarnieRanchItems(),
+                90, 67, 7, 5
         );
 
         Shop starDropSaloon = new Shop(
-            ShopType.STAR_DROP_SALOON,
-            "The Stardrop Saloon",
-            "Gus",
-            12, 24,
-            createSaloonItems(),
-            92, 80, 6, 5
+                ShopType.STAR_DROP_SALOON,
+                "The Stardrop Saloon",
+                "Gus",
+                12, 24,
+                createSaloonItems(),
+                92, 80, 6, 5
         );
 
         shops.addAll(Arrays.asList(
-            blacksmith, jojamart, pierreStore, carpenterShop,
-            fishShop, marnieRanch, starDropSaloon
+                blacksmith, jojamart, pierreStore, carpenterShop,
+                fishShop, marnieRanch, starDropSaloon
         ));
     }
     public Shop getShopAtPosition(int x, int y) {
@@ -502,38 +493,38 @@ public class MapOfGame {
 
         // Barn upgrades
         items.add(new ShopItem("Barn", 1,
-            new Habitat(0, 0, 4, 3, StorageType.INITIAL, Habitat.HabitatType.Barn),
-            ShopItemType.BARN, 6000, 6000, 6000, 6000));
+                new Habitat(0, 0, 4, 3, StorageType.INITIAL, Habitat.HabitatType.Barn),
+                ShopItemType.BARN, 6000, 6000, 6000, 6000));
 
         items.add(new ShopItem("Big Barn", 1,
-            new Habitat(0, 0, 4, 3, StorageType.BIG, Habitat.HabitatType.Big_Barn),
-            ShopItemType.BARN, 12000, 12000, 12000, 12000));
+                new Habitat(0, 0, 4, 3, StorageType.BIG, Habitat.HabitatType.Big_Barn),
+                ShopItemType.BARN, 12000, 12000, 12000, 12000));
 
         items.add(new ShopItem("Deluxe Barn", 1,
-            new Habitat(0, 0, 4, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Barn),
-            ShopItemType.BARN, 25000, 25000, 25000, 25000));
+                new Habitat(0, 0, 4, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Barn),
+                ShopItemType.BARN, 25000, 25000, 25000, 25000));
 
         // Coop upgrades
         items.add(new ShopItem("Cage", 1,
-            new Habitat(0, 0, 3, 3, StorageType.INITIAL, Habitat.HabitatType.CAGE),
-            ShopItemType.CAGE, 4000, 4000, 4000, 4000));
+                new Habitat(0, 0, 3, 3, StorageType.INITIAL, Habitat.HabitatType.CAGE),
+                ShopItemType.CAGE, 4000, 4000, 4000, 4000));
 
         items.add(new ShopItem("Big Cage", 1,
-            new Habitat(0, 0, 3, 3, StorageType.BIG,Habitat.HabitatType.Big_Cage),
-            ShopItemType.CAGE, 10000, 10000, 10000, 10000));
+                new Habitat(0, 0, 3, 3, StorageType.BIG,Habitat.HabitatType.Big_Cage),
+                ShopItemType.CAGE, 10000, 10000, 10000, 10000));
 
         items.add(new ShopItem("Deluxe Cage", 1,
-            new Habitat(0, 0, 3, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Cage),
-            ShopItemType.CAGE, 20000, 20000, 20000, 20000));
+                new Habitat(0, 0, 3, 3, StorageType.DELUX, Habitat.HabitatType.Deluxe_Cage),
+                ShopItemType.CAGE, 20000, 20000, 20000, 20000));
 
         // Other buildings
         items.add(new ShopItem("Wood", Integer.MAX_VALUE,
-            new randomStuff(20, randomStuffType.Wood),
-            ShopItemType.RANDOMSTUFF, 10, 10, 10, 10));
+                new randomStuff(20, randomStuffType.Wood),
+                ShopItemType.RANDOMSTUFF, 10, 10, 10, 10));
 
         items.add(new ShopItem("Stone", Integer.MAX_VALUE,
-            new randomStuff(20, randomStuffType.Stone),
-            ShopItemType.RANDOMSTUFF, 20, 20, 20, 20));
+                new randomStuff(20, randomStuffType.Stone),
+                ShopItemType.RANDOMSTUFF, 20, 20, 20, 20));
 
         //shipping bin
         items.add(new ShopItem("Shipping Bin", Integer.MAX_VALUE, null, ShopItemType.SHIPPING_BIN, 250, 250, 250, 250));
@@ -629,7 +620,7 @@ public class MapOfGame {
         int height = house.getHeight();
 
         return x >= houseX && x < houseX + width &&
-            y >= houseY && y < houseY + height;
+                y >= houseY && y < houseY + height;
     }
 
 

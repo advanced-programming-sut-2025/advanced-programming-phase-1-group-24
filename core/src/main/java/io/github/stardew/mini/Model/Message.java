@@ -20,24 +20,9 @@ public class Message<T> {
     private String methodName;
     private String requestId;
     private String gameID;
-
-    public String getGameID() {
-        return gameID;
-    }
-
-    public void setGameID(String gameID) {
-        this.gameID = gameID;
-    }
-
     public enum MessageType {
         REQUEST, RESPONSE
     }
-
-
-    public static <T> Message<T> ok(T body) {
-        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
-    }
-
 
     public Message(int status, String message, T body, MessageType messageType) {
         this.status = status;
@@ -126,6 +111,15 @@ public class Message<T> {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
+    public static <T> Message<T> ok(T body) {
+        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
+    }
+
+    public String getGameID() {
+        return gameID;
+    }
+
+    public void setGameID(String gameID) {
+        this.gameID = gameID;
+    }
 }
-
-

@@ -28,6 +28,7 @@ public class NetworkClient extends WebSocketClient {
         super(serverUri);
     }
 
+
     @Override
     public void onOpen(ServerHandshake handshakedata) {
         System.out.println("WebSocket connected");
@@ -59,7 +60,27 @@ public class NetworkClient extends WebSocketClient {
 //                future.complete(message);
 //            }
 //        } else {
-//        }
+//                if ("time-update".equalsIgnoreCase(message.getType())) {
+//                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+//                    int hour = ((Double) data.get("hour")).intValue();
+//                    int day = ((Double) data.get("day")).intValue();
+//                    String dayOfWeekString = (String) data.get("dayOfWeek");
+//                    String seasonString = (String) data.get("season");
+//                    DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
+//                    Season season = Season.fromString(seasonString);
+//
+//                    // Optional: store or update this data somewhere globally
+//                    MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
+//
+//                    // Notify your UI or game loop (if any)
+//                    System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
+//                        hour, day, dayOfWeek, seasonString);
+//                }
+//            }
+//
+    ////        } else {
+    ////            // Handle unsolicited messages if any (e.g., broadcasts)
+    ////        }
 //    }
     @Override
     public void onMessage(String messageJson) {
@@ -219,6 +240,7 @@ public class NetworkClient extends WebSocketClient {
         requestMessage.setUsername(username);
         requestMessage.setMessageType(Message.MessageType.REQUEST);
 
+        // Optionally include gameId in the body or add a field if needed (depends on server design)
 //        if (params != null && gameId != null) {
 //            params.put("gameId", gameId);
 //        }
@@ -226,8 +248,6 @@ public class NetworkClient extends WebSocketClient {
 
         // Serialize and send
         String json = gson.toJson(requestMessage);
-
-        System.out.println("Sending JSON: " + json);
 
         CompletableFuture<Message<?>> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);
