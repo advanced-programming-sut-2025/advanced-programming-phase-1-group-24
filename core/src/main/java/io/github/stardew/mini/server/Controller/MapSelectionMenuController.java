@@ -428,7 +428,6 @@ public class MapSelectionMenuController implements MenuController {
         if (currentGame.haveAllPlayersSelectedMap()) {
             for (PlayerConnection playerConnection : gs.getPlayers()) {
                 if (playerConnection.getWsContext().session.isOpen()) {
-                    playerConnection.getUser().setCurrentTile(gs.getGame().getMap().getFarmByOwner(playerConnection.getUser()).getRandomFarmTile(map));
                     currentGame.setCurrentPlayer(playerConnection.getUser());
                     try {
                         String jsonGame = mapper.writeValueAsString(currentGame); // serialize Game to JSON string
@@ -448,6 +447,9 @@ public class MapSelectionMenuController implements MenuController {
         return new Message<>(200, "You are starting at coordinates " + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
             body, Message.MessageType.RESPONSE);
     }
+
+
+
 
     public TreeType findTreeBySourceName(String sourceName) {
         for (TreeType tree : TreeType.values()) {

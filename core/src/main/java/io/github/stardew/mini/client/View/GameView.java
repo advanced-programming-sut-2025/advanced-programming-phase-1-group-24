@@ -39,7 +39,6 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.GameController;
@@ -2700,7 +2699,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //            public void run() {
 //                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
 //                controller.handleEndOfDay();
-//                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+//               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
 //            }
 //        }, 5, 5);
 
@@ -2838,6 +2837,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
     @Override
     public void render(float v) {
+        //////////////////////hard code /////////////////////////
+//        currentPlayer =  MainApp.getInstance().getLoggedInUser();
+//        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
+        //////////////////////hard code /////////////////////////
         updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
@@ -2849,7 +2852,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //        } else {
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
-
         if (currentPlayer.hasFainted()) {
             if (!hasShownFaintMessage) {
                 showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
@@ -3232,6 +3234,83 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 }
             }
         }
+//        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+//            moveCooldown -= v;
+//            if (moveCooldown <= 0f) {
+//                int dx = 0, dy = 0, direction = -1;
+//
+//                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//                    dx = 0; dy = -1; direction = 3;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    dx = 0; dy = 1; direction = 1;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    dx = -1; dy = 0; direction = 0;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    dx = 1; dy = 0; direction = 2;
+//                }
+//
+//                if (direction != -1) {
+//                    // ✅ Optimistically move the player locally
+////                    Tile currentTile = currentPlayer.getCurrentTile();
+////                    Tile nextTile = currentTile.offset(dx, dy); // You must implement this logic
+////                    if (nextTile != null && !nextTile.isBlocked()) {
+////                        currentPlayer.setCurrentTile(nextTile);
+////                        currentPlayer.setMovingDirection(direction);
+////                        moveCooldown = MOVE_INTERVAL;
+////                    }
+//                    if (tryMove(dx, dy, direction)) {
+//                        moveCooldown = MOVE_INTERVAL;
+//                    }
+//
+//                    // ✅ Send move request to server (still needed for real game state)
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx", String.valueOf(dx));
+//                    params.put("dy", String.valueOf(dy));
+//                    params.put("direction", String.valueOf(direction));
+//
+//                    MainApp.getInstance().getNetworkClient()
+//                        .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                            "GameController", "tryMove", params, currentPlayer.getUsername())
+//                        .thenAccept(response -> {
+//                            if (response.getStatus() == 200) {
+//                                Object bodyRaw = response.getBody();
+//                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+////                                    Tile serverTile = GameSaver.convertObject(bodyMap.get("tile"), Tile.class);
+////                                    int energy = ((Number) bodyMap.get("energy")).intValue();
+////                                    int dir = ((Number) bodyMap.get("movingDirection")).intValue();
+////
+////                                    // ✅ Reconcile — if client and server differ, correct it
+////                                    if (!currentPlayer.getCurrentTile().equals(serverTile)) {
+////                                        currentPlayer.setCurrentTile(serverTile);
+////                                    }
+////                                    currentPlayer.setEnergy(energy);
+////                                    currentPlayer.setMovingDirection(dir);
+//                                    Object tileRaw = bodyMap.get("tile");
+//                                    Object energyRaw = bodyMap.get("energy");
+//                                    Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                    Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                    int energy = ((Number) energyRaw).intValue();
+//                                    int dir = ((Number) dirRaw).intValue();
+//
+//                                    User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                    currentPlayer.setCurrentTile(tile);
+//                                    currentPlayer.setEnergy(energy);
+//                                    currentPlayer.setMovingDirection(dir);
+//                                } else {
+//                                  System.err.println("Response body is not a map");
+//                                }
+//                            }
+//                        }).exceptionally(ex -> {
+//                            Gdx.app.postRunnable(() -> {
+//                                showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                            });
+//                            return null;
+//                        });
+//                }
+//            }
+//        }
+
         setCameraPosition();
         camera.update();
 
@@ -3630,10 +3709,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
 
     private void drawPlayer() {
-        if (currentPlayer == null || currentPlayer.getCurrentTile() == null){
-            //System.out.println("//////////////////////////////////" + currentPlayer +  currentPlayer.getCurrentTile());
-            return;
-        }
+        if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
 
         Tile tile = currentPlayer.getCurrentTile();
         int tileSize = GameAssetManager.TILE_SIZE;
@@ -4367,8 +4443,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             int currentXP = friendship.getXp();
             if (currentXP >= XP_PER_LEVEL_Player) currentXP %= XP_PER_LEVEL_Player;
 
-            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
-            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(smallFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
 
             ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
             TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
