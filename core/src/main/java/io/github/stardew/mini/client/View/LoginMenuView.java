@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.server.Controller.LoginMenuController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
@@ -102,14 +103,33 @@ public class LoginMenuView implements Screen,AppMenu {
                 String username = usernameField.getText().trim();
                 String password = passwordField.getText();
 
+                // Optional local check (you can remove this if you only want WS auth)
                 boolean stayLoggedIn = stayLoggedInCheckbox.isChecked();
                 Result result = controller.login(username, password, stayLoggedIn);
                 errorLabel.setText(result.message());
-                if (result.isSuccessful()) {
-                    MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), skin));
-                }
+
+                // Now do the WebSocket login
+                MainApp.getInstance().wsLogin(username, password)
+                    .thenAccept(msg -> {
+                        if (msg.getStatus() == 200) {
+                            String jwt = msg.getBody();
+                            MainApp.getInstance().setJwtToken(jwt);
+
+                            MainApp.getInstance().connectToServer();
+                            Gdx.app.postRunnable(() ->
+                                MainApp.getInstance()
+                                    .setScreen(new MainMenuView(new MainMenuController(), skin))
+                            );
+                        } else {
+                            Gdx.app.postRunnable(() ->
+                                errorLabel.setText(msg.getMessage())
+                            );
+                        }
+                    });  // <— closes thenAccept(…)
             }
         });
+
+
         forgetPasswordButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {

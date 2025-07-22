@@ -8,7 +8,6 @@ public class Message<T> {
     public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
     public static final Message<?> BAD_REQUEST = new Message<>(400);
     public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
-
     private int status;
     private String message;
     private T body;
@@ -20,9 +19,31 @@ public class Message<T> {
     private String methodName;
     private String requestId;
     private String gameID;
+    private String token;
+
+    public String getGameID() {
+        return gameID;
+    }
+
+    public void setGameID(String gameID) {
+        this.gameID = gameID;
+    }
+    public String getToken() {
+        return token;
+    }
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public enum MessageType {
         REQUEST, RESPONSE
     }
+
+
+    public static <T> Message<T> ok(T body) {
+        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
+    }
+
 
     public Message(int status, String message, T body, MessageType messageType) {
         this.status = status;
@@ -39,7 +60,6 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
-
     // --- Getters and setters ---
 
     public int getStatus() { return status; }
@@ -111,15 +131,6 @@ public class Message<T> {
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
-    public static <T> Message<T> ok(T body) {
-        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
-    }
-
-    public String getGameID() {
-        return gameID;
-    }
-
-    public void setGameID(String gameID) {
-        this.gameID = gameID;
-    }
 }
+
+
