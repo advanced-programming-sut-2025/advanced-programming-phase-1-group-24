@@ -418,25 +418,27 @@ public class MapSelectionMenuController implements MenuController {
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
         currentGame.markPlayerSelectedMap(player.getUsername());
-        currentGame.setCurrentPlayer(player);
+        //currentGame.setCurrentPlayer(player);
         System.out.println(" current  player "+currentGame.getCurrentPlayer().getUsername());
         System.out.println(player.getUsername() +"chose map ");
         ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
         Map<String, Object> body = new HashMap<>();
-        try {
-            String jsonGame = mapper.writeValueAsString(currentGame); // serialize Game to JSON string
-            body.put("game", jsonGame);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
-        }
 
-        Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
-        msg.setType("start-game");
         if (currentGame.haveAllPlayersSelectedMap()) {
             for (PlayerConnection playerConnection : gs.getPlayers()) {
                 if (playerConnection.getWsContext().session.isOpen()) {
+                    currentGame.setCurrentPlayer(playerConnection.getUser());
+                    try {
+                        String jsonGame = mapper.writeValueAsString(currentGame); // serialize Game to JSON string
+                        body.put("game", jsonGame);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
+                    }
+
+                    Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
+                    msg.setType("start-game");
                     playerConnection.getWsContext().send(new Gson().toJson(msg));
                 }
             }
