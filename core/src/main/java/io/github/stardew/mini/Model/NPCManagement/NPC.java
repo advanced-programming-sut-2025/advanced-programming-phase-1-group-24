@@ -3,8 +3,9 @@ package io.github.stardew.mini.Model.NPCManagement;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import io.github.stardew.mini.MainApp;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
 import io.github.stardew.mini.Model.Result;
@@ -22,7 +23,6 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NPC {
     private NPCtype npcName;
-    //private Tile currentTile;
     private Map <String, Integer> friendshipLevels;
     private Map <String, Integer> friendshipPoints;
     private Map <String, Boolean> talkedToNPCToday;
@@ -34,7 +34,6 @@ public class NPC {
     public NPC(NPCtype npcName, ArrayList<User> users,
                ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission) {
         this.npcName = npcName;
-        //this.currentTile = currentTile;
         this.friendshipLevels = new HashMap<>();
         this.friendshipPoints = new HashMap<>();
         this.talkedToNPCToday = new HashMap<>();
@@ -62,10 +61,6 @@ public class NPC {
     public NPCtype getNpcName() {
         return npcName;
     }
-
-//    public Tile getCurrentTile() {
-//        return currentTile;
-//    }
 
 
     public Map<String, Integer> getFriendshipLevels() {
@@ -133,16 +128,13 @@ public class NPC {
             currentPlayer.getBackpack().grabItem(itemName, mission.getRequiredItems().get(itemName));
         }
         int howManyItems = 1;
-        String message = "";
         if (friendshipLevels.get(currentPlayer.getUsername()) >= 2)  howManyItems = 2;
         for (String itemName : mission.getPrizeItems().keySet()) {
             if (itemName.equals("Gold Coin")) {
                 currentPlayer.addMoney( mission.getPrizeItems().get(itemName) * howManyItems);
-                message = "Your current money is " + currentPlayer.getMoney() + ".";
             }
             else if (itemName.equals("Friendship Level")) {
                 friendshipLevels.put(currentPlayer.getUsername(),friendshipLevels.get(currentPlayer.getUsername()) + 1);
-                message = "Your new Friendship level is " + friendshipLevels.get(currentPlayer.getUsername()) + ".";
             }
             else if (itemName.equals("Salmon Dinner Recipe")) {
                 currentPlayer.getCookingRecepies().add(FoodRecipe.SalmonDinner);
@@ -153,7 +145,7 @@ public class NPC {
             }
         }
         mission.setAlreadyDone(true);
-        return new Result(true, "Mission was completed successfully." + message);
+        return new Result(true, "Mission was completed successfully.");
     }
 
     public Result giveGift(String itemName, User currentPlayer){
@@ -222,6 +214,21 @@ public class NPC {
             }
         }
         return false;
+    }
+
+    public Tile currentTileGetter() {
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+        if (map.getTile(72, 55).getContainedNPC().equals(this))
+            return map.getTile(72, 55);
+        else if (map.getTile(72, 65).getContainedNPC().equals(this))
+            return map.getTile(72, 65);
+        else if (map.getTile(72, 75).getContainedNPC().equals(this))
+            return map.getTile(72, 75);
+        else if (map.getTile(72, 85).getContainedNPC().equals(this))
+            return map.getTile(72, 85);
+        else if (map.getTile(72, 95).getContainedNPC().equals(this))
+            return map.getTile(72, 95);
+        else return null;
     }
 
 

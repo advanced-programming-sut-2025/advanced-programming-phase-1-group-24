@@ -1,7 +1,7 @@
 package io.github.stardew.mini.Model.MapManagement;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.GameAssetManager;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 public enum TileType {
     EMPTY("E", "\u001B[47m"),          // White background
@@ -17,6 +17,7 @@ public enum TileType {
     WALL("w", "\u001B[47m"),           // White
     NPCLAND("N", "\u001B[106m"),       // Bright Cyan
     NPCHOUSE("h", "\u001B[105m"),
+    NPCWALL("h", "\u001B[105m"),
     DOOR("D", "\u001B[41m"), // White
     SHOP("S", "\u001B[42m"),           // Green
     SHIPPINGBIN("s","\u001B[41m");
@@ -58,9 +59,10 @@ public enum TileType {
         GRASS.setTexture(GameAssetManager.LIGHT_GREEN_FLOOR);
         FARM.setTexture(GameAssetManager.FLOORING_29);
         WALL.setTexture(GameAssetManager.FLOORING_52);
-        NPCLAND.setTexture(GameAssetManager.FLOORING_09);
-        NPCHOUSE.setTexture(GameAssetManager.FLOORING_10);
-        DOOR.setTexture(GameAssetManager.FLOORING_71);
+        NPCLAND.setTexture(GameAssetManager.FLOORING_08);
+        NPCHOUSE.setTexture(GameAssetManager.FLOORING_06);
+        NPCWALL.setTexture(GameAssetManager.FLOORING_62);
+        DOOR.setTexture(GameAssetManager.FLOORING_02);
         SHOP.setTexture(GameAssetManager.FLOORING_84);
         SHIPPINGBIN.setTexture(GameAssetManager.FLOORING_01);
     }

@@ -3,7 +3,7 @@ package io.github.stardew.mini.Model.Growables;
 import java.util.*;
 
 import com.badlogic.gdx.graphics.Texture;
-import io.github.stardew.mini.Model.Assets.TreeAssets;
+import io.github.stardew.mini.client.Assets.TreeAssets;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 
 public enum TreeType {
