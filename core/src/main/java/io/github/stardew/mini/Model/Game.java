@@ -11,7 +11,9 @@ import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.NPCManagement.NPCtype;
 import io.github.stardew.mini.Model.Places.Farm;
+import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
+import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
@@ -21,11 +23,12 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import java.util.*;
 
 import io.github.stardew.mini.Model.MapManagement.*;
+import io.github.stardew.mini.client.MainApp;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
-    private String NetworkId = UUID.randomUUID().toString();
+    private  String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -42,9 +45,12 @@ public class Game {
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
-
+    private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
+        for (User player : players) {
+            mapSelectionStatus.put(player.getUsername(), false);
+        }
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
         this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
@@ -117,9 +123,27 @@ public class Game {
 
 
     public void advanceTimeByOneHour() {
-        timeAndDate.advanceHour();
+      timeAndDate.advanceHour();
+      getCurrentPlayer().handleSpecialFoodsEffects();
+      updateMachines();
     }
-
+    public  void updateMachines() {  //use this method every hour
+        for (User user : players) {
+            Farm farm =  getMap().getFarmByOwner(user);
+            System.out.println("farm :"+farm);
+            House house = getMap().getFarmByOwner(user).getHouse();
+            for (Machine machine : house.getMachines()) {
+                if (machine.getActivated()) {
+                    machine.setHoursLeft(machine.getHoursLeft() - 1);
+                    if (machine.getHoursLeft() <= 0) {
+                        machine.setActivated(false);
+                        machine.setReady(true);
+                        machine.setMaxProcessTime(0);
+                    }
+                }
+            }
+        }
+    }
     public MapOfGame getMap() {
         return map;
     }
@@ -394,4 +418,18 @@ public class Game {
     public void setNetworkId(String networkId) {
         NetworkId = networkId;
     }
+
+    public void markPlayerSelectedMap(String username) {
+        mapSelectionStatus.put(username, true);
+    }
+
+    public boolean haveAllPlayersSelectedMap() {
+        for (User user : players) {
+            if (!mapSelectionStatus.getOrDefault(user.getUsername(), false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

@@ -114,6 +114,8 @@ public class LoginMenuView implements Screen,AppMenu {
                         if (msg.getStatus() == 200) {
                             String jwt = msg.getBody();
                             MainApp.getInstance().setJwtToken(jwt);
+
+                            MainApp.getInstance().connectToServer();
                             Gdx.app.postRunnable(() ->
                                 MainApp.getInstance()
                                     .setScreen(new MainMenuView(new MainMenuController(), skin))

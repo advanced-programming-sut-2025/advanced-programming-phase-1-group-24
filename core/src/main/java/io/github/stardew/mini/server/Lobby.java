@@ -2,6 +2,7 @@ package io.github.stardew.mini.server;
 
 import io.github.stardew.mini.Model.User;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +17,12 @@ public class Lobby {
     private boolean started;
     private Map<String, Boolean> mapSelectionState = new HashMap<>();
     private boolean isPrivate;
+    private boolean isInvisible;
+    private long createdAt;
 
     public static final int MAX_PLAYERS = 4;
 
-    public Lobby(String id, String name, String password, User creator, boolean started, boolean isPrivate) {
+    public Lobby(String id, String name, String password, User creator, boolean started, boolean isPrivate, boolean isInvisible) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -27,9 +30,24 @@ public class Lobby {
         this.players = new ArrayList<>();
         this.started = started;
         this.isPrivate = isPrivate;
+        this.isInvisible = isInvisible;
         for(User user : getPlayers()) {
             mapSelectionState.put(user.getUsername(), false);
         }
+        this.createdAt = System.currentTimeMillis();
+    }
+
+    public boolean isExpired() {
+        long now = System.currentTimeMillis();
+        return (players.isEmpty() || (now - createdAt) > (1 * 60 * 1000));
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
 
     public void setId(String id) {
@@ -94,5 +112,12 @@ public class Lobby {
 
     public Map<String, Boolean> getMapSelectionState() {
         return mapSelectionState;
+    }
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
     }
 }

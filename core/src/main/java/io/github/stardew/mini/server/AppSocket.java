@@ -9,8 +9,10 @@ import io.javalin.Javalin;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Message;
+
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class AppSocket {
@@ -25,6 +27,8 @@ public class AppSocket {
     }
 
     public void start() {
+
+
         app.ws("/ws", ws -> {
             ws.onConnect(ctx -> {
                 System.out.println("WebSocket connected: " + ctx.sessionId());
@@ -144,8 +148,7 @@ public class AppSocket {
                         System.out.println("hereeeeeeeeee");
                         // This method doesn't require a game ID
                         response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
-                    }
-                    else {
+                    } else {
                         // Other messages need a game ID
                         GameServer gameServer = getActiveGameById(message.getGameID());
                         System.out.println("2:" + message.getGameID());
@@ -158,7 +161,6 @@ public class AppSocket {
 
                     response.setRequestId(message.getRequestId());
                     ctx.send(gson.toJson(response));
-
                     // Handle other message types here...
 
                 } catch (Exception e) {
@@ -166,7 +168,6 @@ public class AppSocket {
                     ctx.send(gson.toJson(Message.BAD_REQUEST));
                 }
             });
-
 
             // ✅ WsCloseContext
             ws.onClose(ctx -> {
@@ -223,7 +224,6 @@ public class AppSocket {
         System.out.println("PlayerConnection not found for: " + username);
         return null;
     }
-
 
 
 }
