@@ -1,4 +1,3 @@
-
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
@@ -11,6 +10,9 @@ import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+
+import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
 import java.util.Map;
@@ -197,6 +199,15 @@ public class NetworkClient extends WebSocketClient {
         }
     }
 
+
+    //    @Override
+//    public void onClose(int code, String reason, boolean remote) {
+//        System.out.println("WebSocket closed: " + reason);
+//        // Fail all pending requests
+//        pendingRequests.forEach((id, future) -> future.completeExceptionally(
+//            new RuntimeException("Connection closed before response")));
+//        pendingRequests.clear();
+//    }
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println("WebSocket closed: " + reason);
@@ -239,7 +250,7 @@ public class NetworkClient extends WebSocketClient {
         requestMessage.setType(httpMethod); // "GET" or "POST"
         requestMessage.setUsername(username);
         requestMessage.setMessageType(Message.MessageType.REQUEST);
-
+        requestMessage.setToken(MainApp.getInstance().getJwtToken());
         // Optionally include gameId in the body or add a field if needed (depends on server design)
 //        if (params != null && gameId != null) {
 //            params.put("gameId", gameId);
@@ -248,6 +259,8 @@ public class NetworkClient extends WebSocketClient {
 
         // Serialize and send
         String json = gson.toJson(requestMessage);
+
+        System.out.println("Sending JSON: " + json);
 
         CompletableFuture<Message<?>> future = new CompletableFuture<>();
         pendingRequests.put(requestId, future);
@@ -278,6 +291,32 @@ public class NetworkClient extends WebSocketClient {
     ) {
         return sendRequest(gameId, controllerName, methodName, "POST", params, username);
     }
+    /**
+     * Send an AuthController.login request over WS, returning the server’s Message<String>.
+     */
+    public CompletableFuture<Message<String>> login(String username, String password) {
+        // Build the credentials payload
+        Map<String,Object> params = new HashMap<>();
+        params.put("username", username);
+        params.put("password", password);
+
+        // controllerName = "AuthController", methodName = "login"
+        // No gameId, no username header needed here
+        @SuppressWarnings("unchecked")
+        CompletableFuture<Message<String>> future =
+            (CompletableFuture<Message<String>>)(CompletableFuture<?>)
+                sendRequest(
+                    null,
+                    "AuthController",
+                    "login",
+                    "POST",
+                    params,
+                    null
+                );
+        return future;
+    }
+
+
     public void sendConnect(String username) {
         if (!isOpen()) {
             System.err.println("WebSocket is not open");
