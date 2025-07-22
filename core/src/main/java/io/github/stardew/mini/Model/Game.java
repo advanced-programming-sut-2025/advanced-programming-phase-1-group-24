@@ -19,14 +19,16 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
+
 import java.util.*;
+
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.client.MainApp;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
-    private String NetworkId = UUID.randomUUID().toString();
+    private  String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -68,6 +70,7 @@ public class Game {
         predictTomorrowWeather();
         generateNPCs();
     }
+
     public Game() {
     }
 
@@ -220,6 +223,7 @@ public class Game {
         }
         return null;
     }
+
     public Friendship getFriendship(String name1, String name2) {
         // Ensure consistent ordering as used in Friendship constructor
         String player1 = name1.compareTo(name2) < 0 ? name1 : name2;
@@ -236,6 +240,7 @@ public class Game {
     public ArrayList<Friendship> getAllFriendships() {
         return allFriendships;
     }
+
     public void generateNPCs() {
         if (this.npcs == null) {
             this.npcs = new ArrayList<>();

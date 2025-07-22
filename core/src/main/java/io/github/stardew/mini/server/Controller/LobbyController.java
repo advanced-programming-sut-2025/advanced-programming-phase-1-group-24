@@ -7,8 +7,10 @@ import io.github.stardew.mini.server.Lobby;
 import io.github.stardew.mini.server.LobbyManager;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class LobbyController {
     public void createLobby(String name, String password, boolean isPrivate, boolean isInvisible, User user) {
@@ -25,7 +27,7 @@ public class LobbyController {
             return Message.FORBIDDEN.setMessage("You are not allowed to join this lobby");
 
     }
-//    public Message<?> leaveLobby() {
+    //    public Message<?> leaveLobby() {
 //
 //    }
     public Message<?> getAllLobbies() {
@@ -35,9 +37,17 @@ public class LobbyController {
     public Message<?> leaveLobby(String id, User user) {
         for(Lobby lobby : LobbyManager.getInstance().getActiveLobbies().values()) {
             if (lobby.getId().equals(id)) {
-                for (User users : lobby.getPlayers()) {
-                    if(users.getUsername().equals(user.getUsername())) {
-                        lobby.getPlayers().remove(user);
+                        Iterator<User> iterator = lobby.getPlayers().iterator();
+                        while (iterator.hasNext()) {
+                            User current = iterator.next();
+                            if (current.getUsername().equals(user.getUsername())) {
+                                boolean wasCreator = lobby.getCreator().getUsername().equals(user.getUsername());
+                                iterator.remove();
+
+                                // If the creator left and there are still players, assign new creator
+                                if (wasCreator && !lobby.getPlayers().isEmpty()) {
+                                    lobby.setCreator(lobby.getPlayers().get(0));
+                                }
                         return new Message<>(200, "leaved lobby", null, Message.MessageType.RESPONSE);
                     }
                 }
@@ -57,6 +67,10 @@ public class LobbyController {
                 info.setId(lobby.getId());
                 info.setName(lobby.getName());
                 info.setPlayerCount(lobby.getPlayers().size());
+                List<String> usernames = lobby.getPlayers().stream()
+                    .map(User::getUsername)
+                    .collect(Collectors.toList());
+                info.setPlayers(usernames);
                 info.setPrivate(lobby.isPrivate());
                 info.setInvisible(lobby.isInvisible());
                 body.put("lobby", info);

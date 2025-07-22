@@ -201,10 +201,10 @@ public class LobbyMenuView implements Screen, AppMenu {
             });
 
             leaveButton.addListener(new ClickListener() {
-               @Override
-               public void clicked(InputEvent event, float x, float y) {
-                   controller.leaveLobby(lobby.getId());
-               }
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    controller.leaveLobby(lobby.getId());
+                }
             });
 
             startButton.addListener(new ClickListener() {

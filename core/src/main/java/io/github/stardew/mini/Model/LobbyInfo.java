@@ -9,7 +9,7 @@ public class LobbyInfo {
     private int playerCount;
     private boolean isPrivate;
     private boolean isInvisible;
-    private List<String> players= new ArrayList<>();
+    private List<String> players = new ArrayList<>();
     private String owner;
 
     public String getId() {
@@ -44,14 +44,6 @@ public class LobbyInfo {
         isPrivate = aPrivate;
     }
 
-    public boolean isInvisible() {
-        return isInvisible;
-    }
-
-    public void setInvisible(boolean invisible) {
-        isInvisible = invisible;
-    }
-
     public List<String> getPlayers() {
         return players;
     }
@@ -60,12 +52,19 @@ public class LobbyInfo {
         this.players = players;
     }
 
-
     public String getOwner() {
         return owner;
     }
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
     }
 }

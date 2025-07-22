@@ -47,10 +47,9 @@ public class LobbyManager {
                 info.setPlayerCount(Lobby.getPlayers().size());
                 info.setPrivate(Lobby.isPrivate());
                 info.setInvisible(Lobby.isInvisible());
-                List<String> usernames = Lobby.getPlayers()
-                    .stream()
+                List<String> usernames = Lobby.getPlayers().stream()
                     .map(User::getUsername)
-                    .toList();
+                    .collect(Collectors.toList());
                 info.setPlayers(usernames);
                 return info;
             }).collect(Collectors.toList());
@@ -58,6 +57,7 @@ public class LobbyManager {
         body.put("lobbies", LobbyInfoList);
         return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
     }
+
 
     public boolean joinLobby(String id, String password, User user) {
         Lobby lobby = activeLobbies.get(id);

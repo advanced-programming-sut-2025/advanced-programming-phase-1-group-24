@@ -3088,228 +3088,228 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //                }
 //            }
 //        }
-        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
-            moveCooldown -= v;
-            if (moveCooldown <= 0f) {
-                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","0");
-                    params.put("dy","-1");
-                    params.put("direction","3");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
-                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","0");
-                    params.put("dy","1");
-                    params.put("direction","1");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
-                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","-1");
-                    params.put("dy","0");
-                    params.put("direction","0");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
-                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","1");
-                    params.put("dy","0");
-                    params.put("direction","2");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
-                }
-            }
-        }
 //        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
 //            moveCooldown -= v;
 //            if (moveCooldown <= 0f) {
-//                int dx = 0, dy = 0, direction = -1;
-//
 //                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-//                    dx = 0; dy = -1; direction = 3;
-//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-//                    dx = 0; dy = 1; direction = 1;
-//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-//                    dx = -1; dy = 0; direction = 0;
-//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-//                    dx = 1; dy = 0; direction = 2;
-//                }
-//
-//                if (direction != -1) {
-//                    // ✅ Optimistically move the player locally
-////                    Tile currentTile = currentPlayer.getCurrentTile();
-////                    Tile nextTile = currentTile.offset(dx, dy); // You must implement this logic
-////                    if (nextTile != null && !nextTile.isBlocked()) {
-////                        currentPlayer.setCurrentTile(nextTile);
-////                        currentPlayer.setMovingDirection(direction);
-////                        moveCooldown = MOVE_INTERVAL;
-////                    }
-//                    if (tryMove(dx, dy, direction)) {
-//                        moveCooldown = MOVE_INTERVAL;
-//                    }
-//
-//                    // ✅ Send move request to server (still needed for real game state)
 //                    Map<String, Object> params = new HashMap<>();
-//                    params.put("dx", String.valueOf(dx));
-//                    params.put("dy", String.valueOf(dy));
-//                    params.put("direction", String.valueOf(direction));
+//                    params.put("dx","0");
+//                    params.put("dy","-1");
+//                    params.put("direction","3");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
 //
-//                    MainApp.getInstance().getNetworkClient()
-//                        .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-//                            "GameController", "tryMove", params, currentPlayer.getUsername())
-//                        .thenAccept(response -> {
-//                            if (response.getStatus() == 200) {
-//                                Object bodyRaw = response.getBody();
-//                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
-////                                    Tile serverTile = GameSaver.convertObject(bodyMap.get("tile"), Tile.class);
-////                                    int energy = ((Number) bodyMap.get("energy")).intValue();
-////                                    int dir = ((Number) bodyMap.get("movingDirection")).intValue();
-////
-////                                    // ✅ Reconcile — if client and server differ, correct it
-////                                    if (!currentPlayer.getCurrentTile().equals(serverTile)) {
-////                                        currentPlayer.setCurrentTile(serverTile);
-////                                    }
-////                                    currentPlayer.setEnergy(energy);
-////                                    currentPlayer.setMovingDirection(dir);
-//                                    Object tileRaw = bodyMap.get("tile");
-//                                    Object energyRaw = bodyMap.get("energy");
-//                                    Object dirRaw = bodyMap.get("movingDirection");
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
 //
-//                                    Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-//                                    int energy = ((Number) energyRaw).intValue();
-//                                    int dir = ((Number) dirRaw).intValue();
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
 //
-//                                    User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-//                                    currentPlayer.setCurrentTile(tile);
-//                                    currentPlayer.setEnergy(energy);
-//                                    currentPlayer.setMovingDirection(dir);
-//                                } else {
-//                                  System.err.println("Response body is not a map");
-//                                }
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
 //                            }
-//                        }).exceptionally(ex -> {
-//                            Gdx.app.postRunnable(() -> {
-//                                showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-//                            });
-//                            return null;
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
 //                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","0");
+//                    params.put("dy","1");
+//                    params.put("direction","1");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","-1");
+//                    params.put("dy","0");
+//                    params.put("direction","0");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","1");
+//                    params.put("dy","0");
+//                    params.put("direction","2");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
 //                }
 //            }
 //        }
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+            moveCooldown -= v;
+            if (moveCooldown <= 0f) {
+                int dx = 0, dy = 0, direction = -1;
+
+                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                    dx = 0; dy = -1; direction = 3;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                    dx = 0; dy = 1; direction = 1;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    dx = -1; dy = 0; direction = 0;
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    dx = 1; dy = 0; direction = 2;
+                }
+
+                if (direction != -1) {
+                    // ✅ Optimistically move the player locally
+//                    Tile currentTile = currentPlayer.getCurrentTile();
+//                    Tile nextTile = currentTile.offset(dx, dy); // You must implement this logic
+//                    if (nextTile != null && !nextTile.isBlocked()) {
+//                        currentPlayer.setCurrentTile(nextTile);
+//                        currentPlayer.setMovingDirection(direction);
+//                        moveCooldown = MOVE_INTERVAL;
+//                    }
+                    if (tryMove(dx, dy, direction)) {
+                        moveCooldown = MOVE_INTERVAL;
+                    }
+
+                    // ✅ Send move request to server (still needed for real game state)
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("dx", String.valueOf(dx));
+                    params.put("dy", String.valueOf(dy));
+                    params.put("direction", String.valueOf(direction));
+
+                    MainApp.getInstance().getNetworkClient()
+                        .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                            "GameController", "tryMove", params, currentPlayer.getUsername())
+                        .thenAccept(response -> {
+                            if (response.getStatus() == 200) {
+                                Object bodyRaw = response.getBody();
+                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                    Tile serverTile = GameSaver.convertObject(bodyMap.get("tile"), Tile.class);
+//                                    int energy = ((Number) bodyMap.get("energy")).intValue();
+//                                    int dir = ((Number) bodyMap.get("movingDirection")).intValue();
+//
+//                                    // ✅ Reconcile — if client and server differ, correct it
+//                                    if (!currentPlayer.getCurrentTile().equals(serverTile)) {
+//                                        currentPlayer.setCurrentTile(serverTile);
+//                                    }
+//                                    currentPlayer.setEnergy(energy);
+//                                    currentPlayer.setMovingDirection(dir);
+                                    Object tileRaw = bodyMap.get("tile");
+                                    Object energyRaw = bodyMap.get("energy");
+                                    Object dirRaw = bodyMap.get("movingDirection");
+
+                                    Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+                                    int energy = ((Number) energyRaw).intValue();
+                                    int dir = ((Number) dirRaw).intValue();
+
+                                    User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+                                    currentPlayer.setCurrentTile(tile);
+                                    currentPlayer.setEnergy(energy);
+                                    currentPlayer.setMovingDirection(dir);
+                                } else {
+                                  System.err.println("Response body is not a map");
+                                }
+                            }
+                        }).exceptionally(ex -> {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+                            });
+                            return null;
+                        });
+                }
+            }
+        }
 
         setCameraPosition();
         camera.update();

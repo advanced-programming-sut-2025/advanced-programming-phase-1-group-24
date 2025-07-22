@@ -63,23 +63,23 @@ public class LobbyMenuController {
             .sendGet(gameId, controllerName, methodName, params, username)
             .thenAccept(response -> {
                 if (response.getStatus() == 200) {
-                   Object body = response.getBody();
-                   if(body instanceof Map<?,?>) {
-                       Map<String, Object> bodyMap = (Map<String, Object>) body;
-                       Object lobbies = bodyMap.get("lobbies");
-                       if(lobbies != null) {
-                           Gson gson = new Gson();
-                           String json = gson.toJson(lobbies);
-                           Type listType = new TypeToken<List<LobbyInfo>>() {}.getType();
-                           List<LobbyInfo> lobbiesList = gson.fromJson(json, listType);
-                           System.out.println("lobbies found");
-                           Gdx.app.postRunnable(() -> view.updateLobbyList(lobbiesList));
-                       }
-                       else{
-                           System.err.println("❌ Failed to fetch lobbies: " + response.getMessage());
-                           Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(),"No lobby yet!"));
-                       }
-                   }
+                    Object body = response.getBody();
+                    if(body instanceof Map<?,?>) {
+                        Map<String, Object> bodyMap = (Map<String, Object>) body;
+                        Object lobbies = bodyMap.get("lobbies");
+                        if(lobbies != null) {
+                            Gson gson = new Gson();
+                            String json = gson.toJson(lobbies);
+                            Type listType = new TypeToken<List<LobbyInfo>>() {}.getType();
+                            List<LobbyInfo> lobbiesList = gson.fromJson(json, listType);
+                            System.out.println("lobbies found");
+                            Gdx.app.postRunnable(() -> view.updateLobbyList(lobbiesList));
+                        }
+                        else{
+                            System.err.println("❌ Failed to fetch lobbies: " + response.getMessage());
+                            Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(),"No lobby yet!"));
+                        }
+                    }
                 } else {
                     System.err.println("❌ Failed to fetch lobbies: " + response.getMessage());
                     Gdx.app.postRunnable(() -> view.showErrorDialog(view.getStage(),"Failed to get lobby list: " + response.getMessage()));

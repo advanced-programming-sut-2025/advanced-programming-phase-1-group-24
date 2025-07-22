@@ -217,5 +217,3 @@ public class NewGameMenuController implements MenuController {
 //        gs.handleRequests(ctx);
 //    }
 }
-
-
