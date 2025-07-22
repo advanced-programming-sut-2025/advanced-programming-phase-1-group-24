@@ -1,12 +1,20 @@
 package io.github.stardew.mini.client;
 
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.Food;
+import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.server.Controller.*;
+import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.FoodType;
 import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.Model.Animals.AnimalProductType;
@@ -28,11 +36,14 @@ import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 
 public class MainApp extends com.badlogic.gdx.Game {
@@ -43,26 +54,43 @@ public class MainApp extends com.badlogic.gdx.Game {
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
-    //=UserDatabase.loadUsers(); // we should delete this
+    //UserDatabase.loadUsers(); // we should delete this
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
+    private String jwtToken;
 
+    public String getJwtToken() {
+        return jwtToken;
+    }
+    public void setJwtToken(String jwtToken) {
+        this.jwtToken = jwtToken;
+    }
+
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
+    }
 
     @Override
     public void create() {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
+        users = UserDatabase.loadUsers();
+        if (users == null) {
+            users = new ArrayList<>();
+        }
         connectToServer();
+        //loggedInUser = new User("nikki", "1234", "nik", "aa", true);
         setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
         if (loggedInUser == null) {
             setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
         } else
             setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        //setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
-        // Initialize game data
-        //loadGameData();
+//       // Initialize game data
+       //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -112,11 +140,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
-    public void setCurrentGameId(String gameId) {
-        currentGame.setNetworkId(gameId);
-    }
 
-    private void connectToServer() {
+    public void connectToServer() {
         try {
             URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
             networkClient = new NetworkClient(serverUri);
@@ -193,8 +218,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             }
         }
     }
-
-    /// /////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
+////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
     public void saveActiveGames() {
         try {
             GameSaver.saveGames(activeGames, "data/active_games.json.gz");
@@ -202,7 +226,6 @@ public class MainApp extends com.badlogic.gdx.Game {
             e.printStackTrace();
         }
     }
-
     private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
         File file = new File("data/active_games.json.gz");
         if (!file.exists()) return new ArrayList<>();
@@ -236,6 +259,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         "In my little pony what is appleJack's pet name?",
         "how many times did SpongeBob take the driving test?"
     );
+
+    public CompletableFuture<Message<String>> wsLogin(String user, String pass) {
+        return networkClient.login(user, pass);
+    }
 
     public Menu getCurrentMenu() {
         return currentMenu;
@@ -297,7 +324,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.currentMenu = currentMenu;
         changeScreen();
     }
-
     public void changeScreen() {
         switch (currentMenu) {
             case GameMenu:

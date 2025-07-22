@@ -127,5 +127,14 @@ public class GameServer extends Thread {
     public List<PlayerConnection> getPlayers() {
         return players;
     }
+
+    public User getUserByUsername(String username) {
+        for(PlayerConnection player : players){
+            if(player.getUsername().equals(username)){
+                return player.getUser();
+            }
+        }
+        return null;
+    }
 }
 

@@ -1,8 +1,11 @@
 package io.github.stardew.mini.Model.Things;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Objects;
 
 public class Food extends Item {
+    @JsonIgnore
     FoodType type;
     int energy;
     public Food(FoodType type) {
