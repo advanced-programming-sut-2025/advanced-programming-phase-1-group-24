@@ -1,10 +1,16 @@
 package io.github.stardew.mini.Model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LobbyInfo {
     private String id;
     private String name;
     private int playerCount;
     private boolean isPrivate;
+    private boolean isInvisible;
+    private List<String> players = new ArrayList<>();
+    private String owner;
 
     public String getId() {
         return id;
@@ -36,5 +42,29 @@ public class LobbyInfo {
 
     public void setPrivate(boolean aPrivate) {
         isPrivate = aPrivate;
+    }
+
+    public List<String> getPlayers() {
+        return players;
+    }
+
+    public void setPlayers(List<String> players) {
+        this.players = players;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
     }
 }

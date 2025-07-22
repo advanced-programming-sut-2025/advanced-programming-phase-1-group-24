@@ -39,7 +39,6 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.GameController;
@@ -176,8 +175,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private boolean showToolsMenu = false;
     private boolean showInventoryMenu = false;
     private boolean showBackpackMenu = false;
-    //private BitmapFont smallFont;
-    //private BitmapFont smallerButtonFont;
+    private BitmapFont smallFont;
+    private BitmapFont smallerButtonFont;
     private int selectedSlot = 0;
     private Table toolMenuTable;
     private Table inventoryMenuTable;
@@ -208,18 +207,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private String scenario = "";
     String giftReciever, artisanName;
 
-//    private void loadFont() {
-//        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
-//        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//        parameter.size = 32;
-//        smallFont = generator.generateFont(parameter);
-//
-//        FreeTypeFontGenerator.FreeTypeFontParameter smallerParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//        smallerParameter.size = 24;
-//        smallerButtonFont = generator.generateFont(smallerParameter);
-//
-//        generator.dispose();
-//    }
+    private void loadFont() {
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 32;
+        smallFont = generator.generateFont(parameter);
+
+        FreeTypeFontGenerator.FreeTypeFontParameter smallerParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        smallerParameter.size = 24;
+        smallerButtonFont = generator.generateFont(smallerParameter);
+
+        generator.dispose();
+    }
 
     public GameView(GameController controller) {
         this.controller = controller;
@@ -228,7 +227,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         controller.setView(this);
         this.batch = MainApp.getBatch();
         this.currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        //loadFont();
+        loadFont();
         for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
             MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().put(user.getUsername(), new ArrayList<>());
         }
@@ -312,19 +311,19 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
 
-private void updateAnimals(float delta) {
-    for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-        for (Animal animal : player.getOwnedAnimals()) {
-            animal.updateMovement(delta);
+    private void updateAnimals(float delta) {
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            for (Animal animal : player.getOwnedAnimals()) {
+                animal.updateMovement(delta);
 //            animal.updateIsInHabitat();
-            if (!animal.updateIsInHabitat()) {
-                animal.feed();
-            }
+                if (!animal.updateIsInHabitat()) {
+                    animal.feed();
+                }
 
-            // Only try to assign a new path if animal is not moving
-            // and its personal cooldown allows it
-            if (!animal.itMoving() && !animal.isInHabitat()) {
-                animal.reduceCooldown(delta);
+                // Only try to assign a new path if animal is not moving
+                // and its personal cooldown allows it
+                if (!animal.itMoving() && !animal.isInHabitat()) {
+                    animal.reduceCooldown(delta);
 
                     if (animal.getMovementCooldown() <= 0f) {
                         List<Tile> path = generateStepwisePath(animal);
@@ -791,7 +790,7 @@ private void updateAnimals(float delta) {
         if (showFullMap) return true;
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
-}
+    }
     private Animal getAnimalNearPlayer() {
         int playerX = currentPlayer.getCurrentTile().getX();
         int playerY = currentPlayer.getCurrentTile().getY();
@@ -1155,95 +1154,95 @@ private void updateAnimals(float delta) {
         return false;
     }
 
-            private void showShopMenuDialog(float x, float y) {
-                shopMenuDialog.getContentTable().clear();
-                shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+    private void showShopMenuDialog(float x, float y) {
+        shopMenuDialog.getContentTable().clear();
+        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
-                Table content = shopMenuDialog.getContentTable();
-                content.defaults().pad(10);
-                content.clear();
+        Table content = shopMenuDialog.getContentTable();
+        content.defaults().pad(10);
+        content.clear();
 
-                // Filter dropdown (SelectBox)
-                Table filterTable = new Table();
-                SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
-                filterSelectBox.setItems("All Products", "Available Products");
-                filterSelectBox.setSelected("All Products"); // default selection
-                filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
-                filterTable.add(filterSelectBox).left();
+        // Filter dropdown (SelectBox)
+        Table filterTable = new Table();
+        SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
+        filterSelectBox.setItems("All Products", "Available Products");
+        filterSelectBox.setSelected("All Products"); // default selection
+        filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
+        filterTable.add(filterSelectBox).left();
 
-                content.add(filterTable).left().row();
+        content.add(filterTable).left().row();
 
-                // Item list table
-                final Table itemTable = new Table();
-                itemTable.top();
-                itemTable.defaults().pad(5).fillX();
+        // Item list table
+        final Table itemTable = new Table();
+        itemTable.top();
+        itemTable.defaults().pad(5).fillX();
 
-                // Refresh logic for filtering
-                Runnable refreshItems = () -> {
-                    itemTable.clear();
-                    boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
+        // Refresh logic for filtering
+        Runnable refreshItems = () -> {
+            itemTable.clear();
+            boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
 
-                    for (final ShopItem item : selectedShop.getProducts()) {
-                        boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+            for (final ShopItem item : selectedShop.getProducts()) {
+                boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
 
-                        if (onlyAvailable && !isAvailable) continue;
+                if (onlyAvailable && !isAvailable) continue;
 
-                        TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
-                        itemButton.setDisabled(!isAvailable);
-                        itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+                TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
+                itemButton.setDisabled(!isAvailable);
+                itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
 
-                        itemButton.addListener(new ClickListener() {
-                            @Override
-                            public void clicked(InputEvent event, float x, float y) {
-                                selectedShopItem = item;
-                                if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
-                                    || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
-                                    showFullFarm(item);
-                                } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
-                                    showBuyAnimalDialog(item);
-                                } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
-                                    Result result = storeController.upgradeTool(selectedShop,item.getName());
-                                    showErrorDialog(stage,result.message());
-                                } else {
-                                    purchaseQuantity = 1;
-                                    showPurchaseDialog();
-                                }
-                                shopMenuDialog.hide();
-                                shopMenuDialog.setVisible(false);
-                            }
-                        });
-
-                        itemTable.add(itemButton).expandX().fillX().row();
-                    }
-                };
-
-                // Listener for dropdown change
-                filterSelectBox.addListener(new ChangeListener() {
+                itemButton.addListener(new ClickListener() {
                     @Override
-                    public void changed(ChangeEvent event, Actor actor) {
-                        refreshItems.run();
+                    public void clicked(InputEvent event, float x, float y) {
+                        selectedShopItem = item;
+                        if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
+                            || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
+                            showFullFarm(item);
+                        } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
+                            showBuyAnimalDialog(item);
+                        } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
+                            Result result = storeController.upgradeTool(selectedShop,item.getName());
+                            showErrorDialog(stage,result.message());
+                        } else {
+                            purchaseQuantity = 1;
+                            showPurchaseDialog();
+                        }
+                        shopMenuDialog.hide();
+                        shopMenuDialog.setVisible(false);
                     }
                 });
 
-                // Scrollable list for items
-                ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
-                scrollPane.setFadeScrollBars(false);
-                scrollPane.setScrollingDisabled(true, false);
-                scrollPane.setForceScroll(false, true);
-                scrollPane.layout();
-
-                content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
-
-                // Initial load
-                refreshItems.run();
-
-                shopMenuDialog.pack();
-                shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
-
-                shopMenuDialog.setVisible(true);
-                shopMenuDialog.show(stage);
-                Gdx.input.setInputProcessor(stage);
+                itemTable.add(itemButton).expandX().fillX().row();
             }
+        };
+
+        // Listener for dropdown change
+        filterSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                refreshItems.run();
+            }
+        });
+
+        // Scrollable list for items
+        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.layout();
+
+        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
+
+        // Initial load
+        refreshItems.run();
+
+        shopMenuDialog.pack();
+        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+
+        shopMenuDialog.setVisible(true);
+        shopMenuDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
 
     public void showBuyAnimalDialog(ShopItem item) {
         buyAnimalDialog.getContentTable().clear();
@@ -1541,7 +1540,7 @@ private void updateAnimals(float delta) {
         stage.addActor(terminalWindow);
     }
 
-//    private void createAnimalDialog() {
+    //    private void createAnimalDialog() {
 //        // Create the animal menu dialog (initially hidden)
 //        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
 //            @Override
@@ -1620,122 +1619,122 @@ private void updateAnimals(float delta) {
 //        animalMenuDialog.setVisible(false);  // Add this after creation
 //        stage.addActor(animalMenuDialog);
 //    }
-private void createAnimalDialog() {
-    animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
-        @Override
-        protected void result(Object object) {
-            handleAnimalMenuChoice(object.toString());
-        }
-    };
+    private void createAnimalDialog() {
+        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                handleAnimalMenuChoice(object.toString());
+            }
+        };
 
-    animalMenuDialog.padTop(40);
-    animalMenuDialog.getContentTable().defaults().pad(5);
+        animalMenuDialog.padTop(40);
+        animalMenuDialog.getContentTable().defaults().pad(5);
 
-    // ========== TOP INFO AREA ==========
-    animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
-    animalInfoLabel.setWrap(true);
-    animalMenuDialog.getContentTable().add(animalInfoLabel).width(300).row();
+        // ========== TOP INFO AREA ==========
+        animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
+        animalInfoLabel.setWrap(true);
+        animalMenuDialog.getContentTable().add(animalInfoLabel).width(300).row();
 
 
-    // ========== SHEPHERD INPUT FIELDS ==========
-    TextField xField = new TextField("", GameAssetManager.skin);
-    TextField yField = new TextField("", GameAssetManager.skin);
-    xField.setMessageText("X");
-    yField.setMessageText("Y");
+        // ========== SHEPHERD INPUT FIELDS ==========
+        TextField xField = new TextField("", GameAssetManager.skin);
+        TextField yField = new TextField("", GameAssetManager.skin);
+        xField.setMessageText("X");
+        yField.setMessageText("Y");
 
-    HorizontalGroup shepherdGroup = new HorizontalGroup();
-    shepherdGroup.space(10);
-    shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
-    shepherdGroup.addActor(xField);
-    shepherdGroup.addActor(yField);
+        HorizontalGroup shepherdGroup = new HorizontalGroup();
+        shepherdGroup.space(10);
+        shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
+        shepherdGroup.addActor(xField);
+        shepherdGroup.addActor(yField);
 
-    TextButton shepherdButton = new TextButton("Shepherd", GameAssetManager.skin, "custom-button");
-    shepherdButton.addListener(new ClickListener() {
-        @Override
-        public void clicked(InputEvent event, float x, float y) {
-            try {
-                int targetX = Integer.parseInt(xField.getText());
-                int targetY = Integer.parseInt(yField.getText());
-                handleAnimalMenuChoice("shepherd:" + targetX + "," + targetY);
+        TextButton shepherdButton = new TextButton("Shepherd", GameAssetManager.skin, "custom-button");
+        shepherdButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                try {
+                    int targetX = Integer.parseInt(xField.getText());
+                    int targetY = Integer.parseInt(yField.getText());
+                    handleAnimalMenuChoice("shepherd:" + targetX + "," + targetY);
+                    xField.setText("");
+                    yField.setText("");
+                } catch (NumberFormatException e) {
+                    showErrorDialog(stage, "Please enter valid coordinates.");
+                }
+            }
+        });
+
+        animalMenuDialog.getContentTable().add(shepherdGroup).row();
+        animalMenuDialog.getContentTable().add(shepherdButton).row();
+
+        // ========== BUTTONS ==========
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
+        releaseButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("release");
+            }
+        });
+        animalMenuDialog.getContentTable().add(releaseButton).row();
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
+        feedButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("feed");
+            }
+        });
+        animalMenuDialog.getContentTable().add(feedButton).row();
+
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
+        petButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("pet");
+            }
+        });
+        animalMenuDialog.getContentTable().add(petButton).row();
+
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
+        sellButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("sell");
+            }
+        });
+        animalMenuDialog.getContentTable().add(sellButton).row();
+
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
+        collectButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("collect");
+            }
+        });
+        animalMenuDialog.getContentTable().add(collectButton).row();
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+        cancelButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+                selectedAnimal = null;
                 xField.setText("");
                 yField.setText("");
-            } catch (NumberFormatException e) {
-                showErrorDialog(stage, "Please enter valid coordinates.");
             }
-        }
-    });
+        });
+        animalMenuDialog.getContentTable().add(cancelButton).row();
 
-    animalMenuDialog.getContentTable().add(shepherdGroup).row();
-    animalMenuDialog.getContentTable().add(shepherdButton).row();
-
-    // ========== BUTTONS ==========
-    TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
-    releaseButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("release");
-        }
-    });
-    animalMenuDialog.getContentTable().add(releaseButton).row();
-    TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
-    feedButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("feed");
-        }
-    });
-    animalMenuDialog.getContentTable().add(feedButton).row();
-
-    TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
-    petButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("pet");
-        }
-    });
-    animalMenuDialog.getContentTable().add(petButton).row();
-
-    TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
-    sellButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("sell");
-        }
-    });
-    animalMenuDialog.getContentTable().add(sellButton).row();
-
-    TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
-    collectButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("collect");
-        }
-    });
-    animalMenuDialog.getContentTable().add(collectButton).row();
-
-    TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
-    cancelButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            Gdx.input.setInputProcessor(GameView.this);
-            selectedAnimal = null;
-            xField.setText("");
-            yField.setText("");
-        }
-    });
-    animalMenuDialog.getContentTable().add(cancelButton).row();
-
-    animalMenuDialog.setKeepWithinStage(true);
-    animalMenuDialog.setMovable(false);
-    animalMenuDialog.setVisible(false);
-    stage.addActor(animalMenuDialog);
-}
+        animalMenuDialog.setKeepWithinStage(true);
+        animalMenuDialog.setMovable(false);
+        animalMenuDialog.setVisible(false);
+        stage.addActor(animalMenuDialog);
+    }
     private void updateAnimalInfoLabel() {
         if (selectedAnimal == null || animalInfoLabel == null) return;
 
         StringBuilder info = new StringBuilder();
         info.append("Name: ").append(selectedAnimal.getName()).append("\n");
-       // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+        // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
         info.append("Friendship: ").append(selectedAnimal.getFriendship()).append("\n");
         info.append("Fed: ").append(selectedAnimal.isFedToday()).append("\n");
         info.append("Petted: ").append(selectedAnimal.isPettedToday()).append("\n");
@@ -2453,7 +2452,7 @@ private void createAnimalDialog() {
         TextButton.TextButtonStyle smallerButtonStyle = new TextButton.TextButtonStyle(
             GameAssetManager.skin.get("custom-button", TextButton.TextButtonStyle.class)
         );
-        smallerButtonStyle.font = GameAssetManager.customFont;
+        smallerButtonStyle.font = smallerButtonFont;
 
 
         TextButton giftButton = new TextButton("Gift", smallerButtonStyle);
@@ -2608,11 +2607,11 @@ private void createAnimalDialog() {
         return
             //(skillsDialog != null && skillsDialog.isVisible()) ||
             (shopMenuDialog != null && shopMenuDialog.isVisible()) ||
-           // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
-            (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
-            //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
-           // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
-           // (friendsDialog != null && friendsDialog.isVisible());
+                // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
+                (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
+        //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
+        // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
+        // (friendsDialog != null && friendsDialog.isVisible());
     }
 
     @Override
@@ -2695,14 +2694,14 @@ private void createAnimalDialog() {
         updateEquippedItemSlot();
 
 
-        gameTickTask = Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
-                controller.handleEndOfDay();
-                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
-            }
-        }, 5, 5);
+//        gameTickTask = Timer.schedule(new Timer.Task() {
+//            @Override
+//            public void run() {
+//                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+//                controller.handleEndOfDay();
+//               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+//            }
+//        }, 5, 5);
 
         determineAvatar();
 
@@ -2838,6 +2837,11 @@ private void createAnimalDialog() {
 
     @Override
     public void render(float v) {
+        //////////////////////hard code /////////////////////////
+//        currentPlayer =  MainApp.getInstance().getLoggedInUser();
+//        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
+        //////////////////////hard code /////////////////////////
+        updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
 //        if (currentPlayer.hasFainted()) {
@@ -2848,17 +2852,16 @@ private void createAnimalDialog() {
 //        } else {
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
-
-            if (currentPlayer.hasFainted()) {
-                if (!hasShownFaintMessage) {
-                    showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
-                        controller.nextTurn();
-                    });
-                    hasShownFaintMessage = true;
-                }
-            } else {
-                hasShownFaintMessage = false;
+        if (currentPlayer.hasFainted()) {
+            if (!hasShownFaintMessage) {
+                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
+                    controller.nextTurn();
+                });
+                hasShownFaintMessage = true;
             }
+        } else {
+            hasShownFaintMessage = false;
+        }
 
 
 
@@ -3085,152 +3088,229 @@ private void createAnimalDialog() {
 //                }
 //            }
 //        }
+//        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+//            moveCooldown -= v;
+//            if (moveCooldown <= 0f) {
+//                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","0");
+//                    params.put("dy","-1");
+//                    params.put("direction","3");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","0");
+//                    params.put("dy","1");
+//                    params.put("direction","1");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","-1");
+//                    params.put("dy","0");
+//                    params.put("direction","0");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","1");
+//                    params.put("dy","0");
+//                    params.put("direction","2");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                }
+//            }
+//        }
         if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
+                int dx = 0, dy = 0, direction = -1;
+
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","0");
-                    params.put("dy","-1");
-                    params.put("direction","3");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
+                    dx = 0; dy = -1; direction = 3;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","0");
-                    params.put("dy","1");
-                    params.put("direction","1");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
+                    dx = 0; dy = 1; direction = 1;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("dx","-1");
-                    params.put("dy","0");
-                    params.put("direction","0");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
-
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
-
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
-
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
-                            }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
-                        });
-                        return null;
-                    });
+                    dx = -1; dy = 0; direction = 0;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    dx = 1; dy = 0; direction = 2;
+                }
+
+                if (direction != -1) {
+                    // ✅ Optimistically move the player locally
+//                    Tile currentTile = currentPlayer.getCurrentTile();
+//                    Tile nextTile = currentTile.offset(dx, dy); // You must implement this logic
+//                    if (nextTile != null && !nextTile.isBlocked()) {
+//                        currentPlayer.setCurrentTile(nextTile);
+//                        currentPlayer.setMovingDirection(direction);
+//                        moveCooldown = MOVE_INTERVAL;
+//                    }
+                    if (tryMove(dx, dy, direction)) {
+                        moveCooldown = MOVE_INTERVAL;
+                    }
+
+                    // ✅ Send move request to server (still needed for real game state)
                     Map<String, Object> params = new HashMap<>();
-                    params.put("dx","1");
-                    params.put("dy","0");
-                    params.put("direction","2");
-                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
-                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
-                        if (response.getStatus() == 200) {
-                            moveCooldown = MOVE_INTERVAL;
-                            Object bodyRaw = response.getBody();
+                    params.put("dx", String.valueOf(dx));
+                    params.put("dy", String.valueOf(dy));
+                    params.put("direction", String.valueOf(direction));
 
-                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object tileRaw = bodyMap.get("tile");
-                                Object energyRaw = bodyMap.get("energy");
-                                Object dirRaw = bodyMap.get("movingDirection");
+                    MainApp.getInstance().getNetworkClient()
+                        .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                            "GameController", "tryMove", params, currentPlayer.getUsername())
+                        .thenAccept(response -> {
+                            if (response.getStatus() == 200) {
+                                Object bodyRaw = response.getBody();
+                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                    Tile serverTile = GameSaver.convertObject(bodyMap.get("tile"), Tile.class);
+//                                    int energy = ((Number) bodyMap.get("energy")).intValue();
+//                                    int dir = ((Number) bodyMap.get("movingDirection")).intValue();
+//
+//                                    // ✅ Reconcile — if client and server differ, correct it
+//                                    if (!currentPlayer.getCurrentTile().equals(serverTile)) {
+//                                        currentPlayer.setCurrentTile(serverTile);
+//                                    }
+//                                    currentPlayer.setEnergy(energy);
+//                                    currentPlayer.setMovingDirection(dir);
+                                    Object tileRaw = bodyMap.get("tile");
+                                    Object energyRaw = bodyMap.get("energy");
+                                    Object dirRaw = bodyMap.get("movingDirection");
 
-                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                                int energy = ((Number) energyRaw).intValue();
-                                int direction = ((Number) dirRaw).intValue();
+                                    Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+                                    int energy = ((Number) energyRaw).intValue();
+                                    int dir = ((Number) dirRaw).intValue();
 
-                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-                                currentPlayer.setCurrentTile(tile);
-                                currentPlayer.setEnergy(energy);
-                                currentPlayer.setMovingDirection(direction);
-
-                            } else {
-                                System.err.println("Response body is not a map");
+                                    User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+                                    currentPlayer.setCurrentTile(tile);
+                                    currentPlayer.setEnergy(energy);
+                                    currentPlayer.setMovingDirection(dir);
+                                } else {
+                                  System.err.println("Response body is not a map");
+                                }
                             }
-                        }
-                    }).exceptionally(ex -> {
-                        Gdx.app.postRunnable(() -> {
-                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+                        }).exceptionally(ex -> {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+                            });
+                            return null;
                         });
-                        return null;
-                    });
                 }
             }
         }
+
         setCameraPosition();
         camera.update();
 
@@ -3302,7 +3382,7 @@ private void createAnimalDialog() {
 
             if (perfectCatch) {
                 // SILVER -> GOLD -> IRIDIUM
-               if (finalQuality == ProductQuality.Silver) {
+                if (finalQuality == ProductQuality.Silver) {
                     finalQuality = ProductQuality.Golden;
                 } else if (finalQuality == ProductQuality.Golden) {
                     finalQuality = ProductQuality.Iridium;
@@ -3487,9 +3567,9 @@ private void createAnimalDialog() {
                 float centerX = drawX + (8 * tileSize) / 2f;
                 float centerY = drawY + (7 * tileSize) / 2f;
 
-                layout.setText(GameAssetManager.customFont, message, Color.WHITE, 8 * tileSize, Align.center, true);
+                layout.setText(smallFont, message, Color.WHITE, 8 * tileSize, Align.center, true);
 
-                GameAssetManager.customFont.draw(batch, layout, centerX - layout.width / 2f - 200, centerY + layout.height / 2f - 100);
+                smallFont.draw(batch, layout, centerX - layout.width / 2f - 200, centerY + layout.height / 2f - 100);
             }
         }
     }
@@ -3507,7 +3587,7 @@ private void createAnimalDialog() {
             int drawY = (rows - shop.getY() - shop.getHeight()) * tileSize;
 
             Texture texture = shop.getShopType().getTexture();
-             if (texture != null) {
+            if (texture != null) {
                 batch.draw(texture, drawX, drawY, shop.getWidth() * tileSize, shop.getHeight() * tileSize);
             }
         }
@@ -3573,15 +3653,15 @@ private void createAnimalDialog() {
                 if(tile == TileType.EMPTY){
                     Season season = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
                     switch (season) {
-                            case SUMMER:
-                                batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                break;
-                                case AUTUMN:
-                                    batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                    break;
-                                    case WINTER:
-                                        batch.draw(GameAssetManager.FLOORING_25, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                        break;
+                        case SUMMER:
+                            batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
+                        case AUTUMN:
+                            batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
+                        case WINTER:
+                            batch.draw(GameAssetManager.FLOORING_25, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
                     }
                 }
                 if (tiles[y][x].isHasBeenBurt()) {
@@ -3622,9 +3702,9 @@ private void createAnimalDialog() {
     public void dispose() {
         clockHud.dispose();
         stage.dispose();
-//        if (smallFont != null) {
-//            smallFont.dispose();
-//        }
+        if (smallFont != null) {
+            smallFont.dispose();
+        }
     }
 
 
@@ -3854,101 +3934,101 @@ private void createAnimalDialog() {
         }
     }
 
-        private void updateToolsMenuTable() {
-            toolMenuTable.clearChildren();
+    private void updateToolsMenuTable() {
+        toolMenuTable.clearChildren();
 
-            if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
-                if (toolMenuTable != null) toolMenuTable.setVisible(false);
-                return;
-            }
+        if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
+            if (toolMenuTable != null) toolMenuTable.setVisible(false);
+            return;
+        }
 
-            Backpack backpack = currentPlayer.getBackpack();
-            ArrayList<Tool> tools = backpack.getTools();
+        Backpack backpack = currentPlayer.getBackpack();
+        ArrayList<Tool> tools = backpack.getTools();
 
-            if (tools == null || tools.isEmpty()) {
-                return;
-            }
+        if (tools == null || tools.isEmpty()) {
+            return;
+        }
 
-            Label.LabelStyle labelStyle;
-            if (GameAssetManager.skin.has("default-label", Label.LabelStyle.class)) {
-                labelStyle = GameAssetManager.skin.get("default-label", Label.LabelStyle.class);
-            } else if (GameAssetManager.skin.has("custom-label", Label.LabelStyle.class)) {
-                labelStyle = GameAssetManager.skin.get("custom-label", Label.LabelStyle.class);
+        Label.LabelStyle labelStyle;
+        if (GameAssetManager.skin.has("default-label", Label.LabelStyle.class)) {
+            labelStyle = GameAssetManager.skin.get("default-label", Label.LabelStyle.class);
+        } else if (GameAssetManager.skin.has("custom-label", Label.LabelStyle.class)) {
+            labelStyle = GameAssetManager.skin.get("custom-label", Label.LabelStyle.class);
+        } else {
+            labelStyle = new Label.LabelStyle(smallFont, Color.WHITE);
+        }
+
+        float slotImageSize = GameAssetManager.TILE_SIZE * 1.0f;
+        float labelPad = 2f;
+
+        if (selectedSlot >= tools.size()) {
+            selectedSlot = 0;
+        }
+        if (selectedSlot < 0) {
+            selectedSlot = tools.size() - 1;
+        }
+
+        for (int i = 0; i < tools.size(); i++) {
+            Stack slotStack = new Stack();
+
+            Image slotBg = new Image(InventoryAssets.slot);
+            slotBg.setSize(slotImageSize, slotImageSize);
+            slotStack.add(slotBg);
+
+            Tool tool = tools.get(i);
+            String textureOrigin;
+            if (tool instanceof FishingPole) {
+                textureOrigin = ((FishingPole) tool).getPoleMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
             } else {
-                labelStyle = new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE);
+                textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
             }
+            Texture itemTex = InventoryAssets.getToolTexture(textureOrigin);
 
-            float slotImageSize = GameAssetManager.TILE_SIZE * 1.0f;
-            float labelPad = 2f;
-
-            if (selectedSlot >= tools.size()) {
-                selectedSlot = 0;
-            }
-            if (selectedSlot < 0) {
-                selectedSlot = tools.size() - 1;
-            }
-
-            for (int i = 0; i < tools.size(); i++) {
-                Stack slotStack = new Stack();
-
-                Image slotBg = new Image(InventoryAssets.slot);
-                slotBg.setSize(slotImageSize, slotImageSize);
-                slotStack.add(slotBg);
-
-                Tool tool = tools.get(i);
-                String textureOrigin;
-                if (tool instanceof FishingPole) {
-                    textureOrigin = ((FishingPole) tool).getPoleMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
-                } else {
-                    textureOrigin = tool.getMaterial().name().toUpperCase() + tool.getType().name().toUpperCase();
+            if (i == selectedSlot && InventoryAssets.highlightedSlot != null) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotImageSize, slotImageSize);
+                slotStack.add(highlightImage);
+                if (!isToolBeingUsed) {
+                    drawSelectedTool(itemTex);
                 }
-                Texture itemTex = InventoryAssets.getToolTexture(textureOrigin);
-
-                if (i == selectedSlot && InventoryAssets.highlightedSlot != null) {
-                    Image highlightImage = new Image(InventoryAssets.highlightedSlot);
-                    highlightImage.setSize(slotImageSize, slotImageSize);
-                    slotStack.add(highlightImage);
-                    if (!isToolBeingUsed) {
-                        drawSelectedTool(itemTex);
-                    }
-                }
-
-                if (itemTex != null) {
-                    Image itemImage = new Image(itemTex);
-                    itemImage.setSize(slotImageSize, slotImageSize);
-                    slotStack.add(itemImage);
-                } else {
-                    Gdx.app.error("GameView", "Texture for tool " + textureOrigin + " is null!");
-                }
-
-                Label slotNumLabel = new Label(String.valueOf(i + 1), labelStyle);
-                Container<Label> labelContainer = new Container<>(slotNumLabel);
-                labelContainer.align(com.badlogic.gdx.utils.Align.topLeft);
-                labelContainer.pad(labelPad);
-                labelContainer.fill();
-                slotStack.add(labelContainer);
-
-                toolMenuTable.add(slotStack).size(slotImageSize, slotImageSize).pad(2f);
             }
 
-            toolMenuTable.pack();
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(slotImageSize, slotImageSize);
+                slotStack.add(itemImage);
+            } else {
+                Gdx.app.error("GameView", "Texture for tool " + textureOrigin + " is null!");
+            }
+
+            Label slotNumLabel = new Label(String.valueOf(i + 1), labelStyle);
+            Container<Label> labelContainer = new Container<>(slotNumLabel);
+            labelContainer.align(com.badlogic.gdx.utils.Align.topLeft);
+            labelContainer.pad(labelPad);
+            labelContainer.fill();
+            slotStack.add(labelContainer);
+
+            toolMenuTable.add(slotStack).size(slotImageSize, slotImageSize).pad(2f);
         }
 
-        private void drawSelectedTool(Texture itemTex) {
-            if (itemTex == null) { return; }
-            if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
+        toolMenuTable.pack();
+    }
 
-            Tile tile = currentPlayer.getCurrentTile();
-            int tileSize = GameAssetManager.TILE_SIZE;
+    private void drawSelectedTool(Texture itemTex) {
+        if (itemTex == null) { return; }
+        if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
 
-            int tileX = tile.getX();
-            int tileY = tile.getY();
+        Tile tile = currentPlayer.getCurrentTile();
+        int tileSize = GameAssetManager.TILE_SIZE;
 
-            int drawX = tileX * tileSize;
-            int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tileY - 1) * tileSize;
+        int tileX = tile.getX();
+        int tileY = tile.getY();
 
-            batch.draw(itemTex, drawX, drawY, tileSize, tileSize);
-        }
+        int drawX = tileX * tileSize;
+        int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - tileY - 1) * tileSize;
+
+        batch.draw(itemTex, drawX, drawY, tileSize, tileSize);
+    }
 
     private void useSelectedTool(float mouseWorldX, float mouseWorldY) {
         if (!showToolsMenu || showInventoryMenu || showBackpackMenu) {
@@ -4035,254 +4115,254 @@ private void createAnimalDialog() {
         }
     }
 
-        private int get4DirectionalAngle(float dx, float dy) {
-            if (dx == 0 && dy == 0) {
-                return 2; // Down
+    private int get4DirectionalAngle(float dx, float dy) {
+        if (dx == 0 && dy == 0) {
+            return 2; // Down
+        }
+
+        float angleRad = MathUtils.atan2(dy, dx);
+        float angleDeg = angleRad * MathUtils.radDeg;
+
+        if (angleDeg < 0) {
+            angleDeg += 360;
+        }
+
+        // Up:     45   to 135  (centered at 90)
+        // Left:  135   to 225  (centered at 180)
+        // Down:  225   to 315  (centered at 270)
+        // Right: 315   to 360  (centered at 0/360) OR 0 to 45
+
+        if (angleDeg >= 45 && angleDeg < 135) {
+            return 0; // Up
+        } else if (angleDeg >= 135 && angleDeg < 225) {
+            return 3; // Left
+        } else if (angleDeg >= 225 && angleDeg < 315) {
+            return 2; // Down
+        } else {
+            return 1; // Right
+        }
+    }
+
+    private void showBackpack() {
+        inventoryMenuTable.setVisible(false);
+        showInventoryMenu = false;
+
+        backpackMenuTable.clearChildren();
+
+        Backpack backpack = currentPlayer.getBackpack();
+        Map<Item, Integer> items = backpack.getInventoryItems();
+        int totalSlots = backpack.getMaxSize();
+
+        Table itemsContainer = new Table(GameAssetManager.skin);
+        itemsContainer.center();
+        itemsContainer.pad(10);
+
+        float slotSize = GameAssetManager.TILE_SIZE;
+        float itemImagePadding = slotSize * 0.1f;
+        float itemImageRenderSize = slotSize - (itemImagePadding * 2);
+        float labelOffset = 5f;
+
+        ArrayList<Item> sortedItems = new ArrayList<>(items.keySet());
+
+        int currentSlotIndex = 0;
+
+        for (Item item : sortedItems) {
+            Integer count = items.get(item);
+            if (count == null || count <= 0) continue;
+
+            Stack itemSlotStack = new Stack();
+
+            Image slotBg = new Image(InventoryAssets.slot);
+            slotBg.setSize(slotSize, slotSize);
+            itemSlotStack.add(slotBg);
+
+            if (currentSlotIndex == selectedSlot) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotSize, slotSize);
+                itemSlotStack.add(highlightImage);
             }
 
-            float angleRad = MathUtils.atan2(dy, dx);
-            float angleDeg = angleRad * MathUtils.radDeg;
+            Texture itemTex = getItemTexture(item);
+            if (itemTex != null) {
+                Image itemImage = new Image(itemTex);
+                itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
+                itemImage.setScaling(Scaling.fit);
+                itemImage.setAlign(com.badlogic.gdx.utils.Align.center);
 
-            if (angleDeg < 0) {
-                angleDeg += 360;
-            }
+                Container<Image> itemImageContainer = new Container<>(itemImage);
+                itemImageContainer.pad(itemImagePadding);
+                itemImageContainer.fill();
 
-            // Up:     45   to 135  (centered at 90)
-            // Left:  135   to 225  (centered at 180)
-            // Down:  225   to 315  (centered at 270)
-            // Right: 315   to 360  (centered at 0/360) OR 0 to 45
-
-            if (angleDeg >= 45 && angleDeg < 135) {
-                return 0; // Up
-            } else if (angleDeg >= 135 && angleDeg < 225) {
-                return 3; // Left
-            } else if (angleDeg >= 225 && angleDeg < 315) {
-                return 2; // Down
+                itemSlotStack.add(itemImageContainer);
             } else {
-                return 1; // Right
+                Gdx.app.error("GameView", "Texture for item " + item.getName() + " is null!");
+            }
+
+            Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
+            Container<Label> labelContainer = new Container<>(countLabel);
+            labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
+            labelContainer.padRight(labelOffset);
+            labelContainer.padBottom(labelOffset);
+            labelContainer.fill();
+            itemSlotStack.add(labelContainer);
+
+
+            itemsContainer.add(itemSlotStack).size(slotSize).pad(5);
+
+            currentSlotIndex++;
+
+            if (currentSlotIndex % 6 == 0) {
+                itemsContainer.row();
             }
         }
 
-        private void showBackpack() {
-            inventoryMenuTable.setVisible(false);
-            showInventoryMenu = false;
+        // Fill remaining empty slots
+        for (int i = sortedItems.size(); i < totalSlots; i++) {
+            Stack emptySlotStack = new Stack();
+            Image slotBg = new Image(InventoryAssets.slot);
+            slotBg.setSize(slotSize, slotSize);
+            emptySlotStack.add(slotBg);
 
-            backpackMenuTable.clearChildren();
+            if (currentSlotIndex == selectedSlot) {
+                Image highlightImage = new Image(InventoryAssets.highlightedSlot);
+                highlightImage.setSize(slotSize, slotSize);
+                emptySlotStack.add(highlightImage);
+            }
 
-            Backpack backpack = currentPlayer.getBackpack();
-            Map<Item, Integer> items = backpack.getInventoryItems();
-            int totalSlots = backpack.getMaxSize();
+            itemsContainer.add(emptySlotStack).size(slotSize).pad(5);
+            currentSlotIndex++;
+            if (currentSlotIndex % 6 == 0) {
+                itemsContainer.row();
+            }
+        }
 
-            Table itemsContainer = new Table(GameAssetManager.skin);
-            itemsContainer.center();
-            itemsContainer.pad(10);
+        if (selectedSlot >= currentSlotIndex) {
+            selectedSlot = Math.max(0, currentSlotIndex - 1);
+        }
+        if (currentSlotIndex == 0) {
+            selectedSlot = -1;
+        }
 
-            float slotSize = GameAssetManager.TILE_SIZE;
-            float itemImagePadding = slotSize * 0.1f;
-            float itemImageRenderSize = slotSize - (itemImagePadding * 2);
-            float labelOffset = 5f;
+        ScrollPane scrollPane = new ScrollPane(itemsContainer, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
 
-            ArrayList<Item> sortedItems = new ArrayList<>(items.keySet());
+        backpackMenuTable.padTop(20f);
+        backpackMenuTable.row();
+        backpackMenuTable.add(scrollPane).expand().fill().row();
 
-            int currentSlotIndex = 0;
+        TextButton trashcanButton = new TextButton("", GameAssetManager.skin, "custom-button");
+        trashcanButton.setSize(slotSize, slotSize);
+        trashcanButton.setColor(Color.DARK_GRAY);
+        TrashCan trashcan = backpack.getTrashcan();
+        String textureOrigin = trashcan.getMaterial().name().toUpperCase() + trashcan.getType().name().toUpperCase();
+        Texture trashcanTex = InventoryAssets.getToolTexture(textureOrigin);
+        if (trashcanTex != null) {
+            Image trashcanImage = new Image(trashcanTex);
+            trashcanImage.setTouchable(Touchable.disabled);
+            trashcanButton.clearChildren();
+            trashcanButton.add(trashcanImage).expand().fill().center();
+        } else {
+            trashcanButton.setText("TRASH");
+            Gdx.app.error("GameView", "Trashcan texture is null. Using text fallback.");
+        }
 
-            for (Item item : sortedItems) {
-                Integer count = items.get(item);
-                if (count == null || count <= 0) continue;
-
-                Stack itemSlotStack = new Stack();
-
-                Image slotBg = new Image(InventoryAssets.slot);
-                slotBg.setSize(slotSize, slotSize);
-                itemSlotStack.add(slotBg);
-
-                if (currentSlotIndex == selectedSlot) {
-                    Image highlightImage = new Image(InventoryAssets.highlightedSlot);
-                    highlightImage.setSize(slotSize, slotSize);
-                    itemSlotStack.add(highlightImage);
-                }
-
-                Texture itemTex = getItemTexture(item);
-                if (itemTex != null) {
-                    Image itemImage = new Image(itemTex);
-                    itemImage.setSize(itemImageRenderSize, itemImageRenderSize);
-                    itemImage.setScaling(Scaling.fit);
-                    itemImage.setAlign(com.badlogic.gdx.utils.Align.center);
-
-                    Container<Image> itemImageContainer = new Container<>(itemImage);
-                    itemImageContainer.pad(itemImagePadding);
-                    itemImageContainer.fill();
-
-                    itemSlotStack.add(itemImageContainer);
+        trashcanButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                    Item itemToTrash = sortedItems.get(selectedSlot);
+                    backpack.removeItem(itemToTrash.getName(), 1);
+                    showBackpack();
                 } else {
-                    Gdx.app.error("GameView", "Texture for item " + item.getName() + " is null!");
-                }
-
-                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
-                Container<Label> labelContainer = new Container<>(countLabel);
-                labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
-                labelContainer.padRight(labelOffset);
-                labelContainer.padBottom(labelOffset);
-                labelContainer.fill();
-                itemSlotStack.add(labelContainer);
-
-
-                itemsContainer.add(itemSlotStack).size(slotSize).pad(5);
-
-                currentSlotIndex++;
-
-                if (currentSlotIndex % 6 == 0) {
-                    itemsContainer.row();
+                    System.out.println("No item selected to trash.");
                 }
             }
+        });
 
-            // Fill remaining empty slots
-            for (int i = sortedItems.size(); i < totalSlots; i++) {
-                Stack emptySlotStack = new Stack();
-                Image slotBg = new Image(InventoryAssets.slot);
-                slotBg.setSize(slotSize, slotSize);
-                emptySlotStack.add(slotBg);
-
-                if (currentSlotIndex == selectedSlot) {
-                    Image highlightImage = new Image(InventoryAssets.highlightedSlot);
-                    highlightImage.setSize(slotSize, slotSize);
-                    emptySlotStack.add(highlightImage);
-                }
-
-                itemsContainer.add(emptySlotStack).size(slotSize).pad(5);
-                currentSlotIndex++;
-                if (currentSlotIndex % 6 == 0) {
-                    itemsContainer.row();
+        TextButton selectButton = new TextButton("Select", GameAssetManager.skin, "custom-button");
+        selectButton.setColor(Color.BLUE);
+        selectButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
+                    equippedItem = sortedItems.get(selectedSlot);
+                    updateEquippedItemSlot();
+                    //showErrorDialog(stage, "Selected item: " + equippedItem.getName());
+                    showNumItemDialog();
+                } else {
+                    showErrorDialog(stage, "No item selected.");
                 }
             }
+        });
 
-            if (selectedSlot >= currentSlotIndex) {
-                selectedSlot = Math.max(0, currentSlotIndex - 1);
+        Table controlButtonsTable = new Table();
+        controlButtonsTable.defaults().pad(10);
+
+        TextButton backButton = new TextButton("Back", GameAssetManager.skin, "custom-button");
+        backButton.setColor(Color.RED);
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                showBackpackMenu = false;
+                backpackMenuTable.setVisible(false);
+                inventoryMenuTable.setVisible(true);
+                showInventoryMenu = true;
+                selectedSlot = 0;
             }
-            if (currentSlotIndex == 0) {
-                selectedSlot = -1;
-            }
+        });
+        controlButtonsTable.add(backButton).width(100).height(40);
+        controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
+        controlButtonsTable.add(selectButton).width(100).height(40);
 
-            ScrollPane scrollPane = new ScrollPane(itemsContainer, GameAssetManager.skin);
-            scrollPane.setFadeScrollBars(false);
-            scrollPane.setScrollingDisabled(true, false);
+        backpackMenuTable.add(controlButtonsTable).bottom().center().row();
 
-            backpackMenuTable.padTop(20f);
-            backpackMenuTable.row();
-            backpackMenuTable.add(scrollPane).expand().fill().row();
+        backpackMenuTable.setVisible(true);
+        showBackpackMenu = true;
+    }
 
-            TextButton trashcanButton = new TextButton("", GameAssetManager.skin, "custom-button");
-            trashcanButton.setSize(slotSize, slotSize);
-            trashcanButton.setColor(Color.DARK_GRAY);
-            TrashCan trashcan = backpack.getTrashcan();
-            String textureOrigin = trashcan.getMaterial().name().toUpperCase() + trashcan.getType().name().toUpperCase();
-            Texture trashcanTex = InventoryAssets.getToolTexture(textureOrigin);
-            if (trashcanTex != null) {
-                Image trashcanImage = new Image(trashcanTex);
-                trashcanImage.setTouchable(Touchable.disabled);
-                trashcanButton.clearChildren();
-                trashcanButton.add(trashcanImage).expand().fill().center();
-            } else {
-                trashcanButton.setText("TRASH");
-                Gdx.app.error("GameView", "Trashcan texture is null. Using text fallback.");
-            }
-
-            trashcanButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
-                        Item itemToTrash = sortedItems.get(selectedSlot);
-                        backpack.removeItem(itemToTrash.getName(), 1);
-                        showBackpack();
-                    } else {
-                        System.out.println("No item selected to trash.");
-                    }
-                }
-            });
-
-            TextButton selectButton = new TextButton("Select", GameAssetManager.skin, "custom-button");
-            selectButton.setColor(Color.BLUE);
-            selectButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    if (selectedSlot != -1 && selectedSlot < sortedItems.size()) {
-                        equippedItem = sortedItems.get(selectedSlot);
-                        updateEquippedItemSlot();
-                        //showErrorDialog(stage, "Selected item: " + equippedItem.getName());
-                        showNumItemDialog();
-                    } else {
-                        showErrorDialog(stage, "No item selected.");
-                    }
-                }
-            });
-
-            Table controlButtonsTable = new Table();
-            controlButtonsTable.defaults().pad(10);
-
-            TextButton backButton = new TextButton("Back", GameAssetManager.skin, "custom-button");
-            backButton.setColor(Color.RED);
-            backButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    showBackpackMenu = false;
-                    backpackMenuTable.setVisible(false);
-                    inventoryMenuTable.setVisible(true);
-                    showInventoryMenu = true;
-                    selectedSlot = 0;
-                }
-            });
-            controlButtonsTable.add(backButton).width(100).height(40);
-            controlButtonsTable.add(trashcanButton).width(slotSize * 0.7f).height(slotSize * 0.7f);
-            controlButtonsTable.add(selectButton).width(100).height(40);
-
-            backpackMenuTable.add(controlButtonsTable).bottom().center().row();
-
-            backpackMenuTable.setVisible(true);
-            showBackpackMenu = true;
+    public Texture getItemTexture(Item item) {
+        if(item == null) {return null;}
+        if (item instanceof Fish) {
+            return ((Fish) item).getType().getTexture();
         }
-
-        public Texture getItemTexture(Item item) {
-            if(item == null) {return null;}
-            if (item instanceof Fish) {
-                return ((Fish) item).getType().getTexture();
-            }
-            if (item instanceof Food) {
-                return ((Food) item).getType().getTexture();
-            }
-            if (item instanceof ForagingMineral) {
-                return ((ForagingMineral) item).getType().getTexture();
-            }
-            if (item instanceof randomStuff) {
-                return ((randomStuff) item).getType().getTexture();
-            }
-            if (item instanceof AnimalProduct) {
-                return ((AnimalProduct) item).getAnimalProductType().getTexture();
-            }
-            if (item instanceof Machine) {
-                return ((Machine) item).getType().getTexture();
-            }
-            for(SourceType sourceType : SourceType.values()) {
-                if(sourceType.getName().equalsIgnoreCase(item.getName())) {
-                    return sourceType.getTexture();
-                }
-            }
-            for(ForagingCropType foragingCropType : ForagingCropType.values()) {
-                if(foragingCropType.getName().equalsIgnoreCase(item.getName())) {
-                    return foragingCropType.getTexture();
-                }
-            }
-            for(CropType cropType : CropType.values()) {
-                if(cropType.getName().equalsIgnoreCase(item.getName())) {
-                    return cropType.getCropProductTexture();
-                }
-            }
-            for(FruitType fruitType : FruitType.values()) {
-                if(fruitType.getName().equalsIgnoreCase(item.getName())) {
-                    return fruitType.getTexture();
-                }
-            }
-            return null;
+        if (item instanceof Food) {
+            return ((Food) item).getType().getTexture();
         }
+        if (item instanceof ForagingMineral) {
+            return ((ForagingMineral) item).getType().getTexture();
+        }
+        if (item instanceof randomStuff) {
+            return ((randomStuff) item).getType().getTexture();
+        }
+        if (item instanceof AnimalProduct) {
+            return ((AnimalProduct) item).getAnimalProductType().getTexture();
+        }
+        if (item instanceof Machine) {
+            return ((Machine) item).getType().getTexture();
+        }
+        for(SourceType sourceType : SourceType.values()) {
+            if(sourceType.getName().equalsIgnoreCase(item.getName())) {
+                return sourceType.getTexture();
+            }
+        }
+        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
+            if(foragingCropType.getName().equalsIgnoreCase(item.getName())) {
+                return foragingCropType.getTexture();
+            }
+        }
+        for(CropType cropType : CropType.values()) {
+            if(cropType.getName().equalsIgnoreCase(item.getName())) {
+                return cropType.getCropProductTexture();
+            }
+        }
+        for(FruitType fruitType : FruitType.values()) {
+            if(fruitType.getName().equalsIgnoreCase(item.getName())) {
+                return fruitType.getTexture();
+            }
+        }
+        return null;
+    }
 
     private void showSocialMenu() {
         if (socialMenuDialog != null && socialMenuDialog.getStage() != null && socialMenuDialog.isVisible()) {
@@ -4319,8 +4399,8 @@ private void createAnimalDialog() {
 
             if (currentXP >= XP_PER_LEVEL) currentXP %= XP_PER_LEVEL;
 
-            Label nameLabel = new Label(npc.getNpcName().getName(), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
-            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+            Label nameLabel = new Label(npc.getNpcName().getName(), new Label.LabelStyle(smallFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
 
             ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
             TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
@@ -4363,8 +4443,8 @@ private void createAnimalDialog() {
             int currentXP = friendship.getXp();
             if (currentXP >= XP_PER_LEVEL_Player) currentXP %= XP_PER_LEVEL_Player;
 
-            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
-            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+            Label nameLabel = new Label(player.getUsername(), new Label.LabelStyle(smallFont, Color.WHITE));
+            Label levelLabel = new Label("Lvl: " + level, new Label.LabelStyle(smallFont, Color.WHITE));
 
             ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
             TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
@@ -4559,141 +4639,141 @@ private void createAnimalDialog() {
         Gdx.input.setInputProcessor(stage);
     }
 
-        private void toggleSkillsDialog() {
-            if (skillsDialog != null && skillsDialog.getStage() != null) {
+    private void toggleSkillsDialog() {
+        if (skillsDialog != null && skillsDialog.getStage() != null) {
+            skillsDialog.hide();
+            skillsDialog = null;
+            return;
+        }
+
+        if (showInventoryMenu) {
+            showInventoryMenu = false;
+            inventoryMenuTable.setVisible(false);
+        }
+        if (showBackpackMenu) {
+            showBackpackMenu = false;
+            backpackMenuTable.setVisible(false);
+        }
+        if (friendsDialog != null && friendsDialog.getStage() != null) {
+            friendsDialog.hide();
+            friendsDialog = null;
+        }
+
+        skillsDialog = new Dialog("Skills", GameAssetManager.skin, "custom-window");
+        skillsDialog.padTop(120);
+        skillsDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
+
+        skillsDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
+
+        float dialogWidth = Gdx.graphics.getWidth() * 0.4f;
+        float dialogHeight = Gdx.graphics.getHeight() * 0.6f;
+        skillsDialog.setSize(dialogWidth, dialogHeight);
+
+        Table skillsTable = new Table();
+        skillsTable.defaults().pad(5);
+
+
+        Map<String, String> skillDescriptions = Map.of(
+            "Farming", "Improves your ability to grow crops and raise animals.",
+            "Mining", "Enhances your efficiency when gathering ores and minerals.",
+            "Foraging", "Increases your chances of finding rare items and improves gathering wild plants.",
+            "Fishing", "Makes it easier to catch fish and improves the quality of your catches."
+        );
+
+        Map<String, Color> skillColors = Map.of(
+            "Farming", new Color(0.8f, 0.6f, 0.2f, 2f),
+            "Mining", new Color(0.6f, 0.6f, 0.6f, 2f),
+            "Foraging", new Color(0.3f, 0.5f, 0.2f, 3f),
+            "Fishing", new Color(0.2f, 0.5f, 0.8f, 2f)
+        );
+
+
+        TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
+
+        TooltipManager tooltipManager = TooltipManager.getInstance();
+        tooltipManager.initialTime = 0.1f;
+        tooltipManager.resetTime = 0.5f;
+        tooltipManager.hideAll();
+
+
+        for (Map.Entry<String, String> entry : skillDescriptions.entrySet()) {
+            String skillName = entry.getKey();
+            String description = entry.getValue();
+            int currentLevel = 0;
+            int currentXP = 0;
+
+            for (Skill skill : Skill.values()) {
+                if (skill.name().equalsIgnoreCase(skillName)) {
+                    currentXP = currentPlayer.getSkillExperience().get(skill);
+                    currentLevel = currentPlayer.getSkillsLevel().get(skill);
+                }
+            }
+            int maxXPForLevel = currentLevel * 100 + 50;
+
+            Label skillLabel = new Label(skillName + ": Lvl " + currentLevel, GameAssetManager.skin, "custom-label");
+            skillLabel.setColor(skillColors.getOrDefault(skillName, Color.WHITE));
+
+            skillsTable.add(skillLabel).width(240).center().colspan(3).row();
+
+
+            ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+
+            Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
+            progressBarStyle.background = progressBarBackground;
+            progressBarStyle.background.setMinHeight(20);
+
+            progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
+            progressBarStyle.knob.setMinWidth(0);
+
+            Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(new Color(0.2f, 0.8f, 0.2f, 1)); // Green
+            progressBarStyle.knobBefore = progressBarKnobBefore;
+            progressBarStyle.knobBefore.setMinHeight(20);
+
+            ProgressBar xpBar = new ProgressBar(0, maxXPForLevel, 1, false, progressBarStyle);
+            xpBar.setValue(currentXP);
+
+            Label xpTextLabel = new Label(currentXP + "/" + maxXPForLevel, GameAssetManager.skin, "custom-label");
+            xpTextLabel.setFontScale(0.7f);
+            xpTextLabel.setColor(Color.LIGHT_GRAY);
+
+            skillsTable.add().width(20);
+            skillsTable.add(xpBar).width(150).height(20);
+            skillsTable.add(xpTextLabel).width(70).row();
+
+            Label tooltipLabelContent = new Label(description, GameAssetManager.skin, "custom-label");
+            tooltipLabelContent.setFontScale(0.6f);
+            tooltipLabelContent.setWrap(true);
+            tooltipLabelContent.setAlignment(com.badlogic.gdx.utils.Align.center);
+
+            final Tooltip<Label> tooltip = new Tooltip<>(tooltipLabelContent, tooltipManager);
+
+            Drawable tooltipBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.GOLDENROD);
+            tooltip.getContainer().width(200).pad(5).background(tooltipBackground);
+
+            skillLabel.addListener(tooltip);
+        }
+
+        skillsDialog.getContentTable().add(skillsTable).expand().fill().center().row();
+
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.setColor(Color.RED);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
                 skillsDialog.hide();
                 skillsDialog = null;
-                return;
             }
-
-            if (showInventoryMenu) {
-                showInventoryMenu = false;
-                inventoryMenuTable.setVisible(false);
-            }
-            if (showBackpackMenu) {
-                showBackpackMenu = false;
-                backpackMenuTable.setVisible(false);
-            }
-            if (friendsDialog != null && friendsDialog.getStage() != null) {
-                friendsDialog.hide();
-                friendsDialog = null;
-            }
-
-            skillsDialog = new Dialog("Skills", GameAssetManager.skin, "custom-window");
-            skillsDialog.padTop(120);
-            skillsDialog.getTitleLabel().setAlignment(com.badlogic.gdx.utils.Align.center);
-
-            skillsDialog.setBackground(new TextureRegionDrawable(InventoryAssets.inventoryMenuBackground));
-
-            float dialogWidth = Gdx.graphics.getWidth() * 0.4f;
-            float dialogHeight = Gdx.graphics.getHeight() * 0.6f;
-            skillsDialog.setSize(dialogWidth, dialogHeight);
-
-            Table skillsTable = new Table();
-            skillsTable.defaults().pad(5);
+        });
+        skillsDialog.getButtonTable().add(closeButton).pad(10);
 
 
-            Map<String, String> skillDescriptions = Map.of(
-                "Farming", "Improves your ability to grow crops and raise animals.",
-                "Mining", "Enhances your efficiency when gathering ores and minerals.",
-                "Foraging", "Increases your chances of finding rare items and improves gathering wild plants.",
-                "Fishing", "Makes it easier to catch fish and improves the quality of your catches."
-            );
-
-            Map<String, Color> skillColors = Map.of(
-                "Farming", new Color(0.8f, 0.6f, 0.2f, 2f),
-                "Mining", new Color(0.6f, 0.6f, 0.6f, 2f),
-                "Foraging", new Color(0.3f, 0.5f, 0.2f, 3f),
-                "Fishing", new Color(0.2f, 0.5f, 0.8f, 2f)
-            );
-
-
-            TextureRegion pixelTextureRegion = new TextureRegion(GameAssetManager.pixel);
-
-            TooltipManager tooltipManager = TooltipManager.getInstance();
-            tooltipManager.initialTime = 0.1f;
-            tooltipManager.resetTime = 0.5f;
-            tooltipManager.hideAll();
-
-
-            for (Map.Entry<String, String> entry : skillDescriptions.entrySet()) {
-                String skillName = entry.getKey();
-                String description = entry.getValue();
-                int currentLevel = 0;
-                int currentXP = 0;
-
-                for (Skill skill : Skill.values()) {
-                    if (skill.name().equalsIgnoreCase(skillName)) {
-                        currentXP = currentPlayer.getSkillExperience().get(skill);
-                        currentLevel = currentPlayer.getSkillsLevel().get(skill);
-                    }
-                }
-                int maxXPForLevel = currentLevel * 100 + 50;
-
-                Label skillLabel = new Label(skillName + ": Lvl " + currentLevel, GameAssetManager.skin, "custom-label");
-                skillLabel.setColor(skillColors.getOrDefault(skillName, Color.WHITE));
-
-                skillsTable.add(skillLabel).width(240).center().colspan(3).row();
-
-
-                ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
-
-                Drawable progressBarBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.DARK_GRAY);
-                progressBarStyle.background = progressBarBackground;
-                progressBarStyle.background.setMinHeight(20);
-
-                progressBarStyle.knob = new TextureRegionDrawable(pixelTextureRegion);
-                progressBarStyle.knob.setMinWidth(0);
-
-                Drawable progressBarKnobBefore = new TextureRegionDrawable(pixelTextureRegion).tint(new Color(0.2f, 0.8f, 0.2f, 1)); // Green
-                progressBarStyle.knobBefore = progressBarKnobBefore;
-                progressBarStyle.knobBefore.setMinHeight(20);
-
-                ProgressBar xpBar = new ProgressBar(0, maxXPForLevel, 1, false, progressBarStyle);
-                xpBar.setValue(currentXP);
-
-                Label xpTextLabel = new Label(currentXP + "/" + maxXPForLevel, GameAssetManager.skin, "custom-label");
-                xpTextLabel.setFontScale(0.7f);
-                xpTextLabel.setColor(Color.LIGHT_GRAY);
-
-                skillsTable.add().width(20);
-                skillsTable.add(xpBar).width(150).height(20);
-                skillsTable.add(xpTextLabel).width(70).row();
-
-                Label tooltipLabelContent = new Label(description, GameAssetManager.skin, "custom-label");
-                tooltipLabelContent.setFontScale(0.6f);
-                tooltipLabelContent.setWrap(true);
-                tooltipLabelContent.setAlignment(com.badlogic.gdx.utils.Align.center);
-
-                final Tooltip<Label> tooltip = new Tooltip<>(tooltipLabelContent, tooltipManager);
-
-                Drawable tooltipBackground = new TextureRegionDrawable(pixelTextureRegion).tint(Color.GOLDENROD);
-                tooltip.getContainer().width(200).pad(5).background(tooltipBackground);
-
-                skillLabel.addListener(tooltip);
-            }
-
-            skillsDialog.getContentTable().add(skillsTable).expand().fill().center().row();
-
-
-            TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
-            closeButton.setColor(Color.RED);
-            closeButton.addListener(new ClickListener() {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    skillsDialog.hide();
-                    skillsDialog = null;
-                }
-            });
-            skillsDialog.getButtonTable().add(closeButton).pad(10);
-
-
-            skillsDialog.setPosition(
-                (Gdx.graphics.getWidth() - skillsDialog.getWidth()) / 2,
-                (Gdx.graphics.getHeight() - skillsDialog.getHeight()) / 2
-            );
-            stage.addActor(skillsDialog);
-        }
+        skillsDialog.setPosition(
+            (Gdx.graphics.getWidth() - skillsDialog.getWidth()) / 2,
+            (Gdx.graphics.getHeight() - skillsDialog.getHeight()) / 2
+        );
+        stage.addActor(skillsDialog);
+    }
 
     private void showNotifications() {
         List<FriendshipMessage> notifications = currentPlayer.getNotifications();
@@ -4807,7 +4887,7 @@ private void createAnimalDialog() {
 
 
 
-        public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
         //        Result canUseCommand = controller.checkEnergy();
@@ -5076,7 +5156,7 @@ private void createAnimalDialog() {
         }
     }
 
-//    public void showErrorDialog(Stage stage, String message) {
+    //    public void showErrorDialog(Stage stage, String message) {
 //        Skin skin = GameAssetManager.skin;
 //
 //        Dialog dialog = new Dialog("", skin) {
@@ -5126,66 +5206,66 @@ private void createAnimalDialog() {
 //        stage.addActor(dialog);
 //        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
 //    }
-public void showErrorDialog(Stage stage, String message) {
-    Skin skin = GameAssetManager.skin;
+    public void showErrorDialog(Stage stage, String message) {
+        Skin skin = GameAssetManager.skin;
 
-    Dialog dialog = new Dialog("", skin) {
-        @Override
-        protected void result(Object object) {
-            // Optional: Handle result
-        }
-    };
+        Dialog dialog = new Dialog("", skin) {
+            @Override
+            protected void result(Object object) {
+                // Optional: Handle result
+            }
+        };
 
-    dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
 
-    Label messageLabel = new Label(message, skin, "custom-label");
-    messageLabel.setWrap(true);
-    messageLabel.setAlignment(Align.center);
-    messageLabel.setFontScale(0.7f);
+        Label messageLabel = new Label(message, skin, "custom-label");
+        messageLabel.setWrap(true);
+        messageLabel.setAlignment(Align.center);
+        messageLabel.setFontScale(0.7f);
 
-    float maxWidth = stage.getWidth() * 0.6f;
-    messageLabel.setWidth(maxWidth); // Required for wrapping to work
-    messageLabel.invalidateHierarchy(); // Force layout to recalculate size
+        float maxWidth = stage.getWidth() * 0.6f;
+        messageLabel.setWidth(maxWidth); // Required for wrapping to work
+        messageLabel.invalidateHierarchy(); // Force layout to recalculate size
 
-    // Let the label wrap and calculate the height
-    Table contentTable = new Table();
-    contentTable.defaults().pad(10f);
-    contentTable.add(messageLabel).width(maxWidth).row();
+        // Let the label wrap and calculate the height
+        Table contentTable = new Table();
+        contentTable.defaults().pad(10f);
+        contentTable.add(messageLabel).width(maxWidth).row();
 
-    TextButton okButton = new TextButton("OK", skin, "custom-button");
-    okButton.pad(10f);
-    okButton.addListener(new ClickListener() {
-        @Override
-        public void clicked(InputEvent event, float x, float y) {
-            dialog.hide();
-            Gdx.input.setInputProcessor(GameView.this);
-        }
-    });
+        TextButton okButton = new TextButton("OK", skin, "custom-button");
+        okButton.pad(10f);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
 
-    contentTable.add(okButton).center().padTop(10f);
+        contentTable.add(okButton).center().padTop(10f);
 
-    dialog.getContentTable().clear();
-    dialog.getContentTable().add(contentTable).expand().fill();
-    dialog.setMovable(false);
-    dialog.setModal(true);
-    dialog.setResizable(false);
+        dialog.getContentTable().clear();
+        dialog.getContentTable().add(contentTable).expand().fill();
+        dialog.setMovable(false);
+        dialog.setModal(true);
+        dialog.setResizable(false);
 
-    dialog.pack(); // Automatically size dialog based on contents
+        dialog.pack(); // Automatically size dialog based on contents
 
-    // Clamp width/height to screen size if needed
-    float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
-    float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
-    dialog.setSize(clampedWidth, clampedHeight);
+        // Clamp width/height to screen size if needed
+        float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
+        float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
+        dialog.setSize(clampedWidth, clampedHeight);
 
-    // Center on screen
-    dialog.setPosition(
-        (stage.getWidth() - clampedWidth) / 2f,
-        (stage.getHeight() - clampedHeight) / 2f
-    );
+        // Center on screen
+        dialog.setPosition(
+            (stage.getWidth() - clampedWidth) / 2f,
+            (stage.getHeight() - clampedHeight) / 2f
+        );
 
-    stage.addActor(dialog);
-    Gdx.input.setInputProcessor(stage);
-}
+        stage.addActor(dialog);
+        Gdx.input.setInputProcessor(stage);
+    }
 
 //    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
 //        Skin skin = GameAssetManager.skin;
@@ -5196,7 +5276,7 @@ public void showErrorDialog(Stage stage, String message) {
 //        errorLabel.setFontScale(1.2f);
 //
 //        // Optional background for visibility
-////       errorLabel.setBackground(skin.getDrawable("window"));
+    ////       errorLabel.setBackground(skin.getDrawable("window"));
 //
 //        float width = Gdx.graphics.getWidth() * 0.4f;
 //        float height = Gdx.graphics.getHeight() * 0.15f;
@@ -5216,36 +5296,36 @@ public void showErrorDialog(Stage stage, String message) {
 //            Actions.run(errorLabel::remove)
 //        ));
 //    }
-public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
-    Skin skin = GameAssetManager.skin;
+    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
+        Skin skin = GameAssetManager.skin;
 
-    Label errorLabel = new Label(message, skin, "custom-label");
-    errorLabel.setAlignment(Align.center);
-    errorLabel.setColor(Color.SCARLET);
-    errorLabel.setFontScale(1.2f);
+        Label errorLabel = new Label(message, skin, "custom-label");
+        errorLabel.setAlignment(Align.center);
+        errorLabel.setColor(Color.SCARLET);
+        errorLabel.setFontScale(1.2f);
 
-    float width = Gdx.graphics.getWidth() * 0.4f;
-    float height = Gdx.graphics.getHeight() * 0.15f;
+        float width = Gdx.graphics.getWidth() * 0.4f;
+        float height = Gdx.graphics.getHeight() * 0.15f;
 
-    errorLabel.setSize(width, height);
-    errorLabel.setPosition(
-        (Gdx.graphics.getWidth() - width) / 2f,
-        (Gdx.graphics.getHeight() - height) / 2f
-    );
+        errorLabel.setSize(width, height);
+        errorLabel.setPosition(
+            (Gdx.graphics.getWidth() - width) / 2f,
+            (Gdx.graphics.getHeight() - height) / 2f
+        );
 
-    stage.addActor(errorLabel);
+        stage.addActor(errorLabel);
 
-    errorLabel.addAction(Actions.sequence(
-        Actions.delay(durationSeconds),
-        Actions.fadeOut(0.5f),
-        Actions.run(() -> {
-            errorLabel.remove();
-            if (onComplete != null) {
-                onComplete.run();
-            }
-        })
-    ));
-}
+        errorLabel.addAction(Actions.sequence(
+            Actions.delay(durationSeconds),
+            Actions.fadeOut(0.5f),
+            Actions.run(() -> {
+                errorLabel.remove();
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            })
+        ));
+    }
     public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
         Skin skin = GameAssetManager.skin;
 
@@ -5309,7 +5389,7 @@ public void showTimedErrorLabel(Stage stage, String message, float durationSecon
 
             Integer count = currentPlayer.getBackpack().getInventoryItems().get(equippedItem);
             if (count != null && count > 1) {
-                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(GameAssetManager.customFont, Color.WHITE));
+                Label countLabel = new Label(String.valueOf(count), new Label.LabelStyle(smallFont, Color.WHITE));
                 Container<Label> labelContainer = new Container<>(countLabel);
                 labelContainer.align(com.badlogic.gdx.utils.Align.bottomRight);
                 labelContainer.padRight(labelOffset);

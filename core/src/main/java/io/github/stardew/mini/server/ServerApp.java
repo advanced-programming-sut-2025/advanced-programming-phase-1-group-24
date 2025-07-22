@@ -4,6 +4,7 @@ import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -14,6 +15,13 @@ public class ServerApp {
     private final ConcurrentHashMap<String, User> allUsers = new ConcurrentHashMap<>();
     private final CopyOnWriteArrayList<GameServer> allGames = new CopyOnWriteArrayList<>();
 
+    private ServerApp() {
+        loadAllUsers();
+    }
+
+    public static ServerApp getInstance() {
+        return instance;
+    }
     public User getUserByUsername(String username) {
         for(User user : allUsers.values()) {
             if(user.getUsername().equals(username)) {
@@ -22,23 +30,18 @@ public class ServerApp {
         }
         return null;
     }
-
-
-    public void loadUsers() {
-            List<User> loadedUsers = UserDatabase.loadUsers();
-            for (User user : loadedUsers) {
-                  allUsers.put(user.getUsername(), user);
-            }
+    private void loadAllUsers() {
+        ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+        for (User user : loadedUsers) {
+            allUsers.put(user.getUsername(), user);  // assuming getUsername() exists
+        }
     }
 
-    private ServerApp() {
-        loadUsers();
-    }
 
-    public static ServerApp getInstance() {
-        return instance;
+    // Optionally, call this when you want to persist
+    public void saveUsers() {
+        UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
     }
-
     // ==== USER MANAGEMENT ====
     public void addUser(User user) {
         allUsers.put(user.getUsername(), user);

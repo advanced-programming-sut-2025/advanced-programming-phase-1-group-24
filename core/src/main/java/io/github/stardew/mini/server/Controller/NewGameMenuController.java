@@ -2,7 +2,9 @@ package io.github.stardew.mini.server.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.*;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.client.View.NewGameMenuView;
@@ -15,11 +17,13 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NewGameMenuController implements MenuController{
+public class NewGameMenuController implements MenuController {
     private NewGameMenuView view;
+
     public void setView(NewGameMenuView view) {
         this.view = view;
     }
+
     private static final Avatar[] FEMALE_AVATARS = {Avatar.Abigail, Avatar.Haley};
     private static final Avatar[] MALE_AVATARS = {Avatar.Shane, Avatar.Alex};
 
@@ -76,21 +80,24 @@ public class NewGameMenuController implements MenuController{
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
 
-    public Message<?> createGameOnServer(List<String> usernames, User creator) {
+    public Message<?> createGameOnServer(List<String> usernames,User creator) {
         ArrayList<User> players = new ArrayList<>();
-        players.add(creator);
-
-        List<PlayerConnection> connections = new ArrayList<>();
-        System.out.println("[SERVER] Creating game for: " + creator.getUsername());
-        PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(creator.getUsername());
-        if (pc == null) {
-            return Message.NOT_FOUND.setMessage("Creator's connection not found");
-        } else {
-            System.out.println("[SERVER] Found player connection for " + creator.getUsername() + ", sessionId = " + pc.getWsContext().sessionId());
+        if (usernames.size() < 2) {
+            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
         }
+        List<PlayerConnection> connections = new ArrayList<>();
 
-        connections.add(pc);
-
+        for(String user : usernames) {
+            System.out.println("[SERVER] Creating game for: " + user);
+            PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(user);
+            if (pc == null) {
+                return Message.NOT_FOUND.setMessage(user+" connection not found");
+            } else {
+                System.out.println("[SERVER] Found player connection for " + user+ ", sessionId = " + pc.getWsContext().sessionId());
+            }
+            players.add(pc.getUser());
+            connections.add(pc);
+        }
         for (User player : players) {
             player.updateGameFields();
         }
@@ -106,7 +113,7 @@ public class NewGameMenuController implements MenuController{
         gameServer.setGame(game);
 
         AppSocket.addGame(gameServer);
-            gameServer.start();
+        gameServer.start();
         Map<String, Object> body = new HashMap<>();
         body.put("gameId", game.getNetworkId());
         body.put("message", "Game created successfully");
@@ -120,10 +127,17 @@ public class NewGameMenuController implements MenuController{
 //            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
 //        }
         body.put("game", game);
+        Message<Map<String, Object>> msg = new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
+        msg.setType("start-map-selection");
+
+        for (PlayerConnection player : connections) {
+            if (!player.getUser().equals(creator) && player.getWsContext().session.isOpen()) {
+                player.getWsContext().send(new Gson().toJson(msg));
+            }
+        }
 
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
-
 
 
     public Result createGame(String users) {
