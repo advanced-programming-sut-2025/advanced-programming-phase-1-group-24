@@ -94,12 +94,7 @@ public class AppSocket {
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
 
-                        System.out.println("[WS CONNECTED USERS]");
-                        for (Map.Entry<String, PlayerConnection> entry : connectedPlayers.entrySet()) {
-                            System.out.println("- " + entry.getKey() + " → " + entry.getValue().getUsername());
-                        }
-                        User player = new User(message.getUsername(), "", "", "", true);
-                        ServerApp.getInstance().addUser(player);
+
 
                         System.out.println("User connected: " + message.getUsername());
                     }
