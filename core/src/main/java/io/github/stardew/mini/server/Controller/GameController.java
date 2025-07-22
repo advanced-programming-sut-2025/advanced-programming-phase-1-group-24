@@ -589,7 +589,7 @@ public class GameController implements MenuController {
                 if (user.getDaysSinceRejection() != 0) {
                     user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
                 }
-               // crowAttack(gs, user);
+                // crowAttack(gs, user);
             }
 
             Tile[][] tiles = game.getMap().getMap();
@@ -621,9 +621,8 @@ public class GameController implements MenuController {
 
                     Map<String, Object> body = new HashMap<>();
                     try {
-                        User user = gs.getGame().getPlayerByUsername(player.getUsername());
-                        gs.getGame().setCurrentPlayer(user);
-                        System.out.println("?????????????????????????????????" + gs.getGame().getCurrentPlayer().getCurrentTile());
+                        gs.getGame().setCurrentPlayer(player.getUser());
+                        System.out.println("???????????????????????????????????????????" + player.getUser().getCurrentTile());
                         String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
                         body.put("game", jsonGame);
                         Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
@@ -637,6 +636,9 @@ public class GameController implements MenuController {
             }
         }
     }
+
+
+
 
     public void processShippingBinsAtNight() {
         Game game = MainApp.getInstance().getCurrentGame();
