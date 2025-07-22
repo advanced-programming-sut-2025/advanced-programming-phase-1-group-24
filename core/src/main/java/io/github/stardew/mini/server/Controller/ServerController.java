@@ -78,7 +78,7 @@ public class ServerController {
                 String dx = (String) body.get("dx");
                 String dy = (String) body.get("dy");
                 String direction = (String) body.get("direction");
-                //return gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
+                return gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
             }
 
             case "useTool": {

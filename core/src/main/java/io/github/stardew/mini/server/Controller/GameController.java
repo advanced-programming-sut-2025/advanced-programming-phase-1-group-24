@@ -50,8 +50,8 @@ public class GameController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
-
-    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+    public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+        System.out.println(player.getUsername());
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();
         int newX = x + dx;
@@ -69,10 +69,39 @@ public class GameController implements MenuController {
             player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
             player.reduceEnergy(1);
             player.setMovingDirection(direction);
-            return new Result(true, "You can move.");
+            Map<String, Object> params = new HashMap<>();
+            params.put("tile", player.getCurrentTile());
+            params.put("energy", player.getEnergy());
+            params.put("movingDirection", player.getMovingDirection());
+
+            return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
+            //return Message.OK.setMessage("You can walk there.");
         }
-        return new Result(false, "You can't move.");
+        return Message.FORBIDDEN.setMessage("You can not move there.");
     }
+
+//    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
+//        int x = player.getCurrentTile().getX();
+//        int y = player.getCurrentTile().getY();
+//        int newX = x + dx;
+//        int newY = y + dy;
+//
+//        if (newX >= 0 && newY >= 0 &&
+//            newY < gs.getGame().getMap().getMap().length &&
+//            newX < gs.getGame().getMap().getMap()[0].length &&
+//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
+//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
+//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
+//                    (player.getPartner() != null &&
+//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
+//
+//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
+//            player.reduceEnergy(1);
+//            player.setMovingDirection(direction);
+//            return new Result(true, "You can move.");
+//        }
+//        return new Result(false, "You can't move.");
+//    }
 
 
     public Result exitGame() {

@@ -96,6 +96,8 @@ public class GameSaver {
         byte[] compressed = byteStream.toByteArray();
         return Base64.getEncoder().encodeToString(compressed);
     }
-
+    public static <T> T convertObject(Object rawObj, Class<T> clazz) {
+        return GameSaver.createCustomObjectMapper().convertValue(rawObj, clazz);
+    }
 
 }
