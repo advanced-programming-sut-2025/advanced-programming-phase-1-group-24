@@ -414,7 +414,10 @@ public class MapSelectionMenuController implements MenuController {
             tile.setWalkable(false);
             //System.out.println(map[p.y][p.x].getContainedGrowable().getTreeType());
         }
-        player.setCurrentTile(playerFarm.getRandomFarmTile(map));
+         player.setCurrentTile(playerFarm.getRandomFarmTile(map));
+
+
+
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
         currentGame.markPlayerSelectedMap(player.getUsername());
@@ -429,6 +432,10 @@ public class MapSelectionMenuController implements MenuController {
             for (PlayerConnection playerConnection : gs.getPlayers()) {
                 if (playerConnection.getWsContext().session.isOpen()) {
                     currentGame.setCurrentPlayer(playerConnection.getUser());
+                    if(playerConnection.getUser().equals(player)) {
+                        System.out.println("Player " + playerConnection.getUser().getUsername() + " has selected map");
+                    }
+                    System.out.println(playerConnection.getUser().getCurrentTile());
                     try {
                         String jsonGame = mapper.writeValueAsString(currentGame); // serialize Game to JSON string
                         body.put("game", jsonGame);
