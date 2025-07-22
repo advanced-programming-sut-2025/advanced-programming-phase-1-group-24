@@ -4,6 +4,7 @@ import io.github.stardew.mini.Model.LobbyInfo;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.User;
 
+import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,56 +21,42 @@ public class LobbyManager {
         return instance;
     }
 
-    public Lobby createLobby(String name, String password, boolean isPrivate, User creator) {
+    public Lobby createLobby(String name, String password, boolean isPrivate, boolean isInvisible, User creator) {
         String id = UUID.randomUUID().toString();
-        Lobby lobby = new Lobby(id, name, password, creator, false,isPrivate);
+        Lobby lobby = new Lobby(id, name, password, creator, false, isPrivate, isInvisible);
         activeLobbies.put(id, lobby);
         joinLobby(id, password, creator);
+        System.out.println("Lobby created successfully! : ID: " + id);
         return lobby;
     }
 
     public List<Lobby> listAvailableLobbies() {
         return activeLobbies.values().stream()
-            .filter(lobby -> !lobby.isPrivate() && !lobby.isStarted())
+            .filter(lobby -> !lobby.isInvisible() && !lobby.isStarted())
             .collect(Collectors.toList());
     }
 
-//    public Message<?> getAllLobbies() {
-//        List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
-//        List<LobbyInfo> LobbyInfoList = lobbies.stream().map(
-//            Lobby -> {
-//                LobbyInfo info = new LobbyInfo();
-//                info.setId(Lobby.getId());
-//                info.setName(Lobby.getName());
-//                info.setPlayerCount(Lobby.getPlayers().size());
-//                info.setPrivate(Lobby.isPrivate());
-//                return info;
-//            }).collect(Collectors.toList());
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("lobbies", LobbyInfoList);
-//        return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
-//    }
-public Message<?> getAllLobbies() {
-    List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
-    List<LobbyInfo> lobbyInfoList = lobbies.stream().map(lobby -> {
-        LobbyInfo info = new LobbyInfo();
-        info.setId(lobby.getId());
-        info.setName(lobby.getName());
-        info.setOwner(lobby.getCreator().getUsername());
-        List<String> usernames = lobby.getPlayers().stream()
-            .map(User::getUsername)
-            .collect(Collectors.toList());
-
-        info.setPlayerCount(usernames.size());
-        info.setPlayers(usernames);
-        info.setPrivate(lobby.isPrivate());
-        return info;
-    }).collect(Collectors.toList());
-
-    Map<String, Object> body = new HashMap<>();
-    body.put("lobbies", lobbyInfoList);
-    return new Message<>(200, "sent all lobbies", body, Message.MessageType.RESPONSE);
-}
+    public Message<?> getAllLobbies() {
+        List<Lobby> lobbies = LobbyManager.getInstance().listAvailableLobbies();
+        List<LobbyInfo> LobbyInfoList = lobbies.stream().map(
+            Lobby -> {
+                LobbyInfo info = new LobbyInfo();
+                info.setId(Lobby.getId());
+                info.setName(Lobby.getName());
+                info.setOwner(Lobby.getCreator().getUsername());
+                info.setPlayerCount(Lobby.getPlayers().size());
+                info.setPrivate(Lobby.isPrivate());
+                info.setInvisible(Lobby.isInvisible());
+                List<String> usernames = Lobby.getPlayers().stream()
+                    .map(User::getUsername)
+                    .collect(Collectors.toList());
+                info.setPlayers(usernames);
+                return info;
+            }).collect(Collectors.toList());
+        Map<String, Object> body = new HashMap<>();
+        body.put("lobbies", LobbyInfoList);
+        return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
+    }
 
 
     public boolean joinLobby(String id, String password, User user) {
@@ -77,6 +64,7 @@ public Message<?> getAllLobbies() {
         if (lobby != null && lobby.getPlayers().size() < Lobby.MAX_PLAYERS) {
             if (lobby.isPrivate() && !lobby.getPassword().equals(password)) return false;
             lobby.getPlayers().add(user);
+            lobby.setCreatedAt(System.currentTimeMillis());
             return true;
         }
         return false;
@@ -96,4 +84,10 @@ public Message<?> getAllLobbies() {
             // transition to game session
         }
     }
+
+    public Map<String, Lobby> getActiveLobbies() {
+        return activeLobbies;
+    }
+
+
 }

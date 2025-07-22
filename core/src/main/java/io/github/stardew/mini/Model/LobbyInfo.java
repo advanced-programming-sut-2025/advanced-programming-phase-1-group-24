@@ -8,6 +8,7 @@ public class LobbyInfo {
     private String name;
     private int playerCount;
     private boolean isPrivate;
+    private boolean isInvisible;
     private List<String> players = new ArrayList<>();
     private String owner;
 
@@ -57,5 +58,13 @@ public class LobbyInfo {
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public boolean isInvisible() {
+        return isInvisible;
+    }
+
+    public void setInvisible(boolean invisible) {
+        isInvisible = invisible;
     }
 }
