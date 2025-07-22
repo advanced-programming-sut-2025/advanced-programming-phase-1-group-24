@@ -3217,6 +3217,9 @@ private void createAnimalDialog() {
         updateAnimals(v);
         drawAnimals(rows, tileSize);
 
+        updateNPCMovement(v);
+        drawNPCs(rows, tileSize);
+
         drawPlayer();
         drawAllPlayers();
         // --- DRAW HEART EFFECTS ---
@@ -3364,7 +3367,6 @@ private void createAnimalDialog() {
                         }
                         talkButton.setSize(talkButtonSize, talkButtonSize);
 
-                        // Calculate screen position for the button above the NPC
                         float npcCenterX = tile.getX() * tileSize + tileSize / 2f;
                         float npcTopY = (rows - tile.getY() - 1) * tileSize + tileSize * 2f;
 
@@ -5978,6 +5980,38 @@ public void showTimedErrorLabel(Stage stage, String message, float durationSecon
             recipeRow.add(craftButton).width(iconSize * 2).height(iconSize).colspan(2).center().row();
 
             buildingMenuTable.add(recipeRow).expandX().fillX().row();
+        }
+    }
+
+    private void updateNPCMovement(float delta) {
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+            npc.updateMovement(delta);
+        }
+    }
+
+    private void drawNPCs(int rows, int tileSize) {
+        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+            if (npc.currentTileGetter() == null) continue;
+
+            float x, y;
+
+            if (npc.isMoving()) {
+                Tile from = npc.getMovingFrom();
+                Tile to = npc.getMovingTo();
+                float p = npc.getMoveProgress();
+
+                x = MathUtils.lerp(from.getX(), to.getX(), p) * tileSize;
+                y = MathUtils.lerp(
+                    rows - from.getY() - 1,
+                    rows - to.getY() - 1,
+                    p
+                ) * tileSize;
+            } else {
+                x = npc.currentTileGetter().getX() * tileSize;
+                y = (rows - npc.currentTileGetter().getY() - 1) * tileSize;
+            }
+
+            batch.draw(npc.getNpcName().getTextureRegion(), x, y, tileSize, tileSize * 2f);
         }
     }
 }

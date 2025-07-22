@@ -1,6 +1,8 @@
 package io.github.stardew.mini.Model.NPCManagement;
 
+import com.badlogic.gdx.Gdx;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.client.MainApp;
@@ -13,9 +15,17 @@ import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.awt.Point;
+
+import com.badlogic.gdx.math.MathUtils;
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.IntSequenceGenerator.class,
     property = "@id"
@@ -30,6 +40,23 @@ public class NPC {
     private ArrayList<NPCMission> missions;
     private Map <String, ArrayList<NPCMission>> unlockedMissions;
     private int daysLeftToUnlockThirdMission;
+
+    @JsonIgnore
+    private Tile currentTile;
+
+    private float movementCooldown = 0f;
+
+    @JsonIgnore
+    private Queue<Tile> pathToTarget = new LinkedList<>();
+
+    @JsonIgnore
+    private Tile movingFrom = null;
+
+    @JsonIgnore
+    private Tile movingTo = null;
+
+    private float moveProgress = 0f;
+    private float moveSpeed = 0.7f;
 
     public NPC(NPCtype npcName, ArrayList<User> users,
                ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission) {
@@ -52,6 +79,7 @@ public class NPC {
     }
 
     public NPC() {
+        this.pathToTarget = new LinkedList<>();
     }
 
     public String getName() {
@@ -97,18 +125,19 @@ public class NPC {
     }
 
     public Result talkToNPC (WeatherType currentWeather, User currentPlayer){
-        for (Dialog dialog : npcName.getDialogs()) {
-            if (currentWeather.equals(dialog.getWeatherType())
-                    && friendshipLevels.get(currentPlayer.getUsername()) == dialog.getRequiredFriendshipLevel()) {
-                if (!talkedToNPCToday.get(currentPlayer.getUsername())) {
-                    friendshipPoints.merge(currentPlayer.getUsername(), 20, Integer::sum);
-                    this.updateFriendshipLevel(currentPlayer);
-                    talkedToNPCToday.put(currentPlayer.getUsername(), true);
-                }
-                return dialog.useDialog();
-            }
-        }
-        return new Result(false,"No dialog available");
+//        for (Dialog dialog : npcName.getDialogs()) {
+//            if (currentWeather.equals(dialog.getWeatherType())
+//                    && friendshipLevels.get(currentPlayer.getUsername()) == dialog.getRequiredFriendshipLevel()) {
+//                if (!talkedToNPCToday.get(currentPlayer.getUsername())) {
+//                    friendshipPoints.merge(currentPlayer.getUsername(), 20, Integer::sum);
+//                    this.updateFriendshipLevel(currentPlayer);
+//                    talkedToNPCToday.put(currentPlayer.getUsername(), true);
+//                }
+//                return dialog.useDialog();
+//            }
+//        }
+//        return new Result(false,"No dialog available");
+        return generateDialogueFromLLM(currentWeather, currentPlayer);
     }
     public Result doMission(int missionIndex, User currentPlayer) {
 
@@ -216,19 +245,253 @@ public class NPC {
         return false;
     }
 
+    private Result generateDialogueFromLLM(WeatherType currentWeather, User currentPlayer) {
+        String OPENROUTER_API_KEY = "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";
+        String LLM_MODEL = "qwen/qwen3-235b-a22b-07-25:free";
+        String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+        HttpClient client = HttpClient.newHttpClient();
+        Gson gson = new Gson();
+
+        String playerName = currentPlayer.getUsername();
+        int friendshipLevel = friendshipLevels.get(playerName);
+        String npcNameStr = npcName.getName();
+        String currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason().name();
+        int currentDay = MainApp.getInstance().getCurrentGame().getTimeAndDate().getDay();
+
+        String userPrompt = String.format(
+            "You are %s from Stardew Valley. The player %s is talking to you. " +
+                "It's currently %s season, day %d, and the weather is %s. " +
+                "Your friendship level with %s is %d. " +
+                "Say something natural for this context. Keep it concise (1-2 sentences). " +
+                "Consider your personality from Stardew Valley. Do not include your name in the response.",
+            npcNameStr, playerName, currentSeason, currentDay, currentWeather.name(), playerName, friendshipLevel
+        );
+
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("model", LLM_MODEL);
+
+        JsonArray messages = new JsonArray();
+        JsonObject systemMessage = new JsonObject();
+        systemMessage.addProperty("role", "system");
+        systemMessage.addProperty("content", "You are a Stardew Valley NPC. Respond briefly.");
+        messages.add(systemMessage);
+
+        JsonObject userMessage = new JsonObject();
+        userMessage.addProperty("role", "user");
+        userMessage.addProperty("content", userPrompt);
+        messages.add(userMessage);
+
+        requestBody.add("messages", messages);
+        requestBody.addProperty("max_tokens", 50);
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(OPENROUTER_API_URL))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer " + OPENROUTER_API_KEY)
+            .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(requestBody)))
+            .build();
+
+        try {
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonObject responseJson = gson.fromJson(response.body(), JsonObject.class);
+                String generatedText = responseJson
+                    .getAsJsonArray("choices")
+                    .get(0).getAsJsonObject()
+                    .getAsJsonObject("message")
+                    .get("content").getAsString();
+
+                if (!talkedToNPCToday.get(currentPlayer.getUsername())) {
+                    friendshipPoints.merge(currentPlayer.getUsername(), 20, Integer::sum);
+                    this.updateFriendshipLevel(currentPlayer);
+                    talkedToNPCToday.put(currentPlayer.getUsername(), true);
+                }
+                return new Result(true, generatedText);
+            } else {
+                System.err.println("Error calling LLM API: " + response.statusCode() + " - " + response.body());
+                return new Result(false, "LLM failed to generate dialogue: " + response.body());
+            }
+        } catch (Exception e) {
+            System.err.println("Exception during LLM API call: " + e.getMessage());
+            return new Result(false, "Could not connect to dialogue AI.");
+        }
+    }
+
     public Tile currentTileGetter() {
-        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
-        if (map.getTile(72, 55).getContainedNPC().equals(this))
-            return map.getTile(72, 55);
-        else if (map.getTile(72, 65).getContainedNPC().equals(this))
-            return map.getTile(72, 65);
-        else if (map.getTile(72, 75).getContainedNPC().equals(this))
-            return map.getTile(72, 75);
-        else if (map.getTile(72, 85).getContainedNPC().equals(this))
-            return map.getTile(72, 85);
-        else if (map.getTile(72, 95).getContainedNPC().equals(this))
-            return map.getTile(72, 95);
-        else return null;
+        return this.currentTile;
+    }
+
+    public void updateRoutine(Game currentGame) {
+        MapOfGame map = currentGame.getMap();
+        int currentHour = currentGame.getTimeAndDate().getHour();
+        int currentDayOfWeek = currentGame.getTimeAndDate().getDayOfWeek().ordinal(); // 0 for Sunday, 6 for Saturday
+
+        Point targetLocation = null;
+
+        if (currentHour >= 6 && currentHour < 9) {
+            targetLocation = npcName.getHomeLocation();
+        }
+        else if (currentHour >= 9 && currentHour < 17) {
+            targetLocation = npcName.getWorkLocation();
+        }
+        else if (currentHour >= 17 && currentHour < 22) {
+            targetLocation = npcName.getSocialLocation();
+        }
+        else {
+            targetLocation = npcName.getHomeLocation();
+        }
+
+        if (targetLocation == null) {
+            return;
+        }
+
+        Tile destinationTile = map.getTile(targetLocation.x, targetLocation.y);
+
+        if (!isMoving() && (currentTile == null || !currentTile.equals(destinationTile))) {
+            List<Tile> path = findShortestPath(currentTile, destinationTile, map, 50);
+            if (!path.isEmpty()) {
+                setPathToTarget(path);
+            }
+        }
+        updateMovement(Gdx.graphics.getDeltaTime());
+    }
+
+    public boolean isMoving() {
+        return movingTo != null;
+    }
+
+    public void startMove(Tile from, Tile to) {
+        this.movingFrom = from;
+        this.movingTo = to;
+        this.moveProgress = 0f;
+    }
+
+    public void updateMovement(float delta) {
+        if (movingTo != null) {
+            moveProgress += moveSpeed * delta;
+            if (moveProgress >= 1f) {
+                moveProgress = 0f;
+                if (currentTile != null) {
+                    currentTile.setContainedNPC(null);
+                }
+                currentTile = movingTo;
+                currentTile.setContainedNPC(this);
+                movingFrom = null;
+                movingTo = null;
+
+                if (!pathToTarget.isEmpty()) {
+                    startMove(currentTile, pathToTarget.poll());
+                } else {
+                    resetCooldown();
+                }
+            }
+        }
+    }
+
+    public void setPathToTarget(List<Tile> path) {
+        this.pathToTarget.clear();
+        this.pathToTarget.addAll(path);
+        if (!this.pathToTarget.isEmpty()) {
+            startMove(currentTile, this.pathToTarget.poll());
+        }
+    }
+
+    public Tile getMovingFrom() {
+        return movingFrom;
+    }
+
+    public Tile getMovingTo() {
+        return movingTo;
+    }
+
+    public float getMoveProgress() {
+        return moveProgress;
+    }
+
+    public float getMovementCooldown() {
+        return movementCooldown;
+    }
+
+    public void reduceCooldown(float delta) {
+        movementCooldown -= delta;
+    }
+
+    public void resetCooldown() {
+        movementCooldown = (3f + MathUtils.random(2f));
+    }
+
+    public void setCurrentTile(Tile currentTile) {
+        this.currentTile = currentTile;
+    }
+
+    private List<Tile> findShortestPath(Tile start, Tile goal, MapOfGame map, int maxSteps) {
+        if (start == null || goal == null || start.equals(goal)) return new ArrayList<>();
+
+        Queue<Tile> queue = new LinkedList<>();
+        Map<Tile, Tile> cameFrom = new HashMap<>();
+        Set<Tile> visited = new HashSet<>();
+
+        queue.add(start);
+        visited.add(start);
+        cameFrom.put(start, null);
+
+        int steps = 0;
+        while (!queue.isEmpty() && steps <= maxSteps) {
+            Tile current = queue.poll();
+
+            if (current.equals(goal)) break;
+
+            for (Tile neighbor : getWalkableNeighbors(current, map)) {
+                if (!visited.contains(neighbor)) {
+                    visited.add(neighbor);
+                    cameFrom.put(neighbor, current);
+                    queue.add(neighbor);
+                }
+            }
+            steps++;
+        }
+
+        List<Tile> path = new LinkedList<>();
+        Tile step = goal;
+        while (step != null && !step.equals(start)) {
+            path.add(0, step);
+            step = cameFrom.get(step);
+        }
+
+        if (path.size() > maxSteps || !path.contains(goal)) return new ArrayList<>();
+        return path;
+    }
+
+    private List<Tile> getWalkableNeighbors(Tile tile, MapOfGame map) {
+        List<Tile> neighbors = new ArrayList<>();
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+        for (int[] dir : directions) {
+            int nx = tile.getX() + dir[0];
+            int ny = tile.getY() + dir[1];
+            Tile neighbor = map.getTile(nx, ny);
+            if (neighbor != null && neighbor.getisWalkable()) {
+                if (neighbor.getContainedNPC() == null || neighbor.getContainedNPC().equals(this)) {
+                    neighbors.add(neighbor);
+                }
+            }
+        }
+        return neighbors;
+    }
+
+    public void reloadAfterLoad(Tile tile) {
+        this.currentTile = tile;
+        this.pathToTarget = new LinkedList<>();
+        this.movingFrom = null;
+        this.movingTo = null;
+        this.moveProgress = 0f;
+        this.movementCooldown = 0f;
+
+        if (this.currentTile != null && this.currentTile.getContainedNPC() == null) {
+            this.currentTile.setContainedNPC(this);
+        }
     }
 
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class TimeAndDate {
@@ -31,6 +32,11 @@ public class TimeAndDate {
         }
         MainApp.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
         Machine.updateMachines();
+        if (MainApp.getInstance().getCurrentGame() != null) {
+            for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+                npc.updateRoutine(MainApp.getInstance().getCurrentGame());
+            }
+        }
     }
 
     private void advanceDay() {
