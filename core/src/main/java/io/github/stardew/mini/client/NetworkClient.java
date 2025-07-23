@@ -166,6 +166,7 @@ public class NetworkClient extends WebSocketClient {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
+                        MainApp.getInstance().getCurrentGame().reloadExtraData();
                         MainApp.getInstance().setCurrentMenu(Menu.GameMenu); // Now the menu can read the game safely
                     });
                 }
@@ -175,13 +176,18 @@ public class NetworkClient extends WebSocketClient {
                             System.out.println("addddddddddd//////////////////////////////////////////");
                             Object bodyRaw = message.getBody();
                             if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                                Object gameIdObj = bodyMap.get("gameId");
-                                if (gameIdObj instanceof String gameId) {
-                                    Gson gson = new Gson();
-                                    String json = gson.toJson(bodyMap.get("game"));
-                                    Game game = gson.fromJson(json, Game.class);
-                                    game.setNetworkId(gameId);
-                                    MainApp.getInstance().setCurrentGame(game);
+                                Object gameJsonObj = bodyMap.get("game");
+
+                                if (gameJsonObj instanceof  String json) {
+                                    try {
+                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        MainApp.getInstance().setCurrentGame(game);
+                                        // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+                                        System.out.println("Game successfully deserialized");
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        System.out.println("failed to deserialize game after map selection");
+                                    }
                                 }
                             }
                         } catch (Exception e) {

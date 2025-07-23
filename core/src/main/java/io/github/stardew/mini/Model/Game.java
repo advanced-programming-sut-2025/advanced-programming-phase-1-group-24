@@ -4,6 +4,7 @@ package io.github.stardew.mini.Model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Animals.AnimalType;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
@@ -69,6 +70,11 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+        /// /////////////////////////////////////////////hardcoded
+        Animal animal = new Animal("moo", AnimalType.COW);
+        animal.setCurrentTile(map.getTile(0,0));
+        mainPlayer.getOwnedAnimals().add(animal);
+        map.getTile(0,0).setContainedAnimal(animal);
     }
 
     public Game() {
