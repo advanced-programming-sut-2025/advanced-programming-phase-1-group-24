@@ -126,7 +126,11 @@ public class Game {
       timeAndDate.advanceHour();
       getCurrentPlayer().handleSpecialFoodsEffects();
       updateMachines();
+      for (NPC npc : this.getNpcs()) {
+          npc.updateRoutine(this);
+      }
     }
+
     public  void updateMachines() {  //use this method every hour
         for (User user : players) {
             Farm farm =  getMap().getFarmByOwner(user);
