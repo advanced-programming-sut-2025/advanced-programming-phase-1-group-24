@@ -50,7 +50,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = new ArrayList<>(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
@@ -134,7 +134,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             npCtype.initTexture();
         }
         // Initialize game data
-        activeGames = loadActiveGames();
+//        activeGames = loadActiveGames();
         if (FarmTemplateManager.getTemplates() == null) {
             FarmTemplateManager.loadTemplates();
         }

@@ -67,7 +67,7 @@ public class NewGameMenuController implements MenuController {
             FarmTemplateManager.loadTemplates();
         }
 
-        GameServer gameServer = new GameServer(connections);
+        GameServer gameServer = new GameServer(connections, game);
         gameServer.setGame(game);
 
         AppSocket.addGame(gameServer);
@@ -80,20 +80,23 @@ public class NewGameMenuController implements MenuController {
         return new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
     }
 
-    public Message<?> createGameOnServer(List<String> usernames,User creator) {
+    public Message<?> createGameOnServer(List<String> usernames, User creator) {
         ArrayList<User> players = new ArrayList<>();
         if (usernames.size() < 2) {
             return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
         }
+
         List<PlayerConnection> connections = new ArrayList<>();
 
-        for(String user : usernames) {
+        for (String user : usernames) {
             System.out.println("[SERVER] Creating game for: " + user);
             PlayerConnection pc = AppSocket.getPlayerConnectionByUsername(user);
             if (pc == null) {
-                return Message.NOT_FOUND.setMessage(user+" connection not found");
+                return Message.NOT_FOUND.setMessage(user + " connection not found");
+            } else if (AppSocket.isPlayerInAnyGame(pc.getUsername())) {
+                return Message.FORBIDDEN.setMessage(user + " is already in an online game!");
             } else {
-                System.out.println("[SERVER] Found player connection for " + user+ ", sessionId = " + pc.getWsContext().sessionId());
+                System.out.println("[SERVER] Found player connection for " + user + ", sessionId = " + pc.getWsContext().sessionId());
             }
             players.add(pc.getUser());
             connections.add(pc);
@@ -109,7 +112,7 @@ public class NewGameMenuController implements MenuController {
         }
 
 
-        GameServer gameServer = new GameServer(connections);
+        GameServer gameServer = new GameServer(connections, game);
         gameServer.setGame(game);
 
         AppSocket.addGame(gameServer);

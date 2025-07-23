@@ -290,6 +290,7 @@
 //}
 package io.github.stardew.mini.server.Controller;
 
+import io.github.stardew.mini.Model.GameSummary;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -310,6 +311,7 @@ public class ServerController {
     private final TradeMenuController tradeMenuController = new TradeMenuController();
     private final NewGameMenuController newGameMenuController = new NewGameMenuController();
     private final MapSelectionMenuController mapSelectionMenuController = new MapSelectionMenuController();
+    private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
 
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server){
@@ -350,6 +352,8 @@ public class ServerController {
                 return routeToMapSelectionMenuController(methodName, body, server, player);
             case "LobbyController":
                 return  routeToLobbyController(methodName, body, server, player);
+            case "PreGameMenuController":
+                return  routeToPreGameMenuController(methodName, body, server, player);
 
 
             default:
@@ -394,6 +398,14 @@ public class ServerController {
             case "buildGreenHouse": {
                 result = gameController.buildGreenHouse(player, server);
                 return Message.ok(result);
+            }
+            case "exitGame": {
+                result = gameController.exitGame(player, server);
+                return Message.ok(result);
+            }
+            case "getSavedGames": {
+                List<GameSummary> summaries = gameController.getSavedGamesForUser(player.getUsername());
+                return Message.ok(summaries);
             }
 
             default:
@@ -481,7 +493,20 @@ public class ServerController {
         }
     }
 
+    private Message<?> routeToPreGameMenuController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        switch (methodName) {
+            case "loadGame": {
+                String gameId = (String) body.get("gameId");
 
+                preGameMenuController.loadGame(player,gameId);
+                return Message.OK.setMessage("gameLoaded");
+            }
+
+
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
 //    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
 //        Result result = null;
 //        switch (methodName) {

@@ -93,9 +93,6 @@ public class AppSocket {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
-
-
-
                         System.out.println("User connected: " + message.getUsername());
                     }
 
@@ -218,6 +215,16 @@ public class AppSocket {
         }
         System.out.println("PlayerConnection not found for: " + username);
         return null;
+    }
+    public static boolean isPlayerInAnyGame(String username) {
+        for (GameServer gameServer : activeGames) {
+            for (PlayerConnection player : gameServer.getPlayers()) {
+                if (player.getUsername().equals(username)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 

@@ -8,6 +8,10 @@ import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.MainMenuView;
+import io.github.stardew.mini.server.Controller.MainMenuController;
+import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -189,6 +193,13 @@ public class NetworkClient extends WebSocketClient {
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                    });
+                }
+                if ("game-ended".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().setCurrentGame(null);
+                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
                     });
                 }
                 System.err.println("❌ requestId was null");
