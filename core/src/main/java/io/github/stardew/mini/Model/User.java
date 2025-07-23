@@ -417,6 +417,21 @@ public class User {
         this.skillExperience.put(skill, currentXP);
     }
 
+    public void perfectFishingSkillUpgrade() {
+        int currentXP = skillExperience.getOrDefault(Skill.FISHING, 0);
+        int currentLevel = skillsLevel.getOrDefault(Skill.FISHING, 0);
+
+        currentXP *= 2.4;
+
+        while (currentLevel < 4 && currentXP >= 100 * currentLevel + 50) {
+            currentXP -= 100 * currentLevel + 50;
+            currentLevel++;
+        }
+
+        this.skillsLevel.put(Skill.FISHING, currentLevel);
+        this.skillExperience.put(Skill.FISHING, currentXP);
+    }
+
     public void setCurrentTile(Tile currentTile) {
         this.currentTile = currentTile;
     }

@@ -38,6 +38,8 @@ import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
 import java.net.URI;
@@ -315,7 +317,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
-
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }

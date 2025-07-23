@@ -166,7 +166,6 @@ public class NetworkClient extends WebSocketClient {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
-                        MainApp.getInstance().getCurrentGame().reloadExtraData();
                         MainApp.getInstance().setCurrentMenu(Menu.GameMenu); // Now the menu can read the game safely
                     });
                 }
