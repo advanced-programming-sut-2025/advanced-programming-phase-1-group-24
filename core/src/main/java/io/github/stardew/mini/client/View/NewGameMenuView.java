@@ -259,30 +259,30 @@ public class NewGameMenuView implements AppMenu, Screen {
                 ).thenAccept(response -> {
                     System.out.println("Response received");
                     if (response.getStatus() == 200) {
-                        Object bodyRaw = response.getBody();
-
-                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                            Object gameIdObj = bodyMap.get("gameId");
-                            if (gameIdObj instanceof String gameId) {
-                                // Now you can use gameId
-                                System.out.println("Game ID: " + gameId);
-                                Object gameObj = bodyMap.get("game");
-
-                                Gson gson = new Gson();
-                                String json = gson.toJson(gameObj); // serialize raw object to JSON string
-                                Game game = gson.fromJson(json, Game.class); // deserialize back into Game object
-
-                                MainApp.getInstance().setCurrentGame(game);
-                                MainApp.getInstance().setCurrentGameId(gameId);
-                            } else {
-                                System.err.println("gameId is not a string or is null");
-                            }
-                        } else {
-                            System.err.println("Response body is not a map");
-                        }
-                        Gdx.app.postRunnable(() -> {
-                            MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
-                        });
+//                        Object bodyRaw = response.getBody();
+//
+//                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                            Object gameIdObj = bodyMap.get("gameId");
+//                            if (gameIdObj instanceof String gameId) {
+//                                // Now you can use gameId
+//                                System.out.println("Game ID: " + gameId);
+//                                Object gameObj = bodyMap.get("game");
+//
+//                                Gson gson = new Gson();
+//                                String json = gson.toJson(gameObj); // serialize raw object to JSON string
+//                                Game game = gson.fromJson(json, Game.class); // deserialize back into Game object
+//
+//                                MainApp.getInstance().setCurrentGame(game);
+//                                MainApp.getInstance().setCurrentGameId(gameId);
+//                            } else {
+//                                System.err.println("gameId is not a string or is null");
+//                            }
+//                        } else {
+//                            System.err.println("Response body is not a map");
+//                        }
+//                        Gdx.app.postRunnable(() -> {
+//                            MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
+//                        });
                     } else {
                         Gdx.app.postRunnable(() -> {
                             showErrorDialog(stage, response.getMessage());
