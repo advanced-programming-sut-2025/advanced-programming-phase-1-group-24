@@ -64,6 +64,7 @@ public class MapOfGame {
                 map[y][x] = tile;
             }
         }
+        System.out.println("5");
         //initialize shops
         for (Shop shop : shops) {
             int startX = shop.getX();
@@ -79,6 +80,7 @@ public class MapOfGame {
                 }
             }
         }
+        System.out.println("6");
         // initialize npcHouses
         // Initialize NPC Houses
         int[][] npsHouseCoordinates = {
@@ -234,6 +236,7 @@ public class MapOfGame {
         }
         return null;
     }
+
     public Tile getTile(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return map[y][x];

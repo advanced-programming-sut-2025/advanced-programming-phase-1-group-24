@@ -37,6 +37,8 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.HouseMenuController;
@@ -51,10 +53,8 @@ import io.github.stardew.mini.client.Assets.InventoryAssets;
 import io.github.stardew.mini.client.Assets.TreeAssets;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
-import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.Growables.*;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Menus.Menu;
@@ -66,6 +66,8 @@ import io.github.stardew.mini.Model.MapManagement.TileType;
 import io.github.stardew.mini.Model.Menus.GameMenuCommands;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Places.GreenHouse;
+import io.github.stardew.mini.Model.Reccepies.Machine;
+import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.Tools.FishingPole;
 import io.github.stardew.mini.Model.Tools.FishingAttemptOutcome;
@@ -329,19 +331,19 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
 
-private void updateAnimals(float delta) {
-    for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-        for (Animal animal : player.getOwnedAnimals()) {
-            animal.updateMovement(delta);
+    private void updateAnimals(float delta) {
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            for (Animal animal : player.getOwnedAnimals()) {
+                animal.updateMovement(delta);
 //            animal.updateIsInHabitat();
-            if (!animal.updateIsInHabitat()) {
-                animal.feed();
-            }
+                if (!animal.updateIsInHabitat()) {
+                    animal.feed();
+                }
 
-            // Only try to assign a new path if animal is not moving
-            // and its personal cooldown allows it
-            if (!animal.itMoving() && !animal.isInHabitat()) {
-                animal.reduceCooldown(delta);
+                // Only try to assign a new path if animal is not moving
+                // and its personal cooldown allows it
+                if (!animal.itMoving() && !animal.isInHabitat()) {
+                    animal.reduceCooldown(delta);
 
                     if (animal.getMovementCooldown() <= 0f) {
                         List<Tile> path = generateStepwisePath(animal);
@@ -516,8 +518,7 @@ private void updateAnimals(float delta) {
 
 
     @Override
-    public boolean
-    keyDown(int keycode) {
+    public boolean keyDown(int keycode) {
         if (isFishingActive) {
             if (keycode == Input.Keys.SPACE) {
                 fishingMinigameDialog.setGreenBarMovingUp(true);
@@ -567,7 +568,6 @@ private void updateAnimals(float delta) {
                 showErrorDialog(stage,result.getMessage());
             }
         }
-
         if (keycode == Input.Keys.C) {
             if (showToolsMenu) {
                 if (showInventoryMenu || showBackpackMenu || (cookingMenuDialog != null && showCookingMenu)) return false;
@@ -886,7 +886,7 @@ private void updateAnimals(float delta) {
         if (showFullMap) return true;
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
-}
+    }
     private Animal getAnimalNearPlayer() {
         int playerX = currentPlayer.getCurrentTile().getX();
         int playerY = currentPlayer.getCurrentTile().getY();
@@ -957,11 +957,10 @@ private void updateAnimals(float delta) {
             }
             return true;
         }
-
         if (stage.touchDown(screenX, screenY, pointer, button)) {
             return true;
         }
-        if (showInventoryMenu || showBackpackMenu || showFridgeMenu) {
+        if (showInventoryMenu || showBackpackMenu) {
             return stage.touchDown(screenX, screenY, pointer, button);
         }
         if (skillsDialog != null && skillsDialog.getStage() != null) {
@@ -1251,95 +1250,95 @@ private void updateAnimals(float delta) {
         return false;
     }
 
-            private void showShopMenuDialog(float x, float y) {
-                shopMenuDialog.getContentTable().clear();
-                shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
+    private void showShopMenuDialog(float x, float y) {
+        shopMenuDialog.getContentTable().clear();
+        shopMenuDialog.getTitleLabel().setText(selectedShop.getShopName());
 
-                Table content = shopMenuDialog.getContentTable();
-                content.defaults().pad(10);
-                content.clear();
+        Table content = shopMenuDialog.getContentTable();
+        content.defaults().pad(10);
+        content.clear();
 
-                // Filter dropdown (SelectBox)
-                Table filterTable = new Table();
-                SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
-                filterSelectBox.setItems("All Products", "Available Products");
-                filterSelectBox.setSelected("All Products"); // default selection
-                filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
-                filterTable.add(filterSelectBox).left();
+        // Filter dropdown (SelectBox)
+        Table filterTable = new Table();
+        SelectBox<String> filterSelectBox = new SelectBox<>(GameAssetManager.skin.get("custom-selectbox", SelectBox.SelectBoxStyle.class));
+        filterSelectBox.setItems("All Products", "Available Products");
+        filterSelectBox.setSelected("All Products"); // default selection
+        filterTable.add(new Label("Filter:", GameAssetManager.skin, "custom-label")).padRight(10);
+        filterTable.add(filterSelectBox).left();
 
-                content.add(filterTable).left().row();
+        content.add(filterTable).left().row();
 
-                // Item list table
-                final Table itemTable = new Table();
-                itemTable.top();
-                itemTable.defaults().pad(5).fillX();
+        // Item list table
+        final Table itemTable = new Table();
+        itemTable.top();
+        itemTable.defaults().pad(5).fillX();
 
-                // Refresh logic for filtering
-                Runnable refreshItems = () -> {
-                    itemTable.clear();
-                    boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
+        // Refresh logic for filtering
+        Runnable refreshItems = () -> {
+            itemTable.clear();
+            boolean onlyAvailable = filterSelectBox.getSelected().equals("Available Products");
 
-                    for (final ShopItem item : selectedShop.getProducts()) {
-                        boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
+            for (final ShopItem item : selectedShop.getProducts()) {
+                boolean isAvailable = item.getDailyLimit() - item.getSoldToday() > 0;
 
-                        if (onlyAvailable && !isAvailable) continue;
+                if (onlyAvailable && !isAvailable) continue;
 
-                        TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
-                        itemButton.setDisabled(!isAvailable);
-                        itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
+                TextButton itemButton = new TextButton(item.getName(), GameAssetManager.skin, "custom-button");
+                itemButton.setDisabled(!isAvailable);
+                itemButton.getLabel().setColor(isAvailable ? Color.WHITE : Color.GRAY);
 
-                        itemButton.addListener(new ClickListener() {
-                            @Override
-                            public void clicked(InputEvent event, float x, float y) {
-                                selectedShopItem = item;
-                                if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
-                                    || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
-                                    showFullFarm(item);
-                                } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
-                                    showBuyAnimalDialog(item);
-                                } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
-                                    Result result = storeController.upgradeTool(selectedShop,item.getName());
-                                    showErrorDialog(stage,result.message());
-                                } else {
-                                    purchaseQuantity = 1;
-                                    showPurchaseDialog();
-                                }
-                                shopMenuDialog.hide();
-                                shopMenuDialog.setVisible(false);
-                            }
-                        });
-
-                        itemTable.add(itemButton).expandX().fillX().row();
-                    }
-                };
-
-                // Listener for dropdown change
-                filterSelectBox.addListener(new ChangeListener() {
+                itemButton.addListener(new ClickListener() {
                     @Override
-                    public void changed(ChangeEvent event, Actor actor) {
-                        refreshItems.run();
+                    public void clicked(InputEvent event, float x, float y) {
+                        selectedShopItem = item;
+                        if (selectedShop.getShopType() == ShopType.CARPENTER_SHOP && (item.getShopItemType() == ShopItemType.CAGE
+                            || item.getShopItemType() == ShopItemType.BARN || item.getShopItemType() == ShopItemType.SHIPPING_BIN)) {
+                            showFullFarm(item);
+                        } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
+                            showBuyAnimalDialog(item);
+                        } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
+                            Result result = storeController.upgradeTool(selectedShop,item.getName());
+                            showErrorDialog(stage,result.message());
+                        } else {
+                            purchaseQuantity = 1;
+                            showPurchaseDialog();
+                        }
+                        shopMenuDialog.hide();
+                        shopMenuDialog.setVisible(false);
                     }
                 });
 
-                // Scrollable list for items
-                ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
-                scrollPane.setFadeScrollBars(false);
-                scrollPane.setScrollingDisabled(true, false);
-                scrollPane.setForceScroll(false, true);
-                scrollPane.layout();
-
-                content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
-
-                // Initial load
-                refreshItems.run();
-
-                shopMenuDialog.pack();
-                shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
-
-                shopMenuDialog.setVisible(true);
-                shopMenuDialog.show(stage);
-                Gdx.input.setInputProcessor(stage);
+                itemTable.add(itemButton).expandX().fillX().row();
             }
+        };
+
+        // Listener for dropdown change
+        filterSelectBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                refreshItems.run();
+            }
+        });
+
+        // Scrollable list for items
+        ScrollPane scrollPane = new ScrollPane(itemTable, GameAssetManager.skin);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.layout();
+
+        content.add(scrollPane).width(gameWidth / 2).height(gameHeight / 2).row();
+
+        // Initial load
+        refreshItems.run();
+
+        shopMenuDialog.pack();
+        shopMenuDialog.setPosition(x - shopMenuDialog.getWidth() / 2, y - shopMenuDialog.getHeight() / 2);
+
+        shopMenuDialog.setVisible(true);
+        shopMenuDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
 
     public void showBuyAnimalDialog(ShopItem item) {
         buyAnimalDialog.getContentTable().clear();
@@ -1734,7 +1733,7 @@ private void updateAnimals(float delta) {
         stage.addActor(terminalWindow);
     }
 
-//    private void createAnimalDialog() {
+    //    private void createAnimalDialog() {
 //        // Create the animal menu dialog (initially hidden)
 //        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
 //            @Override
@@ -1813,122 +1812,122 @@ private void updateAnimals(float delta) {
 //        animalMenuDialog.setVisible(false);  // Add this after creation
 //        stage.addActor(animalMenuDialog);
 //    }
-private void createAnimalDialog() {
-    animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
-        @Override
-        protected void result(Object object) {
-            handleAnimalMenuChoice(object.toString());
-        }
-    };
+    private void createAnimalDialog() {
+        animalMenuDialog = new Dialog("Animal Menu", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                handleAnimalMenuChoice(object.toString());
+            }
+        };
 
-    animalMenuDialog.padTop(40);
-    animalMenuDialog.getContentTable().defaults().pad(5);
+        animalMenuDialog.padTop(40);
+        animalMenuDialog.getContentTable().defaults().pad(5);
 
-    // ========== TOP INFO AREA ==========
-    animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
-    animalInfoLabel.setWrap(true);
-    animalMenuDialog.getContentTable().add(animalInfoLabel).width(300).row();
+        // ========== TOP INFO AREA ==========
+        animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
+        animalInfoLabel.setWrap(true);
+        animalMenuDialog.getContentTable().add(animalInfoLabel).width(300).row();
 
 
-    // ========== SHEPHERD INPUT FIELDS ==========
-    TextField xField = new TextField("", GameAssetManager.skin);
-    TextField yField = new TextField("", GameAssetManager.skin);
-    xField.setMessageText("X");
-    yField.setMessageText("Y");
+        // ========== SHEPHERD INPUT FIELDS ==========
+        TextField xField = new TextField("", GameAssetManager.skin);
+        TextField yField = new TextField("", GameAssetManager.skin);
+        xField.setMessageText("X");
+        yField.setMessageText("Y");
 
-    HorizontalGroup shepherdGroup = new HorizontalGroup();
-    shepherdGroup.space(10);
-    shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
-    shepherdGroup.addActor(xField);
-    shepherdGroup.addActor(yField);
+        HorizontalGroup shepherdGroup = new HorizontalGroup();
+        shepherdGroup.space(10);
+        shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
+        shepherdGroup.addActor(xField);
+        shepherdGroup.addActor(yField);
 
-    TextButton shepherdButton = new TextButton("Shepherd", GameAssetManager.skin, "custom-button");
-    shepherdButton.addListener(new ClickListener() {
-        @Override
-        public void clicked(InputEvent event, float x, float y) {
-            try {
-                int targetX = Integer.parseInt(xField.getText());
-                int targetY = Integer.parseInt(yField.getText());
-                handleAnimalMenuChoice("shepherd:" + targetX + "," + targetY);
+        TextButton shepherdButton = new TextButton("Shepherd", GameAssetManager.skin, "custom-button");
+        shepherdButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                try {
+                    int targetX = Integer.parseInt(xField.getText());
+                    int targetY = Integer.parseInt(yField.getText());
+                    handleAnimalMenuChoice("shepherd:" + targetX + "," + targetY);
+                    xField.setText("");
+                    yField.setText("");
+                } catch (NumberFormatException e) {
+                    showErrorDialog(stage, "Please enter valid coordinates.");
+                }
+            }
+        });
+
+        animalMenuDialog.getContentTable().add(shepherdGroup).row();
+        animalMenuDialog.getContentTable().add(shepherdButton).row();
+
+        // ========== BUTTONS ==========
+        TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
+        releaseButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("release");
+            }
+        });
+        animalMenuDialog.getContentTable().add(releaseButton).row();
+        TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
+        feedButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("feed");
+            }
+        });
+        animalMenuDialog.getContentTable().add(feedButton).row();
+
+        TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
+        petButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("pet");
+            }
+        });
+        animalMenuDialog.getContentTable().add(petButton).row();
+
+        TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
+        sellButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("sell");
+            }
+        });
+        animalMenuDialog.getContentTable().add(sellButton).row();
+
+        TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
+        collectButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                handleAnimalMenuChoice("collect");
+            }
+        });
+        animalMenuDialog.getContentTable().add(collectButton).row();
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+        cancelButton.addListener(new ClickListener() {
+            public void clicked(InputEvent event, float x, float y) {
+                animalMenuDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+                selectedAnimal = null;
                 xField.setText("");
                 yField.setText("");
-            } catch (NumberFormatException e) {
-                showErrorDialog(stage, "Please enter valid coordinates.");
             }
-        }
-    });
+        });
+        animalMenuDialog.getContentTable().add(cancelButton).row();
 
-    animalMenuDialog.getContentTable().add(shepherdGroup).row();
-    animalMenuDialog.getContentTable().add(shepherdButton).row();
-
-    // ========== BUTTONS ==========
-    TextButton releaseButton = new TextButton("Release", GameAssetManager.skin, "custom-button");
-    releaseButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("release");
-        }
-    });
-    animalMenuDialog.getContentTable().add(releaseButton).row();
-    TextButton feedButton = new TextButton("Feed", GameAssetManager.skin, "custom-button");
-    feedButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("feed");
-        }
-    });
-    animalMenuDialog.getContentTable().add(feedButton).row();
-
-    TextButton petButton = new TextButton("Pet", GameAssetManager.skin, "custom-button");
-    petButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("pet");
-        }
-    });
-    animalMenuDialog.getContentTable().add(petButton).row();
-
-    TextButton sellButton = new TextButton("Sell", GameAssetManager.skin, "custom-button");
-    sellButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("sell");
-        }
-    });
-    animalMenuDialog.getContentTable().add(sellButton).row();
-
-    TextButton collectButton = new TextButton("Collect Product", GameAssetManager.skin, "custom-button");
-    collectButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            handleAnimalMenuChoice("collect");
-        }
-    });
-    animalMenuDialog.getContentTable().add(collectButton).row();
-
-    TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
-    cancelButton.addListener(new ClickListener() {
-        public void clicked(InputEvent event, float x, float y) {
-            animalMenuDialog.hide();
-            Gdx.input.setInputProcessor(GameView.this);
-            selectedAnimal = null;
-            xField.setText("");
-            yField.setText("");
-        }
-    });
-    animalMenuDialog.getContentTable().add(cancelButton).row();
-
-    animalMenuDialog.setKeepWithinStage(true);
-    animalMenuDialog.setMovable(false);
-    animalMenuDialog.setVisible(false);
-    stage.addActor(animalMenuDialog);
-}
+        animalMenuDialog.setKeepWithinStage(true);
+        animalMenuDialog.setMovable(false);
+        animalMenuDialog.setVisible(false);
+        stage.addActor(animalMenuDialog);
+    }
     private void updateAnimalInfoLabel() {
         if (selectedAnimal == null || animalInfoLabel == null) return;
 
         StringBuilder info = new StringBuilder();
         info.append("Name: ").append(selectedAnimal.getName()).append("\n");
-       // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
+        // info.append("Type: ").append(selectedAnimal.getAnimalType()).append("\n");
         info.append("Friendship: ").append(selectedAnimal.getFriendship()).append("\n");
         info.append("Fed: ").append(selectedAnimal.isFedToday()).append("\n");
         info.append("Petted: ").append(selectedAnimal.isPettedToday()).append("\n");
@@ -2827,11 +2826,11 @@ private void createAnimalDialog() {
         return
             //(skillsDialog != null && skillsDialog.isVisible()) ||
             (shopMenuDialog != null && shopMenuDialog.isVisible()) ||
-           // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
-            (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
-            //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
-           // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
-           // (friendsDialog != null && friendsDialog.isVisible());
+                // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
+                (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
+        //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
+        // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
+        // (friendsDialog != null && friendsDialog.isVisible());
     }
 
     @Override
@@ -2914,14 +2913,14 @@ private void createAnimalDialog() {
         updateEquippedItemSlot();
 
 
-        gameTickTask = Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
-                controller.handleEndOfDay();
-                updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
-            }
-        }, 5, 5);
+//        gameTickTask = Timer.schedule(new Timer.Task() {
+//            @Override
+//            public void run() {
+//                MainApp.getInstance().getCurrentGame().getTimeAndDate().advanceHour();
+//                controller.handleEndOfDay();
+//               // updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
+//            }
+//        }, 5, 5);
 
         determineAvatar();
 
@@ -3087,6 +3086,11 @@ private void createAnimalDialog() {
 
     @Override
     public void render(float v) {
+        //////////////////////hard code /////////////////////////
+//        currentPlayer =  MainApp.getInstance().getLoggedInUser();
+//        MainApp.getInstance().getCurrentGame().setCurrentPlayer(MainApp.getInstance().getLoggedInUser());
+        //////////////////////hard code /////////////////////////
+        updateLighting(MainApp.getInstance().getCurrentGame().getTimeAndDate().getHour());
         currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
         currentFarm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(currentPlayer);
 //        if (currentPlayer.hasFainted()) {
@@ -3323,17 +3327,279 @@ private void createAnimalDialog() {
 //        renderHud(batch, camera, timeAndDate.getSeason().name() + timeAndDate.getDay(), Integer.toString(timeAndDate.getHour()) ,
 //            Integer.toString(currentPlayer.getMoney()));
 
+//        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+//            moveCooldown -= v;
+//            if (moveCooldown <= 0f) {
+//                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+//                }
+//            }
+//        }
+//        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+//            moveCooldown -= v;
+//            if (moveCooldown <= 0f) {
+//                if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","0");
+//                    params.put("dy","-1");
+//                    params.put("direction","3");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","0");
+//                    params.put("dy","1");
+//                    params.put("direction","1");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","-1");
+//                    params.put("dy","0");
+//                    params.put("direction","0");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("dx","1");
+//                    params.put("dy","0");
+//                    params.put("direction","2");
+//                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                        "GameController", "tryMove", params, currentPlayer.getUsername()).thenAccept(response -> {
+//                        if (response.getStatus() == 200) {
+//                            moveCooldown = MOVE_INTERVAL;
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object tileRaw = bodyMap.get("tile");
+//                                Object energyRaw = bodyMap.get("energy");
+//                                Object dirRaw = bodyMap.get("movingDirection");
+//
+//                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+//                                int energy = ((Number) energyRaw).intValue();
+//                                int direction = ((Number) dirRaw).intValue();
+//
+//                                User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+//                                currentPlayer.setCurrentTile(tile);
+//                                currentPlayer.setEnergy(energy);
+//                                currentPlayer.setMovingDirection(direction);
+//
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                        }
+//                    }).exceptionally(ex -> {
+//                        Gdx.app.postRunnable(() -> {
+//                            showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+//                        });
+//                        return null;
+//                    });
+//                }
+//            }
+//        }
         if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
+                int dx = 0, dy = 0, direction = -1;
+
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    if (tryMove(0, -1, 3)) moveCooldown = MOVE_INTERVAL;
+                    dx = 0; dy = -1; direction = 3;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    if (tryMove(0, +1, 1)) moveCooldown = MOVE_INTERVAL;
+                    dx = 0; dy = 1; direction = 1;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    if (tryMove(-1, 0, 0)) moveCooldown = MOVE_INTERVAL;
+                    dx = -1; dy = 0; direction = 0;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    if (tryMove(+1, 0, 2)) moveCooldown = MOVE_INTERVAL;
+                    dx = 1; dy = 0; direction = 2;
+                }
+
+                if (direction != -1) {
+                    // ✅ Optimistically move the player locally
+//                    Tile currentTile = currentPlayer.getCurrentTile();
+//                    Tile nextTile = currentTile.offset(dx, dy); // You must implement this logic
+//                    if (nextTile != null && !nextTile.isBlocked()) {
+//                        currentPlayer.setCurrentTile(nextTile);
+//                        currentPlayer.setMovingDirection(direction);
+//                        moveCooldown = MOVE_INTERVAL;
+//                    }
+                    if (tryMove(dx, dy, direction)) {
+                        moveCooldown = MOVE_INTERVAL;
+                    }
+
+                    // ✅ Send move request to server (still needed for real game state)
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("dx", String.valueOf(dx));
+                    params.put("dy", String.valueOf(dy));
+                    params.put("direction", String.valueOf(direction));
+
+                    MainApp.getInstance().getNetworkClient()
+                        .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                            "GameController", "tryMove", params, currentPlayer.getUsername())
+                        .thenAccept(response -> {
+                            if (response.getStatus() == 200) {
+                                Object bodyRaw = response.getBody();
+                                if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                    Tile serverTile = GameSaver.convertObject(bodyMap.get("tile"), Tile.class);
+//                                    int energy = ((Number) bodyMap.get("energy")).intValue();
+//                                    int dir = ((Number) bodyMap.get("movingDirection")).intValue();
+//
+//                                    // ✅ Reconcile — if client and server differ, correct it
+//                                    if (!currentPlayer.getCurrentTile().equals(serverTile)) {
+//                                        currentPlayer.setCurrentTile(serverTile);
+//                                    }
+//                                    currentPlayer.setEnergy(energy);
+//                                    currentPlayer.setMovingDirection(dir);
+                                    Object tileRaw = bodyMap.get("tile");
+                                    Object energyRaw = bodyMap.get("energy");
+                                    Object dirRaw = bodyMap.get("movingDirection");
+
+                                    Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+                                    int energy = ((Number) energyRaw).intValue();
+                                    int dir = ((Number) dirRaw).intValue();
+
+                                    User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+                                    currentPlayer.setCurrentTile(tile);
+                                    currentPlayer.setEnergy(energy);
+                                    currentPlayer.setMovingDirection(dir);
+                                } else {
+                                  System.err.println("Response body is not a map");
+                                }
+                            }
+                        }).exceptionally(ex -> {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, "Failed to walk: " + ex.getMessage());
+                            });
+                            return null;
+                        });
+                }
+            }
+        }
+
+        setCameraPosition();
+        camera.update();
+
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
+                for (Tile tile : tileRow) {
+                    if (tile.getContainedNPC() != null) {
+                        NPC npc = tile.getContainedNPC();
+                        TextButton talkButton = npcTalkButtons.get(npc);
+
+                        if (talkButton == null) {
+                            talkButton = new TextButton("...", GameAssetManager.skin, "custom-button");
+                            talkButton.setSize(tileSize / 2f, tileSize / 2f);
+                            talkButton.getLabel().setFontScale(0.5f);
+                            talkButton.setColor(Color.WHITE);
+                            talkButton.addListener(new ClickListener() {
+                                @Override
+                                public void clicked(InputEvent event, float x, float y) {
+                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(),currentPlayer).message());
+                                    event.stop();
+                                }
+                            });
+                            stage.addActor(talkButton);
+                            npcTalkButtons.put(npc, talkButton);
+                        }
+
+                        // Calculate screen position for the button above the NPC
+                        float npcCenterX = tile.getX() * tileSize + tileSize / 2f;
+                        float npcTopY = (rows - tile.getY() - 1) * tileSize + tileSize * 2f;
+
+                        Vector3 buttonWorldCoords = new Vector3(npcCenterX, npcTopY, 0);
+                        camera.project(buttonWorldCoords);
+
+                        talkButton.setPosition(buttonWorldCoords.x - talkButton.getWidth() / 2f, buttonWorldCoords.y);
+                        talkButton.setVisible(true);
+                    }
                 }
             }
         }
@@ -3649,7 +3915,7 @@ private void createAnimalDialog() {
             int drawY = (rows - shop.getY() - shop.getHeight()) * tileSize;
 
             Texture texture = shop.getShopType().getTexture();
-             if (texture != null) {
+            if (texture != null) {
                 batch.draw(texture, drawX, drawY, shop.getWidth() * tileSize, shop.getHeight() * tileSize);
             }
         }
@@ -3715,15 +3981,15 @@ private void createAnimalDialog() {
                 if(tile == TileType.EMPTY){
                     Season season = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
                     switch (season) {
-                            case SUMMER:
-                                batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                break;
-                                case AUTUMN:
-                                    batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                    break;
-                                    case WINTER:
-                                        batch.draw(GameAssetManager.FLOORING_25, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
-                                        break;
+                        case SUMMER:
+                            batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
+                        case AUTUMN:
+                            batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
+                        case WINTER:
+                            batch.draw(GameAssetManager.FLOORING_25, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            break;
                     }
                 }
                 if (tiles[y][x].isHasBeenBurt()) {
@@ -3970,8 +4236,8 @@ private void createAnimalDialog() {
 //            currentPlayer.setCurrentTurnEnergy(newTurnEnergy);
             currentPlayer.reduceEnergy(1);
             currentPlayer.setMovingDirection(direction);
-            setCameraPosition();
-            camera.update();
+            //setCameraPosition();
+            //camera.update();
             return true;
         }
         return false;
@@ -4085,12 +4351,12 @@ private void createAnimalDialog() {
                     Gdx.app.error("GameView", "Texture for tool " + textureOrigin + " is null!");
                 }
 
-                Label slotNumLabel = new Label(String.valueOf(i + 1), labelStyle);
-                Container<Label> labelContainer = new Container<>(slotNumLabel);
-                labelContainer.align(com.badlogic.gdx.utils.Align.topLeft);
-                labelContainer.pad(labelPad);
-                labelContainer.fill();
-                slotStack.add(labelContainer);
+            Label slotNumLabel = new Label(String.valueOf(i + 1), labelStyle);
+            Container<Label> labelContainer = new Container<>(slotNumLabel);
+            labelContainer.align(com.badlogic.gdx.utils.Align.topLeft);
+            labelContainer.pad(labelPad);
+            labelContainer.fill();
+            slotStack.add(labelContainer);
 
                 toolMenuTable.add(slotStack).size(slotImageSize, slotImageSize).pad(2f);
             }
@@ -4869,13 +5135,13 @@ private void createAnimalDialog() {
         }
 
     private void showNotifications() {
-        List<Message> notifications = currentPlayer.getNotifications();
+        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
         if (notifications.isEmpty()) return;
         Gdx.input.setInputProcessor(stage);
 
         StringBuilder generalNotifications = new StringBuilder();
 
-        for (Message notification : notifications) {
+        for (FriendshipMessage notification : notifications) {
             String message = notification.getMessage();
 
             if (message.endsWith("has asked to marry you")) {
@@ -4915,7 +5181,7 @@ private void createAnimalDialog() {
     }
 
     @NotNull
-    private Dialog proposalNotification(Message notification) {
+    private Dialog proposalNotification(FriendshipMessage notification) {
         String sender = notification.getSender();
 
         Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
@@ -5249,7 +5515,7 @@ private void createAnimalDialog() {
         }
     }
 
-//    public void showErrorDialog(Stage stage, String message) {
+    //    public void showErrorDialog(Stage stage, String message) {
 //        Skin skin = GameAssetManager.skin;
 //
 //        Dialog dialog = new Dialog("", skin) {
@@ -5299,66 +5565,66 @@ private void createAnimalDialog() {
 //        stage.addActor(dialog);
 //        Gdx.input.setInputProcessor(stage); // 🔥 Important: Enable input for stage
 //    }
-public void showErrorDialog(Stage stage, String message) {
-    Skin skin = GameAssetManager.skin;
+    public void showErrorDialog(Stage stage, String message) {
+        Skin skin = GameAssetManager.skin;
 
-    Dialog dialog = new Dialog("", skin) {
-        @Override
-        protected void result(Object object) {
-            // Optional: Handle result
-        }
-    };
+        Dialog dialog = new Dialog("", skin) {
+            @Override
+            protected void result(Object object) {
+                // Optional: Handle result
+            }
+        };
 
-    dialog.setBackground("window"); // make sure "window" drawable exists in your skin
+        dialog.setBackground("window"); // make sure "window" drawable exists in your skin
 
-    Label messageLabel = new Label(message, skin, "custom-label");
-    messageLabel.setWrap(true);
-    messageLabel.setAlignment(Align.center);
-    messageLabel.setFontScale(0.7f);
+        Label messageLabel = new Label(message, skin, "custom-label");
+        messageLabel.setWrap(true);
+        messageLabel.setAlignment(Align.center);
+        messageLabel.setFontScale(0.7f);
 
-    float maxWidth = stage.getWidth() * 0.6f;
-    messageLabel.setWidth(maxWidth); // Required for wrapping to work
-    messageLabel.invalidateHierarchy(); // Force layout to recalculate size
+        float maxWidth = stage.getWidth() * 0.6f;
+        messageLabel.setWidth(maxWidth); // Required for wrapping to work
+        messageLabel.invalidateHierarchy(); // Force layout to recalculate size
 
-    // Let the label wrap and calculate the height
-    Table contentTable = new Table();
-    contentTable.defaults().pad(10f);
-    contentTable.add(messageLabel).width(maxWidth).row();
+        // Let the label wrap and calculate the height
+        Table contentTable = new Table();
+        contentTable.defaults().pad(10f);
+        contentTable.add(messageLabel).width(maxWidth).row();
 
-    TextButton okButton = new TextButton("OK", skin, "custom-button");
-    okButton.pad(10f);
-    okButton.addListener(new ClickListener() {
-        @Override
-        public void clicked(InputEvent event, float x, float y) {
-            dialog.hide();
-            Gdx.input.setInputProcessor(GameView.this);
-        }
-    });
+        TextButton okButton = new TextButton("OK", skin, "custom-button");
+        okButton.pad(10f);
+        okButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
 
-    contentTable.add(okButton).center().padTop(10f);
+        contentTable.add(okButton).center().padTop(10f);
 
-    dialog.getContentTable().clear();
-    dialog.getContentTable().add(contentTable).expand().fill();
-    dialog.setMovable(false);
-    dialog.setModal(true);
-    dialog.setResizable(false);
+        dialog.getContentTable().clear();
+        dialog.getContentTable().add(contentTable).expand().fill();
+        dialog.setMovable(false);
+        dialog.setModal(true);
+        dialog.setResizable(false);
 
-    dialog.pack(); // Automatically size dialog based on contents
+        dialog.pack(); // Automatically size dialog based on contents
 
-    // Clamp width/height to screen size if needed
-    float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
-    float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
-    dialog.setSize(clampedWidth, clampedHeight);
+        // Clamp width/height to screen size if needed
+        float clampedWidth = Math.min(dialog.getWidth(), stage.getWidth() * 0.95f);
+        float clampedHeight = Math.min(dialog.getHeight(), stage.getHeight() * 0.95f);
+        dialog.setSize(clampedWidth, clampedHeight);
 
-    // Center on screen
-    dialog.setPosition(
-        (stage.getWidth() - clampedWidth) / 2f,
-        (stage.getHeight() - clampedHeight) / 2f
-    );
+        // Center on screen
+        dialog.setPosition(
+            (stage.getWidth() - clampedWidth) / 2f,
+            (stage.getHeight() - clampedHeight) / 2f
+        );
 
-    stage.addActor(dialog);
-    Gdx.input.setInputProcessor(stage);
-}
+        stage.addActor(dialog);
+        Gdx.input.setInputProcessor(stage);
+    }
 
 //    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
 //        Skin skin = GameAssetManager.skin;
@@ -5369,7 +5635,7 @@ public void showErrorDialog(Stage stage, String message) {
 //        errorLabel.setFontScale(1.2f);
 //
 //        // Optional background for visibility
-////       errorLabel.setBackground(skin.getDrawable("window"));
+    ////       errorLabel.setBackground(skin.getDrawable("window"));
 //
 //        float width = Gdx.graphics.getWidth() * 0.4f;
 //        float height = Gdx.graphics.getHeight() * 0.15f;
@@ -5389,36 +5655,36 @@ public void showErrorDialog(Stage stage, String message) {
 //            Actions.run(errorLabel::remove)
 //        ));
 //    }
-public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
-    Skin skin = GameAssetManager.skin;
+    public void showTimedErrorLabel(Stage stage, String message, float durationSeconds, Runnable onComplete) {
+        Skin skin = GameAssetManager.skin;
 
-    Label errorLabel = new Label(message, skin, "custom-label");
-    errorLabel.setAlignment(Align.center);
-    errorLabel.setColor(Color.SCARLET);
-    errorLabel.setFontScale(1.2f);
+        Label errorLabel = new Label(message, skin, "custom-label");
+        errorLabel.setAlignment(Align.center);
+        errorLabel.setColor(Color.SCARLET);
+        errorLabel.setFontScale(1.2f);
 
-    float width = Gdx.graphics.getWidth() * 0.4f;
-    float height = Gdx.graphics.getHeight() * 0.15f;
+        float width = Gdx.graphics.getWidth() * 0.4f;
+        float height = Gdx.graphics.getHeight() * 0.15f;
 
-    errorLabel.setSize(width, height);
-    errorLabel.setPosition(
-        (Gdx.graphics.getWidth() - width) / 2f,
-        (Gdx.graphics.getHeight() - height) / 2f
-    );
+        errorLabel.setSize(width, height);
+        errorLabel.setPosition(
+            (Gdx.graphics.getWidth() - width) / 2f,
+            (Gdx.graphics.getHeight() - height) / 2f
+        );
 
-    stage.addActor(errorLabel);
+        stage.addActor(errorLabel);
 
-    errorLabel.addAction(Actions.sequence(
-        Actions.delay(durationSeconds),
-        Actions.fadeOut(0.5f),
-        Actions.run(() -> {
-            errorLabel.remove();
-            if (onComplete != null) {
-                onComplete.run();
-            }
-        })
-    ));
-}
+        errorLabel.addAction(Actions.sequence(
+            Actions.delay(durationSeconds),
+            Actions.fadeOut(0.5f),
+            Actions.run(() -> {
+                errorLabel.remove();
+                if (onComplete != null) {
+                    onComplete.run();
+                }
+            })
+        ));
+    }
     public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
         Skin skin = GameAssetManager.skin;
 

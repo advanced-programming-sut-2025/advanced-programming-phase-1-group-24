@@ -6,6 +6,13 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.Food;
+import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.server.Controller.*;
+import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.FoodType;
@@ -30,11 +37,16 @@ import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
@@ -48,6 +60,14 @@ public class MainApp extends com.badlogic.gdx.Game {
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
+    private String jwtToken;
+
+    public String getJwtToken() {
+        return jwtToken;
+    }
+    public void setJwtToken(String jwtToken) {
+        this.jwtToken = jwtToken;
+    }
 
     public void setCurrentGameId(String gameId) {
         currentGame.setNetworkId(gameId);
@@ -58,17 +78,21 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
+        users = UserDatabase.loadUsers();
+        if (users == null) {
+            users = new ArrayList<>();
+        }
         connectToServer();
-        loggedInUser = new User("nikki", "1234", "nik", "aa", true);
-//        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//        if (loggedInUser == null) {
-//            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
-//        } else
-//            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
-        setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        //loggedInUser = new User("nikki", "1234", "nik", "aa", true);
+        setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        if (loggedInUser == null) {
+            setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
+        } else
+            setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+        //setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
 
 //       // Initialize game data
-        //loadGameData();
+       //loadGameData();
         TileType.initTextures();
         AnimalType.initTextures();
         TreeAssets.load();
@@ -105,21 +129,21 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
             animalProductType.initTexture();
         }
-        for (NPCtype npCtype : NPCtype.values()) {
-            npCtype.initTexture();
-        }
         for (FoodType foodType : FoodType.values()) {
             foodType.initTexture();
+        }
+        for (NPCtype npCtype : NPCtype.values()) {
+            npCtype.initTexture();
         }
         // Initialize game data
         activeGames = loadActiveGames();
         if (FarmTemplateManager.getTemplates() == null) {
-            FarmTemplateManager.loadTemplates(); // only once
+            FarmTemplateManager.loadTemplates();
         }
     }
 
-    private void connectToServer() {
 
+    public void connectToServer() {
         try {
             URI serverUri = new URI("ws://localhost:8080/ws"); // Make sure port matches AppSocket server
             networkClient = new NetworkClient(serverUri);
@@ -141,7 +165,8 @@ public class MainApp extends com.badlogic.gdx.Game {
                 while (!networkClient.isOpen()) {
                     try {
                         Thread.sleep(100);
-                    } catch (InterruptedException ignored) {}
+                    } catch (InterruptedException ignored) {
+                    }
                 }
 
                 if (loggedInUser != null) {
@@ -162,8 +187,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
-
-
     public NetworkClient getNetworkClient() {
         return networkClient;
     }
@@ -183,7 +206,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
         // save games
-        if( currentGame!=null ) {
+        if (currentGame != null) {
             currentGame.getMap().getShops().clear();
         }
         //saveActiveGames();
@@ -196,9 +219,8 @@ public class MainApp extends com.badlogic.gdx.Game {
                 System.err.println("Error while closing WebSocket: " + e.getMessage());
             }
         }
-
     }
-    ////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
+////////////////////////////////////////saving with .json : just replace .json.gz with .json //////////////////////
     public void saveActiveGames() {
         try {
             GameSaver.saveGames(activeGames, "data/active_games.json.gz");
@@ -239,6 +261,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         "In my little pony what is appleJack's pet name?",
         "how many times did SpongeBob take the driving test?"
     );
+
+    public CompletableFuture<Message<String>> wsLogin(String user, String pass) {
+        return networkClient.login(user, pass);
+    }
 
     public Menu getCurrentMenu() {
         return currentMenu;
@@ -318,9 +344,10 @@ public class MainApp extends com.badlogic.gdx.Game {
                 break;
             case LobbyMenu:
                 getInstance().setScreen(new LobbyMenuView(new LobbyMenuController()));
+                break;
 
 
-                // ... other cases
+            // ... other cases
         }
     }
 

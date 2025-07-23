@@ -3,6 +3,8 @@ package io.github.stardew.mini.Model.TimeManagement;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.client.MainApp;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
@@ -30,13 +32,13 @@ public class TimeAndDate {
             hour = 0;
             advanceDay();
         }
-        MainApp.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
-        Machine.updateMachines();
-        if (MainApp.getInstance().getCurrentGame() != null) {
-            for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
-                npc.updateRoutine(MainApp.getInstance().getCurrentGame());
-            }
-        }
+        //MainApp.getInstance().getCurrentGame().getCurrentPlayer().handleSpecialFoodsEffects();
+        //Machine.updateMachines();
+//        if (MainApp.getInstance().getCurrentGame() != null) {
+//            for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+//                npc.updateRoutine(MainApp.getInstance().getCurrentGame());
+//            }
+//        }
     }
 
     private void advanceDay() {
@@ -78,6 +80,12 @@ public class TimeAndDate {
 
     public void setHour(int hour) {
         this.hour = hour;
+    }
+    public void updateTime(int hour,int day,DayOfWeek dayOfWeek,Season season){
+        this.hour = hour;
+        this.day = day;
+        this.dayOfWeek = dayOfWeek;
+        this.season = season;
     }
 }
 

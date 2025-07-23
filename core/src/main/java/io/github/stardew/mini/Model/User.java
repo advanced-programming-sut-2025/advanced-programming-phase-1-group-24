@@ -4,8 +4,8 @@ package io.github.stardew.mini.Model;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
@@ -59,12 +59,12 @@ public class User {
     private Backpack backpack;
     private ArrayList<Animal> ownedAnimals=new ArrayList<>();
     private Tile homeTile;
-    private ArrayList<Message> notifications = new ArrayList<>();
+    private ArrayList<FriendshipMessage> notifications = new ArrayList<>();
     private ArrayList<Gift> recievedGift = new ArrayList<>();
     private User partner;
     private int daysSinceRejection;
     private ArrayList<Trade> tradingHistory = new ArrayList<>();
-    private ArrayList<Message> tradeNotifications = new ArrayList<>();
+    private ArrayList<FriendshipMessage> tradeNotifications = new ArrayList<>();
 
     private boolean buffMaxEnergy;
     private boolean buffForagingSkill;
@@ -588,15 +588,15 @@ public class User {
         this.currentTurnEnergy = Math.min(this.currentTurnEnergy + amount, maxEnergyTurn);
     }
 
-    public ArrayList<Message> getNotifications() {
+    public ArrayList<FriendshipMessage> getNotifications() {
         return notifications;
     }
 
-    public void setNotifications(ArrayList<Message> notifications) {
+    public void setNotifications(ArrayList<FriendshipMessage> notifications) {
         this.notifications = notifications;
     }
 
-    public void addToNotifications(Message message) {
+    public void addToNotifications(FriendshipMessage message) {
         this.notifications.add(message);
     }
 
@@ -630,7 +630,7 @@ public class User {
         return tradingHistory;
     }
 
-    public ArrayList<Message> getTradeNotifications() {
+    public ArrayList<FriendshipMessage> getTradeNotifications() {
         return tradeNotifications;
     }
 
@@ -638,7 +638,7 @@ public class User {
         this.tradingHistory = tradingHistory;
     }
 
-    public void setTradeNotifications(ArrayList<Message> tradeNotifications) {
+    public void setTradeNotifications(ArrayList<FriendshipMessage> tradeNotifications) {
         this.tradeNotifications = tradeNotifications;
     }
 

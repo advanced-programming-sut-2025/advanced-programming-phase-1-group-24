@@ -27,5 +27,13 @@ public enum Season {
     public Season next() {
         return values()[(this.ordinal() + 1) % values().length];
     }
+    public static Season fromString(String value) {
+        for (Season season : Season.values()) {
+            if (season.name().equalsIgnoreCase(value)) {
+                return season;
+            }
+        }
+        throw new IllegalArgumentException("Invalid Season: " + value);
+    }
 }
 

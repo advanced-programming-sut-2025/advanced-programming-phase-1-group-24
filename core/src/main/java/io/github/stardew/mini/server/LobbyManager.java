@@ -43,13 +43,13 @@ public class LobbyManager {
                 LobbyInfo info = new LobbyInfo();
                 info.setId(Lobby.getId());
                 info.setName(Lobby.getName());
+                info.setOwner(Lobby.getCreator().getUsername());
                 info.setPlayerCount(Lobby.getPlayers().size());
                 info.setPrivate(Lobby.isPrivate());
                 info.setInvisible(Lobby.isInvisible());
-                List<String> usernames = Lobby.getPlayers()
-                    .stream()
+                List<String> usernames = Lobby.getPlayers().stream()
                     .map(User::getUsername)
-                    .toList();
+                    .collect(Collectors.toList());
                 info.setPlayers(usernames);
                 return info;
             }).collect(Collectors.toList());
@@ -57,6 +57,7 @@ public class LobbyManager {
         body.put("lobbies", LobbyInfoList);
         return new Message<>(200, "sent all lobies", body, Message.MessageType.RESPONSE);
     }
+
 
     public boolean joinLobby(String id, String password, User user) {
         Lobby lobby = activeLobbies.get(id);
@@ -78,7 +79,7 @@ public class LobbyManager {
 
     public void startGame(String id) {
         Lobby lobby = activeLobbies.get(id);
-        if (lobby != null && lobby.getPlayers().size() >= 2) {
+        if (lobby != null && lobby.getPlayers().size() >= 2 ) {
             lobby.setStarted(true);
             // transition to game session
         }

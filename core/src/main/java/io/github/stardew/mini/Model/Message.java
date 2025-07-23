@@ -19,6 +19,7 @@ public class Message<T> {
     private String methodName;
     private String requestId;
     private String gameID;
+    private String token;
 
     public String getGameID() {
         return gameID;
@@ -26,6 +27,12 @@ public class Message<T> {
 
     public void setGameID(String gameID) {
         this.gameID = gameID;
+    }
+    public String getToken() {
+        return token;
+    }
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public enum MessageType {
@@ -125,4 +132,5 @@ public class Message<T> {
         this.requestId = requestId;
     }
 }
+
 

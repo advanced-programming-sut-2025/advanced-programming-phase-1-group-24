@@ -11,17 +11,24 @@ import io.github.stardew.mini.Model.NPCManagement.NPC;
 import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.NPCManagement.NPCtype;
 import io.github.stardew.mini.Model.Places.Farm;
+import io.github.stardew.mini.Model.Places.House;
 import io.github.stardew.mini.Model.Reccepies.FoodRecipe;
+import io.github.stardew.mini.Model.Reccepies.Machine;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
+
 import java.util.*;
+
 import io.github.stardew.mini.Model.MapManagement.*;
+import io.github.stardew.mini.client.MainApp;
+
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
+    private  String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -38,9 +45,12 @@ public class Game {
     private ArrayList<Friendship> allFriendships = new ArrayList<>();
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
-
+    private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
+        for (User player : players) {
+            mapSelectionStatus.put(player.getUsername(), false);
+        }
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
         this.timeAndDate = new TimeAndDate(9, 1, DayOfWeek.Saturday, Season.SPRING);
@@ -60,6 +70,7 @@ public class Game {
         predictTomorrowWeather();
         generateNPCs();
     }
+
     public Game() {
     }
 
@@ -112,9 +123,27 @@ public class Game {
 
 
     public void advanceTimeByOneHour() {
-        timeAndDate.advanceHour();
+      timeAndDate.advanceHour();
+      getCurrentPlayer().handleSpecialFoodsEffects();
+      updateMachines();
     }
-
+    public  void updateMachines() {  //use this method every hour
+        for (User user : players) {
+            Farm farm =  getMap().getFarmByOwner(user);
+            System.out.println("farm :"+farm);
+            House house = getMap().getFarmByOwner(user).getHouse();
+            for (Machine machine : house.getMachines()) {
+                if (machine.getActivated()) {
+                    machine.setHoursLeft(machine.getHoursLeft() - 1);
+                    if (machine.getHoursLeft() <= 0) {
+                        machine.setActivated(false);
+                        machine.setReady(true);
+                        machine.setMaxProcessTime(0);
+                    }
+                }
+            }
+        }
+    }
     public MapOfGame getMap() {
         return map;
     }
@@ -194,6 +223,7 @@ public class Game {
         }
         return null;
     }
+
     public Friendship getFriendship(String name1, String name2) {
         // Ensure consistent ordering as used in Friendship constructor
         String player1 = name1.compareTo(name2) < 0 ? name1 : name2;
@@ -287,25 +317,26 @@ public class Game {
 
     public void handleFoodRecipe(User currentPlayer) {  //add this somewhere
         if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 2 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.VegetableMedley))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.VegetableMedley))
             currentPlayer.getCookingRecepies().add(FoodRecipe.VegetableMedley);
         if (currentPlayer.getSkillsLevel().get(Skill.FARMING) == 1 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.FarmersLaunch))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.FarmersLaunch))
             currentPlayer.getCookingRecepies().add(FoodRecipe.FarmersLaunch);
         if (currentPlayer.getSkillsLevel().get(Skill.FORAGING) == 3 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SurvivalBurger))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.SurvivalBurger))
             currentPlayer.getCookingRecepies().add(FoodRecipe.SurvivalBurger);
         if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 2 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.DishOtheSea))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.DishOtheSea))
             currentPlayer.getCookingRecepies().add(FoodRecipe.DishOtheSea);
         if (currentPlayer.getSkillsLevel().get(Skill.FISHING) == 3 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.SeaformPudding))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.SeaformPudding))
             currentPlayer.getCookingRecepies().add(FoodRecipe.SeaformPudding);
         if (currentPlayer.getSkillsLevel().get(Skill.MINING) == 1 &&
-                !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
+            !currentPlayer.getCookingRecepies().contains(FoodRecipe.MinersTreat))
             currentPlayer.getCookingRecepies().add(FoodRecipe.MinersTreat);
     }
-    public void reloadExtraData(){
+
+    public void reloadExtraData() {
         for (Tile[] row : map.getMap()) {
             for (Tile tile : row) {
                 Animal animal = tile.getContainedAnimal();
@@ -319,4 +350,26 @@ public class Game {
     public Map<String, List<NPCMission>> getPlayerAddedMissions() {
         return playerAddedMissions;
     }
+
+    public String getNetworkId() {
+        return NetworkId;
+    }
+
+    public void setNetworkId(String networkId) {
+        NetworkId = networkId;
+    }
+
+    public void markPlayerSelectedMap(String username) {
+        mapSelectionStatus.put(username, true);
+    }
+
+    public boolean haveAllPlayersSelectedMap() {
+        for (User user : players) {
+            if (!mapSelectionStatus.getOrDefault(user.getUsername(), false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

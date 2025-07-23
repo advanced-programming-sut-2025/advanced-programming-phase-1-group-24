@@ -14,12 +14,23 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.google.gson.Gson;
+import com.sun.tools.javac.Main;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.MapSelectionMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.User;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class MapSelectionMenuView implements AppMenu, Screen {
@@ -117,39 +128,60 @@ public class MapSelectionMenuView implements AppMenu, Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 if (selectedMap != null) {
-                    //  controller.notifyMapSelected(selectedMap);
-                    controller.pickGameMap(MainApp.getInstance().getLoggedInUser(), Integer.parseInt(selectedMap));
-                    System.out.println("logged in user " + MainApp.getInstance().getLoggedInUser().getUsername() + " " + selectedMap);
-                    for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
-                        if (!user.equals(MainApp.getInstance().getLoggedInUser())) {
-                            int number = Integer.parseInt(selectedMap) + 1;
-                            controller.pickGameMap(user, number);
-                            System.out.println( user.getUsername() + " " + number +"\n");
-                        }
-                    }
-                    /// /////////// hard code ///////////////////////////////////////////////////////////////
-//                    Machine machine = new Machine(MachineType.KEG);
-//
-//
-//                    Animal moo = new Animal("moo", AnimalType.COW);
-//                    Tile[][] tiles=MainApp.getInstance().getCurrentGame().getMap().getMap();
-//                    Tile tiles2 = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-//                    Tile new_tile = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-//                    moo.setCurrentTile(new_tile);
-//                    moo.setInHabitat(false);
-//                    moo.setLivingPlace(new Habitat(0,0,1,1, StorageType.INITIAL, Habitat.HabitatType.Barn));
-//                    tiles2.setContainedItem(machine);
-//                    new_tile.setContainedAnimal(moo);
-//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(moo);
-//                    Animal heny = new Animal("heny", AnimalType.CHICKEN);
-//                    Tile new_tile_heny = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(MainApp.getInstance().getLoggedInUser()).getRandomFarmTile(tiles);
-//                    heny.setCurrentTile(new_tile_heny);
-//                    new_tile.setContainedAnimal(heny);
-//                    heny.setInHabitat(false);
-//                    MainApp.getInstance().getLoggedInUser().getOwnedAnimals().add(heny);
-                    /// /////////// hard code ///////////////////////////////////////////////////////////////
-                    MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+//                    //  controller.notifyMapSelected(selectedMap);
+//                    controller.pickGameMap(MainApp.getInstance().getCurrentGame().getCurrentPlayer(), Integer.parseInt(selectedMap));
+//                    System.out.println("logged in user " + MainApp.getInstance().getLoggedInUser().getUsername() + " " + selectedMap);
+//                    for (User user : MainApp.getInstance().getCurrentGame().getPlayers()) {
+//                        if (!user.equals(MainApp.getInstance().getLoggedInUser())) {
+//                            int number = Integer.parseInt(selectedMap) + 1;
+//                            controller.pickGameMap(user, number);
+//                            System.out.println( user.getUsername() + " " + number +"\n");
+//                        }
+//                    }
+//                    MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
 
+                    Map<String, Object> params = new HashMap<>();
+                    if(selectedMap.equals("1")) params.put("mapNumber", 1);
+                    else if(selectedMap.equals("2")) params.put("mapNumber", 2);
+                    MainApp.getInstance().getNetworkClient().sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "MapSelectionMenuController","pickGameMap",params,
+                        MainApp.getInstance().getLoggedInUser().getUsername()).thenAccept(response -> {
+                        if(response.getStatus() == 200) {
+//                            Object bodyRaw = response.getBody();
+//
+//                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+//                                Object gameJsonObj = bodyMap.get("game");
+//
+//                                if (gameJsonObj instanceof  String json) {
+//                                    System.out.println("////////////////////////////////////////////////////");
+//                                    try {
+//                                        Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+//                                        MainApp.getInstance().setCurrentGame(game);
+//                                        System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+//                                        System.out.println("Game successfully deserialized");
+//                                    } catch (Exception e) {
+//                                        e.printStackTrace();
+//                                        showErrorDialog(stage, "Deserialization failed: " + e.getMessage());
+//                                    }
+//                                }
+//                            } else {
+//                                System.err.println("Response body is not a map");
+//                            }
+//                            Gdx.app.postRunnable(() -> {
+//                                MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
+//                            });
+                        }
+                        else {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, response.getMessage());
+                            });
+                        }
+                    }).exceptionally(ex -> {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to create game: " + ex.getMessage());
+                        });
+                        return null;
+                    });
                 }
             }
         });

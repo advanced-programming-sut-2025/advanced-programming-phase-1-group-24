@@ -31,14 +31,13 @@ public enum FoodType {
     private final FoodRecipe recipe;
     private final int sellPrice;
     private final int energy;
-    private final Texture texture;
+    private  Texture texture;
     private final String name;
 
     FoodType(String name, FoodRecipe recipe, int sellPrice) {
         this.recipe = recipe;
         this.sellPrice = sellPrice;
         this.energy = recipe.getEnergy();
-        this.texture = new Texture("Recipe/" + this.name() + ".png");
         this.name = name;
     }
 
@@ -55,6 +54,9 @@ public enum FoodType {
     }
 
     public Texture getTexture() { return texture; }
+    public void initTexture(){
+        this.texture =  new Texture("Recipe/" + this.name() + ".png");
+    }
 
     public FoodRecipe getRecipe() {
         return recipe;
@@ -69,4 +71,5 @@ public enum FoodType {
         return null;
     }
 }
+
 

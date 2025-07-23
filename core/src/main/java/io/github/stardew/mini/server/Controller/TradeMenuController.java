@@ -1,8 +1,8 @@
 package io.github.stardew.mini.server.Controller;
 
+import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Message;
 import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
@@ -39,7 +39,7 @@ public class TradeMenuController implements MenuController {
                 trade.getAmountOfOfferedItems(), trade.getOfferedItem(),
                 trade.getRequestedPrice()
         );
-        user.getTradeNotifications().add(new Message(player.getUsername(), user.getUsername(), messageText));
+        user.getTradeNotifications().add(new FriendshipMessage(player.getUsername(), user.getUsername(), messageText));
         return new Result(true, "Trade has been successfully placed!");
     }
 
@@ -70,7 +70,7 @@ public class TradeMenuController implements MenuController {
                 trade.getAmountOfOfferedItems(), trade.getOfferedItem(),
                 trade.getAmountOfRequestedItem(), trade.getRequestedItem()
         );
-        user.getTradeNotifications().add(new Message(player.getUsername(), user.getUsername(), messageText));
+        user.getTradeNotifications().add(new FriendshipMessage(player.getUsername(), user.getUsername(), messageText));
         return new Result(true, "Trade has been successfully placed!");
     }
 
