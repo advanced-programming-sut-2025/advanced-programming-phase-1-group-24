@@ -1116,395 +1116,15 @@
     "rejectingTimer": 0.0
   },
   {
-    "username": "nikki19",
-    "password": "e9631c42d696f664046baa1cbd346f7994020a2bc4f45d6c23639386740d3c97",
-    "nickname": "nik",
-    "email": "n1@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "hoe",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "pick axe",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "axe",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "watering can",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "scythe",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "trash can",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0,
-    "avatar": "Alex",
-    "isProposing": false,
-    "isAccepting": false,
-    "isRejecting": false,
-    "proposingTimer": 0.0,
-    "acceptingTimer": 0.0,
-    "rejectingTimer": 0.0
-  },
-  {
-    "username": "nikki19",
-    "password": "e9631c42d696f664046baa1cbd346f7994020a2bc4f45d6c23639386740d3c97",
-    "nickname": "nik",
-    "email": "n1@gmail.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "hoe",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "pick axe",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "axe",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "watering can",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "scythe",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "trash can",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0,
-    "avatar": "Alex",
-    "isProposing": false,
-    "isAccepting": false,
-    "isRejecting": false,
-    "proposingTimer": 0.0,
-    "acceptingTimer": 0.0,
-    "rejectingTimer": 0.0
-  },
-  {
-    "username": "nikki17",
-    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
-    "nickname": "nik",
-    "email": "n1@gmsil.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "hoe",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "pick axe",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "axe",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "watering can",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "scythe",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "trash can",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0,
-    "avatar": "Alex",
-    "isProposing": false,
-    "isAccepting": false,
-    "isRejecting": false,
-    "proposingTimer": 0.0,
-    "acceptingTimer": 0.0,
-    "rejectingTimer": 0.0
-  },
-  {
-    "username": "nikki17",
-    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
-    "nickname": "nik",
-    "email": "n1@gmsil.com",
-    "gender": false,
-    "playedGames": 0,
-    "maxMoneyInGames": 0,
-    "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
-    "maxEnergy": 200,
-    "maxEnergyTurn": 50,
-    "energy": 200,
-    "currentTurnEnergy": 50,
-    "money": 0,
-    "fainted": false,
-    "skillsLevel": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "skillExperience": {
-      "FARMING": 0,
-      "MINING": 0,
-      "FORAGING": 0,
-      "FISHING": 0
-    },
-    "machineRecepies": [],
-    "cookingRecepies": [
-      "Salad",
-      "BakedFish",
-      "FriedEgg"
-    ],
-    "friends": {},
-    "backpack": {
-      "type": "INITIAL",
-      "maxSize": 12,
-      "inventoryItems": {},
-      "tools": [
-        {
-          "name": "hoe",
-          "type": "HOE",
-          "material": "Initial"
-        },
-        {
-          "name": "pick axe",
-          "type": "PICKAXE",
-          "material": "Initial"
-        },
-        {
-          "name": "axe",
-          "type": "AXE",
-          "material": "Initial"
-        },
-        {
-          "maxCapacity": 40,
-          "waterLeft": 0,
-          "name": "watering can",
-          "type": "WATERINGCAN",
-          "material": "Initial"
-        },
-        {
-          "name": "scythe",
-          "type": "SCYTHE",
-          "material": "Initial"
-        }
-      ],
-      "trashcan": {
-        "name": "trash can",
-        "type": "TRASHCAN",
-        "material": "Initial"
-      }
-    },
-    "ownedAnimals": [],
-    "notifications": [],
-    "recievedGift": [],
-    "daysSinceRejection": 0,
-    "tradingHistory": [],
-    "tradeNotifications": [],
-    "buffMaxEnergy": false,
-    "buffForagingSkill": false,
-    "buffFarmingSkill": false,
-    "buffFishingSkill": false,
-    "buffMiningSkill": false,
-    "hoursLeftForBuff": 0,
-    "movingDirection": 0,
-    "avatar": "Alex",
-    "isProposing": false,
-    "isAccepting": false,
-    "isRejecting": false,
-    "proposingTimer": 0.0,
-    "acceptingTimer": 0.0,
-    "rejectingTimer": 0.0
-  },
-  {
-    "username": "nikki16",
-    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
-    "nickname": "nik",
-    "email": "n1@gmsil.com",
+    "username": "Parnia13",
+    "password": "d7140327560969554960069d5d68290346b413a2e63dc6b88d3f79df2033d9a3",
+    "nickname": "pari",
+    "email": "parniaheidfssg11w@gmail.com",
     "gender": true,
     "playedGames": 0,
     "maxMoneyInGames": 0,
     "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
+    "securityAnswer": "makaroni",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
     "energy": 200,
@@ -1512,16 +1132,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FARMING": 0,
       "MINING": 0,
+      "FISHING": 0,
       "FORAGING": 0,
-      "FISHING": 0
+      "FARMING": 0
     },
     "skillExperience": {
-      "FARMING": 0,
       "MINING": 0,
+      "FISHING": 0,
       "FORAGING": 0,
-      "FISHING": 0
+      "FARMING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1591,15 +1211,15 @@
     "rejectingTimer": 0.0
   },
   {
-    "username": "nikki16",
-    "password": "b2ab5102a068a1583c5617a4c42b0d0efb415b0aecc6011cc38ee90b036997e4",
-    "nickname": "nik",
-    "email": "n1@gmsil.com",
+    "username": "Parnia13",
+    "password": "d7140327560969554960069d5d68290346b413a2e63dc6b88d3f79df2033d9a3",
+    "nickname": "pari",
+    "email": "parniaheidfssg11w@gmail.com",
     "gender": true,
     "playedGames": 0,
     "maxMoneyInGames": 0,
     "securityQuestion": "What is your favorite food?",
-    "securityAnswer": "n",
+    "securityAnswer": "makaroni",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
     "energy": 200,
@@ -1607,16 +1227,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FARMING": 0,
       "MINING": 0,
+      "FISHING": 0,
       "FORAGING": 0,
-      "FISHING": 0
+      "FARMING": 0
     },
     "skillExperience": {
-      "FARMING": 0,
       "MINING": 0,
+      "FISHING": 0,
       "FORAGING": 0,
-      "FISHING": 0
+      "FARMING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1678,6 +1298,196 @@
     "hoursLeftForBuff": 0,
     "movingDirection": 0,
     "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "Parnia2",
+    "password": "e0b212baee404ea7fbd5a56a8767a93f631a017bd01d4a29a3481ccec6f65bd5",
+    "nickname": "parpari",
+    "email": "uggjgfgf3232@jjghgfh.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "What is your favorite food?",
+    "securityAnswer": "lla",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "MINING": 0,
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
+    },
+    "skillExperience": {
+      "MINING": 0,
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "hoe",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "pick axe",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "axe",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "watering can",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "scythe",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "trash can",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "avatar": "Alex",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "Parnia2",
+    "password": "e0b212baee404ea7fbd5a56a8767a93f631a017bd01d4a29a3481ccec6f65bd5",
+    "nickname": "parpari",
+    "email": "uggjgfgf3232@jjghgfh.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "What is your favorite food?",
+    "securityAnswer": "lla",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "MINING": 0,
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
+    },
+    "skillExperience": {
+      "MINING": 0,
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "hoe",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "pick axe",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "axe",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "watering can",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "scythe",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "trash can",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "avatar": "Alex",
     "isProposing": false,
     "isAccepting": false,
     "isRejecting": false,

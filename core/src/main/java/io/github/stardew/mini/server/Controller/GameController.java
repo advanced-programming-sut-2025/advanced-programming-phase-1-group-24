@@ -25,6 +25,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.NPCManagement.*;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Reccepies.*;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
@@ -3355,6 +3356,28 @@ public class GameController implements MenuController {
         player.getBackpack().grabItem("Stone", 500);
         greenHouse.setGreenHouseFixed(true);
         return new Result(true, "green house build successful");
+    }
+
+    public Result craftMachine(MachineType machineType) {
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        for (MachineType unlockedRecipe : MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMachineRecepies()) {
+            if (unlockedRecipe.equals(machineType)) {
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    if (!currentPlayer.getBackpack().hasItem(itemName, unlockedRecipe.getRecipe().get(itemName))) {
+                        return new Result(false, "You dont have the ingredients.");
+                    }
+                }
+                Item machine = Item.getRandomItem(machineType.getName());
+                Result result = currentPlayer.getBackpack().addItem(machine, 1);
+                if (!result.isSuccessful()) return result;
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    currentPlayer.getBackpack().grabItem(itemName, unlockedRecipe.getRecipe().get(itemName));
+                }
+                currentPlayer.reduceEnergy(3);
+                return new Result(true, "Machine added successfully.");
+            }
+        }
+        return new Result(false, "No recipe found.");
     }
 
 
