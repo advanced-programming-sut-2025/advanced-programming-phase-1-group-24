@@ -450,6 +450,7 @@ public class MapSelectionMenuController implements MenuController {
                 }
             }
             gs.startGameTimer();
+            currentGame.resetMapSelectionStatus();
         }
         return new Message<>(200, "You are starting at coordinates " + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY(),
             body, Message.MessageType.RESPONSE);
