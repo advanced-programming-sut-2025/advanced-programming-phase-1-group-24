@@ -147,6 +147,7 @@ public class NewGameMenuView implements AppMenu, Screen {
             }
         });
 
+
 //        startGameButton.addListener(new ClickListener() {
 //            public void clicked(InputEvent event, float x, float y) {
 //                String usersString = String.join(" ", playerNames);
