@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.*;
@@ -189,7 +190,7 @@ public class GameController implements MenuController {
     }
 
 
-    public Result exitGame(User currentUser, GameServer gameServer) {
+    public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
         Game currentGame = gameServer.getGame();
 
         if (currentGame == null)
@@ -209,7 +210,10 @@ public class GameController implements MenuController {
         // Step 3: Save game to disk and global state
         ServerApp.getInstance().addGame(currentGame);
         ServerApp.getInstance().saveAllGames();
-
+        ///    ///////////////////////////////////////////////////////////////
+        //ServerApp.getInstance().saveAllGamesToRedis();
+        GameDatabase.saveGameToDatabase(gameServer.getGame());
+        //////////////////////////////////////////////
         // Step 4: Safely stop game server
         gameServer.stopServer();                         // stop timer and thread
         AppSocket.removeGame(gameServer);                // remove from activeGames

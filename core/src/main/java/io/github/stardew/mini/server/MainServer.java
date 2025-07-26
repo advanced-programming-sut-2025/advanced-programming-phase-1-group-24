@@ -1,5 +1,7 @@
 package io.github.stardew.mini.server;
 
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.javalin.Javalin;
 
 import java.util.List;
@@ -36,6 +38,7 @@ public class MainServer {
         MainServer server = new MainServer();
         ServerApp app = ServerApp.getInstance();
         try {
+            GameDatabase.initDatabase();
             server.start();
             // Keep the main thread alive if needed
             // For example, block here or wait for shutdown signal
