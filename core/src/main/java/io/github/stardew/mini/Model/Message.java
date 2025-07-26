@@ -8,6 +8,11 @@ public class Message<T> {
     public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
     public static final Message<?> BAD_REQUEST = new Message<>(400);
     public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
+
+    public static final String CHAT_PUBLIC = "chat_public";
+    public static final String CHAT_PRIVATE = "chat_private";
+    public static final String POP_UP_NOTIFICATION = "pop_up_notification";
+
     private int status;
     private String message;
     private T body;

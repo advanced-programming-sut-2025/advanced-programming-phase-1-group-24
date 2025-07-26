@@ -136,5 +136,14 @@ public class GameServer extends Thread {
         }
         return null;
     }
+
+    public PlayerConnection getPlayerConnectionByUsername(String username) {
+        for(PlayerConnection player : players){
+            if(player.getUsername().equals(username)){
+                return player;
+            }
+        }
+        return null;
+    }
 }
 

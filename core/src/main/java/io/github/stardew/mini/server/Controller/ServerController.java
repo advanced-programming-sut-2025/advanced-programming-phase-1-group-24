@@ -330,7 +330,7 @@ public class ServerController {
 
         switch (controllerName) {
             case "GameController":
-                return routeToGameController(methodName, body, server, player);
+                return routeToGameController(methodName, body, server, player, message);
 
             case "HouseMenuController":
                 // TODO: Implement this
@@ -353,14 +353,14 @@ public class ServerController {
 
 
             default:
-                return routeToGameController(methodName, body, server, player);
+                return routeToGameController(methodName, body, server, player, message);
         }
     }
 
 
     //We shouldn't always return ok
 
-    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) {
+    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player, Message<Map<String, Object>> fullMessage) {
         Result result;
 
         switch (methodName) {
@@ -394,6 +394,12 @@ public class ServerController {
             case "buildGreenHouse": {
                 result = gameController.buildGreenHouse(player, server);
                 return Message.ok(result);
+            }
+
+            case "handleChatMessage": {
+                String senderUsername = fullMessage.getUsername();
+                String gameId = fullMessage.getGameID();
+                return gameController.handleChatMessage(senderUsername, gameId, body, server); // Modified call
             }
 
             default:

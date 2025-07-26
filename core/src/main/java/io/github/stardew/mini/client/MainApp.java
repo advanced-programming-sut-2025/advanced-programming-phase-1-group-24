@@ -61,6 +61,15 @@ public class MainApp extends com.badlogic.gdx.Game {
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
     private String jwtToken;
+    private ChatDialog chatDialogInstance;
+
+    public ChatDialog getChatDialogInstance() {
+        return chatDialogInstance;
+    }
+
+    public void setChatDialogInstance(ChatDialog chatDialogInstance) {
+        this.chatDialogInstance = chatDialogInstance;
+    }
 
     public String getJwtToken() {
         return jwtToken;
@@ -326,9 +335,16 @@ public class MainApp extends com.badlogic.gdx.Game {
         changeScreen();
     }
     public void changeScreen() {
+
+        if (this.getScreen() instanceof GameView) {
+            this.setCurrentGameView(null);
+        }
+
         switch (currentMenu) {
             case GameMenu:
-                getInstance().setScreen(new GameView(new GameController()));
+                GameView newGameView = new GameView(new GameController());
+                this.setCurrentGameView(newGameView);
+                getInstance().setScreen(newGameView);
                 break;
             case MainMenu:
                 getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));

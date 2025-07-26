@@ -28,6 +28,7 @@ public class InventoryAssets {
     public static Texture slot;
     public static Texture highlightedSlot;
     public static Texture inventoryMenuBackground;
+    public static Texture chatButtonBackground;
     public static Texture InitialHOE;
     public static Texture CopperHOE;
     public static Texture IronHOE;
@@ -72,6 +73,7 @@ public class InventoryAssets {
         slot = new Texture(Gdx.files.internal("NewInventory/slot.jpg"));
         highlightedSlot = new Texture(Gdx.files.internal("NewInventory/highlight.png"));
         inventoryMenuBackground = new Texture(Gdx.files.internal("NewInventory/inventoryMenu.png"));
+        chatButtonBackground = new Texture(Gdx.files.internal("chatIcon.png"));
         InitialHOE = new Texture(Gdx.files.internal("Hoe/Hoe.png"));
         CopperHOE = new Texture(Gdx.files.internal("Hoe/Copper_Hoe.png"));
         IronHOE = new Texture(Gdx.files.internal("Hoe/Steel_Hoe.png"));
@@ -153,6 +155,7 @@ public class InventoryAssets {
         if (slot != null) slot.dispose();
         if (highlightedSlot != null) highlightedSlot.dispose();
         if (inventoryMenuBackground != null) inventoryMenuBackground.dispose();
+        if (chatButtonBackground != null) chatButtonBackground.dispose();
         if (miningBuff != null) miningBuff.dispose();
         if (farmingBuff != null) farmingBuff.dispose();
         if (foragingBuff != null) foragingBuff.dispose();

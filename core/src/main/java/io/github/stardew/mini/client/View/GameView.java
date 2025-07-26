@@ -226,6 +226,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private String scenario = "";
     String giftReciever, artisanName;
 
+    private ChatDialog chatDialog;
+    private ImageButton chatButton;
+
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -518,6 +521,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
     @Override
     public boolean keyDown(int keycode) {
+
+        if (chatDialog.isVisible()) {
+            return true;
+        }
+
         if (isFishingActive) {
             if (keycode == Input.Keys.SPACE) {
                 fishingMinigameDialog.setGreenBarMovingUp(true);
@@ -1691,6 +1699,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         createNPCSpeechBubbleDialog();
 
         createFridgeDialog();
+
+        chatDialog = new ChatDialog(GameAssetManager.skin, controller, this);
+        chatDialog.setVisible(false);
+        MainApp.getInstance().setChatDialogInstance(chatDialog);
     }
     private void createNumItemDialog() {
         numItemDialog = new Dialog("select Number", GameAssetManager.skin);
@@ -2844,6 +2856,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         batch.setProjectionMatrix(camera.combined);
         createUI();
 
+        stage.addActor(chatDialog);
+        chatDialog.toFront();
+
         clockHud = new ClockHud(stage);
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(100, 100);
@@ -3047,6 +3062,30 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        ImageButton.ImageButtonStyle chatButtonStyle = new ImageButton.ImageButtonStyle();
+        chatButtonStyle.imageUp = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+        chatButtonStyle.imageDown = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+        chatButtonStyle.over = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+
+        chatButton = new ImageButton(chatButtonStyle);
+        chatButton.setSize(80, 80);
+        chatButton.setPosition(Gdx.graphics.getWidth() - 400, 20);
+        chatButton.setTouchable(Touchable.enabled);
+        chatButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (chatDialog.isVisible()) {
+                    chatDialog.hide();
+                    chatDialog.setVisible(false);
+                    Gdx.input.setInputProcessor(GameView.this);
+                } else {
+                    chatDialog.show(stage);
+                    chatDialog.setVisible(true);
+                    chatDialog.toFront();
+                }
+            }
+        });
+        stage.addActor(chatButton);
     }
 
     private void determineAvatar() {
@@ -3486,7 +3525,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //                }
 //            }
 //        }
-        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive && !chatDialog.isVisible()) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
                 int dx = 0, dy = 0, direction = -1;
@@ -3565,43 +3604,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         setCameraPosition();
         camera.update();
-
-        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
-                for (Tile tile : tileRow) {
-                    if (tile.getContainedNPC() != null) {
-                        NPC npc = tile.getContainedNPC();
-                        TextButton talkButton = npcTalkButtons.get(npc);
-
-                        if (talkButton == null) {
-                            talkButton = new TextButton("...", GameAssetManager.skin, "custom-button");
-                            talkButton.setSize(tileSize / 2f, tileSize / 2f);
-                            talkButton.getLabel().setFontScale(0.5f);
-                            talkButton.setColor(Color.WHITE);
-                            talkButton.addListener(new ClickListener() {
-                                @Override
-                                public void clicked(InputEvent event, float x, float y) {
-                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(),currentPlayer).message());
-                                    event.stop();
-                                }
-                            });
-                            stage.addActor(talkButton);
-                            npcTalkButtons.put(npc, talkButton);
-                        }
-
-                        // Calculate screen position for the button above the NPC
-                        float npcCenterX = tile.getX() * tileSize + tileSize / 2f;
-                        float npcTopY = (rows - tile.getY() - 1) * tileSize + tileSize * 2f;
-
-                        Vector3 buttonWorldCoords = new Vector3(npcCenterX, npcTopY, 0);
-                        camera.project(buttonWorldCoords);
-
-                        talkButton.setPosition(buttonWorldCoords.x - talkButton.getWidth() / 2f, buttonWorldCoords.y);
-                        talkButton.setVisible(true);
-                    }
-                }
-            }
-        }
 
         for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
             for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
@@ -6278,5 +6280,13 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
             batch.draw(npc.getNpcName().getTextureRegion(), x, y, tileSize, tileSize * 2f);
         }
+    }
+
+    public ChatDialog getChatDialog() {
+        return chatDialog;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

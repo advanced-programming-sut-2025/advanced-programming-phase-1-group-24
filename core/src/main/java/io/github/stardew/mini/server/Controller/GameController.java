@@ -3380,5 +3380,73 @@ public class GameController implements MenuController {
         return new Result(false, "No recipe found.");
     }
 
+    public Message<?> handleChatMessage(String senderUsername, String gameId, Map<String, Object> body, GameServer gameServer) {
+        String messageContent = (String) body.get("messageContent");
+        String chatType = (String) body.get("chatType");
+        String recipientUsername = (String) body.get("recipientUsername");
+        List<String> mentionedUsers = (List<String>) body.get("mentionedUsers");
+
+
+        if (senderUsername == null || messageContent == null || chatType == null) {
+            System.err.println("[ERROR-GAMECONTROLLER] Missing crucial chat message parameters.");
+            return Message.BAD_REQUEST.setMessage("Missing chat message parameters (sender, content, or type).");
+        }
+
+        Map<String, Object> chatMessageData = new HashMap<>();
+        chatMessageData.put("sender", senderUsername);
+        chatMessageData.put("messageContent", messageContent);
+        chatMessageData.put("chatType", chatType);
+        if (recipientUsername != null) {
+            chatMessageData.put("recipient", recipientUsername);
+        }
+
+        Message<Map<String, Object>> chatMessage = new Message<>(200, "Chat message received", chatMessageData, Message.MessageType.RESPONSE);
+        chatMessage.setType("chat-message");
+
+        if (Message.CHAT_PUBLIC.equals(chatType)) {
+            for (PlayerConnection playerConnection : gameServer.getPlayers()) {
+                if (playerConnection.getWsContext().session.isOpen()) {
+                    playerConnection.getWsContext().send(new Gson().toJson(chatMessage));
+                }
+            }
+
+            if (mentionedUsers != null && !mentionedUsers.isEmpty()) {
+                for (String mentionedUser : mentionedUsers) {
+                    PlayerConnection mentionedPlayerConn = gameServer.getPlayerConnectionByUsername(mentionedUser);
+                    if (mentionedPlayerConn != null && mentionedPlayerConn.getWsContext().session.isOpen()) {
+                        Map<String, Object> notificationData = new HashMap<>();
+                        notificationData.put("notificationType", "mention");
+                        notificationData.put("sender", senderUsername);
+                        notificationData.put("messageContent", messageContent);
+                        notificationData.put("title", "You were mentioned in public chat!");
+                        notificationData.put("body", senderUsername + " mentioned you: " + messageContent);
+
+                        Message<Map<String, Object>> notificationMessage = new Message<>(200, "Mention notification", notificationData, Message.MessageType.RESPONSE);
+                        notificationMessage.setType(Message.POP_UP_NOTIFICATION);
+
+                        mentionedPlayerConn.getWsContext().send(new Gson().toJson(notificationMessage));
+                    } else {
+                    }
+                }
+            }
+            return Message.OK.setMessage("Public message broadcasted.");
+        } else if (Message.CHAT_PRIVATE.equals(chatType)) {
+            if (recipientUsername == null) {
+                System.err.println("[ERROR-GAMECONTROLLER] Recipient username is null for private chat.");
+                return Message.BAD_REQUEST.setMessage("Recipient username is required for private chat.");
+            }
+            for (PlayerConnection playerConnection : gameServer.getPlayers()) {
+                if (playerConnection.getWsContext().session.isOpen() &&
+                    (playerConnection.getUsername().equals(senderUsername) || playerConnection.getUsername().equals(recipientUsername))) {
+                    playerConnection.getWsContext().send(new Gson().toJson(chatMessage));
+                }
+            }
+            return Message.OK.setMessage("Private message sent.");
+        } else {
+            System.err.println("[ERROR-GAMECONTROLLER] Unknown chat type: " + chatType);
+            return Message.BAD_REQUEST.setMessage("Unknown chat type.");
+        }
+    }
+
 
 }

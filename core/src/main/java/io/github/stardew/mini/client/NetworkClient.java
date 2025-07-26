@@ -130,6 +130,7 @@ public class NetworkClient extends WebSocketClient {
                             try {
                                 Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
                                 MainApp.getInstance().setCurrentGame(game);
+                                game.reloadExtraData();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -152,6 +153,7 @@ public class NetworkClient extends WebSocketClient {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
                                         MainApp.getInstance().setCurrentGame(game);
+                                        game.reloadExtraData();
                                        // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
                                     } catch (Exception e) {
@@ -181,6 +183,7 @@ public class NetworkClient extends WebSocketClient {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
                                         MainApp.getInstance().setCurrentGame(game);
+                                        game.reloadExtraData();
                                         // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
                                     } catch (Exception e) {
@@ -195,6 +198,45 @@ public class NetworkClient extends WebSocketClient {
                         }
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
                     });
+                }
+                if ("chat-message".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> chatData = (Map<String, Object>) message.getBody();
+                    String sender = (String) chatData.get("sender");
+                    String messageContent = (String) chatData.get("messageContent");
+                    String chatType = (String) chatData.get("chatType");
+                    String recipient = (String) chatData.get("recipient");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getChatDialogInstance() != null) {
+                            if (Message.CHAT_PUBLIC.equals(chatType)) {
+                                MainApp.getInstance().getChatDialogInstance().addPublicMessage(sender, messageContent);
+                            } else if (Message.CHAT_PRIVATE.equals(chatType)) {
+                                String currentUsername = MainApp.getInstance().getLoggedInUser().getUsername();
+                                String chatPartner = sender.equals(currentUsername) ? recipient : sender;
+                                MainApp.getInstance().getChatDialogInstance().addPrivateMessage(sender, chatPartner, messageContent);
+                            }
+                        } else {
+                        }
+                    });
+                    return;
+                }
+                if (Message.POP_UP_NOTIFICATION.equalsIgnoreCase(message.getType())) {
+                    System.out.println("[DEBUG-NWCLIENT] Received POP_UP_NOTIFICATION type. Processing...");
+                    Map<String, Object> notificationData = (Map<String, Object>) message.getBody();
+                    String title = (String) notificationData.get("title");
+                    String notificationBody = (String) notificationData.get("body"); // Using 'body' for the message content
+
+                    System.out.println("[DEBUG-NWCLIENT] Pop-up Notification: Title=" + title + ", Body=" + notificationBody);
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            System.out.println("[DEBUG-NWCLIENT] GameView available. Calling showPopupNotification.");
+                            MainApp.getInstance().getCurrentGameView().showErrorDialog(MainApp.getInstance().getCurrentGameView().getStage(), notificationBody);
+                        } else {
+                            System.err.println("[DEBUG-NWCLIENT] GameView is null! Cannot show pop-up notification.");
+                        }
+                    });
+                    return; // Message handled
                 }
                 System.err.println("❌ requestId was null");
             }
@@ -334,5 +376,28 @@ public class NetworkClient extends WebSocketClient {
         String json = gson.toJson(connectMsg);
         send(json);
         System.out.println("Sent connect for user: " + username);
+    }
+
+    public CompletableFuture<Message<?>> sendChatMessage(
+        String gameId,
+        String senderUsername,
+        String messageContent,
+        String recipientUsername,
+        String chatType
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("messageContent", messageContent);
+        params.put("chatType", chatType);
+        if (recipientUsername != null) {
+            params.put("recipientUsername", recipientUsername);
+        }
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleChatMessage",
+            params,
+            senderUsername
+        );
     }
 }

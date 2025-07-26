@@ -246,8 +246,8 @@ public class NPC {
     }
 
     private Result generateDialogueFromLLM(WeatherType currentWeather, User currentPlayer) {
-        String OPENROUTER_API_KEY = "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";
-        String LLM_MODEL = "qwen/qwen3-235b-a22b-07-25:free";
+        String OPENROUTER_API_KEY = "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";
+        String LLM_MODEL = "qwen/qwen3-coder:free";
         String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -355,7 +355,7 @@ public class NPC {
                 setPathToTarget(path);
             }
         }
-        updateMovement(Gdx.graphics.getDeltaTime());
+        updateMovement(0.0166f);
     }
 
     public boolean isMoving() {
@@ -489,8 +489,8 @@ public class NPC {
         this.moveProgress = 0f;
         this.movementCooldown = 0f;
 
-        if (this.currentTile != null && this.currentTile.getContainedNPC() == null) {
-            this.currentTile.setContainedNPC(this);
+        if (tile.getContainedNPC() == null || !tile.getContainedNPC().equals(this)) {
+            tile.setContainedNPC(this);
         }
     }
 

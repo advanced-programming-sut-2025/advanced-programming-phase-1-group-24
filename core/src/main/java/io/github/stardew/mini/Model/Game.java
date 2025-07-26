@@ -347,6 +347,10 @@ public class Game {
                 if (animal != null) {
                     animal.reloadAfterLoad(tile);
                 }
+                NPC npc = tile.getContainedNPC();
+                if (npc != null) {
+                    npc.reloadAfterLoad(tile);
+                }
             }
         }
     }
