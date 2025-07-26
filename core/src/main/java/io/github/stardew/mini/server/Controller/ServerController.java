@@ -339,8 +339,8 @@ public class ServerController {
                 return Message.BAD_REQUEST.setMessage("HouseMenuController not implemented yet");
 
             case "StoreMenuController":
-                // TODO: Implement this
-                return Message.BAD_REQUEST.setMessage("StoreMenuController not implemented yet");
+                System.out.println("routing to store menu controller ");
+                return routeToStoreMenuController(methodName, body, server, player);
 
             case "TradeMenuController":
                 // TODO: Implement this
@@ -406,6 +406,19 @@ public class ServerController {
             case "getSavedGames": {
                 List<GameSummary> summaries = gameController.getSavedGamesForUser(player.getUsername());
                 return Message.ok(summaries);
+            }
+            case "cheatAddMoney": {
+                String count = (String) body.get("money");
+                result = gameController.cheatAddMoney(count, player, server);
+                return Message.ok(result).setMessage(result.getMessage());
+            }
+            case "cheatAddItem": {
+                System.out.println("going to cheat add item");
+                String count = (String) body.get("count");
+                String itemName = (String) body.get("itemName");
+                result = gameController.cheatAddItem(itemName,count, player, server);
+                System.out.println("cccccccccccCccc");
+                return Message.ok(result).setMessage(result.getMessage());
             }
 
             default:
@@ -507,6 +520,19 @@ public class ServerController {
                 return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
         }
     }
+    private Message<?> routeToStoreMenuController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        if ("purchase".equalsIgnoreCase(methodName)) {
+            return storeMenuController.purchase(server, player, body);
+        }
+        if ("buyAnimal".equalsIgnoreCase(methodName)) {
+            return storeMenuController.buyAnimal(server, player, body);
+        }
+        if ("buyFromCarpenter".equalsIgnoreCase(methodName)) {
+            return storeMenuController.buyFromCarpenter(server, player, body);
+        }
+        return Message.NOT_FOUND.setMessage("Unknown method in StoreMenuController: " + methodName);
+    }
+
 //    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
 //        Result result = null;
 //        switch (methodName) {

@@ -204,7 +204,7 @@ public class GameController implements MenuController {
         }
 
         // Step 2: Clean up game objects
-        currentGame.getMap().getShops().clear();
+       // currentGame.getMap().getShops().clear();
 
         // Step 3: Save game to disk and global state
         ServerApp.getInstance().addGame(currentGame);
@@ -2800,6 +2800,24 @@ public class GameController implements MenuController {
         player.addMoney(count);
         return new Result(true, "Your current money: " + player.getMoney());
     }
+    public Result cheatAddMoney(String countString,User user,GameServer gameServer) {
+        Game game = gameServer.getGame();
+        if (game == null) {
+            return new Result(false, "a new game hasnt started yet");
+        }
+        User player = game.getPlayerByUsername(user.getUsername());
+        int count;
+        try {
+            count = Integer.parseInt(countString);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Invalid number format.");
+        }
+        if (count <= 0) {
+            return new Result(true, "Invalid count!");
+        }
+        player.addMoney(count);
+        return new Result(true, "Your current money: " + player.getMoney());
+    }
 
     public Result showFriendships() {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -3098,13 +3116,18 @@ public class GameController implements MenuController {
     }
 
 
-    public Result cheatAddItem(String itemName, int count) {
+    public Result cheatAddItem(String itemName, String countString,User user,GameServer gameserver) {
+        System.out.println("1");
+        int count = Integer.parseInt(countString);
         Item item = Item.getRandomItem(itemName);
+        System.out.println("2");
         if (item == null) {
             return new Result(false, "No item found.");
         }
+        System.out.println("3");
         if (count == 0) return new Result(false, "Invalid count.");
-        return MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+        User player = gameserver.getGame().getPlayerByUsername(user.getUsername());
+        return player.getBackpack().addItem(item, count);
     }
 
     public Result meetNPC(String npcName) {

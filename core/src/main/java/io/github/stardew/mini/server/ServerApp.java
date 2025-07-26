@@ -121,5 +121,7 @@ public void addGame(Game game) {
         System.err.println("Failed to add game: Game or NetworkId is null.");
     }
 }
-
+    public void setUserByUsername(User player) {
+        allUsers.put(player.getUsername(), player);
+    }
 }

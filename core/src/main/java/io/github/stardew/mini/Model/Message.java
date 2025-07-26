@@ -43,6 +43,9 @@ public class Message<T> {
     public static <T> Message<T> ok(T body) {
         return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
     }
+    public static Message success(String message) {
+        return new Message<>(200, message, null, Message.MessageType.RESPONSE);
+    }
 
 
     public Message(int status, String message, T body, MessageType messageType) {

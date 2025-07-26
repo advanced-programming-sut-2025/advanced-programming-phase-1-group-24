@@ -9,8 +9,7 @@ import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.Food;
-import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -32,7 +31,6 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
@@ -130,6 +128,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (FoodType foodType : FoodType.values()) {
             foodType.initTexture();
         }
+        for (FishType fishType : FishType.values()) {
+            fishType.initTexture();
+        }
         for (NPCtype npCtype : NPCtype.values()) {
             npCtype.initTexture();
         }
@@ -204,9 +205,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
         // save games
-        if (currentGame != null) {
-            currentGame.getMap().getShops().clear();
-        }
+//        if (currentGame != null) {
+//            currentGame.getMap().getShops().clear();
+//        }
         //saveActiveGames();
         // ✅ Gracefully close WebSocket
         if (networkClient != null && networkClient.isOpen()) {

@@ -133,6 +133,7 @@ public class NetworkClient extends WebSocketClient {
                             System.out.println("////////////////////////////////////////////////////");
                             try {
                                 Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                game.reloadExtraData();
                                 MainApp.getInstance().setCurrentGame(game);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -143,6 +144,25 @@ public class NetworkClient extends WebSocketClient {
                     }
                     System.out.printf("[CLIENT] Game updated handle end of day");
                 }
+                if ("shop-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Object bodyRaw = message.getBody();
+                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                            Object gameJson = bodyMap.get("game");
+                            if (gameJson instanceof String json) {
+                                try {
+                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                    MainApp.getInstance().setCurrentGame(game);
+                                    game.reloadExtraData();
+                                    System.out.println("[CLIENT] Shop state updated.");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                }
+
 
                 if ("start-game".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
@@ -155,6 +175,7 @@ public class NetworkClient extends WebSocketClient {
                                 if (gameJsonObj instanceof  String json) {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        game.reloadExtraData();
                                         MainApp.getInstance().setCurrentGame(game);
                                        // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
@@ -185,6 +206,7 @@ public class NetworkClient extends WebSocketClient {
                                     String json = gson.toJson(bodyMap.get("game"));
                                     Game game = gson.fromJson(json, Game.class);
                                     game.setNetworkId(gameId);
+                                    game.reloadExtraData();
                                     MainApp.getInstance().setCurrentGame(game);
                                 }
                             }
