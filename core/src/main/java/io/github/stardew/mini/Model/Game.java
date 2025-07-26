@@ -463,4 +463,13 @@ public class Game {
             loadStatus.put(user.getUsername(), false);
         }
     }
+    public void setUserByUsername(User player) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getUsername().equals(player.getUsername())) {
+                players.set(i, player);
+                return;
+            }
+        }
+    }
+
 }

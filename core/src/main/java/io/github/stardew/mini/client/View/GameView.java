@@ -943,21 +943,57 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
 
                 if (tile != null && tile.canBuildOn()) {
-                    if (buildingToPlace == null || storeController.isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
-                        Result result;
+                    if (buildingToPlace == null || isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
+                        //Result result;
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+//                        if (buildingToPlace == null) {
+//                            result = storeController.buyFromCarpenter(selectedShop,"Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+//                        } else {
+//                            buildingToPlace.setX(tileX);
+//                            buildingToPlace.setY(tileY);
+//                            result = storeController.buyFromCarpenter(selectedShop,buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+//                        }
+//                        if (result.isSuccessful()) {
+//                            //updateHabitatTiles();
+//                            showErrorDialog(stage, "Building placed!");
+//                        } else {
+//                            showErrorDialog(stage, result.message());
+//                        }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////
+                        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                        Map<String, Object> body = new HashMap<>();
+                        body.put("shopName", selectedShop.getShopName());
+
                         if (buildingToPlace == null) {
-                            result = storeController.buyFromCarpenter(selectedShop,"Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+                            body.put("itemName", "Shipping Bin");
                         } else {
-                            buildingToPlace.setX(tileX);
-                            buildingToPlace.setY(tileY);
-                            result = storeController.buyFromCarpenter(selectedShop,buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+                            body.put("itemName", buildingToPlace.getHabitatType().getName());
                         }
-                        if (result.isSuccessful()) {
-                            //updateHabitatTiles();
-                            showErrorDialog(stage, "Building placed!");
-                        } else {
-                            showErrorDialog(stage, result.message());
-                        }
+                        body.put("x", tileX + "");
+                        body.put("y", tileY + "");
+
+                        MainApp.getInstance().getNetworkClient()
+                            .sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "StoreMenuController",
+                                "buyFromCarpenter",
+                                body,
+                                username
+                            ).thenAccept(response -> {
+                                Gson gson = new Gson();
+                                Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+
+                                Gdx.app.postRunnable(() -> {
+                                    if (result.isSuccessful()) {
+                                        showErrorDialog(stage, "Building placed!");
+                                        // Optionally: refresh map/buildings
+                                    } else {
+                                        showErrorDialog(stage, result.message());
+                                    }
+                                });
+                            });
+
                     } else {
                         showErrorDialog(stage, "Building doesnt fit here!");
                     }
@@ -1105,7 +1141,40 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight();
     }
 
+    public boolean isAreaPlaceable(int x, int y, int width, int height) {
+        Game game = MainApp.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        MapOfGame map = game.getMap();
+        Farm farm = map.getFarmByOwner(player);
 
+        for (int i = x; i < x + width; i++) {
+            for (int j = y; j < y + height; j++) {
+                // Check bounds
+                if (i < farm.getX() || i >= farm.getX() + farm.getWidth() ||
+                    j < farm.getY() || j >= farm.getY() + farm.getHeight()) {
+                    return false;
+                }
+                // Check occupation
+                if (isOccupied(i, j)) {
+                    return false;
+                }
+                Tile tile = map.getTile(x, y);
+                if (tile.getType() != TileType.FARM) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public boolean isOccupied(int x, int y) {
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+        Tile tile = map.getTile(x, y);
+        return tile != null && (
+            tile.getContainedGrowable() != null ||
+                tile.getProductOfGrowable() != null ||
+                tile.getContainedItem() != null
+        ); // or tile.isBlocked() if such a method exists
+    }
     @Override
     public boolean keyUp(int i) {
         if (isFishingActive) {
@@ -1305,10 +1374,30 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                     showErrorDialog(stage, "Please enter a name for the animal.");
                     return;
                 }
+                ///    ////////////////////////////////////////////////////////////////
+                String username = MainApp.getInstance().getLoggedInUser().getUsername();
 
-                Result result = storeController.buyAnimal(selectedShop,item.getName(), enteredName);
-                buyAnimalDialog.hide();
-                showErrorDialog(stage, result.message());
+                Map<String, Object> body = new HashMap<>();
+                body.put("shopName", selectedShop.getShopName());
+                body.put("itemName", item.getName());
+                body.put("animalName", enteredName);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(
+                        MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "StoreMenuController",
+                        "buyAnimal",
+                        body,
+                        username
+                    ).thenAccept(response -> {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, response.getMessage());
+                        });
+                    });
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                Result result = storeController.buyAnimal(selectedShop,item.getName(), enteredName);
+//                buyAnimalDialog.hide();
+//                showErrorDialog(stage, result.message());
             }
         });
 
@@ -1382,11 +1471,36 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Result result = storeController.purchase(selectedShop,selectedShopItem, purchaseQuantity);
+                /// ///////////////////////////////////////////////////////////////////////////////////////////
+                String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("shopName", selectedShop.getShopName()); // Or whatever uniquely identifies the shop
+                body.put("itemName", selectedShopItem.getName());
+                body.put("count", purchaseQuantity);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(
+                        MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "StoreMenuController",
+                        "purchase",
+                        body,
+                        username
+                    ).thenAccept(response -> {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, response.getMessage());
+                       // if (response.getStatus() == 200) {
+                            shopPurchaseDialog.hide();
+                            shopPurchaseDialog.setVisible(false);
+                       // }
+                    });
+                });
+                // Result result = storeController.purchase(selectedShop,selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
-                shopPurchaseDialog.hide();
-                shopPurchaseDialog.setVisible(false);
-                showErrorDialog(stage, result.message());
+//                shopPurchaseDialog.hide();
+//                shopPurchaseDialog.setVisible(false);
+               // showErrorDialog(stage, result.message());
+                /// ///////////////////////////////////////////////////////////////////////////////////////////
                 //Gdx.input.setInputProcessor(GameView.this);
             }
         });
@@ -4939,9 +5053,39 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
-            System.out.println(controller.cheatAddMoney(matcher.group("count")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
+        }  else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAddMoney(matcher.group("count")));
+            String sountString = matcher.group("count").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("money",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println("yasssssssssss");
+                            int count = Integer.parseInt(sountString);
+                            currentPlayer.addMoney(count);
+//                            if (!result.isSuccessful()) {
+//                                showErrorDialog(stage, result.message());
+//                            } else {
+//                                showErrorDialog(stage, result.message()); // or update the UI
+//                            }
+                            System.out.println(result.message());
+                        });
+                    } else {
+                        System.out.println("nooooo wayyyyy???");
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println(result.message());
+                            // showErrorDialog(stage, "Failed to use cheat: " + response.getMessage());
+                        });
+                    }
+                });
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
             System.out.println(controller.cheatAnimalFriendship(matcher.group("name"), matcher.group("amount")));
         } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
             System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));
@@ -4951,11 +5095,50 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatUnlimitedEnergy());
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
             System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
-            String itemName = matcher.group("itemName");
-            int count = Integer.parseInt(matcher.group("count"));
-            System.out.println(controller.cheatAddItem(itemName, count));
-        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+//            String itemName = matcher.group("itemName");
+//            int count = Integer.parseInt(matcher.group("count"));
+//            System.out.println(controller.cheatAddItem(itemName, count));
+            String sountString = matcher.group("count").trim();
+            String itemName =matcher.group("itemName").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("itemName",matcher.group("itemName"));
+            params.put("count",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    System.out.println("salamsalasmsalmsalsams");
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println("yasssssssssss");
+                            int count = Integer.parseInt(sountString);
+                            Item item = Item.getRandomItem(itemName);
+                            if (item == null) {
+                                System.out.println("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                                return;
+                            }
+                            currentPlayer.getBackpack().addItem(item,count);
+//                            if (!result.isSuccessful()) {
+//                                showErrorDialog(stage, result.message());
+//                            } else {
+//                                showErrorDialog(stage, result.message()); // or update the UI
+//                            }
+                            System.out.println(result.message());
+                        });
+                    } else {
+                        System.out.println("nooooo wayyyyy???");
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println(result.message());
+                            // showErrorDialog(stage, "Failed to use cheat: " + response.getMessage());
+                        });
+                    }
+                });
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
             System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
             System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
