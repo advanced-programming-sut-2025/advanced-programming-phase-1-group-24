@@ -314,7 +314,7 @@ public class ServerController {
     private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
 
-    public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server){
+    public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server) throws Exception{
         String controllerName = message.getControllerName();
         String methodName = message.getMethodName();
         Map<String, Object> body = message.getBody();
@@ -364,7 +364,7 @@ public class ServerController {
 
     //We shouldn't always return ok
 
-    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) {
+    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) throws Exception {
         Result result;
 
         switch (methodName) {

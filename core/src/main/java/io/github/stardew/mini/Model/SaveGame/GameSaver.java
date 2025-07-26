@@ -99,5 +99,20 @@ public class GameSaver {
     public static <T> T convertObject(Object rawObj, Class<T> clazz) {
         return GameSaver.createCustomObjectMapper().convertValue(rawObj, clazz);
     }
+    public static Game loadSingleGameFromCompressedBytes(byte[] compressedBytes) throws IOException {
+        ObjectMapper mapper = createCustomObjectMapper();
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(compressedBytes);
+             GZIPInputStream gzipStream = new GZIPInputStream(byteStream);
+             InputStreamReader reader = new InputStreamReader(gzipStream, StandardCharsets.UTF_8)) {
+            return mapper.readValue(reader, Game.class);
+        }
+    }
+//    RMap<String, String> gameMap = redissonClient.getMap("savedGames");
+//    String compressed = GameSaver.serializeAndCompressGame(game);
+//gameMap.put(game.getId(), compressed); // Save
+//
+//    String data = gameMap.get(gameId); // Load
+//    byte[] decoded = Base64.getDecoder().decode(data);
+// Deserialize as usual
 
 }
