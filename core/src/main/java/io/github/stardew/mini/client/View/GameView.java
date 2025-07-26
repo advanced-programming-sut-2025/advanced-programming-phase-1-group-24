@@ -207,7 +207,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private Dialog relationshipDialog;
     private final List<Flower> activeFlowers = new ArrayList<>();
 
-    private TextButton nextTurnButton;
+    //private TextButton nextTurnButton;
     private TextButton exitGameButton;
     private TextButton forceTerminateButton;
     private Label energyLabel;
@@ -939,23 +939,23 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
             return true;
         }
-        if (isClickInside(mouseX, mouseY, nextTurnButton)) {
-            if(equippedItem != null) {
-                equippedItem = null;
-            }
-            //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
-//                System.out.println("touchdown");
-//                if (isAnyDialogOpen()) {
-//                    //showErrorDialog(stage,"Cannot end turn while another menu is open.");
-//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
-//                    return true;
-//                }
-            Result result = controller.nextTurn();
-            if (!result.isSuccessful()) {
-                showErrorDialog(stage, result.message());
-            }
-            return true;
-        }
+//        if (isClickInside(mouseX, mouseY, nextTurnButton)) {
+//            if(equippedItem != null) {
+//                equippedItem = null;
+//            }
+//            //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
+////                System.out.println("touchdown");
+////                if (isAnyDialogOpen()) {
+////                    //showErrorDialog(stage,"Cannot end turn while another menu is open.");
+////                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+////                    return true;
+////                }
+//            Result result = controller.nextTurn();
+//            if (!result.isSuccessful()) {
+//                showErrorDialog(stage, result.message());
+//            }
+//            return true;
+//        }
         if (stage.touchDown(screenX, screenY, pointer, button)) {
             return true;
         }
@@ -2852,31 +2852,31 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         friendsButton.setTouchable(Touchable.enabled);
         stage.addActor(friendsButton);
 
-        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
-        nextTurnButton.setSize(200, 100);
-        nextTurnButton.setColor(Color.MAGENTA);
-        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
-        nextTurnButton.setTouchable(Touchable.enabled);
-        nextTurnButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (Gdx.input.getInputProcessor() != GameView.this) {
-                    // showErrorDialog(stage, "Cannot end turn while another menu is open.");
-                    showTimedErrorLabel( stage, "Cannot end turn while another menu is open.", 2f) ;
-                    // return;
-                }
-//                if (isAnyDialogOpen()) {
-//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
-//                    return;
+//        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
+//        nextTurnButton.setSize(200, 100);
+//        nextTurnButton.setColor(Color.MAGENTA);
+//        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
+//        nextTurnButton.setTouchable(Touchable.enabled);
+//        nextTurnButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                if (Gdx.input.getInputProcessor() != GameView.this) {
+//                    // showErrorDialog(stage, "Cannot end turn while another menu is open.");
+//                    showTimedErrorLabel( stage, "Cannot end turn while another menu is open.", 2f) ;
+//                    // return;
 //                }
-
-//                Result result = controller.nextTurn();
-//                if (!result.isSuccessful()) {
-//                    showErrorDialog(stage, result.message());
-//                }
-            }
-        });
-        stage.addActor(nextTurnButton);
+////                if (isAnyDialogOpen()) {
+////                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+////                    return;
+////                }
+//
+////                Result result = controller.nextTurn();
+////                if (!result.isSuccessful()) {
+////                    showErrorDialog(stage, result.message());
+////                }
+//            }
+//        });
+//        stage.addActor(nextTurnButton);
 
 
         exitGameButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
@@ -3103,8 +3103,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
             if (currentPlayer.hasFainted()) {
                 if (!hasShownFaintMessage) {
-                    showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
-                        controller.nextTurn();
+                    showTimedErrorLabel(stage, "You don't have enough energy!", 5f, () -> {
+                        //controller.nextTurn();
                     });
                     hasShownFaintMessage = true;
                 }
@@ -3540,14 +3540,17 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                                     Object tileRaw = bodyMap.get("tile");
                                     Object energyRaw = bodyMap.get("energy");
                                     Object dirRaw = bodyMap.get("movingDirection");
+                                    Object faintedRaw = bodyMap.get("hasFainted");
 
                                     Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
                                     int energy = ((Number) energyRaw).intValue();
                                     int dir = ((Number) dirRaw).intValue();
+                                    boolean fainted = ((Boolean) faintedRaw).booleanValue();
 
                                     User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
                                     currentPlayer.setCurrentTile(tile);
                                     currentPlayer.setEnergy(energy);
+                                    currentPlayer.setFainted(fainted);
                                     currentPlayer.setMovingDirection(dir);
                                 } else {
                                   System.err.println("Response body is not a map");
@@ -4206,12 +4209,12 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         if (gameHour >= 18 && gameHour < 22) {
             alpha = (gameHour - 18) / 4f * 0.8f;
         } else if (gameHour >= 22) {
-            alpha = 1f;
+            alpha = 0.8f;
         } else {
             alpha = 0f;
         }
 
-        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 1f); // max darkness = 0.8
+        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 0.8f); // max darkness = 0.8
     }
 
     private boolean tryMove(int dx, int dy, int direction) {

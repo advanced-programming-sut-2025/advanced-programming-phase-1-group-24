@@ -69,11 +69,13 @@ public class GameController implements MenuController {
 
             player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
             player.reduceEnergy(1);
+            if(player.getEnergy() == 0) player.setFainted(true);
             player.setMovingDirection(direction);
             Map<String, Object> params = new HashMap<>();
             params.put("tile", player.getCurrentTile());
             params.put("energy", player.getEnergy());
             params.put("movingDirection", player.getMovingDirection());
+            params.put("hasFainted", player.hasFainted());
 
             return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
             //return Message.OK.setMessage("You can walk there.");
@@ -629,74 +631,139 @@ public class GameController implements MenuController {
         Game game = gs.getGame();
         Tile[][] map = game.getMap().getMap();
 
-        if (game.getTimeAndDate().getHour() == 23) {
-
-            for (Shop shop : game.getMap().getShops()) {
-                for (ShopItem shopItem : shop.getProducts()) {
-                    shopItem.setSoldToday(0);
-                }
+        if (game.getTimeAndDate().getHour() >= 22) {
+            if(allPlayersAtHome(gs.getGame())) {
+                game.setWaitingForPlayersToSleep(false);
+                gs.setWaitingForPlayersToGoHome(false);
+                if(game.getTimeAndDate().getHour() == 23) endOfDayHandling(gs, game);
+                return;
             }
-            processShippingBinsAtNight(gs);
 
-            handleMachinRecipes(game);
-            game.getTimeAndDate().skipToNextMorning();
-
+            boolean someoneCanStillMakeIt = false;
             for (User user : game.getPlayers()) {
-                user.resetEnergyForNewDay();
-                if (user.getOwnedAnimals() != null || !user.getOwnedAnimals().isEmpty()) {
-                    for (Animal animal : user.getOwnedAnimals()) {
-                        animal.updateProductEndDay();
-                        animal.endOfDayUpdate();
+                if (game.getMap().getHousePosition(user.getCurrentTile().getX(), user.getCurrentTile().getY()) == null) {
+                    if (playerCanReachHome(user)) {
+                        someoneCanStillMakeIt = true;
+                        break;
                     }
-                }
-                if (user.getDaysSinceRejection() != 0) {
-                    user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
-                }
-               // crowAttack(gs, user);
-            }
-
-            Tile[][] tiles = game.getMap().getMap();
-            for (int j = 0; j < tiles.length; j++) {
-                for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(game,tiles[j][i]);
-                    tiles[j][i].setHasBeenBurt(false);
-                    if (tiles[j][i].getContainedGrowable() == null &&
-                        tiles[j][i].getProductOfGrowable() == null &&
-                        tiles[j][i].getContainedItem() == null &&
-                        tiles[j][i].getType() == TileType.FARM) {
-                        tiles[j][i].setWalkable(true);
+                    else{
+                        user.setFainted(true);
+                        for (PlayerConnection player : gs.getPlayers()) {
+                            if (player.getWsContext().session.isOpen()) {
+                                Map<String, Object> faintUpdate = new HashMap<>();
+                                faintUpdate.put("fainted", user.getUsername());
+                                Message<Map<String, Object>> msg = new Message<>(200, "faintUpdate", faintUpdate, Message.MessageType.RESPONSE);
+                                msg.setType("faint-update");
+                                player.getWsContext().send(new Gson().toJson(msg));
+                            }
+                        }
                     }
                 }
             }
-            randomForaging(gs);
 
-            game.setCurrentWeatherType(game.getTomorrowWeatherType());
-            game.predictTomorrowWeather();
-            rainOnGrowables(game,game.getCurrentWeatherType());
-            game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
-            NPC.endOfDay(game);
-            for (User user : game.getPlayers()) {
-                game.handleFoodRecipe(user);
+            if (someoneCanStillMakeIt) {
+                game.setWaitingForPlayersToSleep(true);
+                gs.setWaitingForPlayersToGoHome(true);
+                // optionally notify players that the game is waiting
+                return;
+            } else {
+                game.setWaitingForPlayersToSleep(false);
+                gs.setWaitingForPlayersToGoHome(false);
+                if(game.getTimeAndDate().getHour() == 23) endOfDayHandling(gs, game);
             }
-            for (PlayerConnection player : gs.getPlayers()) {
-                if (player.getWsContext().session.isOpen()) {
-                    ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
-                    Map<String, Object> body = new HashMap<>();
-                    try {
-                        gs.getGame().setCurrentPlayer(player.getUser());
-                        String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
-                        body.put("game", jsonGame);
-                        Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
-                        msg.setType("endOfDay");
-                        player.getWsContext().send(new Gson().toJson(msg));
-                        System.out.println("handle end of day!");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        }
+    }
+
+    public boolean playerCanReachHome(User user) {
+        Tile current = user.getCurrentTile();
+        Tile home = user.getHomeTile();
+
+        int dx = Math.abs(current.getX() - home.getX());
+        int dy = Math.abs(current.getY() - home.getY());
+        int stepsNeeded = dx + dy;
+
+        return stepsNeeded <= user.getEnergy();
+    }
+
+
+    private void endOfDayHandling(GameServer gs, Game game) {
+        for (Shop shop : game.getMap().getShops()) {
+            for (ShopItem shopItem : shop.getProducts()) {
+                shopItem.setSoldToday(0);
+            }
+        }
+        processShippingBinsAtNight(gs);
+
+        handleMachinRecipes(game);
+        game.getTimeAndDate().skipToNextMorning();
+
+        for (User user : game.getPlayers()) {
+            user.resetEnergyForNewDay();
+            if (user.getOwnedAnimals() != null || !user.getOwnedAnimals().isEmpty()) {
+                for (Animal animal : user.getOwnedAnimals()) {
+                    animal.updateProductEndDay();
+                    animal.endOfDayUpdate();
+                }
+            }
+            if (user.getDaysSinceRejection() != 0) {
+                user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
+            }
+            // crowAttack(gs, user);
+        }
+
+        Tile[][] tiles = game.getMap().getMap();
+        for (int j = 0; j < tiles.length; j++) {
+            for (int i = 0; i < tiles[0].length; i++) {
+                updateGrowable(game, tiles[j][i]);
+                tiles[j][i].setHasBeenBurt(false);
+                if (tiles[j][i].getContainedGrowable() == null &&
+                    tiles[j][i].getProductOfGrowable() == null &&
+                    tiles[j][i].getContainedItem() == null &&
+                    tiles[j][i].getType() == TileType.FARM) {
+                    tiles[j][i].setWalkable(true);
                 }
             }
         }
+        randomForaging(gs);
+
+        game.setCurrentWeatherType(game.getTomorrowWeatherType());
+        game.predictTomorrowWeather();
+        rainOnGrowables(game, game.getCurrentWeatherType());
+        game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
+        NPC.endOfDay(game);
+        for (User user : game.getPlayers()) {
+            game.handleFoodRecipe(user);
+        }
+        for (PlayerConnection player : gs.getPlayers()) {
+            if (player.getWsContext().session.isOpen()) {
+                ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+
+                Map<String, Object> body = new HashMap<>();
+                try {
+                    gs.getGame().setCurrentPlayer(player.getUser());
+                    String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
+                    body.put("game", jsonGame);
+                    Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
+                    msg.setType("endOfDay");
+                    player.getWsContext().send(new Gson().toJson(msg));
+                    System.out.println("handle end of day!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean allPlayersAtHome(Game game) {
+        for (User user : game.getPlayers()) {
+            Tile current = user.getCurrentTile();
+            House house = game.getMap().getHousePosition(current.getX(), current.getY());
+            if (house == null && !user.hasFainted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void processShippingBinsAtNight() {

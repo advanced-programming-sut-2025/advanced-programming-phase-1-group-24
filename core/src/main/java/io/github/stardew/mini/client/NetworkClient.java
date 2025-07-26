@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.Model.User;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -194,6 +195,27 @@ public class NetworkClient extends WebSocketClient {
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                    });
+                }
+                if ("faint-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        try {
+                            Object bodyRaw = message.getBody();
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                Object faintedUserObj = bodyMap.get("fainted");
+                                if (faintedUserObj instanceof String faintedUsername) {
+                                    User user = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+                                    if (user != null && user.getUsername().equals(faintedUsername)) {
+                                        user.setFainted(true);
+                                    } else {
+                                        System.err.println("User not found: " + faintedUsername);
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.err.println("❌ Failed to parse fainted User");
+                        }
                     });
                 }
                 System.err.println("❌ requestId was null");

@@ -46,6 +46,17 @@ public class Game {
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
     private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
+
+    private boolean waitingForPlayersToSleep = false;
+
+    public boolean isWaitingForPlayersToSleep() {
+        return waitingForPlayersToSleep;
+    }
+
+    public void setWaitingForPlayersToSleep(boolean waitingForPlayersToSleep) {
+        this.waitingForPlayersToSleep = waitingForPlayersToSleep;
+    }
+
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
         for (User player : players) {
@@ -344,8 +355,12 @@ public class Game {
         for (Tile[] row : map.getMap()) {
             for (Tile tile : row) {
                 Animal animal = tile.getContainedAnimal();
+                NPC npc = tile.getContainedNPC();
                 if (animal != null) {
                     animal.reloadAfterLoad(tile);
+                }
+                if(npc != null) {
+                    npc.reloadAfterLoad(tile);
                 }
             }
         }
