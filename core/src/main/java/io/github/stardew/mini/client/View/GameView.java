@@ -4331,6 +4331,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 itemSlotStack.add(highlightImage);
             }
 
+            System.out.println(item.getName());
+            System.out.println(item.getClass());
             Texture itemTex = getItemTexture(item);
             if (itemTex != null) {
                 Image itemImage = new Image(itemTex);
