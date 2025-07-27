@@ -39,6 +39,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.GameController;
@@ -824,17 +825,52 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             return true;
         }
         if (isClickInside(mouseX, mouseY, exitGameButton)) {
-            Result result = controller.exitGame();
-            if (!result.isSuccessful()) {
-                showErrorDialog(stage, result.message());
-            } else{
-                if (gameTickTask != null) {
-                    gameTickTask.cancel();
-                }
-                MainApp.getInstance().setCurrentGame(null);
-                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
-            }
+            //Result result = controller.exitGame();
+            Map<String, Object> params = new HashMap<>();
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "exitGame", params, currentPlayer.getUsername())
+//                .thenAccept(response -> {
+//                    if (response.getStatus() == 200) {
+//
+//                    }
+//                }).exceptionally(ex -> {
+//                    Gdx.app.postRunnable(() -> {
+//                        showErrorDialog(stage, "Failed to exit: " + ex.getMessage());
+//                    });
+//                    return null;
+//                });
+//            if (!result.isSuccessful()) {
+//                showErrorDialog(stage, result.message());
+//            } else{
+////                if (gameTickTask != null) {
+////                    gameTickTask.cancel();
+////                }
+//                MainApp.getInstance().setCurrentGame(null);
+//                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
+//            }
+                .thenAccept(response -> {
+                    if (response.getStatus() == 200) {
+                        Gson gson = new Gson();
+                        // convert response.body (which is Object) to JSON string then parse as Result
+                        Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+
+                        if (!result.isSuccessful()) {
+                            Gdx.app.postRunnable(() -> showErrorDialog(stage, result.message()));
+                        } else {
+                            Gdx.app.postRunnable(() -> {
+                                MainApp.getInstance().setCurrentGame(null);
+                                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+                            });
+                        }
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to exit game: " + response.getMessage());
+                        });
+                    }
+                });
             return true;
         }
         if (isClickInside(mouseX, mouseY, forceTerminateButton)) {

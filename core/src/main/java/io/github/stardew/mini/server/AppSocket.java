@@ -7,6 +7,9 @@ import io.github.stardew.mini.server.Controller.ServerController;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,8 +25,37 @@ public class AppSocket {
     private static final CopyOnWriteArrayList<GameServer> activeGames = new CopyOnWriteArrayList<>();
     private final ServerController serverController = new ServerController();
 
+
+
     public AppSocket(Javalin app) {
         this.app = app;
+    }
+
+    private void broadcastOnlinePlayers() {
+        // جمع‌آوری لیست
+        List<Map<String,String>> list = new ArrayList<>();
+        for (PlayerConnection pc : connectedPlayers.values()) {
+            Map<String,String> entry = new HashMap<>();
+            entry.put("username", pc.getUsername());
+
+            String lobby = LobbyManager.getInstance()
+                .getPlayerLobby(pc.getUser())
+                .map(Lobby::getName)
+                .orElse("");
+            entry.put("lobby", lobby);
+            list.add(entry);
+        }
+
+        // می‌سازیم پیام JSON
+        Map<String,Object> payload = Map.of("players", list);
+        Message<Map<String,Object>> msg = Message.ok(payload);
+        msg.setType("online-players");
+        String json = gson.toJson(msg);
+
+
+        for (PlayerConnection pc : connectedPlayers.values()) {
+            pc.getWsContext().send(json);
+        }
     }
 
     public void start() {
@@ -93,9 +125,7 @@ public class AppSocket {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
-
-
-
+                        broadcastOnlinePlayers();
                         System.out.println("User connected: " + message.getUsername());
                     }
 
@@ -158,6 +188,13 @@ public class AppSocket {
                     ctx.send(gson.toJson(response));
                     // Handle other message types here...
 
+                    if ("LobbyController".equals(message.getControllerName())
+                        && ("joinLobby".equals(message.getMethodName())
+                        || "leaveLobby".equals(message.getMethodName()))) {
+                        broadcastOnlinePlayers();
+                    }
+
+
                 } catch (Exception e) {
                     System.err.println("Failed to parse message: " + e.getMessage());
                     ctx.send(gson.toJson(Message.BAD_REQUEST));
@@ -171,6 +208,7 @@ public class AppSocket {
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
+                    broadcastOnlinePlayers();
                 } else {
                     System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
                 }
@@ -218,6 +256,16 @@ public class AppSocket {
         }
         System.out.println("PlayerConnection not found for: " + username);
         return null;
+    }
+    public static boolean isPlayerInAnyGame(String username) {
+        for (GameServer gameServer : activeGames) {
+            for (PlayerConnection player : gameServer.getPlayers()) {
+                if (player.getUsername().equals(username)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
