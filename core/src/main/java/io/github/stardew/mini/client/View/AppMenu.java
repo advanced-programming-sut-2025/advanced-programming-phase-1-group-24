@@ -8,9 +8,10 @@ import com.badlogic.gdx.utils.Align;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public interface AppMenu {
-    public void handleCommand(Scanner scanner);
+    public  void handleCommand(Scanner scanner, Consumer<String> callback);
      default void showErrorDialog(Stage stage, String message) {
         Skin skin = GameAssetManager.skin;
 

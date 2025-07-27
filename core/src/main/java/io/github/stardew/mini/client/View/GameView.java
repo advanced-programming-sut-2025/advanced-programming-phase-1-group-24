@@ -99,6 +99,7 @@ import java.util.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -5370,6 +5371,100 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //        }
         else {
             System.out.println("invalid command");
+        }
+    }
+//    public void handleCommand(Scanner scanner, Consumer<String> outputCallback){
+//    String input = scanner.nextLine().trim();
+//        Matcher matcher;
+//
+//        if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+//            //outputCallback.accept(controller.showCurrentMenu());
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+//            String countStr = matcher.group("count").trim();
+//            Map<String, Object> params = new HashMap<>();
+//            params.put("money", countStr);
+//            MainApp.getInstance().getNetworkClient()
+//                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+//                .thenAccept(response -> {
+//                    Gson gson = new Gson();
+//                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+//                    if (response.getStatus() == 200) {
+//                        Gdx.app.postRunnable(() -> {
+//                            int count = Integer.parseInt(countStr);
+//                            currentPlayer.addMoney(count);
+//                            outputCallback.accept(result.message());
+//                        });
+//                    } else {
+//                        Gdx.app.postRunnable(() -> {
+//                            outputCallback.accept("Failed: " + result.message());
+//                        });
+//                    }
+//                });
+//        }
+//        // Add outputCallback.accept(...) in all other cases where System.out.println is used
+//        else {
+//            outputCallback.accept("invalid command");
+//        }
+//    }
+
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
+        String input = scanner.nextLine().trim();
+        Matcher matcher;
+
+         if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+            String amount = matcher.group("count").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("money", amount);
+
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    Gdx.app.postRunnable(() -> {
+                        if (response.getStatus() == 200) {
+                            currentPlayer.addMoney(Integer.parseInt(amount));
+                            callback.accept(result.message());
+                        } else {
+                            callback.accept("Error: " + result.message());
+                        }
+                    });
+                });
+
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+
+            String sountString = matcher.group("count").trim();
+            String itemName =matcher.group("itemName").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("itemName",matcher.group("itemName"));
+            params.put("count",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            int count = Integer.parseInt(sountString);
+                            Item item = Item.getRandomItem(itemName);
+                            if (item == null) {
+                                callback.accept("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                                return;
+                            }
+                            currentPlayer.getBackpack().addItem(item,count);
+                            callback.accept(result.message());
+                        });
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            callback.accept(result.message());
+                        });
+                    }
+                });
+        }else {
+            callback.accept("Invalid command");
         }
     }
 

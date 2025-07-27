@@ -21,6 +21,7 @@ import io.github.stardew.mini.Model.Result;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class MainMenuView implements Screen,AppMenu {
     private final MainMenuController controller;
@@ -155,7 +156,7 @@ public class MainMenuView implements Screen,AppMenu {
     }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
 
     }
 }

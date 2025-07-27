@@ -23,6 +23,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 public class PreGameMenuView implements AppMenu, Screen {
@@ -389,7 +390,7 @@ public class PreGameMenuView implements AppMenu, Screen {
 //        return selectDuration.getSelected().toString();
 //    }
 
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 //        Result canUseCommand = controller.checkEnergy();
