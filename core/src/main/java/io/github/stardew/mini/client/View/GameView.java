@@ -830,26 +830,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             MainApp.getInstance().getNetworkClient()
                 .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
                     "GameController", "exitGame", params, currentPlayer.getUsername())
-//                .thenAccept(response -> {
-//                    if (response.getStatus() == 200) {
-//
-//                    }
-//                }).exceptionally(ex -> {
-//                    Gdx.app.postRunnable(() -> {
-//                        showErrorDialog(stage, "Failed to exit: " + ex.getMessage());
-//                    });
-//                    return null;
-//                });
-//            if (!result.isSuccessful()) {
-//                showErrorDialog(stage, result.message());
-//            } else{
-////                if (gameTickTask != null) {
-////                    gameTickTask.cancel();
-////                }
-//                MainApp.getInstance().setCurrentGame(null);
-//                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-//                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
-//            }
                 .thenAccept(response -> {
                     if (response.getStatus() == 200) {
                         Gson gson = new Gson();
@@ -1605,7 +1585,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                         result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
                         break;
                     case "Machine":
-
                         result=controller.artisanUse(pendingMachineName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
                         break;
                     case "Sell":

@@ -1,6 +1,7 @@
 package io.github.stardew.mini.server.Controller;
 
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.UserDatabaseSQL;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -70,6 +71,9 @@ SignupMenuView view;
         // Save user
         app.getUsers().add(newUser);
         UserDatabase.saveUsers(app.getUsers());
+        /// //////////////////////////////////////////////////////////
+        UserDatabaseSQL.saveUsers(app.getUsers());
+        /// /////////////////////////////////////////////////////////
         app.setLoggedInUser(newUser); // not added yet until question is picked
 
         // Show security questions
@@ -99,6 +103,9 @@ SignupMenuView view;
         // Finally save the user
         app.getUsers().add(currentUser);
         UserDatabase.saveUsers(app.getUsers());
+        /// //////////////////////////////////////////////////////////
+        UserDatabaseSQL.saveUsers(app.getUsers());
+        /// /////////////////////////////////////////////////////////
         app.setLoggedInUser(null); // clear pending user
 
         return new Result(true, "user registered successfully. you are now in login menu!");
