@@ -247,6 +247,7 @@ public class StoreMenuController implements MenuController{
             result = new Result(true, "Successfully purchased: " + habitatCopy);
         } else if (item instanceof Food) {
             Food foodCopy = ((Food) item).copy();
+            System.out.println("your purchase was: "+foodCopy.getName()+foodCopy.getType());
             result = player.getBackpack().addItem(foodCopy, count);
         } else if (item instanceof Machine) {
             Machine machineCopy = ((Machine) item).copy();
