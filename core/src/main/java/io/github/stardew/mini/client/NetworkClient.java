@@ -8,10 +8,15 @@ import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.MainMenuView;
+import io.github.stardew.mini.server.Controller.MainMenuController;
+import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
@@ -103,6 +108,18 @@ public class NetworkClient extends WebSocketClient {
                     System.err.println("❌ No future found for requestId: " + requestId);
                 }
             } else {
+
+                if ("online-players".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> body = (Map<String,Object>) message.getBody();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,String>> list = (List<Map<String,String>>) body.get("players");
+                    MainApp.getInstance().updateOnlinePlayers(list);
+                    return;
+                }
+
+
+
                 if ("time-update".equalsIgnoreCase(message.getType())) {
                     Map<String, Object> data = (Map<String, Object>) message.getBody();
                     int hour = ((Double) data.get("hour")).intValue();
@@ -189,6 +206,13 @@ public class NetworkClient extends WebSocketClient {
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                    });
+                }
+                if ("game-ended".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().setCurrentGame(null);
+                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
                     });
                 }
                 System.err.println("❌ requestId was null");

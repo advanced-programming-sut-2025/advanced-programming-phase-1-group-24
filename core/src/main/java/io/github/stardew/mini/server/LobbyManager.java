@@ -89,5 +89,11 @@ public class LobbyManager {
         return activeLobbies;
     }
 
+    public Optional<Lobby> getPlayerLobby(User user) {
+        return activeLobbies.values().stream()
+            .filter(lobby -> lobby.getPlayers().stream()
+                .anyMatch(u -> u.getUsername().equals(user.getUsername())))
+            .findFirst();
+    }
 
 }

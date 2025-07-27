@@ -3,16 +3,7 @@ package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.Food;
-import io.github.stardew.mini.Model.Things.FoodType;
-import io.github.stardew.mini.server.Controller.*;
-import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.FoodType;
@@ -36,13 +27,12 @@ import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
-import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -50,7 +40,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = new ArrayList<>(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
@@ -59,6 +49,8 @@ public class MainApp extends com.badlogic.gdx.Game {
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
     private String jwtToken;
+    private List<Map<String,String>> onlinePlayers = new ArrayList<>();
+
 
     public String getJwtToken() {
         return jwtToken;
@@ -70,6 +62,11 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGameId(String gameId) {
         currentGame.setNetworkId(gameId);
     }
+
+    public List<Map<String,String>> getOnlinePlayers() {
+        return onlinePlayers;
+    }
+
 
     @Override
     public void create() {
@@ -134,7 +131,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             npCtype.initTexture();
         }
         // Initialize game data
-        activeGames = loadActiveGames();
+//        activeGames = loadActiveGames();
         if (FarmTemplateManager.getTemplates() == null) {
             FarmTemplateManager.loadTemplates();
         }
@@ -349,6 +346,23 @@ public class MainApp extends com.badlogic.gdx.Game {
             // ... other cases
         }
     }
+
+    public void updateOnlinePlayers(List<Map<String,String>> list) {
+        this.onlinePlayers = new ArrayList<>(list);
+        // اگر MainMenuView نمایش داده شده، ریفرشش کن
+        if (currentMenu == Menu.MainMenu && getCurrentGameView() == null) {
+            Gdx.app.postRunnable(() -> {
+                if (getScreen() instanceof MainMenuView) {
+                    ((MainMenuView) screen).updateOnlinePlayers(onlinePlayers);
+                }
+            });
+        }
+    }
+
+
+
+
+
 
     public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         currentGame = currentGame;

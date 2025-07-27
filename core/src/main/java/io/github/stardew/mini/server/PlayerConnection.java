@@ -6,7 +6,7 @@ import io.javalin.websocket.WsContext;
 public class PlayerConnection {
     private final String username;
     private final WsContext wsContext;
-    private final User user;
+    private  User user;
 
     public PlayerConnection(String username, WsContext wsContext) {
         this.username = username;
@@ -30,6 +30,10 @@ public class PlayerConnection {
         if (wsContext.session.isOpen()) {
             wsContext.send(json);
         }
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
 
