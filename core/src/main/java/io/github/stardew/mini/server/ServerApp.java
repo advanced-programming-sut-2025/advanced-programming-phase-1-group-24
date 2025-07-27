@@ -5,6 +5,7 @@ import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.Model.UserDatabaseSQL;
 import org.redisson.Redisson;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
@@ -49,8 +50,12 @@ public class ServerApp {
         return null;
     }
     private void loadAllUsers() {
-        ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+        //ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+        ///    //////////////////////////////////////////////////////
+        ArrayList<User> loadedUsers = UserDatabaseSQL.loadUsers();
+        ///////////////////////////////////////////////////////////////////////
         for (User user : loadedUsers) {
+            user.updateGameFields();
             allUsers.put(user.getUsername(), user);  // assuming getUsername() exists
         }
     }
@@ -60,7 +65,9 @@ public class ServerApp {
     }
     // Optionally, call this when you want to persist
     public void saveUsers() {
+
         UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
+        UserDatabaseSQL.saveUsers(new ArrayList<>(allUsers.values()));
     }
     // ==== USER MANAGEMENT ====
     public void addUser(User user) {

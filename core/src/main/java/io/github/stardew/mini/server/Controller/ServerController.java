@@ -313,6 +313,7 @@ public class ServerController {
     private final MapSelectionMenuController mapSelectionMenuController = new MapSelectionMenuController();
     private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
+    private final MainMenuController mainMenuController= new MainMenuController();
 
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server) throws Exception{
         String controllerName = message.getControllerName();
@@ -354,6 +355,8 @@ public class ServerController {
                 return  routeToLobbyController(methodName, body, server, player);
             case "PreGameMenuController":
                 return  routeToPreGameMenuController(methodName, body, server, player);
+            case "MainMenuController":
+                return routeToMainMenuController(methodName, body, player);
 
 
             default:
@@ -513,6 +516,18 @@ public class ServerController {
 
                 preGameMenuController.loadGame(player,gameId);
                 return Message.OK.setMessage("gameLoaded");
+            }
+
+
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
+    private Message<?> routeToMainMenuController(String methodName, Map<String, Object> body, User player) {
+        switch (methodName) {
+            case "showUserInfo": {
+               Result result= mainMenuController.showUserInfo(player.getUsername());
+                return Message.OK.setMessage(result.getMessage());
             }
 
 

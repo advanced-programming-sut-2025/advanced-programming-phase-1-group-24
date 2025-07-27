@@ -203,6 +203,7 @@ public class GameController implements MenuController {
         for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
         }
+        ServerApp.getInstance().saveUsers();
 
         // Step 2: Clean up game objects
        // currentGame.getMap().getShops().clear();
