@@ -82,9 +82,9 @@ public class NewGameMenuController implements MenuController {
 
     public Message<?> createGameOnServer(List<String> usernames, User creator) {
         ArrayList<User> players = new ArrayList<>();
-//        if (usernames.size() < 2) {
-//            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
-//        }
+        if (usernames.size() < 2) {
+            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
+        }
 
         List<PlayerConnection> connections = new ArrayList<>();
 
