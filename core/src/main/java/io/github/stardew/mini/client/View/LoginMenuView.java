@@ -20,6 +20,7 @@ import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class LoginMenuView implements Screen,AppMenu {
     private final LoginMenuController controller;
@@ -175,7 +176,7 @@ public class LoginMenuView implements Screen,AppMenu {
         }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
 
     }
 

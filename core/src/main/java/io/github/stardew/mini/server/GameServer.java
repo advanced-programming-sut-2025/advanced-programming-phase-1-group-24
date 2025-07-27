@@ -22,8 +22,9 @@ public class GameServer extends Thread {
     private Timer timer;
     private boolean isWaitingForPlayersToGoHome = false;
 
-    public GameServer(List<PlayerConnection> players) {
+    public GameServer(List<PlayerConnection> players,Game game) {
         this.players = players;
+        this.game = game;
     }
 
     @Override

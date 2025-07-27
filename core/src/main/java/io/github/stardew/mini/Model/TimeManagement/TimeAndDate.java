@@ -87,5 +87,36 @@ public class TimeAndDate {
         this.dayOfWeek = dayOfWeek;
         this.season = season;
     }
+//    public String formattedTime() {
+////        // Convert 24-hour format to 12-hour format with AM/PM
+//        int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+//        String period = hour < 12 ? "AM" : "PM";
+////
+////        // Format as: "Tuesday, Spring 14 - 08:00 AM"
+////        return String.format("%s, %s %02d - %02d:00 %s",
+////            dayOfWeek.name(), season.name(), day, displayHour, period);
+//        String dayStr = String.format("%02d", day);
+//        String hourStr = String.format("%02d", displayHour);
+//        String dowStr = (dayOfWeek != null) ? (dayOfWeek.name()) : "Unknown Day";
+//        String seasonStr = (season != null) ? (season.name()) : "Unknown Season";
+//
+//        return dowStr + ", " + seasonStr + " " + dayStr + " - " + hourStr + ":00 " + period;
+//
+//    }
+public String formattedTime() {
+    int displayHour = hour % 12 == 0 ? 12 : hour % 12;
+    String period = hour < 12 ? "AM" : "PM";
+
+    String dayStr = String.format("%02d", day);
+    String hourStr = String.format("%02d", displayHour);
+    String dowStr = (dayOfWeek != null) ? (dayOfWeek.name()) : "Unknown Day";
+    String seasonStr = (season != null) ? (season.name()) : "Unknown Season";
+
+    String result = dowStr + ", " + seasonStr + " " + dayStr + " - " + hourStr + ":00 " + period;
+    System.out.println("formattedTime: " + result); // ✅ Add this for debugging
+    return result;
+}
+
+
 }
 

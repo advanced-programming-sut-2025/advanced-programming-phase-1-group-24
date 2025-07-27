@@ -28,7 +28,7 @@ import io.github.stardew.mini.client.MainApp;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
 public class Game {
-    private  String NetworkId = UUID.randomUUID().toString();
+    private String NetworkId = UUID.randomUUID().toString();
     private MapOfGame map;
     private ArrayList<User> players;
     private TimeAndDate timeAndDate;
@@ -46,6 +46,8 @@ public class Game {
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
     private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
+    private Map<String, Boolean> loadStatus = new HashMap<>();
+
 
     private boolean waitingForPlayersToSleep = false;
 
@@ -61,6 +63,7 @@ public class Game {
         this.players = players;
         for (User player : players) {
             mapSelectionStatus.put(player.getUsername(), false);
+            loadStatus.put(player.getUsername(), false);
         }
         this.mainPlayer = mainPlayer;
         this.currentPlayer = currentPlayer;
@@ -142,10 +145,10 @@ public class Game {
       }
     }
 
-    public  void updateMachines() {  //use this method every hour
+    public void updateMachines() {  //use this method every hour
         for (User user : players) {
-            Farm farm =  getMap().getFarmByOwner(user);
-            System.out.println("farm :"+farm);
+            Farm farm = getMap().getFarmByOwner(user);
+            System.out.println("farm :" + farm);
             House house = getMap().getFarmByOwner(user).getHouse();
             for (Machine machine : house.getMachines()) {
                 if (machine.getActivated()) {
@@ -159,6 +162,7 @@ public class Game {
             }
         }
     }
+
     public MapOfGame getMap() {
         return map;
     }
@@ -389,6 +393,41 @@ public class Game {
             }
         }
         return true;
+    }
+
+    public void resetMapSelectionStatus() {
+        mapSelectionStatus.clear();
+        for (User user : players) {
+            mapSelectionStatus.put(user.getUsername(), false);
+        }
+    }
+
+    public void markPlayerLoadingGame(String username) {
+        loadStatus.put(username, true);
+    }
+
+    public boolean haveAllPlayersLoadedGame() {
+        for (User user : players) {
+            if (!loadStatus.getOrDefault(user.getUsername(), false)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void resetLoadGamesStatus() {
+        loadStatus.clear();
+        for (User user : players) {
+            loadStatus.put(user.getUsername(), false);
+        }
+    }
+    public void setUserByUsername(User player) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getUsername().equals(player.getUsername())) {
+                players.set(i, player);
+                return;
+            }
+        }
     }
 
 }

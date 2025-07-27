@@ -290,6 +290,7 @@
 //}
 package io.github.stardew.mini.server.Controller;
 
+import io.github.stardew.mini.Model.GameSummary;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
@@ -310,9 +311,11 @@ public class ServerController {
     private final TradeMenuController tradeMenuController = new TradeMenuController();
     private final NewGameMenuController newGameMenuController = new NewGameMenuController();
     private final MapSelectionMenuController mapSelectionMenuController = new MapSelectionMenuController();
+    private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
+    private final MainMenuController mainMenuController= new MainMenuController();
 
-    public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server){
+    public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server) throws Exception{
         String controllerName = message.getControllerName();
         String methodName = message.getMethodName();
         Map<String, Object> body = message.getBody();
@@ -337,8 +340,8 @@ public class ServerController {
                 return Message.BAD_REQUEST.setMessage("HouseMenuController not implemented yet");
 
             case "StoreMenuController":
-                // TODO: Implement this
-                return Message.BAD_REQUEST.setMessage("StoreMenuController not implemented yet");
+                System.out.println("routing to store menu controller ");
+                return routeToStoreMenuController(methodName, body, server, player);
 
             case "TradeMenuController":
                 // TODO: Implement this
@@ -350,6 +353,10 @@ public class ServerController {
                 return routeToMapSelectionMenuController(methodName, body, server, player);
             case "LobbyController":
                 return  routeToLobbyController(methodName, body, server, player);
+            case "PreGameMenuController":
+                return  routeToPreGameMenuController(methodName, body, server, player);
+            case "MainMenuController":
+                return routeToMainMenuController(methodName, body, player);
 
 
             default:
@@ -360,7 +367,7 @@ public class ServerController {
 
     //We shouldn't always return ok
 
-    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) {
+    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) throws Exception {
         Result result;
 
         switch (methodName) {
@@ -394,8 +401,19 @@ public class ServerController {
                 result = gameController.buildGreenHouse(player, server);
                 return Message.ok(result);
             }
-
-
+            case "exitGame": {
+                result = gameController.exitGame(player, server);
+                return Message.ok(result);
+            }
+            case "getSavedGames": {
+                List<GameSummary> summaries = gameController.getSavedGamesForUser(player.getUsername());
+                return Message.ok(summaries);
+            }
+            case "cheatAddMoney": {
+                String count = (String) body.get("money");
+                result = gameController.cheatAddMoney(count, player, server);
+                return Message.ok(result).setMessage(result.getMessage());
+            }
             case "cheatAddItem": {
                 System.out.println("going to cheat add item");
                 String count = (String) body.get("count");
@@ -490,6 +508,47 @@ public class ServerController {
         }
     }
 
+    private Message<?> routeToPreGameMenuController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        switch (methodName) {
+            case "loadGame": {
+                String gameId = (String) body.get("gameId");
+
+                preGameMenuController.loadGame(player,gameId);
+                return Message.OK.setMessage("gameLoaded");
+            }
+
+
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
+    private Message<?> routeToMainMenuController(String methodName, Map<String, Object> body, User player) {
+        switch (methodName) {
+            case "showUserInfo": {
+               Result result= mainMenuController.showUserInfo(player.getUsername());
+                return Message.OK.setMessage(result.getMessage());
+            }
+
+
+            default:
+                return Message.NOT_FOUND.setMessage("Method not found: " + methodName);
+        }
+    }
+    private Message<?> routeToStoreMenuController(String methodName, Map<String, Object> body, GameServer server, User player) {
+        if ("purchase".equalsIgnoreCase(methodName)) {
+            return storeMenuController.purchase(server, player, body);
+        }
+        if ("buyAnimal".equalsIgnoreCase(methodName)) {
+            return storeMenuController.buyAnimal(server, player, body);
+        }
+        if ("buyFromCarpenter".equalsIgnoreCase(methodName)) {
+            return storeMenuController.buyFromCarpenter(server, player, body);
+        }
+        if ("upgradeTool".equalsIgnoreCase(methodName)) {
+            return storeMenuController.upgradeTool(server, player, body);
+        }
+        return Message.NOT_FOUND.setMessage("Unknown method in StoreMenuController: " + methodName);
+    }
 
 //    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
 //        Result result = null;

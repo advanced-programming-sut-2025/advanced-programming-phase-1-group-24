@@ -1,13 +1,15 @@
 package io.github.stardew.mini.Model.SaveGame;
 
+
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.server.ServerApp;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GameDatabase {
-
+    private static final GameDatabase instance = new GameDatabase();
     private static final String DB_URL = "jdbc:sqlite:game_saves.db";
 
     public static void initDatabase() throws SQLException {
@@ -24,8 +26,10 @@ public class GameDatabase {
             stmt.execute(sql);
         }
     }
-
-    public static void saveGameToDatabase(String saveName, Game game) throws Exception {
+    public static GameDatabase getInstance() {
+        return instance;
+    }
+    public static void saveGameToDatabase(Game game) throws Exception {
         String saveData = GameSaver.serializeAndCompressGame(game); // Base64 string
 
         String sql = "INSERT INTO GameSaves (save_name, data) VALUES (?, ?)";
@@ -33,13 +37,13 @@ public class GameDatabase {
         try (Connection conn = DriverManager.getConnection(DB_URL);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, saveName);
+            pstmt.setString(1, game.getNetworkId());
             pstmt.setString(2, saveData);
             pstmt.executeUpdate();
         }
     }
 
-    public static List<String> listSavedGames() throws SQLException {
+    public  List<String> listSavedGames() throws SQLException {
         List<String> saves = new ArrayList<>();
         String sql = "SELECT save_name FROM GameSaves ORDER BY created_at DESC";
 

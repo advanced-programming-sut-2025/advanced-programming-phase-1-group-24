@@ -43,6 +43,9 @@ public class Message<T> {
     public static <T> Message<T> ok(T body) {
         return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
     }
+    public static Message success(String message) {
+        return new Message<>(200, message, null, Message.MessageType.RESPONSE);
+    }
 
 
     public Message(int status, String message, T body, MessageType messageType) {
@@ -60,6 +63,7 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
+
     // --- Getters and setters ---
 
     public int getStatus() { return status; }

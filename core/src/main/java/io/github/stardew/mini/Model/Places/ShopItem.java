@@ -1,5 +1,6 @@
 package io.github.stardew.mini.Model.Places;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.github.stardew.mini.Model.Things.Item;
 
 public class ShopItem {
@@ -8,6 +9,7 @@ public class ShopItem {
     private int autumnPrice;
     private int winterPrice;
     private String name;
+    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
     private Object item; // Better to use a generic or interface
     private int soldToday = 0;
     private int dailyLimit;

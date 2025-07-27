@@ -5,11 +5,12 @@ import io.github.stardew.mini.server.Controller.TradeMenuController;
 import io.github.stardew.mini.Model.Menus.TradeMenuCommands;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 public class TradeMenuView implements AppMenu {
     TradeMenuController tradeController = new TradeMenuController();
-    public void handleCommand(Scanner scanner){
+    public void handleCommand(Scanner scanner, Consumer<String> callback){
         String input = scanner.nextLine().trim();
         Matcher matcher;
         if ((matcher = TradeMenuCommands.OFFER_TRADE.getMatcher(input)) != null) {

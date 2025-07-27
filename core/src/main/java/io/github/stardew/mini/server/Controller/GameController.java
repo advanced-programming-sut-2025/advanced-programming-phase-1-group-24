@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.*;
@@ -34,8 +35,10 @@ import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.client.View.GameView;
+import io.github.stardew.mini.server.AppSocket;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
+import io.github.stardew.mini.server.ServerApp;
 
 import java.util.*;
 import java.util.List;
@@ -192,6 +195,57 @@ public class GameController implements MenuController {
         //app.setCurrentGame(null);
         return new Result(true, "game exited and saved successfully. returning to game menu...");
     }
+
+    public List<GameSummary> getSavedGamesForUser(String username) {
+        return ServerApp.getInstance().getAllGames().values().stream()
+            .filter(game -> game.getPlayers().stream()
+                .anyMatch(player -> player.getUsername().equals(username)))
+            .map(GameSummary::fromGame) // You need to add this static builder method
+            .collect(Collectors.toList());
+    }
+
+
+    public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
+        Game currentGame = gameServer.getGame();
+
+        if (currentGame == null)
+            return new Result(false, "No active game to exit!");
+
+        if (!currentGame.getMainPlayer().equals(currentUser))
+            return new Result(false, "Only the game owner can exit the game!");
+
+        // Step 1: Save game state
+        for (User player : currentGame.getPlayers()) {
+            player.updateMaxMoney();
+        }
+        ServerApp.getInstance().saveUsers();
+
+        // Step 2: Clean up game objects
+       // currentGame.getMap().getShops().clear();
+
+        // Step 3: Save game to disk and global state
+        ServerApp.getInstance().addGame(currentGame);
+        ServerApp.getInstance().saveAllGames();
+        ///    ///////////////////////////////////////////////////////////////
+        //ServerApp.getInstance().saveAllGamesToRedis();
+        GameDatabase.saveGameToDatabase(gameServer.getGame());
+        //////////////////////////////////////////////
+        // Step 4: Safely stop game server
+        gameServer.stopServer();                         // stop timer and thread
+        AppSocket.removeGame(gameServer);                // remove from activeGames
+
+        // Optional: close player connections or notify players here
+        for (PlayerConnection player : gameServer.getPlayers()) {
+            if (!player.getUser().equals(currentUser) && player.getWsContext().session.isOpen()) {
+                Message<String> exitMsg = Message.ok("Game ended by the host.");
+                exitMsg.setType("game-ended");
+                player.getWsContext().send(new Gson().toJson(exitMsg));
+            }
+        }
+
+        return new Result(true, "Game exited and saved successfully. Returning to game menu...");
+    }
+
 //    public boolean checkEnergy() {
 //        Game game = MainApp.getInstance().getCurrentGame();
 //        if (game == null) {
@@ -218,8 +272,6 @@ public class GameController implements MenuController {
         }
         return new Result(true, "");
     }
-
-
 
 
     public Result useTool(String direction) {
@@ -297,7 +349,7 @@ public class GameController implements MenuController {
             } else if (currentTool instanceof MilkPail) {
                 return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, gs.getGame().getMap(), gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof PickAxe) {
-                return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, gs.getGame().getMap(), player,gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+                return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof Scythe) {
                 return ((Scythe) currentTool).useScythe(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
             } else if (currentTool instanceof WateringCan) {
@@ -456,8 +508,9 @@ public class GameController implements MenuController {
 //
 //            if (turnCounter == players.size()) {
 //                turnCounter = 0;
-    ////                game.advanceTimeByOneHour();
-    ////                handleEndOfDay();
+
+    /// /                game.advanceTimeByOneHour();
+    /// /                handleEndOfDay();
 //            }
 //        } while (currentPlayer.hasFainted());
 //
@@ -503,7 +556,6 @@ public class GameController implements MenuController {
         game.setCurrentPlayerIndex(currentPlayerIndex);
         game.setTurnCounter(turnCounter);
     }
-
 
 
     private Result voteToTerminateInteractive(Scanner scanner, User user) {
@@ -606,7 +658,7 @@ public class GameController implements MenuController {
             Tile[][] tiles = game.getMap().getMap();
             for (int j = 0; j < tiles.length; j++) {
                 for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(game,tiles[j][i]);
+                    updateGrowable(game, tiles[j][i]);
                     tiles[j][i].setHasBeenBurt(false);
                     if (tiles[j][i].getContainedGrowable() == null &&
                         tiles[j][i].getProductOfGrowable() == null &&
@@ -621,7 +673,7 @@ public class GameController implements MenuController {
             // Update weather for the new day
             game.setCurrentWeatherType(game.getTomorrowWeatherType());
             game.predictTomorrowWeather();
-            rainOnGrowables(game,game.getCurrentWeatherType());
+            rainOnGrowables(game, game.getCurrentWeatherType());
             game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
             // the lightning strike logic should go into your handleEndOfDay() function — specifically after the new day
             //starts and the weather is known, but before or during crop updates (so the lightning can damage crops befor growth).
@@ -1435,7 +1487,8 @@ public class GameController implements MenuController {
                 }
 
                 if (!(x >= farm.getX() && x < farm.getX() + farm.getWidth() &&
-                    y >= farm.getY() && y < farm.getY() + farm.getHeight())) continue; // only tiles inside the player's farm
+                    y >= farm.getY() && y < farm.getY() + farm.getHeight()))
+                    continue; // only tiles inside the player's farm
 
                 Tile tile = game.getMap().getTile(x, y);
                 if (tile != null && tile.getisWalkable() && tile.getContainedAnimal() == null) {
@@ -2097,6 +2150,7 @@ public class GameController implements MenuController {
         ForagingMineralType[] minerals = ForagingMineralType.values();
         return minerals[new Random().nextInt(minerals.length)];
     }
+
     public Result fertalizeGrowable(String fertalizer, String direction) {
         Result result = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().grabItem(fertalizer, 1);
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -2449,7 +2503,7 @@ public class GameController implements MenuController {
     }
 
 
-    public void updateGrowable( Game currentGame,Tile tile) {
+    public void updateGrowable(Game currentGame, Tile tile) {
         //this should be called at the end of the days
         //when we are not in the required season the growables won't grow in this function so naturally they won't produce any product
 //        Game currentGame = MainApp.getInstance().getCurrentGame();
@@ -2575,7 +2629,7 @@ public class GameController implements MenuController {
         }
     }
 
-    public void rainOnGrowables(Game game,WeatherType tommorowWeather) {
+    public void rainOnGrowables(Game game, WeatherType tommorowWeather) {
         Tile[][] map = game.getMap().getMap();
         if (tommorowWeather == WeatherType.RAIN) {
             for (int i = 0; i < map.length; i++) {
@@ -2922,6 +2976,25 @@ public class GameController implements MenuController {
         player.addMoney(count);
         return new Result(true, "Your current money: " + player.getMoney());
     }
+    public Result cheatAddMoney(String countString,User user,GameServer gameServer) {
+        Game game = gameServer.getGame();
+        if (game == null) {
+            return new Result(false, "a new game hasnt started yet");
+        }
+        User player = game.getPlayerByUsername(user.getUsername());
+        int count;
+        try {
+            count = Integer.parseInt(countString);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Invalid number format.");
+        }
+        if (count <= 0) {
+            return new Result(true, "Invalid count!");
+        }
+        player.addMoney(count);
+        System.out.println(player.getMoney());
+        return new Result(true, "Your current money: " + player.getMoney());
+    }
 
     public Result showFriendships() {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -3220,27 +3293,19 @@ public class GameController implements MenuController {
     }
 
 
-//    public Result cheatAddItem(String itemName, int count) {
-//        Item item = Item.getRandomItem(itemName);
-//        if (item == null) {
-//            return new Result(false, "No item found.");
-//        }
-//        if (count == 0) return new Result(false, "Invalid count.");
-//        return MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
-//    }
-public Result cheatAddItem(String itemName, String countString,User user,GameServer gameserver) {
-    System.out.println("1");
-    int count = Integer.parseInt(countString);
-    Item item = Item.getRandomItem(itemName);
-    System.out.println("2");
-    if (item == null) {
-        return new Result(false, "No item found.");
+    public Result cheatAddItem(String itemName, String countString,User user,GameServer gameserver) {
+        System.out.println("1");
+        int count = Integer.parseInt(countString);
+        Item item = Item.getRandomItem(itemName);
+        System.out.println("2");
+        if (item == null) {
+            return new Result(false, "No item found.");
+        }
+        System.out.println("3");
+        if (count == 0) return new Result(false, "Invalid count.");
+        User player = gameserver.getGame().getPlayerByUsername(user.getUsername());
+        return player.getBackpack().addItem(item, count);
     }
-    System.out.println("3");
-    if (count == 0) return new Result(false, "Invalid count.");
-    User player = gameserver.getGame().getPlayerByUsername(user.getUsername());
-    return player.getBackpack().addItem(item, count);
-}
 
     public Result meetNPC(String npcName) {
         NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
@@ -3522,6 +3587,7 @@ public Result cheatAddItem(String itemName, String countString,User user,GameSer
         greenHouse.setGreenHouseFixed(true);
         return new Result(true, "green house build successful");
     }
+
     public Result buildGreenHouse(User player, GameServer gs) {
         Backpack playerBackPack = player.getBackpack();
         if (player.getMoney() < 1000 ||

@@ -28,14 +28,13 @@ public enum FishType {
     private final Season season;
     private final int sellPrice;
     private final RarenessType rareness;
-    private final Texture texture;
+    private  Texture texture;
 
     FishType(String name, Season season, int sellPrice, RarenessType rareness) {
         this.name = name;
         this.season = season;
         this.sellPrice = sellPrice;
         this.rareness = rareness;
-        this.texture = new Texture("Fish/" + this.name() + ".png");
     }
 
     public String getName() { return name; }
@@ -57,5 +56,8 @@ public enum FishType {
     public enum RarenessType {
         COMMON,
         LEGENDARY;
+    }
+    public void initTexture(){
+        this.texture = new Texture("Fish/" + this.name() + ".png");
     }
 }

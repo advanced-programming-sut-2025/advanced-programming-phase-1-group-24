@@ -18,7 +18,10 @@ import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Avatar;
 import io.github.stardew.mini.Model.Result;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class MainMenuView implements Screen,AppMenu {
     private final MainMenuController controller;
@@ -114,8 +117,24 @@ public class MainMenuView implements Screen,AppMenu {
         });
     }
     private void showInfoMainMenu() {
-        Result res = controller.showUserInfoMainMenu();
-        infoLabelMainMenu.setText(res.message());
+        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+        Map<String, Object> body = new HashMap<>(); // No body needed for just fetching info
+
+        MainApp.getInstance().getNetworkClient()
+            .sendPost(
+                null,
+                "MainMenuController",
+                "showUserInfo",
+                body,
+                username
+            ).thenAccept(response -> {
+               // Gdx.app.postRunnable(() -> {
+                    infoLabelMainMenu.setText(response.getMessage());
+               // });
+            });
+
+//        Result res = controller.showUserInfoMainMenu();
+//        infoLabelMainMenu.setText(res.message());
     }
     @Override
     public void render(float delta) {
@@ -137,7 +156,7 @@ public class MainMenuView implements Screen,AppMenu {
     }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
 
     }
 }

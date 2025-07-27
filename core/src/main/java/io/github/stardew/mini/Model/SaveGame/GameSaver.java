@@ -107,6 +107,12 @@ public class GameSaver {
             return mapper.readValue(reader, Game.class);
         }
     }
-
+//    RMap<String, String> gameMap = redissonClient.getMap("savedGames");
+//    String compressed = GameSaver.serializeAndCompressGame(game);
+//gameMap.put(game.getId(), compressed); // Save
+//
+//    String data = gameMap.get(gameId); // Load
+//    byte[] decoded = Base64.getDecoder().decode(data);
+// Deserialize as usual
 
 }

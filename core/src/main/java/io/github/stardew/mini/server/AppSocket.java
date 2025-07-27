@@ -219,6 +219,16 @@ public class AppSocket {
         System.out.println("PlayerConnection not found for: " + username);
         return null;
     }
+    public static boolean isPlayerInAnyGame(String username) {
+        for (GameServer gameServer : activeGames) {
+            for (PlayerConnection player : gameServer.getPlayers()) {
+                if (player.getUsername().equals(username)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 
 }

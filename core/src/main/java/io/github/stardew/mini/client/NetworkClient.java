@@ -13,6 +13,10 @@ import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.MainMenuView;
+import io.github.stardew.mini.server.Controller.MainMenuController;
+import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -134,6 +138,7 @@ public class NetworkClient extends WebSocketClient {
                             System.out.println("////////////////////////////////////////////////////");
                             try {
                                 Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                game.reloadExtraData();
                                 MainApp.getInstance().setCurrentGame(game);
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -144,6 +149,25 @@ public class NetworkClient extends WebSocketClient {
                     }
                     System.out.printf("[CLIENT] Game updated handle end of day");
                 }
+                if ("shop-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Object bodyRaw = message.getBody();
+                        if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                            Object gameJson = bodyMap.get("game");
+                            if (gameJson instanceof String json) {
+                                try {
+                                    Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                    MainApp.getInstance().setCurrentGame(game);
+                                    game.reloadExtraData();
+                                    System.out.println("[CLIENT] Shop state updated.");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                }
+
 
                 if ("start-game".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
@@ -156,6 +180,7 @@ public class NetworkClient extends WebSocketClient {
                                 if (gameJsonObj instanceof  String json) {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        game.reloadExtraData();
                                         MainApp.getInstance().setCurrentGame(game);
                                        // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
@@ -201,6 +226,13 @@ public class NetworkClient extends WebSocketClient {
                         MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
                     });
                 }
+                if ("game-ended".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().setCurrentGame(null);
+                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+                    });
+                }
                 if ("faint-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {
@@ -224,58 +256,58 @@ public class NetworkClient extends WebSocketClient {
                 }
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
-                       try {
-                           Object bodyRaw = message.getBody();
-                           if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                               String username = (String) bodyMap.get("username");
-                               Object tileRaw = bodyMap.get("tile");
-                               Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
-                               int movingDirection = ((Number) bodyMap.get("movingDirection")).intValue();
-                               boolean hasFainted = (Boolean) bodyMap.get("hasFainted");
-                               for(User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()){
-                                   if(otherPlayer.getUsername().equals(username)){
-                                       otherPlayer.setCurrentTile(tile);
-                                       otherPlayer.setMovingDirection(movingDirection);
-                                       otherPlayer.setFainted(hasFainted);
-                                   }
-                               }
-                           }
-                       } catch (Exception e) {
-                           e.printStackTrace();
-                           System.out.println("❌ Failed to parse updated user.");
-                       }
+                        try {
+                            Object bodyRaw = message.getBody();
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                String username = (String) bodyMap.get("username");
+                                Object tileRaw = bodyMap.get("tile");
+                                Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+                                int movingDirection = ((Number) bodyMap.get("movingDirection")).intValue();
+                                boolean hasFainted = (Boolean) bodyMap.get("hasFainted");
+                                for(User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()){
+                                    if(otherPlayer.getUsername().equals(username)){
+                                        otherPlayer.setCurrentTile(tile);
+                                        otherPlayer.setMovingDirection(movingDirection);
+                                        otherPlayer.setFainted(hasFainted);
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            System.out.println("❌ Failed to parse updated user.");
+                        }
                     });
                 }
                 if("plant-growable".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
-                       try{
-                           Object bodyRaw = message.getBody();
-                           if (bodyRaw instanceof Map<?, ?> bodyMap) {
-                               int x = ((Number) bodyMap.get("x")).intValue();
-                               int y = ((Number) bodyMap.get("y")).intValue();
-                               boolean walkable = (Boolean) bodyMap.get("walkable");
-                               boolean plowed = (Boolean) bodyMap.get("plowed");
+                        try{
+                            Object bodyRaw = message.getBody();
+                            if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                int x = ((Number) bodyMap.get("x")).intValue();
+                                int y = ((Number) bodyMap.get("y")).intValue();
+                                boolean walkable = (Boolean) bodyMap.get("walkable");
+                                boolean plowed = (Boolean) bodyMap.get("plowed");
 
 //                               Object backpackRaw = bodyMap.get("inventory");
 //                               Backpack backpack = GameSaver.convertObject(backpackRaw, Backpack.class);
 
-                               Map<Item, Integer> inventory = convertToInventory((Map<String, Integer>) bodyMap.get("inventoryItems"));
+                                Map<Item, Integer> inventory = convertToInventory((Map<String, Integer>) bodyMap.get("inventoryItems"));
 
 
-                               Object growableRaw = bodyMap.get("containedGrowable");
-                               Growable growable = GameSaver.convertObject(growableRaw, Growable.class);
-                               String username = (String) bodyMap.get("username");
-                               if(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(username)){
-                                   MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getInventoryItems().putAll(inventory);
-                               }
-                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setWalkable(walkable);
-                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setIsPlowed(plowed);
-                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setContainedGrowable(growable);
-                           }
-                       } catch (Exception e){
-                           e.printStackTrace();
-                           System.out.println("❌ Failed to parse updated plant.");
-                       }
+                                Object growableRaw = bodyMap.get("containedGrowable");
+                                Growable growable = GameSaver.convertObject(growableRaw, Growable.class);
+                                String username = (String) bodyMap.get("username");
+                                if(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(username)){
+                                    MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getInventoryItems().putAll(inventory);
+                                }
+                                MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setWalkable(walkable);
+                                MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setIsPlowed(plowed);
+                                MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setContainedGrowable(growable);
+                            }
+                        } catch (Exception e){
+                            e.printStackTrace();
+                            System.out.println("❌ Failed to parse updated plant.");
+                        }
                     });
                 }
                 System.err.println("❌ requestId was null");
@@ -286,15 +318,6 @@ public class NetworkClient extends WebSocketClient {
         }
     }
 
-
-    //    @Override
-//    public void onClose(int code, String reason, boolean remote) {
-//        System.out.println("WebSocket closed: " + reason);
-//        // Fail all pending requests
-//        pendingRequests.forEach((id, future) -> future.completeExceptionally(
-//            new RuntimeException("Connection closed before response")));
-//        pendingRequests.clear();
-//    }
     @Override
     public void onClose(int code, String reason, boolean remote) {
         System.out.println("WebSocket closed: " + reason);
