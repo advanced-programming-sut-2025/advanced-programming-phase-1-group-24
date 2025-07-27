@@ -20,7 +20,7 @@ public class GameServer extends Thread {
     private final ServerController controller = new ServerController();
     private final GameController gameController = new GameController();
     private Timer timer;
-
+    private boolean paused = false;
     public GameServer(List<PlayerConnection> players,Game game) {
         this.players = players;
         this.game = game;
@@ -137,6 +137,18 @@ public class GameServer extends Thread {
         }
         return null;
     }
+    public void pauseGame() {
+        this.paused = true;
+        if (timer != null) timer.cancel();
+    }
+
+    public void resumeGame() {
+        if (paused) {
+            paused = false;
+            startGameTimer();
+        }
+    }
+
 
 }
 

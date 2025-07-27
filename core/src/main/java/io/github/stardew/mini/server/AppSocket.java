@@ -7,10 +7,7 @@ import io.github.stardew.mini.server.Controller.ServerController;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
@@ -123,11 +120,24 @@ public class AppSocket {
 
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
+
+                        PlayerConnection existing = getPlayerConnectionByUsername(message.getUsername());
+                        if (existing != null && existing.isAwaitingReconnect()) {
+                            existing.markReconnected();
+                            System.out.println("User reconnected: " + existing.getUsername());
+
+                            GameServer game = getGameOfUser(existing.getUsername());
+                            if (game != null) {
+                                game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
+                            }
+                        }
+
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
                         broadcastOnlinePlayers();
                         System.out.println("User connected: " + message.getUsername());
                     }
+
 
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,17 +212,49 @@ public class AppSocket {
             });
 
             // ✅ WsCloseContext
+//            ws.onClose(ctx -> {
+//                System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
+//                String sessionId = ctx.sessionId(); // this is the correct method
+//                PlayerConnection connection = connectedPlayers.remove(sessionId);
+//                if (connection != null) {
+//                    System.out.println("User disconnected: " + connection.getUsername());
+//                    broadcastOnlinePlayers();
+//                } else {
+//                    System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
+//                }
+//            });
+
             ws.onClose(ctx -> {
                 System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
-                String sessionId = ctx.sessionId(); // this is the correct method
+                String sessionId = ctx.sessionId();
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
+
+                    GameServer game = getGameOfUser(connection.getUsername());
+                    if (game != null) {
+                        connection.markDisconnected(); // مرحله بعدی تو PlayerConnection می‌سازیم
+                        new Timer().schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                if (connection.isAwaitingReconnect() &&
+                                    System.currentTimeMillis() - connection.getDisconnectTime() >= 120_000) {
+                                    System.out.println("User did not reconnect in time: " + connection.getUsername());
+                                    game.stopServer(); // بازی متوقف میشه
+                                    ServerApp.getInstance().addGame(game.getGame()); // ذخیره بازی ناتمام
+                                    removeGame(game);
+                                }
+                            }
+                        }, 120_000);
+                    }
+
                     broadcastOnlinePlayers();
                 } else {
-                    System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
+                    System.out.println("[WS CLOSE] No matching user for sessionId = " + sessionId);
                 }
             });
+
+
 
             // ✅ WsErrorContext
             ws.onError(ctx -> {
@@ -267,6 +309,18 @@ public class AppSocket {
         }
         return false;
     }
+
+    public static GameServer getGameOfUser(String username) {
+        for (GameServer game : activeGames) {
+            for (PlayerConnection player : game.getPlayers()) {
+                if (player.getUsername().equals(username)) {
+                    return game;
+                }
+            }
+        }
+        return null;
+    }
+
 
 
 }
