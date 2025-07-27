@@ -1512,6 +1512,55 @@ public Result releaseAnimal(String name) {
         }
         System.out.println("Growable with name '" + craftName + "' not found.");
     }
+    public Result getCraftInfo(String craftName) {
+        StringBuilder output = new StringBuilder();
+
+        for (CropType crop : CropType.values()) {
+            if (crop.getName().equalsIgnoreCase(craftName)) {
+                output.append("Name: ").append(crop.getName()).append("\n")
+                    .append("Source: ").append(crop.getSource().getName()).append("\n")
+                    .append("Total Harvest Time: ").append(crop.getTotalHarvestTime()).append("\n")
+                    .append("One Time: ").append(crop.oneTime()).append("\n")
+                    .append("Regrowth Time: ").append(crop.getRegrowthTime()).append("\n")
+                    .append("Base Sell Price: ").append(crop.getBaseSellPrice()).append("\n")
+                    .append("Is Edible: ").append(crop.getIsEdible()).append("\n")
+                    .append("Energy: ").append(crop.getEnergy()).append("\n")
+                    .append("Seasons: ").append(crop.getSeasons()).append("\n")
+                    .append("Can Be Giant: ").append(crop.getCanBeGiant()).append("\n")
+                    .append("Stages: ").append(crop.getStages()).append("\n");
+                return new Result(true, output.toString());
+            }
+        }
+
+        for (ForagingCropType forage : ForagingCropType.values()) {
+            if (forage.getName().equalsIgnoreCase(craftName)) {
+                output.append("Name: ").append(forage.getName()).append("\n")
+                    .append("Seasons: ").append(forage.getSeason()).append("\n")
+                    .append("Base Sell Price: ").append(forage.getBaseSellPrice()).append("\n")
+                    .append("Energy: ").append(forage.getEnergy()).append("\n");
+                return new Result(true, output.toString());
+            }
+        }
+
+        for (TreeType tree : TreeType.values()) {
+            if (tree.getName().equalsIgnoreCase(craftName)) {
+                output.append("Name: ").append(tree.getName()).append("\n")
+                    .append("Source: ").append(tree.getSource().getName()).append("\n")
+                    .append("Total Grow Time: ").append(tree.getTotalHarvestTime()).append("\n")
+                    .append("Fruit Type: ").append(tree.getFruitType().getName()).append("\n")
+                    .append("Is Fruit Edible: ").append(tree.getFruitType().getIsFruitEdible()).append("\n")
+                    .append("Is Foraging Tree: ").append(tree.getIsForagingTree()).append("\n")
+                    .append("Fruit Harvest Cycle: ").append(tree.getFruitType().getFullHarvestCycle()).append("\n")
+                    .append("Fruit Base Sell Price: ").append(tree.getFruitType().getFruitBaseSellPrice()).append("\n")
+                    .append("Fruit Energy: ").append(tree.getFruitType().getFruitEnergy()).append("\n")
+                    .append("Seasons: ").append(tree.getNormalSeasons()).append("\n")
+                    .append("Stages: ").append(tree.getSatges()).append("\n");
+                return new Result(true, output.toString());
+            }
+        }
+
+        return new Result(false, "Growable with name '" + craftName + "' not found.");
+    }
 
     public void printTreeInfo(String treeName) {
         for (TreeType tree : TreeType.values()) {

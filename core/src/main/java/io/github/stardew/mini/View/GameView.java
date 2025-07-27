@@ -24,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Container;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Stack;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
@@ -210,6 +211,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private TextButton nextTurnButton;
     private TextButton exitGameButton;
     private TextButton forceTerminateButton;
+    private Label farmingLabel;
+    private Label foragingLabel;
+    private Label miningLabel;
+    private Label fishingLabel;
     private Label energyLabel;
 
     private Dialog socialMenuDialog;
@@ -1122,6 +1127,16 @@ private void updateAnimals(float delta) {
                         showErrorDialog(stage, result.message());
                     }
                 }
+                if(tile != null && (tile.getContainedGrowable() != null || tile.getProductOfGrowable() != null)) {
+                    Result result;
+                    if(tile.getContainedGrowable() != null) result = controller.getCraftInfo(tile.getContainedGrowable().getName());
+                    else result = controller.getCraftInfo(tile.getProductOfGrowable().getName());
+                    if (!result.isSuccessful()) {
+                        showErrorDialog(stage, result.message());
+                    } else {
+                        showScrollableInfoWindow(stage, result.getMessage(), GameAssetManager.skin);
+                    }
+                }
                 if (tile != null) {
                     for (User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()) {
                         if (otherPlayer.getUsername().equals(currentPlayer.getUsername())) continue;
@@ -1142,6 +1157,36 @@ private void updateAnimals(float delta) {
 
         }
         return false;
+    }
+
+    public void showScrollableInfoWindow(Stage stage, String message, Skin skin) {
+        Window window = new Window("Craft Info", skin, "custom-window");
+        window.setSize(400, 300);
+        window.setPosition(
+            (stage.getWidth() - window.getWidth()) / 2,
+            (stage.getHeight() - window.getHeight()) / 2
+        );
+
+        Label infoLabel = new Label(message, skin, "custom-label");
+        infoLabel.setWrap(true);
+
+        ScrollPane scrollPane = new ScrollPane(infoLabel, skin);
+        scrollPane.setFadeScrollBars(false);
+
+        TextButton closeButton = new TextButton("Close", skin, "custom-button");
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                window.remove(); // remove the window from the stage
+            }
+        });
+
+        Table content = new Table();
+        content.add(scrollPane).expand().fill().pad(10).row();
+        content.add(closeButton).pad(10);
+        window.add(content).expand().fill();
+
+        stage.addActor(window);
     }
 
     public void updateHabitatTiles() {
@@ -2327,6 +2372,9 @@ private void createAnimalDialog() {
     }
 
     private void createRelationshipDialog(String targetUsername) {
+        TextField messageField = new TextField("", GameAssetManager.skin, "custom-textField");
+        messageField.setMessageText("Type your message...");
+
         relationshipDialog = new Dialog("Interact with " + targetUsername, GameAssetManager.skin, "custom-window") {
             @Override
             protected void result(Object obj) {
@@ -2369,6 +2417,18 @@ private void createAnimalDialog() {
                             Gdx.input.setInputProcessor(GameView.this);
                         }
                         break;
+                    case "talk":
+                        String message = messageField.getText().trim();
+                        if (message.isEmpty()) {
+                            showErrorDialog(stage, "Message cannot be empty.");
+                            break;
+                        }
+                        result = controller.talk(targetUsername, message);
+                        if (!result.isSuccessful()) {
+                            showErrorDialog(stage, result.message());
+                        }
+                        Gdx.input.setInputProcessor(GameView.this);
+                        break;
                     case "close":
                         relationshipDialog.hide();
                         Gdx.input.setInputProcessor(GameView.this);
@@ -2378,14 +2438,20 @@ private void createAnimalDialog() {
                 }
             }
         };
+        Table content = relationshipDialog.getContentTable();
+        content.add(new Label("Send a message:", GameAssetManager.skin, "custom-label")).padBottom(5).row();
+        content.add(messageField).width(300).padBottom(15).row();
+
         TextButton hugButton = new TextButton("Hug", GameAssetManager.skin, "custom-button");
         TextButton giftButton = new TextButton("Gift Flower", GameAssetManager.skin, "custom-button");
         TextButton proposeButton = new TextButton("Propose", GameAssetManager.skin, "custom-button");
+        TextButton talkButton = new TextButton("Talk", GameAssetManager.skin, "custom-button");
         TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
 
         relationshipDialog.button(hugButton, "hug");
         relationshipDialog.button(giftButton, "flower");
         relationshipDialog.button(proposeButton, "propose");
+        relationshipDialog.button(talkButton,"talk");
         relationshipDialog.button(closeButton, "close");
 
     }
@@ -2924,6 +2990,23 @@ private void createAnimalDialog() {
         forceTerminateButton.setTouchable(Touchable.enabled);
         stage.addActor(forceTerminateButton);
 
+        farmingLabel = new Label("farming", GameAssetManager.skin, "custom-label");
+        farmingLabel.setPosition(Gdx.graphics.getWidth() - 200, 140);
+        stage.addActor(farmingLabel);
+
+        foragingLabel = new Label("foraging", GameAssetManager.skin, "custom-label");
+        foragingLabel.setPosition(Gdx.graphics.getWidth() - 200, 160);
+        stage.addActor(foragingLabel);
+
+        miningLabel = new Label("mining", GameAssetManager.skin, "custom-label");
+        miningLabel.setPosition(Gdx.graphics.getWidth() - 200, 180);
+        stage.addActor(miningLabel);
+
+        fishingLabel = new Label("fishing", GameAssetManager.skin, "custom-label");
+        fishingLabel.setPosition(Gdx.graphics.getWidth() - 200, 200);
+        stage.addActor(fishingLabel);
+
+
         energyLabel = new Label("Energy", GameAssetManager.skin, "custom-label");
         energyLabel.setPosition(Gdx.graphics.getWidth() - 200, 120);
         stage.addActor(energyLabel);
@@ -3143,6 +3226,10 @@ private void createAnimalDialog() {
         determineAvatar();
         showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());
+        farmingLabel.setText("Farming: " + currentPlayer.getSkillsLevel().get(Skill.FARMING));
+        foragingLabel.setText("Foraging: " + currentPlayer.getSkillsLevel().get(Skill.FORAGING));
+        miningLabel.setText("Mining: " + currentPlayer.getSkillsLevel().get(Skill.MINING));
+        fishingLabel.setText("Fishing: " + currentPlayer.getSkillsLevel().get(Skill.FISHING));
         if (currentPlayer.isProposing()) {
             currentPlayer.setProposingTimer(currentPlayer.getProposingTimer() + v);
             if (currentPlayer.getProposingTimer() > 1f) {
