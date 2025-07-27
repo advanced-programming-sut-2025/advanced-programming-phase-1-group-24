@@ -121,7 +121,7 @@ public class StoreMenuController implements MenuController{
         }
 
         // Regular item purchase
-        Result itemResult = buyItem(game.getMap(),player, item, count);
+        Result itemResult = buyItem(game,player, item, count);
         if (!itemResult.isSuccessful()) {
             return new Result(false, "Purchase failed: " + itemResult.message());
         }
@@ -227,8 +227,8 @@ public class StoreMenuController implements MenuController{
         }
     }
 
-    public Result buyItem(MapOfGame map,User player, ShopItem shopItem, int count) {
-       // MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+    public Result buyItem(Game game,User player, ShopItem shopItem, int count) {
+        MapOfGame map = game.getMap();
         Object item = shopItem.getItem();
         Object itemCopy = null;
         Result result;
@@ -297,7 +297,7 @@ public class StoreMenuController implements MenuController{
             player.getBackpack().upgrade(StorageType.DELUX);
             result = new Result(true, "BackPack upgraded to deluxe Successfully!");
         } else if (item == null && shopItem.getShopItemType() == ShopItemType.SHIPPING_BIN) {
-            if (canCreateShippingBin(player)) {
+            if (canCreateShippingBin(game,player)) {
                 result = new Result(true, "Shipping bin created");
             } else {
                 result = new Result(false, "no empty space for shipping bin!");
@@ -347,8 +347,8 @@ public class StoreMenuController implements MenuController{
     }
 
 
-    private boolean canCreateShippingBin(User player) {
-        Game game = MainApp.getInstance().getCurrentGame();
+    private boolean canCreateShippingBin(Game game,User player) {
+//        Game game = MainApp.getInstance().getCurrentGame();
         Farm farm = game.getMap().getFarmByOwner(player);
         Tile[][] map = game.getMap().getMap();
         // Create a random object to generate random numbers
@@ -442,6 +442,9 @@ public Message<?> buyFromCarpenter(GameServer server, User player, Map<String, O
         return Message.NOT_FOUND.setMessage("Shop not found");
 
     Result result = buyFromCarpenter(shop, itemName, xString, yString, player, server); // You’ll need to implement this logic
+    if (!result.isSuccessful())
+        return Message.BAD_REQUEST.setMessage(result.message());
+    broadcastGameStateToAllPlayers(server, server.getGame(), "shop-update");
     return Message.ok(result).setMessage(result.getMessage());
 }
 
@@ -831,11 +834,22 @@ public Message<?> buyFromCarpenter(GameServer server, User player, Map<String, O
         // Return false if no adjacent tile is a shipping bin
         return false;
     }
+    public Message<?> upgradeTool(GameServer server, User player, Map<String, Object> body) {
+        String shopName = (String) body.get("shopName");
+        String itemName = (String) body.get("itemName");
+        Shop shop = server.getGame().getMap().getShopByName(shopName);
+        if (shop == null)
+            return Message.NOT_FOUND.setMessage("Shop not found");
 
+        Result result = upgradeTool(shop, itemName, player, server); // You’ll need to implement this logic
+        if (!result.isSuccessful())
+            return Message.BAD_REQUEST.setMessage(result.message());
+        broadcastGameStateToAllPlayers(server, server.getGame(), "shop-update");
+        return Message.ok(result).setMessage(result.getMessage());
+    }
 
-    public Result upgradeTool(Shop shop, String tool) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+    public Result upgradeTool(Shop shop, String tool,User player,GameServer gameServer) {
+        Game game = gameServer.getGame();
         MapOfGame map = game.getMap();
 
 //        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());

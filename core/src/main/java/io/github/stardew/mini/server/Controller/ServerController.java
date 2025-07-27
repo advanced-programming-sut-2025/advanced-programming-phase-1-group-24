@@ -530,6 +530,9 @@ public class ServerController {
         if ("buyFromCarpenter".equalsIgnoreCase(methodName)) {
             return storeMenuController.buyFromCarpenter(server, player, body);
         }
+        if ("upgradeTool".equalsIgnoreCase(methodName)) {
+            return storeMenuController.upgradeTool(server, player, body);
+        }
         return Message.NOT_FOUND.setMessage("Unknown method in StoreMenuController: " + methodName);
     }
 
