@@ -2,10 +2,14 @@ package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.Growables.Growable;
+import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Things.Backpack;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
@@ -218,6 +222,62 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 }
+                if("tile-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                       try {
+                           Object bodyRaw = message.getBody();
+                           if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                               String username = (String) bodyMap.get("username");
+                               Object tileRaw = bodyMap.get("tile");
+                               Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
+                               int movingDirection = ((Number) bodyMap.get("movingDirection")).intValue();
+                               boolean hasFainted = (Boolean) bodyMap.get("hasFainted");
+                               for(User otherPlayer : MainApp.getInstance().getCurrentGame().getPlayers()){
+                                   if(otherPlayer.getUsername().equals(username)){
+                                       otherPlayer.setCurrentTile(tile);
+                                       otherPlayer.setMovingDirection(movingDirection);
+                                       otherPlayer.setFainted(hasFainted);
+                                   }
+                               }
+                           }
+                       } catch (Exception e) {
+                           e.printStackTrace();
+                           System.out.println("❌ Failed to parse updated user.");
+                       }
+                    });
+                }
+                if("plant-growable".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                       try{
+                           Object bodyRaw = message.getBody();
+                           if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                               int x = ((Number) bodyMap.get("x")).intValue();
+                               int y = ((Number) bodyMap.get("y")).intValue();
+                               boolean walkable = (Boolean) bodyMap.get("walkable");
+                               boolean plowed = (Boolean) bodyMap.get("plowed");
+
+//                               Object backpackRaw = bodyMap.get("inventory");
+//                               Backpack backpack = GameSaver.convertObject(backpackRaw, Backpack.class);
+
+                               Map<Item, Integer> inventory = convertToInventory((Map<String, Integer>) bodyMap.get("inventoryItems"));
+
+
+                               Object growableRaw = bodyMap.get("containedGrowable");
+                               Growable growable = GameSaver.convertObject(growableRaw, Growable.class);
+                               String username = (String) bodyMap.get("username");
+                               if(MainApp.getInstance().getCurrentGame().getCurrentPlayer().getUsername().equals(username)){
+                                   MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().getInventoryItems().putAll(inventory);
+                               }
+                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setWalkable(walkable);
+                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setIsPlowed(plowed);
+                               MainApp.getInstance().getCurrentGame().getMap().getTile(x, y).setContainedGrowable(growable);
+                           }
+                       } catch (Exception e){
+                           e.printStackTrace();
+                           System.out.println("❌ Failed to parse updated plant.");
+                       }
+                    });
+                }
                 System.err.println("❌ requestId was null");
             }
         } catch (Exception e) {
@@ -357,4 +417,29 @@ public class NetworkClient extends WebSocketClient {
         send(json);
         System.out.println("Sent connect for user: " + username);
     }
+
+    public static Map<Item, Integer> convertToInventory(Map<String, ?> rawInventory) {
+        Map<Item, Integer> result = new HashMap<>();
+        for (Map.Entry<String, ?> entry : rawInventory.entrySet()) {
+            String name = entry.getKey();
+            Object value = entry.getValue();
+
+            int amount;
+            if (value instanceof Number) {
+                amount = ((Number) value).intValue(); // works for both Integer and Double
+            } else {
+                continue; // or throw an error/log
+            }
+
+            Item item = Item.getRandomItem(name);
+            if (item != null) {
+                result.put(item, amount);
+            } else {
+                System.err.println("Unknown item: " + name);
+            }
+        }
+        return result;
+    }
+
+
 }

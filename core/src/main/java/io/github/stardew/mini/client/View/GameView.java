@@ -37,6 +37,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
@@ -542,8 +543,28 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             if (equippedItem == null) {
                 showErrorDialog(stage, "Pick a seed first!");
             } else {
-                result = controller.plantGrowable(equippedItem.getName(), direction);
-                if(!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
+                //result = controller.plantGrowable(equippedItem.getName(), direction);
+                //if(!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
+                Map<String, Object> params = new HashMap<>();
+                params.put("seedName", equippedItem.getName());
+                params.put("direction", direction);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "GameController", "plantGrowable", params, currentPlayer.getUsername())
+                    .thenAccept(response -> {
+                        if (response.getStatus() != 200) {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, response.getMessage());
+                        });
+                        }
+                    }).exceptionally(ex -> {
+                        ex.printStackTrace();
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to plant growbale: " + ex.getMessage());
+                        });
+                        return null;
+                    });
             }
         }
         if(keycode == Input.Keys.O){
@@ -5277,9 +5298,46 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
             System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
-            String itemName = matcher.group("itemName");
-            int count = Integer.parseInt(matcher.group("count"));
-            System.out.println(controller.cheatAddItem(itemName, count));
+            //            String itemName = matcher.group("itemName");
+//            int count = Integer.parseInt(matcher.group("count"));
+//            System.out.println(controller.cheatAddItem(itemName, count));
+            String sountString = matcher.group("count").trim();
+            String itemName =matcher.group("itemName").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("itemName",matcher.group("itemName"));
+            params.put("count",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    System.out.println("salamsalasmsalmsalsams");
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println("yasssssssssss");
+                            int count = Integer.parseInt(sountString);
+                            Item item = Item.getRandomItem(itemName);
+                            if (item == null) {
+                                System.out.println("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                                return;
+                            }
+                            currentPlayer.getBackpack().addItem(item,count);
+//                            if (!result.isSuccessful()) {
+//                                showErrorDialog(stage, result.message());
+//                            } else {
+//                                showErrorDialog(stage, result.message()); // or update the UI
+//                            }
+                            System.out.println(result.message());
+                        });
+                    } else {
+                        System.out.println("nooooo wayyyyy???");
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println(result.message());
+                            // showErrorDialog(stage, "Failed to use cheat: " + response.getMessage());
+                        });
+                    }
+                });
         } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
             System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {

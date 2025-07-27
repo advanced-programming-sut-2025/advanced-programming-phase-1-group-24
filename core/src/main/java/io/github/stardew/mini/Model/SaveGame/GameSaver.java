@@ -99,5 +99,14 @@ public class GameSaver {
     public static <T> T convertObject(Object rawObj, Class<T> clazz) {
         return GameSaver.createCustomObjectMapper().convertValue(rawObj, clazz);
     }
+    public static Game loadSingleGameFromCompressedBytes(byte[] compressedBytes) throws IOException {
+        ObjectMapper mapper = createCustomObjectMapper();
+        try (ByteArrayInputStream byteStream = new ByteArrayInputStream(compressedBytes);
+             GZIPInputStream gzipStream = new GZIPInputStream(byteStream);
+             InputStreamReader reader = new InputStreamReader(gzipStream, StandardCharsets.UTF_8)) {
+            return mapper.readValue(reader, Game.class);
+        }
+    }
+
 
 }

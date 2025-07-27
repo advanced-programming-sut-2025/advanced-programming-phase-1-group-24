@@ -380,8 +380,7 @@ public class ServerController {
             case "plantGrowable": {
                 String seedName = (String) body.get("seedName");
                 String direction = (String) body.get("direction");
-                result = gameController.plantGrowable(seedName, direction, player, server);
-                return Message.ok(result);
+                return gameController.plantGrowable(seedName, direction, player, server);
             }
 
             case "fertalizeGrowable": {
@@ -394,6 +393,16 @@ public class ServerController {
             case "buildGreenHouse": {
                 result = gameController.buildGreenHouse(player, server);
                 return Message.ok(result);
+            }
+
+
+            case "cheatAddItem": {
+                System.out.println("going to cheat add item");
+                String count = (String) body.get("count");
+                String itemName = (String) body.get("itemName");
+                result = gameController.cheatAddItem(itemName,count, player, server);
+                System.out.println("cccccccccccCccc");
+                return Message.ok(result).setMessage(result.getMessage());
             }
 
             default:
