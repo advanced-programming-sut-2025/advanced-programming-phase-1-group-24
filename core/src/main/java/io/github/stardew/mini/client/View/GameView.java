@@ -1306,8 +1306,27 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                         } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
                             showBuyAnimalDialog(item);
                         } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
-                            Result result = storeController.upgradeTool(selectedShop,item.getName());
-                            showErrorDialog(stage,result.message());
+                            String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                            Map<String, Object> body = new HashMap<>();
+                            body.put("shopName", selectedShop.getShopName());
+                            body.put("itemName", item.getName());
+
+                            MainApp.getInstance().getNetworkClient()
+                                .sendPost(
+                                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                    "StoreMenuController",
+                                    "upgradeTool",
+                                    body,
+                                    username
+                                ).thenAccept(response -> {
+                                    Gdx.app.postRunnable(() -> {
+                                        showErrorDialog(stage, response.getMessage());
+                                    });
+                                });
+                            //////////////////////////////////////////////////////////////////////////////////////////
+//                            Result result = storeController.upgradeTool(selectedShop,item.getName());
+//                            showErrorDialog(stage,result.message());
                         } else {
                             purchaseQuantity = 1;
                             showPurchaseDialog();
