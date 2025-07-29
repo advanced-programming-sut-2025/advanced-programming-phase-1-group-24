@@ -150,5 +150,21 @@ public class GameServer extends Thread {
     }
 
 
+    public void notifyPlayerDisconnected(PlayerConnection disconnectedPlayer) {
+        for (PlayerConnection player : players) {
+            if (!player.equals(disconnectedPlayer)) {
+                Map<String, String> body = new HashMap<>();
+                body.put("username", disconnectedPlayer.getUsername());
+
+                Message<Map<String, String>> msg = Message.ok(body);
+                msg.setType("player-disconnected");
+
+                String json = new Gson().toJson(msg);
+                player.getWsContext().send(json);
+            }
+        }
+    }
+
+
 }
 

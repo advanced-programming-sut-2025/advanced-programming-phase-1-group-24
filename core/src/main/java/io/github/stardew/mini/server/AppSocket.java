@@ -234,12 +234,14 @@ public class AppSocket {
                     GameServer game = getGameOfUser(connection.getUsername());
                     if (game != null) {
                         connection.markDisconnected(); // مرحله بعدی تو PlayerConnection می‌سازیم
+                        game.notifyPlayerDisconnected(connection);
                         new Timer().schedule(new TimerTask() {
                             @Override
                             public void run() {
                                 if (connection.isAwaitingReconnect() &&
                                     System.currentTimeMillis() - connection.getDisconnectTime() >= 120_000) {
                                     System.out.println("User did not reconnect in time: " + connection.getUsername());
+
                                     game.stopServer(); // بازی متوقف میشه
                                     ServerApp.getInstance().addGame(game.getGame()); // ذخیره بازی ناتمام
                                     removeGame(game);
