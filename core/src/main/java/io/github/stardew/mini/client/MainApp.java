@@ -394,4 +394,14 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGameView(GameView currentGameView) {
         this.currentGameView = currentGameView;
     }
+
+    public void showPlayerDisconnectedMessage(String username) {
+        Gdx.app.postRunnable(() -> {
+            if (getScreen() instanceof GameView gameView) {
+                gameView.showDisconnectedDialog(username);
+            }
+        });
+    }
+
+
 }

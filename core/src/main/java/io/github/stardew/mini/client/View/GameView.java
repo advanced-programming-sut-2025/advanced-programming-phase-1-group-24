@@ -5442,4 +5442,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             (stage.getWidth() - equippedItemSlotTable.getWidth()) / 2,
             10);
     }
+
+    public void showDisconnectedDialog(String username) {
+        Dialog dialog = new Dialog("Disconnected", GameAssetManager.skin, "dialog") {
+            @Override
+            protected void result(Object object) {
+                // در صورت نیاز کاری انجام بده
+            }
+        };
+        dialog.text(username + " has been disconnected. Waiting for reconnection...");
+        dialog.button("OK");
+        dialog.show(stage);  // فرض بر اینکه `stage` داخل GameView هست
+    }
+
+
 }

@@ -118,6 +118,16 @@ public class NetworkClient extends WebSocketClient {
                     return;
                 }
 
+                if ("player-disconnected".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String username = (String) data.get("username");
+
+                    Gdx.app.postRunnable(() -> {
+                        // نمایش دیالوگ یا پیام برای DC
+                        MainApp.getInstance().showPlayerDisconnectedMessage(username);
+                    });
+                    return;
+                }
 
 
                 if ("time-update".equalsIgnoreCase(message.getType())) {
