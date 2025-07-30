@@ -387,8 +387,7 @@ public class ServerController {
             case "plantGrowable": {
                 String seedName = (String) body.get("seedName");
                 String direction = (String) body.get("direction");
-                result = gameController.plantGrowable(seedName, direction, player, server);
-                return Message.ok(result);
+                return gameController.plantGrowable(seedName, direction, player, server);
             }
 
             case "fertalizeGrowable": {

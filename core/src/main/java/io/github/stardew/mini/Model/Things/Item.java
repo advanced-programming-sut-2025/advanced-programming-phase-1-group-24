@@ -102,11 +102,11 @@ public abstract class Item {
     }
 
     public static Item getRandomItem(String name) {
-        for (FishType fishType : FishType.values()) {
-            if (fishType.getName().equalsIgnoreCase(name)) {
-                return new Fish(ProductQuality.Normal, fishType);
-            }
-        }
+//        for (FishType fishType : FishType.values()) {
+//            if (fishType.getName().equalsIgnoreCase(name)) {
+//                return new Fish(ProductQuality.Normal, fishType);
+//            }
+//        }
         for (FoodType foodType : FoodType.values()) {
             if (foodType.getName().equalsIgnoreCase(name)) {
                 return new Food(foodType);
