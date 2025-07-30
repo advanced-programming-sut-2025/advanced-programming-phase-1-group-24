@@ -324,6 +324,17 @@ public class ServerController {
             return Message.BAD_REQUEST.setMessage("Missing controllerName, methodName, or username");
         }
 
+        if (controllerName.equals("SignupMenuController")) {
+            SignupMenuController signup = new SignupMenuController();
+            if ("signup".equals(methodName)) {
+                return signup.signup(body);
+            } else if ("setSecurityQuestion".equals(methodName)) {
+                return signup.setSecurityQuestion(body);
+            } else {
+                return Message.NOT_FOUND.setMessage("Unknown method: " + methodName);
+            }
+        }
+
         User player = ServerApp.getInstance().getUserByUsername(username);
         if (player == null) {
             return Message.NOT_FOUND.setMessage("User not found: " + username);
@@ -354,6 +365,16 @@ public class ServerController {
                 return  routeToLobbyController(methodName, body, server, player);
             case "PreGameMenuController":
                 return  routeToPreGameMenuController(methodName, body, server, player);
+//            case "SignupMenuController":
+//                SignupMenuController signup = new SignupMenuController();
+//                if ("signup".equals(methodName)) {
+//                    return signup.signup(body);
+//                } else if ("setSecurityQuestion".equals(methodName)) {
+//                    return signup.setSecurityQuestion(body);
+//                } else {
+//                    return Message.NOT_FOUND.setMessage("Unknown method: " + methodName);
+//                }
+
 
 
             default:

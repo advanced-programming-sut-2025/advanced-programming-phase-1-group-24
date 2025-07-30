@@ -4,6 +4,7 @@ package io.github.stardew.mini.server;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Controller.AuthController;
 import io.github.stardew.mini.server.Controller.ServerController;
+import io.github.stardew.mini.server.Controller.SignupMenuController;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
 
@@ -93,6 +94,49 @@ public class AppSocket {
 
                 try {
                     Message<?> message = gson.fromJson(rawMessage, Message.class);
+
+//                    if ("AuthController".equals(message.getControllerName())
+//                        && "signup".equals(message.getMethodName())) {
+//
+//                        @SuppressWarnings("unchecked")
+//                        Map<String,Object> body = (Map<String,Object>) message.getBody();
+//                        Message<String> resp = new AuthController().signup(body);
+//                        resp.setRequestId(message.getRequestId());
+//                        ctx.send(gson.toJson(resp));
+//                        return;
+//                    }
+                    String ctrl = message.getControllerName();
+                    String mtd  = message.getMethodName();
+                    boolean isSignupPath =
+                        ("AuthController".equals(ctrl) && "signup".equals(mtd))
+                            || ("SignupMenuController".equals(ctrl)
+                            && ("signup".equals(mtd) || "setSecurityQuestion".equals(mtd)));
+
+                    if (isSignupPath) {
+                        @SuppressWarnings("unchecked")
+                        Map<String,Object> body = (Map<String,Object>) message.getBody();
+                        Message<?> resp;
+                        String userInBody = (String) body.get("username");
+
+                        if ("AuthController".equals(ctrl)) {
+                            resp = new AuthController().signup(body);
+                        } else {
+                            SignupMenuController signupCtrl = new SignupMenuController();
+                            if ("signup".equals(mtd)) {
+                                resp = signupCtrl.signup(body);
+                            } else {
+                                resp = signupCtrl.setSecurityQuestion(body);
+                            }
+                        }
+
+                        // این ۲ خط اضافه میشن:
+                        resp.setUsername(userInBody);
+                        resp.setRequestId(message.getRequestId());
+
+                        ctx.send(gson.toJson(resp));
+                        return;
+                    }
+
 
                     // ─── 1) AUTHENTICATION ENDPOINT ────────────────────────────────
                     if ("AuthController".equals(message.getControllerName())

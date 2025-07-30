@@ -73,10 +73,10 @@ public class MainApp extends com.badlogic.gdx.Game {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
-        users = UserDatabase.loadUsers();
-        if (users == null) {
-            users = new ArrayList<>();
-        }
+//        users = UserDatabase.loadUsers();
+//        if (users == null) {
+//            users = new ArrayList<>();
+//        }
         connectToServer();
         //loggedInUser = new User("nikki", "1234", "nik", "aa", true);
         setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
