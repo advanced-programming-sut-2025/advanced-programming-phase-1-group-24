@@ -37,9 +37,10 @@ public class ServerApp {
         return null;
     }
     private void loadAllUsers() {
-        ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+        List<User> loadedUsers = UserDatabase.loadUsers();
+        if (loadedUsers == null) return;
         for (User user : loadedUsers) {
-            allUsers.put(user.getUsername(), user);  // assuming getUsername() exists
+            allUsers.put(user.getUsername(), user);
         }
     }
 

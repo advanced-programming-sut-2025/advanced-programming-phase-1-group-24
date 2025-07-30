@@ -10,12 +10,15 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Controller.LoginMenuController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Result;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class SignupMenuView implements Screen,AppMenu {
@@ -138,15 +141,34 @@ public class SignupMenuView implements Screen,AppMenu {
 
                 Result result = controller.register(username, password, confirm, nickname, email, gender);
                 errorLabel.setText(result.message());
-                if (result.isSuccessful()) {
+                if (!result.isSuccessful()) return;
+                Map<String,Object> params = new HashMap<>();
+                params.put("username", username);
+                params.put("password", password);
+                params.put("email",    email);
+                params.put("nickname", nickname);
+                params.put("gender",   gender);
 
-                    Gdx.app.postRunnable(() ->
-                        MainApp.getInstance().setScreen(
-                            new SecurityQuestionView(skin)
-                        )
-                    );
-                    //MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), skin));
-                }
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(
+                        null,
+                        "AuthController",
+                        "signup",
+                        params,
+                        username
+                    )
+                    .thenAccept(msg -> {
+                        if (msg.getStatus() == 200) {
+                            Gdx.app.postRunnable(() ->
+                                MainApp.getInstance()
+                                    .setScreen(new SecurityQuestionView(username,skin))
+                            );
+                        } else {
+                            Gdx.app.postRunnable(() ->
+                                errorLabel.setText(msg.getMessage())
+                            );
+                        }
+                    });
             }
         });
 
@@ -214,9 +236,10 @@ public class SignupMenuView implements Screen,AppMenu {
         private TextField answerField, confirmField;
         private TextButton submitButton;
         private Label errorLabel;
-
-        public SecurityQuestionView(Skin skin) {
+        private final String username;
+        public SecurityQuestionView(String username,Skin skin) {
             this.skin = skin;
+            this.username = username;
         }
 
         @Override public void show() {
@@ -253,15 +276,47 @@ public class SignupMenuView implements Screen,AppMenu {
                     String question = questionSelect.getSelected();
                     String ans = answerField.getText().trim();
                     String conf = confirmField.getText().trim();
-                    Result res = SignupMenuController.pickQuestion(ans, conf, question);
-                    errorLabel.setText(res.message());
-                    if (res.isSuccessful()) {
-                        MainApp.getInstance().setScreen(
-                            new LoginMenuView(new LoginMenuController(), skin)
-                        );
+
+                    if (!ans.equals(conf)) {
+                        errorLabel.setText("Answer and confirmation don't match");
+                        return;
                     }
+
+                    Map<String,Object> params = new HashMap<>();
+                    params.put("username", username);
+                    params.put("question", question);
+                    params.put("answer",   ans);
+                    params.put("confirm",  conf);
+
+                    MainApp.getInstance().getNetworkClient()
+                        .sendPost(
+                            null,
+                            "SignupMenuController",
+                            "setSecurityQuestion",
+                            params,
+                            username
+                        )
+                        .thenAccept(msg -> {
+                            System.out.println(">>> setSecurityQuestion response: status="
+                                + msg.getStatus() + ", message=\""
+                                + msg.getMessage() + "\"");
+
+                            if (msg.getStatus() == 200) {
+                                System.out.println("ok?");
+                                Gdx.app.postRunnable(() ->
+                                    MainApp.getInstance().setScreen(
+                                        new LoginMenuView(new LoginMenuController(), skin)
+                                    )
+                                );
+                            } else {
+                                Gdx.app.postRunnable(() ->
+                                    errorLabel.setText(msg.getMessage())
+                                );
+                            }
+                        });
                 }
             });
+
         }
 
         @Override public void render(float delta) { Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); stage.act(delta); stage.draw(); }

@@ -9,6 +9,7 @@ import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.LoginMenuView;
+import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.server.security.AuthUtil;
 
 import java.io.File;
@@ -96,8 +97,7 @@ public class LoginMenuController implements MenuController {
 
 
     public Result login(String username, String password, boolean stayLoggedIn) {
-        MainApp app = MainApp.getInstance();
-        List<User> users = app.getUsers();
+        ServerApp app = ServerApp.getInstance();
         User matchedUser = app.getUserByUsername(username);
 
         if (matchedUser == null) {
@@ -110,8 +110,8 @@ public class LoginMenuController implements MenuController {
         }
 
         // Login successful
-        app.setLoggedInUser(matchedUser);
-        app.setCurrentMenu(Menu.MainMenu);
+        MainApp.getInstance().setLoggedInUser(matchedUser);
+        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
         if (stayLoggedIn) {
             //app.setStayLoggedIn(true);
             saveLoggedInUserToFile(matchedUser); // ✅ save user
@@ -180,8 +180,8 @@ public class LoginMenuController implements MenuController {
     }
 
     public Result forgetPassword(String username, String answer, String newPassword) {
-        MainApp app = MainApp.getInstance();
-        User user = app.getUserByUsername(username);
+        ServerApp server = ServerApp.getInstance();
+        User user = server.getUserByUsername(username);
 
         if (user == null)
             return new Result(false, "no user with this username exists!");
@@ -195,7 +195,8 @@ public class LoginMenuController implements MenuController {
 
         String hashedPassword = hashSHA256(newPassword);
         user.setPassword(hashedPassword);
-        UserDatabase.saveUsers(app.getUsers());
+        server.saveUsers();
+        //UserDatabase.saveUsers(server.getUsers());
 
         return new Result(true, "password changed successfully! you can now log in.");
     }
