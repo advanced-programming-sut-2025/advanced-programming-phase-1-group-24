@@ -37,7 +37,7 @@ public class StoreMenuController implements MenuController{
         if (item == null)
             return Message.NOT_FOUND.setMessage("Item not found in shop");
 
-        Result result = purchase(server.getGame(),shop, item, count);
+        Result result = purchase(server.getGame(),shop, item, count, player);
         if (!result.isSuccessful())
             return Message.BAD_REQUEST.setMessage(result.message());
 
@@ -68,9 +68,9 @@ public class StoreMenuController implements MenuController{
         return Message.ok(result.message()).setMessage(result.message());
     }
 
-    public Result purchase(Game game,Shop shop, ShopItem item, int count) {
+    public Result purchase(Game game,Shop shop, ShopItem item, int count, User player) {
        // Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+        //User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         if (count <= 0) {
             return new Result(false, "Invalid count! Count must be greater than 0.");
@@ -496,7 +496,7 @@ public Message<?> buyFromCarpenter(GameServer server, User player, Map<String, O
         int height = habitat.getHeight();
 
         // Check if all the intended tiles are within farm and empty
-        if (!isAreaPlaceable(game,xCoord, yCoord, width, height)) {
+        if (!isAreaPlaceable(game,xCoord, yCoord, width, height, player)) {
             return new Result(false, "Target area is not valid or already occupied.");
         }
         item.sell(1);
@@ -552,8 +552,8 @@ public Message<?> buyFromCarpenter(GameServer server, User player, Map<String, O
         return new Result(false, "Invalid location for creating shipping bin");
     }
 
-    public boolean isAreaPlaceable(Game game,int x, int y, int width, int height) {
-        User player = game.getCurrentPlayer();
+    public boolean isAreaPlaceable(Game game,int x, int y, int width, int height, User player) {
+        //User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
 

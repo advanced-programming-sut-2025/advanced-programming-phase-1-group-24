@@ -20,6 +20,7 @@ public class GameServer extends Thread {
     private final ServerController controller = new ServerController();
     private final GameController gameController = new GameController();
     private Timer timer;
+    private boolean isWaitingForPlayersToGoHome = false;
 
     public GameServer(List<PlayerConnection> players,Game game) {
         this.players = players;
@@ -77,7 +78,21 @@ public class GameServer extends Thread {
             public void run() {
                 if (game == null ) return;
 
-                game.advanceTimeByOneHour();
+//                if (isWaitingForPlayersToGoHome) {
+//                    System.out.println("Waiting for players to return home...");
+//                    return;
+//                }
+
+                if(!isWaitingForPlayersToGoHome) game.advanceTimeByOneHour();
+
+                if (game.getTimeAndDate().getHour() == 22) {
+                    if (!isWaitingForPlayersToGoHome) {
+                        System.out.println("Players not all home at 11 PM, pausing time.");
+                        isWaitingForPlayersToGoHome = true;
+                        return;
+                    }
+                }
+
                 gameController.handleEndOfDay(GameServer.this);
 
                 for (PlayerConnection player : players) {
@@ -138,5 +153,8 @@ public class GameServer extends Thread {
         return null;
     }
 
+    public void setWaitingForPlayersToGoHome(boolean waitingForPlayersToGoHome) {
+        isWaitingForPlayersToGoHome = waitingForPlayersToGoHome;
+    }
 }
 

@@ -93,6 +93,9 @@ public class AppSocket {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
                         connectedPlayers.put(ctx.sessionId(), connection);
+
+
+
                         System.out.println("User connected: " + message.getUsername());
                     }
 

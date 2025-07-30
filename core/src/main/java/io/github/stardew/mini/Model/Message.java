@@ -63,6 +63,7 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
+
     // --- Getters and setters ---
 
     public int getStatus() { return status; }
