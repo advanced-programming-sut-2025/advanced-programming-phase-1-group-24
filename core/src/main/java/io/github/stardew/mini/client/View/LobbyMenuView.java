@@ -21,6 +21,7 @@ import io.github.stardew.mini.Model.Game;
 import javax.swing.*;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class LobbyMenuView implements Screen, AppMenu {
 
@@ -371,7 +372,7 @@ public class LobbyMenuView implements Screen, AppMenu {
     }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
 
     }
 }

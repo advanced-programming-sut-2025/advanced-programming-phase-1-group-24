@@ -14,15 +14,63 @@ import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.Tools.*;
+import io.github.stardew.mini.server.GameServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
-public class StoreMenuController {
-    public Result purchase(Shop shop, ShopItem item, int count) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+public class StoreMenuController implements MenuController{
+    public Message<?> purchase(GameServer server, User player, Map<String, Object> body) {
+        Game game = server.getGame();
+
+        String shopName = (String) body.get("shopName");
+        String itemName = (String) body.get("itemName");
+        int count = ((Double) body.get("count")).intValue();
+
+        Shop shop = game.getMap().getShopByName(shopName);
+        if (shop == null)
+            return Message.NOT_FOUND.setMessage("Shop not found");
+
+        ShopItem item = shop.getItemByName(itemName);
+        if (item == null)
+            return Message.NOT_FOUND.setMessage("Item not found in shop");
+
+        Result result = purchase(server.getGame(),shop, item, count, player);
+        if (!result.isSuccessful())
+            return Message.BAD_REQUEST.setMessage(result.message());
+
+        // ✅ Broadcast updated game state
+        broadcastGameStateToAllPlayers(server, game, "shop-update");
+
+        return Message.ok(result.message()).setMessage(result.message());
+    }
+    public Message<?> buyAnimal(GameServer server, User player, Map<String, Object> body) {
+        Game game = server.getGame();
+
+        String shopName = (String) body.get("shopName");
+        String itemName = (String) body.get("itemName");
+        String animalName = (String) body.get("animalName");
+
+        Shop shop = game.getMap().getShopByName(shopName);
+        if (shop == null)
+            return Message.NOT_FOUND.setMessage("Shop not found");
+
+
+        Result result = buyAnimal(game,player,shop,itemName,animalName);
+        if (!result.isSuccessful())
+            return Message.BAD_REQUEST.setMessage(result.message());
+
+        // ✅ Broadcast updated game state
+        broadcastGameStateToAllPlayers(server, game, "shop-update");
+
+        return Message.ok(result.message()).setMessage(result.message());
+    }
+
+    public Result purchase(Game game,Shop shop, ShopItem item, int count, User player) {
+       // Game game = MainApp.getInstance().getCurrentGame();
+        //User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         if (count <= 0) {
             return new Result(false, "Invalid count! Count must be greater than 0.");
@@ -38,7 +86,7 @@ public class StoreMenuController {
 
 //        for (ShopItem item : shop.getProducts()) {
 //            if (item.getName().equalsIgnoreCase(productName)) {
-        int price = getCurrentSeasonPrice(item);
+        int price = getCurrentSeasonPrice(game,item);
         if (price == 0) {
             return new Result(false, "This item is not available in the current season.");
         }
@@ -73,7 +121,7 @@ public class StoreMenuController {
         }
 
         // Regular item purchase
-        Result itemResult = buyItem(player, item, count);
+        Result itemResult = buyItem(game,player, item, count);
         if (!itemResult.isSuccessful()) {
             return new Result(false, "Purchase failed: " + itemResult.message());
         }
@@ -163,8 +211,8 @@ public class StoreMenuController {
     }
 
 
-    private int getCurrentSeasonPrice(ShopItem item) {
-        Season currentSeason = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
+    private int getCurrentSeasonPrice(Game game,ShopItem item) {
+        Season currentSeason = game.getTimeAndDate().getSeason();
         switch (currentSeason) {
             case SPRING:
                 return item.getSpringPrice();
@@ -179,8 +227,8 @@ public class StoreMenuController {
         }
     }
 
-    public Result buyItem(User player, ShopItem shopItem, int count) {
-        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+    public Result buyItem(Game game,User player, ShopItem shopItem, int count) {
+        MapOfGame map = game.getMap();
         Object item = shopItem.getItem();
         Object itemCopy = null;
         Result result;
@@ -199,6 +247,7 @@ public class StoreMenuController {
             result = new Result(true, "Successfully purchased: " + habitatCopy);
         } else if (item instanceof Food) {
             Food foodCopy = ((Food) item).copy();
+            System.out.println("your purchase was: "+foodCopy.getName()+foodCopy.getType());
             result = player.getBackpack().addItem(foodCopy, count);
         } else if (item instanceof Machine) {
             Machine machineCopy = ((Machine) item).copy();
@@ -249,7 +298,7 @@ public class StoreMenuController {
             player.getBackpack().upgrade(StorageType.DELUX);
             result = new Result(true, "BackPack upgraded to deluxe Successfully!");
         } else if (item == null && shopItem.getShopItemType() == ShopItemType.SHIPPING_BIN) {
-            if (canCreateShippingBin(player)) {
+            if (canCreateShippingBin(game,player)) {
                 result = new Result(true, "Shipping bin created");
             } else {
                 result = new Result(false, "no empty space for shipping bin!");
@@ -299,8 +348,8 @@ public class StoreMenuController {
     }
 
 
-    private boolean canCreateShippingBin(User player) {
-        Game game = MainApp.getInstance().getCurrentGame();
+    private boolean canCreateShippingBin(Game game,User player) {
+//        Game game = MainApp.getInstance().getCurrentGame();
         Farm farm = game.getMap().getFarmByOwner(player);
         Tile[][] map = game.getMap().getMap();
         // Create a random object to generate random numbers
@@ -383,10 +432,25 @@ public class StoreMenuController {
 //
 //        return new Result(true, "Successfully built: " + name + " at (" + targetX + ", " + targetY + ")");
 //    }
+public Message<?> buyFromCarpenter(GameServer server, User player, Map<String, Object> body) {
+    String shopName = (String) body.get("shopName");
+    String itemName = (String) body.get("itemName");
+    String xString = (String) body.get("x");
+    String yString = (String) body.get("y");
 
-    public Result buyFromCarpenter(Shop shop, String name, String x, String y) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+    Shop shop = server.getGame().getMap().getShopByName(shopName);
+    if (shop == null)
+        return Message.NOT_FOUND.setMessage("Shop not found");
+
+    Result result = buyFromCarpenter(shop, itemName, xString, yString, player, server); // You’ll need to implement this logic
+    if (!result.isSuccessful())
+        return Message.BAD_REQUEST.setMessage(result.message());
+    broadcastGameStateToAllPlayers(server, server.getGame(), "shop-update");
+    return Message.ok(result).setMessage(result.getMessage());
+}
+
+    public Result buyFromCarpenter(Shop shop, String name, String x, String y,User player,GameServer server) {
+        Game game = server.getGame();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
 
@@ -424,7 +488,7 @@ public class StoreMenuController {
             return resourceCheck;
         }
         if (item.getShopItemType() == ShopItemType.SHIPPING_BIN) {
-            return tryCreatingShippingBin(xCoord, yCoord, player);
+            return tryCreatingShippingBin(game,xCoord, yCoord, player);
         }
         // Validate placement area
         Habitat habitat = (Habitat) item.getItem();
@@ -432,7 +496,7 @@ public class StoreMenuController {
         int height = habitat.getHeight();
 
         // Check if all the intended tiles are within farm and empty
-        if (!isAreaPlaceable(xCoord, yCoord, width, height)) {
+        if (!isAreaPlaceable(game,xCoord, yCoord, width, height, player)) {
             return new Result(false, "Target area is not valid or already occupied.");
         }
         item.sell(1);
@@ -472,8 +536,7 @@ public class StoreMenuController {
         return new Result(true, "Successfully built " + name + " at (" + xCoord + ", " + yCoord + ")");
     }
 
-    private Result tryCreatingShippingBin(int xCoord, int yCoord, User player) {
-        Game game = MainApp.getInstance().getCurrentGame();
+    private Result tryCreatingShippingBin(Game game,int xCoord, int yCoord, User player) {
         Farm farm = game.getMap().getFarmByOwner(player);
         Tile[][] map = game.getMap().getMap();
         Tile tile = map[yCoord][xCoord];
@@ -489,9 +552,8 @@ public class StoreMenuController {
         return new Result(false, "Invalid location for creating shipping bin");
     }
 
-    public boolean isAreaPlaceable(int x, int y, int width, int height) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+    public boolean isAreaPlaceable(Game game,int x, int y, int width, int height, User player) {
+        //User player = game.getCurrentPlayer();
         MapOfGame map = game.getMap();
         Farm farm = map.getFarmByOwner(player);
 
@@ -503,7 +565,7 @@ public class StoreMenuController {
                     return false;
                 }
                 // Check occupation
-                if (isOccupied(i, j)) {
+                if (isOccupied(game,i, j)) {
                     return false;
                 }
                 Tile tile = map.getTile(x, y);
@@ -516,8 +578,8 @@ public class StoreMenuController {
     }
 
 
-    public boolean isOccupied(int x, int y) {
-        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+    public boolean isOccupied(Game game,int x, int y) {
+        MapOfGame map = game.getMap();
         Tile tile = map.getTile(x, y);
         return tile != null && (
             tile.getContainedGrowable() != null ||
@@ -527,9 +589,7 @@ public class StoreMenuController {
     }
 
 
-    public Result buyAnimal(Shop shop, String animal, String name) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+    public Result buyAnimal(Game game,User player ,Shop shop, String animal, String name) {
         MapOfGame map = game.getMap();
         Tile playerTile = player.getCurrentTile();
 //        Shop shop = map.getShopAtPosition(playerTile.getX(), playerTile.getY());
@@ -587,7 +647,7 @@ public class StoreMenuController {
         }
 
         // 5. Deduct price
-        int price = getCurrentSeasonPrice(selectedItem);
+        int price = getCurrentSeasonPrice(game,selectedItem);
         if (player.getMoney() < price) {
             return new Result(false, "You don't have enough coins. Required: " + price);
         }
@@ -661,9 +721,9 @@ public class StoreMenuController {
         for (ShopItem product : shop.getProducts()) { // assumed method
             result.append(String.format("- %s | Price: %d | %s\n",
                 product.getName(),
-                getCurrentSeasonPrice(product),
+                getCurrentSeasonPrice(game,product),
                 product.getDailyLimit() - product.getSoldToday() > 0 ? "Available" : "Out of stock"));
-            if (getCurrentSeasonPrice(product) == 0) {
+            if (getCurrentSeasonPrice(game,product) == 0) {
                 result.append("- (Not Available in this Season)");
             }
         }
@@ -686,10 +746,10 @@ public class StoreMenuController {
         StringBuilder result = new StringBuilder("Available Products in Store " + shop.getShopName() + ":\n");
 
         for (ShopItem product : shop.getProducts()) {
-            if (product.isAvailable(1) && getCurrentSeasonPrice(product) > 0) {
+            if (product.isAvailable(1) && getCurrentSeasonPrice(game,product) > 0) {
                 result.append(String.format("- %s | Price: %d | In stock: %d\n",
                     product.getName(),
-                    getCurrentSeasonPrice(product),
+                    getCurrentSeasonPrice(game,product),
                     product.getDailyLimit() - product.getSoldToday()));
             }
         }
@@ -699,7 +759,7 @@ public class StoreMenuController {
 
 
     public Result placeInShippingBin(String productString, int count) {
-        Game game = MainApp.getInstance().getCurrentGame();
+        Game game = MainApp.getInstance().getCurrentGame();;
         User player = game.getCurrentPlayer();
         Farm farm = game.getMap().getFarmByOwner(player);
 
@@ -775,11 +835,22 @@ public class StoreMenuController {
         // Return false if no adjacent tile is a shipping bin
         return false;
     }
+    public Message<?> upgradeTool(GameServer server, User player, Map<String, Object> body) {
+        String shopName = (String) body.get("shopName");
+        String itemName = (String) body.get("itemName");
+        Shop shop = server.getGame().getMap().getShopByName(shopName);
+        if (shop == null)
+            return Message.NOT_FOUND.setMessage("Shop not found");
 
+        Result result = upgradeTool(shop, itemName, player, server); // You’ll need to implement this logic
+        if (!result.isSuccessful())
+            return Message.BAD_REQUEST.setMessage(result.message());
+        broadcastGameStateToAllPlayers(server, server.getGame(), "shop-update");
+        return Message.ok(result).setMessage(result.getMessage());
+    }
 
-    public Result upgradeTool(Shop shop, String tool) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User player = game.getCurrentPlayer();
+    public Result upgradeTool(Shop shop, String tool,User player,GameServer gameServer) {
+        Game game = gameServer.getGame();
         MapOfGame map = game.getMap();
 
 //        Shop shop = map.getShopAtPosition(player.getCurrentTile().getX(), player.getCurrentTile().getY());

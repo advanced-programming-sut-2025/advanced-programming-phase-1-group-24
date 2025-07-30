@@ -2,18 +2,33 @@ package io.github.stardew.mini.server;
 
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.Model.UserDatabaseSQL;
+import org.redisson.Redisson;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
+import org.redisson.config.Config;
 
 import java.io.File;
+import java.util.List;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import java.util.zip.GZIPInputStream;
+
 public class ServerApp {
 
     private static final ServerApp instance = new ServerApp();
+    private RedissonClient redissonClient;
 
     private final ConcurrentHashMap<String, User> allUsers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Game> allGames = new ConcurrentHashMap<>();
@@ -21,6 +36,9 @@ public class ServerApp {
 
 
     private ServerApp() {
+//        Config config = new Config();
+//        config.useSingleServer().setAddress("redis://127.0.0.1:6379"); // change host/port if needed
+//        redissonClient = Redisson.create(config);
         loadAllUsers();
         loadAllGames();
     }
@@ -37,17 +55,25 @@ public class ServerApp {
         return null;
     }
     private void loadAllUsers() {
-        List<User> loadedUsers = UserDatabase.loadUsers();
+       ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+        ///    //////////////////////////////////////////////////////
+        //ArrayList<User> loadedUsers = UserDatabaseSQL.loadUsers();
+        ///////////////////////////////////////////////////////////////////////
         if (loadedUsers == null) return;
         for (User user : loadedUsers) {
-            allUsers.put(user.getUsername(), user);
+            user.updateGameFields();
+            allUsers.put(user.getUsername(), user);  // assuming getUsername() exists
         }
     }
 
-
+    public RedissonClient getRedisson() {
+        return redissonClient;
+    }
     // Optionally, call this when you want to persist
     public void saveUsers() {
-        UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
+
+        //UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
+        UserDatabaseSQL.saveUsers(new ArrayList<>(allUsers.values()));
     }
     // ==== USER MANAGEMENT ====
     public void addUser(User user) {
@@ -122,5 +148,37 @@ public void addGame(Game game) {
         System.err.println("Failed to add game: Game or NetworkId is null.");
     }
 }
+    public void setUserByUsername(User player) {
+        allUsers.put(player.getUsername(), player);
+    }
+    public void saveAllGamesToRedis() {
+        try {
+            RedissonClient redisson = ServerApp.getInstance().getRedisson();
+            RMap<String, String> gameMap = redisson.getMap("savedGames");
+
+            for (Game game : allGames.values()) {
+                String compressed = GameSaver.serializeAndCompressGame(game);
+                gameMap.put(game.getNetworkId(), compressed); // gameId is the key
+            }
+
+            System.out.println("✅ Games saved to Redis.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public Game loadGameFromRedis(String gameId) throws IOException {
+        RedissonClient redisson = ServerApp.getInstance().getRedisson();
+        RMap<String, String> gameMap = redisson.getMap("savedGames");
+        String base64Data = gameMap.get(gameId);
+
+        if (base64Data == null) return null;
+
+        byte[] decoded = Base64.getDecoder().decode(base64Data);
+        ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+        try (InputStream is = new GZIPInputStream(new ByteArrayInputStream(decoded));
+             InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+            return mapper.readValue(reader, Game.class);
+        }
+    }
 
 }

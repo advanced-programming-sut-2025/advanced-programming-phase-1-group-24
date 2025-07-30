@@ -244,6 +244,11 @@ public class MapOfGame {
         return null; // or throw an exception if you prefer
     }
 
+    public void tileSetter(int x, int y, Tile tile) {
+        if(x >= 0 && x < width && y >= 0 && y < height) {
+            map[y][x] = tile;
+        }
+    }
 
     public void initializeShops() {
         shops.clear();
@@ -623,5 +628,13 @@ public class MapOfGame {
                 y >= houseY && y < houseY + height;
     }
 
+    public Shop getShopByName(String name) {
+        for (Shop shop : shops) {
+            if(shop.getShopName().equalsIgnoreCase(name)) {
+                return shop;
+            }
+        }
+        return null;
+    }
 
 }
