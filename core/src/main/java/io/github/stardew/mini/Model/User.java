@@ -465,6 +465,10 @@ public class User {
         return skillsLevel;
     }
 
+    public int giveSkillLevel(Skill skill) {
+        return skillsLevel.getOrDefault(skill, 0);
+    }
+
     public void setSkillsLevel(Map<Skill, Integer> skillsLevel) {
         this.skillsLevel = skillsLevel;
     }
