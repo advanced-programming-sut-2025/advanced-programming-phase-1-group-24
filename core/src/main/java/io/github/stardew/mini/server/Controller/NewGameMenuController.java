@@ -82,9 +82,9 @@ public class NewGameMenuController implements MenuController {
 
     public Message<?> createGameOnServer(List<String> usernames, User creator) {
         ArrayList<User> players = new ArrayList<>();
-        if (usernames.size() < 2) {
-            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
-        }
+//        if (usernames.size() < 2) {
+//            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
+//        }
 
         List<PlayerConnection> connections = new ArrayList<>();
 
@@ -111,7 +111,6 @@ public class NewGameMenuController implements MenuController {
             FarmTemplateManager.loadTemplates(); // only once
         }
 
-
         GameServer gameServer = new GameServer(connections, game);
         gameServer.setGame(game);
 
@@ -129,12 +128,20 @@ public class NewGameMenuController implements MenuController {
 //            e.printStackTrace();
 //            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game");
 //        }
-        body.put("game", game);
+        String jsonGame;
+        try {
+            ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+            jsonGame = mapper.writeValueAsString(game);  // Or msg, or gameDTO, etc.
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();  // Or log it
+            return Message.INTERNAL_SERVER_ERROR.setMessage("Failed to serialize game.");
+        }
+        body.put("game", jsonGame);
         Message<Map<String, Object>> msg = new Message<>(200, "Game created", body, Message.MessageType.RESPONSE);
         msg.setType("start-map-selection");
 
         for (PlayerConnection player : connections) {
-            if (!player.getUser().equals(creator) && player.getWsContext().session.isOpen()) {
+            if (player.getWsContext().session.isOpen()) {
                 player.getWsContext().send(new Gson().toJson(msg));
             }
         }

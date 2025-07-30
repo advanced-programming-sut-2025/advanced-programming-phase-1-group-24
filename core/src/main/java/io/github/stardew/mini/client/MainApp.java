@@ -3,7 +3,19 @@ package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.*;
+import io.github.stardew.mini.server.Controller.*;
+import com.google.gson.JsonObject;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.Things.Food;
+import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.server.Controller.*;
+import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.FoodType;
@@ -23,9 +35,14 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
@@ -33,6 +50,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -48,6 +66,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
+
     private String jwtToken;
     private List<Map<String,String>> onlinePlayers = new ArrayList<>();
 
@@ -59,9 +78,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.jwtToken = jwtToken;
     }
 
-    public void setCurrentGameId(String gameId) {
-        currentGame.setNetworkId(gameId);
-    }
+
 
     public List<Map<String,String>> getOnlinePlayers() {
         return onlinePlayers;
@@ -126,6 +143,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
         for (FoodType foodType : FoodType.values()) {
             foodType.initTexture();
+        }
+        for (FishType fishType : FishType.values()) {
+            fishType.initTexture();
         }
         for (NPCtype npCtype : NPCtype.values()) {
             npCtype.initTexture();
@@ -201,9 +221,9 @@ public class MainApp extends com.badlogic.gdx.Game {
         ShopAssets.dispose();
         batch.dispose();
         // save games
-        if (currentGame != null) {
-            currentGame.getMap().getShops().clear();
-        }
+//        if (currentGame != null) {
+//            currentGame.getMap().getShops().clear();
+//        }
         //saveActiveGames();
         // ✅ Gracefully close WebSocket
         if (networkClient != null && networkClient.isOpen()) {
@@ -312,7 +332,6 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
         this.currentGame = currentGame;
     }
-
     public void setSecurityQuestions(List<String> securityQuestions) {
         this.securityQuestions = securityQuestions;
     }
@@ -345,6 +364,10 @@ public class MainApp extends com.badlogic.gdx.Game {
 
             // ... other cases
         }
+    }
+
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
     }
 
     public void updateOnlinePlayers(List<Map<String,String>> list) {

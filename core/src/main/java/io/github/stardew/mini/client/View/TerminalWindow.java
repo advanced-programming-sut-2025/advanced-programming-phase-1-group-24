@@ -137,37 +137,53 @@ private void initializeUI() {
 
 }
 
+//    private void executeCommand() {
+//        String command = inputField.getText().trim();
+//        if (!command.isEmpty()) {
+//            // Simulate the Scanner input handling from your original code
+//            String result = processCommand(command);
+//            outputLabel.setText(result);
+//            inputField.setText("");
+//        }
+//    }
+
+
     private void executeCommand() {
         String command = inputField.getText().trim();
         if (!command.isEmpty()) {
-            // Simulate the Scanner input handling from your original code
-            String result = processCommand(command);
-            outputLabel.setText(result);
             inputField.setText("");
+            outputLabel.setText("Executing...");
+
+            Scanner scanner = new Scanner(new ByteArrayInputStream(command.getBytes()));
+            currentMenu.handleCommand(scanner, result -> {
+                Gdx.app.postRunnable(() -> {
+                    outputLabel.setText(result);
+                });
+            });
         }
     }
 
-
-    private String processCommand(String command) {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        PrintStream oldOut = System.out;
-        System.setOut(new PrintStream(output));
-
-        Scanner scanner = new Scanner(new ByteArrayInputStream(command.getBytes()));
-
-        try {
-            currentMenu.handleCommand(scanner);
-            return output.toString();
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
-        } finally {
-            scanner.close();
-            System.setOut(oldOut);
-        }
-    }
+//    private String processCommand(String command) {
+//        ByteArrayOutputStream output = new ByteArrayOutputStream();
+//        PrintStream oldOut = System.out;
+//        System.setOut(new PrintStream(output));
+//
+//        Scanner scanner = new Scanner(new ByteArrayInputStream(command.getBytes()));
+//
+//        try {
+//            currentMenu.handleCommand(scanner);
+//            return output.toString();
+//        } catch (Exception e) {
+//            return "Error: " + e.getMessage();
+//        } finally {
+//            scanner.close();
+//            System.setOut(oldOut);
+//        }
+//    }
 
 
     public TextField getInputField() {
         return inputField;
     }
 }
+

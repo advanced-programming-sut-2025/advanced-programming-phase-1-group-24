@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.*;
@@ -25,6 +26,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.NPCManagement.*;
 import io.github.stardew.mini.Model.Places.*;
 import io.github.stardew.mini.Model.Reccepies.*;
+import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuff;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.Things.*;
@@ -52,7 +54,6 @@ public class GameController implements MenuController {
 
     GameMenuCommands command;
     private static final Random RANDOM = new Random();
-
     public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
         System.out.println(player.getUsername());
         int x = player.getCurrentTile().getX();
@@ -71,84 +72,32 @@ public class GameController implements MenuController {
 
             player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
             player.reduceEnergy(1);
+            if(player.getEnergy() == 0) player.setFainted(true);
             player.setMovingDirection(direction);
             Map<String, Object> params = new HashMap<>();
             params.put("tile", player.getCurrentTile());
             params.put("energy", player.getEnergy());
             params.put("movingDirection", player.getMovingDirection());
+            params.put("hasFainted", player.hasFainted());
+
+            for (PlayerConnection user : gs.getPlayers()) {
+                if (user.getWsContext().session.isOpen() && !user.getUsername().equals(player.getUsername())) {
+                    Map<String, Object> tileUpdate = new HashMap<>();
+                    tileUpdate.put("username", player.getUsername());
+                    tileUpdate.put("tile", player.getCurrentTile());
+                    tileUpdate.put("movingDirection", player.getMovingDirection());
+                    tileUpdate.put("hasFainted", player.hasFainted());
+                    Message<Map<String, Object>> msg = new Message<>(200, "tileUpdate", tileUpdate, Message.MessageType.RESPONSE);
+                    msg.setType("tile-update");
+                    user.getWsContext().send(new Gson().toJson(msg));
+                }
+            }
 
             return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
             //return Message.OK.setMessage("You can walk there.");
         }
         return Message.FORBIDDEN.setMessage("You can not move there.");
     }
-//    public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
-//        System.out.println(player.getUsername());
-//        int x = player.getCurrentTile().getX();
-//        int y = player.getCurrentTile().getY();
-//        int newX = x + dx;
-//        int newY = y + dy;
-//
-//        if (newX >= 0 && newY >= 0 &&
-//            newY < gs.getGame().getMap().getMap().length &&
-//            newX < gs.getGame().getMap().getMap()[0].length &&
-//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
-//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
-//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
-//                    (player.getPartner() != null &&
-//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
-//
-//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
-//            player.reduceEnergy(1);
-//            player.setMovingDirection(direction);
-//
-//            Map<String, Object> params = new HashMap<>();
-//            params.put("tile", player.getCurrentTile());
-//            params.put("energy", player.getEnergy());
-//            params.put("movingDirection", player.getMovingDirection());
-//
-//            // ✅ Include all players' states
-//            List<Map<String, Object>> playerStates = new ArrayList<>();
-//            for (User u : gs.getGame().getPlayers()) {
-//                Map<String, Object> playerData = new HashMap<>();
-//                playerData.put("username", u.getUsername());
-//                playerData.put("tile", u.getCurrentTile());
-//                playerData.put("energy", u.getEnergy());
-//                playerData.put("movingDirection", u.getMovingDirection());
-//                playerStates.add(playerData);
-//            }
-//
-//            params.put("players", playerStates); // ✅ Include player list in response
-//
-//            return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
-//        }
-//
-//        return Message.FORBIDDEN.setMessage("You can not move there.");
-//    }
-
-
-//    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
-//        int x = player.getCurrentTile().getX();
-//        int y = player.getCurrentTile().getY();
-//        int newX = x + dx;
-//        int newY = y + dy;
-//
-//        if (newX >= 0 && newY >= 0 &&
-//            newY < gs.getGame().getMap().getMap().length &&
-//            newX < gs.getGame().getMap().getMap()[0].length &&
-//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
-//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
-//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
-//                    (player.getPartner() != null &&
-//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
-//
-//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
-//            player.reduceEnergy(1);
-//            player.setMovingDirection(direction);
-//            return new Result(true, "You can move.");
-//        }
-//        return new Result(false, "You can't move.");
-//    }
 
 
     public Result exitGame() {
@@ -189,7 +138,7 @@ public class GameController implements MenuController {
     }
 
 
-    public Result exitGame(User currentUser, GameServer gameServer) {
+    public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
         Game currentGame = gameServer.getGame();
 
         if (currentGame == null)
@@ -202,14 +151,18 @@ public class GameController implements MenuController {
         for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
         }
+        ServerApp.getInstance().saveUsers();
 
         // Step 2: Clean up game objects
-        currentGame.getMap().getShops().clear();
+       // currentGame.getMap().getShops().clear();
 
         // Step 3: Save game to disk and global state
         ServerApp.getInstance().addGame(currentGame);
         ServerApp.getInstance().saveAllGames();
-
+        ///    ///////////////////////////////////////////////////////////////
+        //ServerApp.getInstance().saveAllGamesToRedis();
+        GameDatabase.saveGameToDatabase(gameServer.getGame());
+        //////////////////////////////////////////////
         // Step 4: Safely stop game server
         gameServer.stopServer();                         // stop timer and thread
         AppSocket.removeGame(gameServer);                // remove from activeGames
@@ -676,74 +629,140 @@ public class GameController implements MenuController {
         Game game = gs.getGame();
         Tile[][] map = game.getMap().getMap();
 
-        if (game.getTimeAndDate().getHour() == 23) {
-
-            for (Shop shop : game.getMap().getShops()) {
-                for (ShopItem shopItem : shop.getProducts()) {
-                    shopItem.setSoldToday(0);
-                }
+        if (game.getTimeAndDate().getHour() >= 22) {
+            if(allPlayersAtHome(gs.getGame())) {
+                game.setWaitingForPlayersToSleep(false);
+                gs.setWaitingForPlayersToGoHome(false);
+                if(game.getTimeAndDate().getHour() == 23) endOfDayHandling(gs, game);
+                return;
             }
-            processShippingBinsAtNight(gs);
 
-            handleMachinRecipes(game);
-            game.getTimeAndDate().skipToNextMorning();
-
+            boolean someoneCanStillMakeIt = false;
             for (User user : game.getPlayers()) {
-                user.resetEnergyForNewDay();
-                if (user.getOwnedAnimals() != null || !user.getOwnedAnimals().isEmpty()) {
-                    for (Animal animal : user.getOwnedAnimals()) {
-                        animal.updateProductEndDay();
-                        animal.endOfDayUpdate();
+                if (game.getMap().getHousePosition(user.getCurrentTile().getX(), user.getCurrentTile().getY()) == null) {
+                    if (playerCanReachHome(user)) {
+                        someoneCanStillMakeIt = true;
+                        break;
                     }
-                }
-                if (user.getDaysSinceRejection() != 0) {
-                    user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
-                }
-                // crowAttack(gs, user);
-            }
-
-            Tile[][] tiles = game.getMap().getMap();
-            for (int j = 0; j < tiles.length; j++) {
-                for (int i = 0; i < tiles[0].length; i++) {
-                    updateGrowable(game, tiles[j][i]);
-                    tiles[j][i].setHasBeenBurt(false);
-                    if (tiles[j][i].getContainedGrowable() == null &&
-                        tiles[j][i].getProductOfGrowable() == null &&
-                        tiles[j][i].getContainedItem() == null &&
-                        tiles[j][i].getType() == TileType.FARM) {
-                        tiles[j][i].setWalkable(true);
+                    else{
+                        user.setFainted(true);
+                        for (PlayerConnection player : gs.getPlayers()) {
+                            if (player.getWsContext().session.isOpen()) {
+                                Map<String, Object> faintUpdate = new HashMap<>();
+                                faintUpdate.put("fainted", user.getUsername());
+                                Message<Map<String, Object>> msg = new Message<>(200, "faintUpdate", faintUpdate, Message.MessageType.RESPONSE);
+                                msg.setType("faint-update");
+                                player.getWsContext().send(new Gson().toJson(msg));
+                            }
+                        }
                     }
                 }
             }
-            randomForaging(gs);
 
-            game.setCurrentWeatherType(game.getTomorrowWeatherType());
-            game.predictTomorrowWeather();
-            rainOnGrowables(game, game.getCurrentWeatherType());
-            game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
-            NPC.endOfDay(game);
-            for (User user : game.getPlayers()) {
-                game.handleFoodRecipe(user);
+            if (someoneCanStillMakeIt) {
+                game.setWaitingForPlayersToSleep(true);
+                gs.setWaitingForPlayersToGoHome(true);
+                // optionally notify players that the game is waiting
+                return;
+            } else {
+                game.setWaitingForPlayersToSleep(false);
+                gs.setWaitingForPlayersToGoHome(false);
+                if(game.getTimeAndDate().getHour() == 23) endOfDayHandling(gs, game);
             }
-            for (PlayerConnection player : gs.getPlayers()) {
-                if (player.getWsContext().session.isOpen()) {
-                    ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
-                    Map<String, Object> body = new HashMap<>();
-                    try {
-                        gs.getGame().setCurrentPlayer(player.getUser());
-                        String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
-                        body.put("game", jsonGame);
-                        Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
-                        msg.setType("endOfDay");
-                        player.getWsContext().send(new Gson().toJson(msg));
-                        System.out.println("handle end of day!");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        }
+    }
+
+    public boolean playerCanReachHome(User user) {
+        Tile current = user.getCurrentTile();
+        Tile home = user.getHomeTile();
+
+        int dx = Math.abs(current.getX() - home.getX());
+        int dy = Math.abs(current.getY() - home.getY());
+        int stepsNeeded = dx + dy;
+
+        return stepsNeeded <= user.getEnergy();
+    }
+
+
+    private void endOfDayHandling(GameServer gs, Game game) {
+        for (Shop shop : game.getMap().getShops()) {
+            for (ShopItem shopItem : shop.getProducts()) {
+                shopItem.setSoldToday(0);
+            }
+        }
+        processShippingBinsAtNight(gs);
+
+        handleMachinRecipes(game);
+        game.getTimeAndDate().skipToNextMorning();
+
+        for (User user : game.getPlayers()) {
+            user.resetEnergyForNewDay();
+            if (user.getOwnedAnimals() != null || !user.getOwnedAnimals().isEmpty()) {
+                for (Animal animal : user.getOwnedAnimals()) {
+                    System.out.println("animal's name: " + animal.getName());
+                    animal.updateProductEndDay();
+                    animal.endOfDayUpdate();
+                }
+            }
+            if (user.getDaysSinceRejection() != 0) {
+                user.setDaysSinceRejection(Math.min(user.getDaysSinceRejection() - 1, 0));
+            }
+            // crowAttack(gs, user);
+        }
+
+        Tile[][] tiles = game.getMap().getMap();
+        for (int j = 0; j < tiles.length; j++) {
+            for (int i = 0; i < tiles[0].length; i++) {
+                updateGrowable(game, tiles[j][i]);
+                tiles[j][i].setHasBeenBurt(false);
+                if (tiles[j][i].getContainedGrowable() == null &&
+                    tiles[j][i].getProductOfGrowable() == null &&
+                    tiles[j][i].getContainedItem() == null &&
+                    tiles[j][i].getType() == TileType.FARM) {
+                    tiles[j][i].setWalkable(true);
                 }
             }
         }
+        randomForaging(gs);
+
+        game.setCurrentWeatherType(game.getTomorrowWeatherType());
+        game.predictTomorrowWeather();
+        rainOnGrowables(game, game.getCurrentWeatherType());
+        game.getMap().applyLightningStrikeIfStormy(game.getCurrentWeatherType().isCausesLightning());
+        NPC.endOfDay(game);
+        for (User user : game.getPlayers()) {
+            game.handleFoodRecipe(user);
+        }
+        for (PlayerConnection player : gs.getPlayers()) {
+            if (player.getWsContext().session.isOpen()) {
+                ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+
+                Map<String, Object> body = new HashMap<>();
+                try {
+                    gs.getGame().setCurrentPlayer(player.getUser());
+                    String jsonGame = mapper.writeValueAsString(gs.getGame()); // serialize Game to JSON string
+                    body.put("game", jsonGame);
+                    Message<Map<String, Object>> msg = new Message<>(200, "endOfDay", body, Message.MessageType.RESPONSE);
+                    msg.setType("endOfDay");
+                    player.getWsContext().send(new Gson().toJson(msg));
+                    System.out.println("handle end of day!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean allPlayersAtHome(Game game) {
+        for (User user : game.getPlayers()) {
+            Tile current = user.getCurrentTile();
+            House house = game.getMap().getHousePosition(current.getX(), current.getY());
+            if (house == null && !user.hasFainted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void processShippingBinsAtNight() {
@@ -1984,14 +2003,14 @@ public class GameController implements MenuController {
 //        }
     }
 
-    public Result plantGrowable(String seedName, String direction, User player, GameServer gs) {
+    public Message<?> plantGrowable(String seedName, String direction, User player, GameServer gs) {
         SourceType sourceType = SourceType.fromName(seedName);
-        if (sourceType == null) return new Result(false, "There is no such source type!");
+        if (sourceType == null) return Message.FORBIDDEN.setMessage("There is no such source type!");
         Backpack playerBackPack = player.getBackpack();
         Tile[][] map = gs.getGame().getMap().getMap();
         Growable growable = (Growable) playerBackPack.grabItemAndReturn(seedName, 1);
         if (growable == null) {
-            return new Result(false, "Growable with name '" + seedName + "' not found in inventory.");
+            return Message.NOT_FOUND.setMessage("Growable with name '" + seedName + "' not found in inventory.");
         }
         int x = player.getCurrentTile().getX();
         int y = player.getCurrentTile().getY();
@@ -2000,16 +2019,16 @@ public class GameController implements MenuController {
         else if (direction.equals("left")) x--;
         else if (direction.equals("right")) x++;
         if (x < 0 || y < 0 || x >= map[0].length || y >= map.length) {
-            return new Result(false, "direction is invalid.");
+            return Message.FORBIDDEN.setMessage("direction is invalid.");
         }
         if (hasGiantNeighbor(map, y, x)) {
-            return new Result(false, "You cannot plant next to a giant crop!");
+            return Message.FORBIDDEN.setMessage("You cannot plant next to a giant crop!");
         }
         if (map[y][x].getType() != TileType.FARM && map[y][x].getType() != TileType.GREENHOUSE) {
-            return new Result(false, "You cannot plant in this tile!");
+            return Message.FORBIDDEN.setMessage("You cannot plant in this tile!");
         }
         if (map[y][x].getContainedItem() != null || map[y][x].getContainedGrowable() != null || map[y][x].getProductOfGrowable() != null) {
-            return new Result(false, "This tile is full!");
+            return Message.FORBIDDEN.setMessage("This tile is full!");
         }
         if (growable.getGrowableType() == GrowableType.MixedSeeds) {
             growable = GrowableFactory.getInstance().create(Growable.getRandomSourceType(gs
@@ -2018,12 +2037,12 @@ public class GameController implements MenuController {
             Season currentSeason = gs.getGame().getTimeAndDate().getSeason();
             if ((growable.getCropType() != null && !growable.getCropType().getSeasons().contains(currentSeason)) ||
                 (growable.getTreeType() != null && !growable.getTreeType().getNormalSeasons().contains(currentSeason))) {
-                return new Result(false, "You cannot plant this seed out of season!");
+                return Message.FORBIDDEN.setMessage("You cannot plant this seed out of season!");
             }
         }
-        if (!map[y][x].getIsPlowed()) {
-            return new Result(false, "The tile isn't plowed!");
-        }
+//        if (!map[y][x].getIsPlowed()) {
+//            return Message.FORBIDDEN.setMessage("The tile isn't plowed!");
+//        }
         map[y][x].setWalkable(false);
         if (growable.getCropType() != null) growable.setName(findCropBySourceName(growable.getName()).getName());
         if (growable.getTreeType() != null) growable.setName(findTreeBySourceName(growable.getName()).getName());
@@ -2031,9 +2050,34 @@ public class GameController implements MenuController {
         map[y][x].getContainedGrowable().setCurrentStage(1);
         map[y][x].setIsPlowed(false);
         if (growable.getCropType() != null) {
-            tryFormGiant(y, x, growable.getCropType());
+            //changed tiles in here
+            tryFormGiant(y, x, growable.getCropType(), gs);
         }
-        return new Result(true, "Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
+        for (PlayerConnection user : gs.getPlayers()) {
+            if (user.getWsContext().session.isOpen()) {
+                Map<String, Object> params = new HashMap<>();
+
+                Map<String, Integer> inventorySafe = new HashMap<>();
+                for (Map.Entry<Item, Integer> entry : playerBackPack.getInventoryItems().entrySet()) {
+                    inventorySafe.put(entry.getKey().getName(), entry.getValue());
+                }
+                params.put("inventoryItems", inventorySafe);
+
+                params.put("walkable", map[y][x].getisWalkable());
+                ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+                Map<String, Object> growableJson = mapper.convertValue(map[y][x].getContainedGrowable(), Map.class);
+                growableJson.put("itemType", "Growable"); // ensure it’s there
+                params.put("containedGrowable", growableJson);
+                params.put("plowed", map[y][x].getIsPlowed());
+                params.put("x", map[y][x].getX());
+                params.put("y", map[y][x].getY());
+                params.put("username", player.getUsername());
+                Message<Map<String, Object>> msg = new Message<>(200, "tileUpdate", params, Message.MessageType.RESPONSE);
+                msg.setType("plant-growable");
+                user.getWsContext().send(new Gson().toJson(msg));
+            }
+        }
+        return Message.OK.setMessage("Growable with name '" + seedName + "' has been planted in " + x + ", " + y);
     }
 
     private ForagingMineralType getRandomForagingMineral() {
@@ -2146,6 +2190,31 @@ public class GameController implements MenuController {
         }
     }
 
+    public void tryFormGiant(int y, int x, CropType cropType, GameServer gs) {
+        Tile[][] grid = gs.getGame().getMap().getMap();
+        int height = grid.length;
+        int width = grid[0].length;
+
+        if (y + 1 < height && x + 1 < width) {
+            if (isValidGiantSquare(y, x, y, x + 1, y + 1, x, y + 1, x + 1, cropType, gs)) return;
+        }
+
+        // 2. (y, x) is top-right
+        if (y + 1 < height && x - 1 >= 0) {
+            if (isValidGiantSquare(y, x - 1, y, x, y + 1, x - 1, y + 1, x, cropType, gs)) return;
+        }
+
+        // 3. (y, x) is bottom-left
+        if (y - 1 >= 0 && x + 1 < width) {
+            if (isValidGiantSquare(y - 1, x, y - 1, x + 1, y, x, y, x + 1, cropType, gs)) return;
+        }
+
+        // 4. (y, x) is bottom-right
+        if (y - 1 >= 0 && x - 1 >= 0) {
+            if (isValidGiantSquare(y - 1, x - 1, y - 1, x, y, x - 1, y, x, cropType, gs)) return;
+        }
+    }
+
     private boolean isValidGiantSquare(int y1, int x1, int y2, int x2,
                                        int y3, int x3, int y4, int x4, CropType cropType) {
         Tile[][] grid = MainApp.getInstance().getCurrentGame().getMap().getMap();
@@ -2178,6 +2247,47 @@ public class GameController implements MenuController {
 //            g.setCurrentStage(maxStage);
 //            g.setDaysLeftToDie(maxDaysLeft);
 //        }
+
+        Growable shared = grid[y1][x1].getContainedGrowable();
+        shared.setGrowableType(GrowableType.Giant);
+        shared.setAge(maxAge);
+        shared.setCurrentStage(maxStage);
+        shared.setDaysLeftToDie(maxDaysLeft);
+
+
+        for (Tile tile : tiles) {
+            System.out.println("1");
+            tile.setContainedGrowable(shared);
+        }
+
+        return true;
+    }
+
+    private boolean isValidGiantSquare(int y1, int x1, int y2, int x2,
+                                       int y3, int x3, int y4, int x4, CropType cropType, GameServer gs) {
+        Tile[][] grid = gs.getGame().getMap().getMap();
+        Tile[] tiles = {
+            grid[y1][x1], grid[y2][x2], grid[y3][x3], grid[y4][x4]
+        };
+
+        for (Tile tile : tiles) {
+            Growable g = tile.getContainedGrowable();
+            if (tile.getType() == TileType.GREENHOUSE || g == null || g.getCropType() != cropType) {
+                return false;
+            }
+        }
+
+        int maxAge = 0;
+        int maxStage = 0;
+        int maxDaysLeft = 2;
+
+        for (Tile tile : tiles) {
+            Growable g = tile.getContainedGrowable();
+            g.setGrowableType(GrowableType.Giant);
+            if (g.getAge() > maxAge) maxAge = g.getAge();
+            if (g.getCurrentStage() > maxStage) maxStage = g.getCurrentStage();
+            if (g.getDaysLeftToDie() > maxDaysLeft) maxDaysLeft = g.getDaysLeftToDie();
+        }
 
         Growable shared = grid[y1][x1].getContainedGrowable();
         shared.setGrowableType(GrowableType.Giant);
@@ -2800,6 +2910,25 @@ public class GameController implements MenuController {
         player.addMoney(count);
         return new Result(true, "Your current money: " + player.getMoney());
     }
+    public Result cheatAddMoney(String countString,User user,GameServer gameServer) {
+        Game game = gameServer.getGame();
+        if (game == null) {
+            return new Result(false, "a new game hasnt started yet");
+        }
+        User player = game.getPlayerByUsername(user.getUsername());
+        int count;
+        try {
+            count = Integer.parseInt(countString);
+        } catch (NumberFormatException e) {
+            return new Result(false, "Invalid number format.");
+        }
+        if (count <= 0) {
+            return new Result(true, "Invalid count!");
+        }
+        player.addMoney(count);
+        System.out.println(player.getMoney());
+        return new Result(true, "Your current money: " + player.getMoney());
+    }
 
     public Result showFriendships() {
         Game game = MainApp.getInstance().getCurrentGame();
@@ -3098,13 +3227,18 @@ public class GameController implements MenuController {
     }
 
 
-    public Result cheatAddItem(String itemName, int count) {
+    public Result cheatAddItem(String itemName, String countString,User user,GameServer gameserver) {
+        System.out.println("1");
+        int count = Integer.parseInt(countString);
         Item item = Item.getRandomItem(itemName);
+        System.out.println("2");
         if (item == null) {
             return new Result(false, "No item found.");
         }
+        System.out.println("3");
         if (count == 0) return new Result(false, "Invalid count.");
-        return MainApp.getInstance().getCurrentGame().getCurrentPlayer().getBackpack().addItem(item, count);
+        User player = gameserver.getGame().getPlayerByUsername(user.getUsername());
+        return player.getBackpack().addItem(item, count);
     }
 
     public Result meetNPC(String npcName) {
@@ -3406,6 +3540,28 @@ public class GameController implements MenuController {
         player.getBackpack().grabItem("Stone", 500);
         greenHouse.setGreenHouseFixed(true);
         return new Result(true, "green house build successful");
+    }
+
+    public Result craftMachine(MachineType machineType) {
+        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
+        for (MachineType unlockedRecipe : MainApp.getInstance().getCurrentGame().getCurrentPlayer().getMachineRecepies()) {
+            if (unlockedRecipe.equals(machineType)) {
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    if (!currentPlayer.getBackpack().hasItem(itemName, unlockedRecipe.getRecipe().get(itemName))) {
+                        return new Result(false, "You dont have the ingredients.");
+                    }
+                }
+                Item machine = Item.getRandomItem(machineType.getName());
+                Result result = currentPlayer.getBackpack().addItem(machine, 1);
+                if (!result.isSuccessful()) return result;
+                for (String itemName : unlockedRecipe.getRecipe().keySet()) {
+                    currentPlayer.getBackpack().grabItem(itemName, unlockedRecipe.getRecipe().get(itemName));
+                }
+                currentPlayer.reduceEnergy(3);
+                return new Result(true, "Machine added successfully.");
+            }
+        }
+        return new Result(false, "No recipe found.");
     }
 
 

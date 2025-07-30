@@ -6,6 +6,7 @@ import io.github.stardew.mini.server.Controller.AuthController;
 import io.github.stardew.mini.server.Controller.ServerController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
 import io.github.stardew.mini.server.security.AuthUtil;
+import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
 
 import java.util.*;
@@ -64,22 +65,6 @@ public class AppSocket {
                 System.out.println("WebSocket connected: " + ctx.sessionId());
             });
 
-//            ws.onMessage(ctx -> {
-//                String rawMessage = ctx.message();
-//                System.out.println("Received message: " + rawMessage);
-//
-//                try {
-//                    Message<?> message = gson.fromJson(rawMessage, Message.class);
-//                    if ("connect".equals(message.getType()) && message.getUsername() != null) {
-//                        PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
-//                        connectedPlayers.put(ctx.sessionId(), connection);
-//                        System.out.println("User connected: " + message.getUsername());
-//                    }
-//                } catch (Exception e) {
-//                    System.err.println("Failed to parse message: " + e.getMessage());
-//                    ctx.send(gson.toJson(Message.BAD_REQUEST));
-//                }
-//            });
             ws.onMessage(ctx -> {
                 String rawMessage = ctx.message();
                 System.out.println("Received message: " + rawMessage);
@@ -182,19 +167,6 @@ public class AppSocket {
                         System.out.println("User connected: " + message.getUsername());
                     }
 
-
-
-/// ///////////////////////////////////////////////////////////////////////////////////////////////
-//                    GameServer gameServer = getActiveGameById(message.getGameID());
-//                    if (gameServer == null) {
-//                        ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("Game not found for user.")));
-//                        return;
-//                    }
-//
-//                    Message<?> response = serverController.routingTheRequests((Message<Map<String, Object>>) message, gameServer);
-//                    System.out.println("Sending response: " + gson.toJson(response));
-//                    ctx.send(gson.toJson(response));
-
                     Message<?> response;
                     System.out.println("message.getType(): " + message.getType());
                     System.out.println("message.getUsername(): " + message.getUsername());
@@ -256,27 +228,16 @@ public class AppSocket {
             });
 
             // ✅ WsCloseContext
-//            ws.onClose(ctx -> {
-//                System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
-//                String sessionId = ctx.sessionId(); // this is the correct method
-//                PlayerConnection connection = connectedPlayers.remove(sessionId);
-//                if (connection != null) {
-//                    System.out.println("User disconnected: " + connection.getUsername());
-//                    broadcastOnlinePlayers();
-//                } else {
-//                    System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
-//                }
-//            });
-
             ws.onClose(ctx -> {
                 System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
-                String sessionId = ctx.sessionId();
+                String sessionId = ctx.sessionId(); // this is the correct method
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
 
                     GameServer game = getGameOfUser(connection.getUsername());
                     if (game != null) {
+                        game.getGame().unmarkPlayerLoadingGame(connection.getUsername());
                         connection.markDisconnected(); // مرحله بعدی تو PlayerConnection می‌سازیم
                         game.notifyPlayerDisconnected(connection);
                         new Timer().schedule(new TimerTask() {
@@ -296,6 +257,7 @@ public class AppSocket {
 
                     broadcastOnlinePlayers();
                 } else {
+                    System.out.println("[WS CLOSE] No matching user for sessionId = " + ctx.sessionId());
                     System.out.println("[WS CLOSE] No matching user for sessionId = " + sessionId);
                 }
             });

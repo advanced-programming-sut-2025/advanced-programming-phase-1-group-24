@@ -23,6 +23,7 @@ import io.github.stardew.mini.Model.Menus.Menu;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 public class PreGameMenuView implements AppMenu, Screen {
@@ -214,7 +215,7 @@ public class PreGameMenuView implements AppMenu, Screen {
         MainApp.getInstance().getNetworkClient()
             .sendPost(null, "GameController", "getSavedGames", params, MainApp.getInstance().getLoggedInUser().getUsername())
 //            .thenAccept(response -> {
-////                if (response.getStatus() == 200) {
+////                    if (response.getStatus() == 200) {
 ////                    Gson gson = new Gson();
 ////                    Type listType = new TypeToken<List<GameSummary>>() {}.getType();
 ////                    Map<String, Object> summariesObj =( Map<String, Object>) response.getBody();
@@ -232,7 +233,6 @@ public class PreGameMenuView implements AppMenu, Screen {
                     Gdx.app.postRunnable(() -> updateSavedGamesUI(summaries));
                 }
             });
-
     }
 
     private void updateSavedGamesUI(List<GameSummary> summaries) {
@@ -390,7 +390,7 @@ public class PreGameMenuView implements AppMenu, Screen {
 //        return selectDuration.getSelected().toString();
 //    }
 
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
         String input = scanner.nextLine().trim();
         Matcher matcher;
 //        Result canUseCommand = controller.checkEnergy();
