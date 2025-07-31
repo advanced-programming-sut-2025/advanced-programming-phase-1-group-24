@@ -1,8 +1,10 @@
 package io.github.stardew.mini.server;
 
 
+import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Controller.AuthController;
+import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.ServerController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
 import io.github.stardew.mini.server.security.AuthUtil;
@@ -247,9 +249,30 @@ public class AppSocket {
                                     System.currentTimeMillis() - connection.getDisconnectTime() >= 120_000) {
                                     System.out.println("User did not reconnect in time: " + connection.getUsername());
 
-                                    game.stopServer(); // بازی متوقف میشه
-                                    ServerApp.getInstance().addGame(game.getGame()); // ذخیره بازی ناتمام
-                                    removeGame(game);
+                                    GameServer gs = game;
+                                    User u = connection.getUser();
+                                    try {
+                                        // این exitGame را از GameController صدا می‌زنیم:
+                                        User host = game.getGame().getMainPlayer();
+                                        GameController gc = new GameController();
+                                        Result r = gc.exitGame(host, game);
+                                        for (PlayerConnection pc : game.getPlayers()) {
+                                            if (pc.getWsContext().session.isOpen()) {
+                                                Message<String> endMsg = Message.ok("Game ended due to timeout");
+                                                endMsg.setType("game-ended");
+                                                pc.getWsContext().send(new Gson().toJson(endMsg));
+                                            }
+                                        }
+                                        System.out.println("Auto-exit result for " + u.getUsername() + ": " + r.getMessage());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    gs.stopServer();
+                                    AppSocket.removeGame(gs);
+
+                                    ServerApp.getInstance().addGame(game.getGame());
+                                    ServerApp.getInstance().saveAllGames();
                                 }
                             }
                         }, 120_000);
