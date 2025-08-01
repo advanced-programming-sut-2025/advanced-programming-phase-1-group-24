@@ -82,12 +82,12 @@ public class PreGameMenuController implements MenuController {
         Map<String, Object> body = new HashMap<>();
         ObjectMapper mapper = GameSaver.createCustomObjectMapper();
 
-       /////////////////////////////////danger//////////////////////////////////////
+        /////////////////////////////////danger//////////////////////////////////////
         //before loading and when we are creating a new game the reference of user in server app and
         // player connection's user in app socket and the players in game are the same but in a loaded game
         // it cant tell that the user in the game has the same reference as the one in server app and app socket
-            Objects.requireNonNull(AppSocket.getPlayerConnectionByUsername(player.getUsername())).setUser(savedGameToLoad.getPlayerByUsername(player.getUsername()));
-            ServerApp.getInstance().setUserByUsername(savedGameToLoad.getPlayerByUsername(player.getUsername()));
+        Objects.requireNonNull(AppSocket.getPlayerConnectionByUsername(player.getUsername())).setUser(savedGameToLoad.getPlayerByUsername(player.getUsername()));
+        ServerApp.getInstance().setUserByUsername(savedGameToLoad.getPlayerByUsername(player.getUsername()));
         ///////////////////////////////////danger//////////////////////////////////////
         if(savedGameToLoad.haveAllPlayersLoadedGame()) {
             for (PlayerConnection playerConnection : gs.getPlayers()) {

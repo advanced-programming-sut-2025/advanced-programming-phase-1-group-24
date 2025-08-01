@@ -20,6 +20,7 @@ import io.github.stardew.mini.Model.Result;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -34,6 +35,8 @@ public class MainMenuView implements Screen,AppMenu {
     private Label infoLabelMainMenu;
     private Image avatarImage;
     private TextButton exitGame;
+    private Table onlineTable;
+
 
     public MainMenuView(MainMenuController controller, Skin skin) {
         this.controller = controller;
@@ -69,6 +72,13 @@ public class MainMenuView implements Screen,AppMenu {
         pregameButton = new TextButton("Pre-Game", skin, "custom-button");
         exitGame = new TextButton("Exit Game", skin, "custom-button");
 
+        onlineTable = new Table(skin);
+        ScrollPane scroll = new ScrollPane(onlineTable, skin);
+        scroll.setFadeScrollBars(false);
+        Label onlineTitle = new Label("Online Players", skin, "custom-label");
+        onlineTitle.setColor(Color.ORANGE);
+
+
         // Row layout
 
 
@@ -82,6 +92,10 @@ public class MainMenuView implements Screen,AppMenu {
         table.row().pad(10);
         table.add(exitGame).width(300).padRight(10).height(70);
         table.add(logoutButton).colspan(2).width(300).height(70);
+        table.row().pad(20);
+        table.add(onlineTitle).colspan(2).padBottom(10).row();
+        table.add(scroll).colspan(2).width(600).height(200).row();
+        updateOnlinePlayers(MainApp.getInstance().getOnlinePlayers());
         showInfoMainMenu();
 
         // Button listeners
@@ -136,6 +150,22 @@ public class MainMenuView implements Screen,AppMenu {
 //        Result res = controller.showUserInfoMainMenu();
 //        infoLabelMainMenu.setText(res.message());
     }
+
+    public void updateOnlinePlayers(java.util.List<Map<String, String>> players) {
+        onlineTable.clear();
+        for (Map<String,String> p : players) {
+            String text = p.get("username");
+            String lobby = p.get("lobby");
+            if (lobby != null && !lobby.isEmpty()) {
+                text += " (" + lobby + ")";
+            }
+            Label lbl = new Label(text, skin, "custom-label");
+            lbl.setColor(Color.WHITE);
+            onlineTable.add(lbl).left().row();
+        }
+    }
+
+
     @Override
     public void render(float delta) {
         Gdx.gl.glClearColor(0, 0, 0, 1);

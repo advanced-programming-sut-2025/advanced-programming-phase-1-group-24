@@ -406,6 +406,10 @@ public class Game {
         loadStatus.put(username, true);
     }
 
+    public void unmarkPlayerLoadingGame(String username) {
+        loadStatus.put(username, false);
+    }
+
     public boolean haveAllPlayersLoadedGame() {
         for (User user : players) {
             if (!loadStatus.getOrDefault(user.getUsername(), false)) {

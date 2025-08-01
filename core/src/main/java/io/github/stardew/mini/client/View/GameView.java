@@ -42,6 +42,7 @@ import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.HouseMenuController;
@@ -6656,4 +6657,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             batch.draw(npc.getNpcName().getTextureRegion(), x, y, tileSize, tileSize * 2f);
         }
     }
+
+    public void showDisconnectedDialog(String username) {
+        Dialog dialog = new Dialog("Disconnected", GameAssetManager.skin, "dialog") {
+            @Override
+            protected void result(Object object) {
+                // در صورت نیاز کاری انجام بده
+            }
+        };
+        dialog.text(username + " has been disconnected. Waiting for reconnection...");
+        dialog.button("OK");
+        dialog.show(stage);  // فرض بر اینکه `stage` داخل GameView هست
+    }
+
+
 }

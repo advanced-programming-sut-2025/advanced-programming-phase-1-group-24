@@ -1,3 +1,4 @@
+
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
@@ -17,10 +18,18 @@ import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.View.MainMenuView;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.PlayerConnection;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.MainMenuView;
+import io.github.stardew.mini.server.Controller.MainMenuController;
+import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
@@ -112,6 +121,28 @@ public class NetworkClient extends WebSocketClient {
                     System.err.println("❌ No future found for requestId: " + requestId);
                 }
             } else {
+
+                if ("online-players".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> body = (Map<String,Object>) message.getBody();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,String>> list = (List<Map<String,String>>) body.get("players");
+                    MainApp.getInstance().updateOnlinePlayers(list);
+                    return;
+                }
+
+                if ("player-disconnected".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String username = (String) data.get("username");
+
+                    Gdx.app.postRunnable(() -> {
+                        // نمایش دیالوگ یا پیام برای DC
+                        MainApp.getInstance().showPlayerDisconnectedMessage(username);
+                    });
+                    return;
+                }
+
+
                 if ("time-update".equalsIgnoreCase(message.getType())) {
                     Map<String, Object> data = (Map<String, Object>) message.getBody();
                     int hour = ((Double) data.get("hour")).intValue();
