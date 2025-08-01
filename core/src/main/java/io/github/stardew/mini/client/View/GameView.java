@@ -231,6 +231,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private String scenario = "";
     String giftReciever, artisanName;
 
+    private Table leaderboardTable;
+
+
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -3247,7 +3250,48 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        leaderboardTable = new Table(GameAssetManager.skin);
+        leaderboardTable.top().left().pad(10);
+        leaderboardTable.setFillParent(true);
+
+        // ستون‌های ثابت
+        leaderboardTable.add("Rank").pad(5);
+        leaderboardTable.add("Player").pad(5);
+        leaderboardTable.add("Money").pad(5);
+        leaderboardTable.add("Skills").pad(5);
+        leaderboardTable.add("Missions").pad(5);
+        leaderboardTable.add("Score").pad(5);
+        leaderboardTable.row();
+
+        stage.addActor(leaderboardTable);
+
+        // 2. پس‌فرستادن درخواست به سرور برای دریافت اولیه‌ی لیست
+        MainApp.getInstance().getNetworkClient()
+            .sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "ServerController",         // controller name
+                "getLeaderboard",         // method name
+                Collections.emptyMap(),// no params
+                currentPlayer.getUsername()
+            )
+            .thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> body = (Map<String,Object>) response.getBody();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,Object>> lb = (List<Map<String,Object>>) body.get("leaderboard");
+                    Gdx.app.postRunnable(() -> updateLeaderboard(lb));
+                } else {
+                    Gdx.app.postRunnable(() ->
+                        showErrorDialog(stage, "Failed to load leaderboard: " + response.getMessage())
+                    );
+                }
+            });
+
     }
+
+
+
 
     private void determineAvatar() {
         switch (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getAvatar()) {
@@ -6669,6 +6713,37 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         dialog.button("OK");
         dialog.show(stage);  // فرض بر اینکه `stage` داخل GameView هست
     }
+
+    public void updateLeaderboard(List<Map<String, Object>> leaderboard) {
+        // پاک کردن ردیف‌های قبلی، ولی نگه‌داشتن عنوان ستون:
+        leaderboardTable.clearChildren();
+        // دوباره عنوان ستون
+        leaderboardTable.add("Rank").pad(5);
+        leaderboardTable.add("Player").pad(5);
+        leaderboardTable.add("Money").pad(5);
+        leaderboardTable.add("Skills").pad(5);
+        leaderboardTable.add("Missions").pad(5);
+        leaderboardTable.add("Score").pad(5);
+        leaderboardTable.row();
+
+        for (int i = 0; i < leaderboard.size(); i++) {
+            Map<String, Object> entry = leaderboard.get(i);
+            String username = (String) entry.get("username");
+            int money      = ((Number)entry.get("money")).intValue();
+            int skillSum   = ((Number)entry.get("skillSum")).intValue();
+            int missions   = ((Number)entry.get("missions")).intValue();
+            int score      = ((Number)entry.get("score")).intValue();
+
+            leaderboardTable.add(String.valueOf(i+1)).pad(5);
+            leaderboardTable.add(username).pad(5);
+            leaderboardTable.add(String.valueOf(money)).pad(5);
+            leaderboardTable.add(String.valueOf(skillSum)).pad(5);
+            leaderboardTable.add(String.valueOf(missions)).pad(5);
+            leaderboardTable.add(String.valueOf(score)).pad(5);
+            leaderboardTable.row();
+        }
+    }
+
 
 
 }

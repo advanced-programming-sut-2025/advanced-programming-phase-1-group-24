@@ -72,6 +72,7 @@ public class PreGameMenuController implements MenuController {
             if (FarmTemplateManager.getTemplates() == null) {
                 FarmTemplateManager.loadTemplates(); // only once
             }
+            savedGameToLoad.resetLoadGamesStatus();
             GameServer gameServer = new GameServer(connections, savedGameToLoad);
             AppSocket.addGame(gameServer);
             gameServer.start();
@@ -105,7 +106,7 @@ public class PreGameMenuController implements MenuController {
                     playerConnection.getWsContext().send(new Gson().toJson(msg));
                 }
             }
-            gs.getGame().resetLoadGamesStatus();
+            //gs.getGame().resetLoadGamesStatus();
             gs.startGameTimer();
         }
 

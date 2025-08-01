@@ -55,6 +55,7 @@ public class AuthController {
         User newUser = new User(username, hashed, nickname, email, gender);
         ServerApp.getInstance().addUser(newUser);
         ServerApp.getInstance().saveUsers();
+        System.out.println("New user created");
 
         Message<String> ok = Message.ok("signed up");
         ok.setUsername(username);    // ← این رو اضافه کن

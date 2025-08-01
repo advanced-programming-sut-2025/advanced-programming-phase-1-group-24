@@ -101,6 +101,7 @@ public class LoginMenuController implements MenuController {
         User matchedUser = app.getUserByUsername(username);
 
         if (matchedUser == null) {
+            System.out.println("username " + username + " not found");
             return new Result(false, "username does not exist!");
         }
 

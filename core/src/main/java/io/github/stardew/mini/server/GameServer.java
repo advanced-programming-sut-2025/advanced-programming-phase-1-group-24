@@ -60,6 +60,13 @@ public class GameServer extends Thread {
 //        }, 5000, 5000); // delay 5s, repeat every 5s
 
         // Optional game loop (e.g., for animation ticks or events)
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                broadcastLeaderboard();
+            }
+        }, 0, 5_000);
         while (running) {
             broadcastGameState();
             try {
@@ -110,6 +117,7 @@ public class GameServer extends Thread {
                         player.getWsContext().send(new Gson().toJson(msg));
                     }
                 }
+                broadcastLeaderboard();
             }
         }, 5000, 5000);
     }
@@ -183,6 +191,128 @@ public class GameServer extends Thread {
     public void setWaitingForPlayersToGoHome(boolean waitingForPlayersToGoHome) {
         isWaitingForPlayersToGoHome = waitingForPlayersToGoHome;
     }
+
+//    public void broadcastLeaderboard() {
+//        List<Map<String, Object>> leaderboard = new ArrayList<>();
+//
+//        for (PlayerConnection player : players) {
+//            User user = player.getUser();
+//            Map<String, Object> entry = new HashMap<>();
+//            entry.put("username", user.getUsername());
+//            entry.put("money", user.getMoney());
+//            entry.put("skills", user.getSkillsLevel());
+//
+//            int skillSum = user.getSkillsLevel().values().stream().mapToInt(i -> i).sum();
+//            entry.put("skillSum", skillSum);
+//            entry.put("missions", 0); // hardcoded
+//
+//            int score = user.getMoney() + skillSum + 0;
+//            entry.put("score", score);
+//
+//            leaderboard.add(entry);
+//        }
+//
+//        // Sort by score descending
+//        leaderboard.sort((a, b) -> ((Integer) b.get("score")) - ((Integer) a.get("score")));
+//
+//        // Send to all players
+//        Map<String, Object> body = new HashMap<>();
+//        body.put("leaderboard", leaderboard);
+//
+//        Message<Map<String, Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
+//        msg.setType("leaderboard-update");
+//
+//        String json = new Gson().toJson(msg);
+//
+//        for (PlayerConnection player : players) {
+//            player.getWsContext().send(json);
+//        }
+//    }
+//public void broadcastLeaderboard() {
+//    List<Map<String, Object>> leaderboard = new ArrayList<>();
+//
+//    for (PlayerConnection pc : players) {
+//        User user = pc.getUser();
+//        int money = user.getMoney();
+//        int skillSum = user.getSkillsLevel().values().stream().mapToInt(Integer::intValue).sum();
+//        int missions = 0; // موقتا هاردکد
+//        int score = money + skillSum + missions;
+//
+//        Map<String, Object> entry = new HashMap<>();
+//        entry.put("username", user.getUsername());
+//        entry.put("money", money);
+//        entry.put("skillSum", skillSum);
+//        entry.put("missions", missions);
+//        entry.put("score", score);
+//
+//        leaderboard.add(entry);
+//    }
+//
+//    // مرتب‌سازی نزولی بر اساس امتیاز
+//    leaderboard.sort((a, b) -> ((Integer) b.get("score")).compareTo((Integer) a.get("score")));
+//
+//    // ارسال به‌روزرسانی برای همه
+//    Map<String, Object> body = new HashMap<>();
+//    body.put("leaderboard", leaderboard);
+//    Message<Map<String, Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
+//    msg.setType("leaderboard-update");
+//    String json = new Gson().toJson(msg);
+//
+//    for (PlayerConnection pc : players) {
+//        if (pc.getWsContext().session.isOpen()) {
+//            pc.getWsContext().send(json);
+//        }
+//    }
+//}
+// در کلاس GameServer
+public List<Map<String, Object>> buildLeaderboard() {
+    List<Map<String, Object>> leaderboard = new ArrayList<>();
+
+    for (PlayerConnection pc : players) {
+        User user = pc.getUser();
+        int money = user.getMoney();
+        int skillSum = user.getSkillsLevel().values().stream().mapToInt(Integer::intValue).sum();
+        int missions = 0; // temporarily hardcoded
+        int score = money + skillSum + missions;
+
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("username", user.getUsername());
+        entry.put("money", money);
+        entry.put("skillSum", skillSum);
+        entry.put("missions", missions);
+        entry.put("score", score);
+
+        leaderboard.add(entry);
+    }
+
+    // Sort descending by score
+    leaderboard.sort((a,b) -> ((Integer)b.get("score")).compareTo((Integer)a.get("score")));
+    return leaderboard;
+}
+
+    // و متد broadcastLeaderboard را هم می‌توانی بر اساس همین بنویسی:
+    public void broadcastLeaderboard() {
+        Map<String,Object> body = Map.of("leaderboard", buildLeaderboard());
+        Message<Map<String,Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
+        msg.setType("leaderboard-update");
+        String json = new Gson().toJson(msg);
+
+        for (PlayerConnection pc : players) {
+            if (pc.getWsContext().session.isOpen()) {
+                pc.getWsContext().send(json);
+            }
+        }
+    }
+    public void replacePlayerConnection(PlayerConnection pc) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getUsername().equals(pc.getUsername())) {
+                players.set(i, pc);
+                break;
+            }
+        }
+    }
+
+
 
 }
 

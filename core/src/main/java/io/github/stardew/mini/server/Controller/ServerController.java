@@ -142,7 +142,17 @@ public class ServerController {
                 result = gameController.cheatAddItem(itemName,count, player, server);
                 System.out.println("cccccccccccCccc");
                 return Message.ok(result).setMessage(result.getMessage());
+
             }
+            case "getLeaderboard": {
+                // اینجا game server رو پاس بده
+                return gameController.getLeaderboard(server);
+            }
+//            case "getLeaderboard": {
+//                List<Map<String, Object>> lb = server.broadcastLeaderboard();
+//                // مستقیم به کلاینت می‌فرستیم
+//                return Message.ok(lb);
+//            }
 
             default:
                 return Message.BAD_REQUEST.setMessage("Unknown method: " + methodName);
@@ -271,108 +281,6 @@ public class ServerController {
         return Message.NOT_FOUND.setMessage("Unknown method in StoreMenuController: " + methodName);
     }
 
-//    public void routeToGameController(String methodName, Map<String, Object> body, Context ctx, GameServer server, User player) {
-//        Result result = null;
-//        switch (methodName) {
-//            case "tryMove" :
-//                //gameController.tryMove()
-//                break;
-//            case "exitGame":
-//                break;
-//            case "useTool":
-//                String direction = (String) body.get("direction");
-//                result = gameController.useTool(direction, player, server);
-//                ctx.json(Message.ok(result));
-//                break;
-//            case "startForceTerminateVote":
-//                break;
-//            case "voteToTerminate":
-//                break;
-//            case "handleEndOfDay":
-//                break;
-//            case "cheatAdvanceDate":
-//                break;
-//            case "cheatAdvanceTime":
-//                break;
-//            case "cheatChangeWeather":
-//                break;
-//            case "cheatUnlimitedEnergy":
-//                break;
-//            case "cheatChangeEnergy":
-//                break;
-//            case "cheatThor":
-//                break;
-//            case "petAnimal":
-//                break;
-//            case "cheatAnimalFriendship":
-//                break;
-//            case "showOwnedAnimals":
-//                break;
-//            case "feedHay":
-//                break;
-//            case "shepherdAnimal":
-//                break;
-//            case "releaseAnimal":
-//                break;
-//            case "findShortestPath":
-//                break;
-//            case "getWalkableNeighbors":
-//                break;
-//            case "collectProduct":
-//                break;
-//            case "sellAnimal":
-//                break;
-//            case "walkTo":
-//                break;
-//            case "plantGrowable":
-//                String seedName = (String) body.get("seedName");
-//                direction = (String) body.get("direction");
-//                result = gameController.plantGrowable(seedName, direction, player, server);
-//                ctx.json(Message.ok(result));
-//                break;
-//            case "fertalizeGrowable":
-//                String fertalizer = (String) body.get("fertalizer");
-//                direction = (String) body.get("direction");
-//                result = gameController.fertalizeGrowable(fertalizer, direction, player, server);
-//                ctx.json(Message.ok(result));
-//                break;
-//            case "hug":
-//                break;
-//            case "askMarriage":
-//                break;
-//            case "respondToMarriage":
-//                break;
-//            case "cheatAddMoney":
-//                break;
-//            case "sendGift":
-//                break;
-//            case "rateGifts":
-//                break;
-//            case "sendFlower":
-//                break;
-//            case "cheatWalk":
-//                break;
-//            case "cheatSetSkill":
-//                break;
-//            case "cheatSetFriendshipLevel":
-//                break;
-//            case "cheatAddItem":
-//                break;
-//            case "artisanUse":
-//                break;
-//            case "showMoney":
-//                break;
-//            case "buildGreenHouse":
-//                 result = gameController.buildGreenHouse(player, server);
-//                 ctx.json(Message.ok(result));
-//                break;
-////            case "plantGrowable":
-////                String seedName = (String) body.get("seedName");
-////                String direction = (String) body.get("direction");
-////                Result result = plantingController.plantGrowable(seedName, direction);
-////                ctx.json(new Message<>(200, "OK").setBody(result));
-////                break;
-//        }
-//    }
+
 
 }
