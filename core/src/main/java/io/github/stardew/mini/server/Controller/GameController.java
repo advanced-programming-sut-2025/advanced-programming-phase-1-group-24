@@ -152,11 +152,13 @@ public class GameController implements MenuController {
             player.updateMaxMoney();
         }
         ServerApp.getInstance().saveUsers();
+        //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
 
         // Step 2: Clean up game objects
        // currentGame.getMap().getShops().clear();
 
         // Step 3: Save game to disk and global state
+        currentGame.resetLoadGamesStatus();
         ServerApp.getInstance().addGame(currentGame);
         ServerApp.getInstance().saveAllGames();
         ///    ///////////////////////////////////////////////////////////////
@@ -3563,6 +3565,21 @@ public class GameController implements MenuController {
         }
         return new Result(false, "No recipe found.");
     }
+    // در GameController
+//    public Message<Map<String,Object>> getLeaderboard(GameServer gs) {
+//        List<Map<String,Object>> leaderboard = buildLeaderboard(gs); // همون منطق قبلی‌ات تو broadcastLeaderboard
+//        Map<String,Object> body = Map.of("leaderboard", leaderboard);
+//        Message<Map<String,Object>> msg = new Message<>(200, "Leaderboard", body, Message.MessageType.RESPONSE);
+//        return msg;
+//    }
+    public Message<Map<String,Object>> getLeaderboard(GameServer gs) {
+        List<Map<String,Object>> lb = gs.buildLeaderboard();
+        Map<String, Object> body = Map.of("leaderboard", lb);
+        Message<Map<String,Object>> msg = new Message<>(200, "Leaderboard", body, Message.MessageType.RESPONSE);
+        return msg;
+    }
+
+
 
 
 }

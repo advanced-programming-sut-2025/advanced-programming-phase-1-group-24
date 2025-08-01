@@ -72,7 +72,7 @@ public class ServerApp {
     // Optionally, call this when you want to persist
     public void saveUsers() {
 
-        //UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
+        UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
         UserDatabaseSQL.saveUsers(new ArrayList<>(allUsers.values()));
     }
     // ==== USER MANAGEMENT ====

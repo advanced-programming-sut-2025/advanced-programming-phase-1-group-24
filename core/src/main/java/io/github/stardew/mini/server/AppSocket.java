@@ -124,6 +124,31 @@ public class AppSocket {
                         return;
                     }
 
+                    if ("leaderboard-request".equalsIgnoreCase(message.getType())) {
+                        // ابتدا مطمئن می‌شویم کاربر لاگین کرده
+                        String token = message.getToken();
+//                        if (token == null) {
+//                            ctx.send(gson.toJson(Message.UNAUTHORIZED.setMessage("Missing auth token")));
+//                            return;
+//                        }
+                        String username;
+                        try {
+                            username = AuthUtil.verifyAndGetUsername(token);
+                        } catch (Exception ex) {
+                            ctx.send(gson.toJson(Message.UNAUTHORIZED.setMessage("Invalid or expired token")));
+                            return;
+                        }
+
+                        // پیدا کردن سرورِ بازی این کاربر
+                        GameServer gs = AppSocket.getGameOfUser(username);
+                        if (gs != null) {
+                            gs.broadcastLeaderboard();
+                        } else {
+                            // اگر توی بازی نیست
+                            ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("You are not in any game")));
+                        }
+                        return; // بقیه پیام‌ها را انجکت نکن
+                    }
 
                     // ─── 1) AUTHENTICATION ENDPOINT ────────────────────────────────
                     if ("AuthController".equals(message.getControllerName())
@@ -164,7 +189,12 @@ public class AppSocket {
                         }
 
                         PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
+                        connection.markReconnected();
                         connectedPlayers.put(ctx.sessionId(), connection);
+                        GameServer game = getGameOfUser(connection.getUsername());
+                        if (game != null) {
+                            game.replacePlayerConnection(connection);
+                        }
                         broadcastOnlinePlayers();
                         System.out.println("User connected: " + message.getUsername());
                     }
@@ -236,7 +266,6 @@ public class AppSocket {
                 PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
-
                     GameServer game = getGameOfUser(connection.getUsername());
                     if (game != null) {
                         game.getGame().unmarkPlayerLoadingGame(connection.getUsername());
@@ -252,7 +281,6 @@ public class AppSocket {
                                     GameServer gs = game;
                                     User u = connection.getUser();
                                     try {
-                                        // این exitGame را از GameController صدا می‌زنیم:
                                         User host = game.getGame().getMainPlayer();
                                         GameController gc = new GameController();
                                         Result r = gc.exitGame(host, game);

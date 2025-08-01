@@ -285,6 +285,19 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 }
+//                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    List<Map<String,Object>> lb = (List<Map<String,Object>>)
+//                        ((Map<?,?>)message.getBody()).get("leaderboard");
+//                    Gdx.app.postRunnable(() -> {
+//                        MainApp.getInstance().getCurrentGameView().updateLeaderboard(lb);
+//                    });
+//                    return;
+//                }
+
+
+
+
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {

@@ -104,7 +104,8 @@ SignupMenuView view;
 
             u = new User(username, hashSHA256(password), nickname, email, genderStr.equalsIgnoreCase("female"));
             ServerApp.getInstance().addUser(u);
-            UserDatabase.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
+            ServerApp.getInstance().saveUsers();
+            //UserDatabase.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
         }
 
         return Message.ok(r);
