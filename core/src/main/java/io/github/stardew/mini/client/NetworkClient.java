@@ -15,6 +15,7 @@ import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.GameView;
 import io.github.stardew.mini.client.View.MainMenuView;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.PlayerConnection;
@@ -287,13 +288,29 @@ public class NetworkClient extends WebSocketClient {
                 }
 //                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
 //                    @SuppressWarnings("unchecked")
-//                    List<Map<String,Object>> lb = (List<Map<String,Object>>)
-//                        ((Map<?,?>)message.getBody()).get("leaderboard");
-//                    Gdx.app.postRunnable(() -> {
-//                        MainApp.getInstance().getCurrentGameView().updateLeaderboard(lb);
-//                    });
+//                    List<Map<String,Object>> lb =
+//                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+//
+//                    Gdx.app.postRunnable(() ->
+//                        MainApp.getInstance().getCurrentGameView().updateLeaderboard(lb)
+//                    );
 //                    return;
 //                }
+                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,Object>> lb =
+                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+
+                    GameView view = MainApp.getInstance().getCurrentGameView();
+                    if (view != null) {
+                        Gdx.app.postRunnable(() -> view.updateLeaderboard(lb));
+                    } else {
+                        System.out.println("⚠️ Warning: GameView is null. Dropping leaderboard update.");
+                    }
+                    return;
+                }
+
+
 
 
 

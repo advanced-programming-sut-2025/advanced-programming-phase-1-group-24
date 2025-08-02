@@ -3250,8 +3250,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        MainApp.getInstance().setCurrentGameView(this);
+
         leaderboardTable = new Table(GameAssetManager.skin);
-        leaderboardTable.top().left().pad(10);
+        leaderboardTable.left().pad(10);
         leaderboardTable.setFillParent(true);
 
         // ستون‌های ثابت
@@ -3272,7 +3274,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 "ServerController",         // controller name
                 "getLeaderboard",         // method name
                 Collections.emptyMap(),// no params
-                currentPlayer.getUsername()
+                MainApp.getInstance().getCurrentGameView().currentPlayer.getUsername()
             )
             .thenAccept(response -> {
                 if (response.getStatus() == 200) {
@@ -3287,6 +3289,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                     );
                 }
             });
+        //MainApp.getInstance().setCurrentGameViewIfNull(this);
+        //MainApp.getInstance().setCurrentGameView(this);
 
     }
 
