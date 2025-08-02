@@ -426,5 +426,11 @@ public class MainApp extends com.badlogic.gdx.Game {
         });
     }
 
+    public void setCurrentGameViewIfNull(GameView view) {
+        if (this.currentGameView == null) {
+            this.currentGameView = view;
+        }
+    }
+
 
 }
