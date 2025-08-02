@@ -290,15 +290,21 @@
 //}
 package io.github.stardew.mini.server.Controller;
 
+import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
+import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.LobbyManager;
 import io.github.stardew.mini.server.ServerApp;
 import io.javalin.http.Context;
 import org.eclipse.jetty.server.Server;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -400,6 +406,32 @@ public class ServerController {
                 String senderUsername = fullMessage.getUsername();
                 String gameId = fullMessage.getGameID();
                 return gameController.handleChatMessage(senderUsername, gameId, body, server); // Modified call
+            }
+
+            case "handleReaction": {
+                return gameController.handleReaction(player, server, body);
+            }
+
+            case "updateNpcPosition": {
+                String npcName = (String) body.get("npcName");
+                Point currentPoint = GameSaver.convertObject(body.get("currentPoint"), Point.class);
+                Point movingTo = GameSaver.convertObject(body.get("movingTo"), Point.class);
+                Point movingFrom = GameSaver.convertObject(body.get("movingFrom"), Point.class);
+
+                result = gameController.updateNpcPosition(npcName, currentPoint, movingTo, movingFrom, server);
+                return Message.ok(result);
+            }
+            case "doNPCMission": {
+                String mission = (String) body.get("mission");
+                String currentPlayer = (String) body.get("currentPlayer");
+                Result resulttt = gameController.doMission(mission, currentPlayer);
+                return Message.ok(resulttt);
+            }
+            case "addNPCMission": {
+                String mission = (String) body.get("mission");
+                String currentPlayer = (String) body.get("currentPlayer");
+                Result resultttt = gameController.addNPCMission(mission,currentPlayer);
+                return Message.ok(resultttt);
             }
 
             default:

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import io.github.stardew.mini.ConfigLoader;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
@@ -41,30 +42,25 @@ public class NPC {
     private Map <String, ArrayList<NPCMission>> unlockedMissions;
     private int daysLeftToUnlockThirdMission;
 
+    private Point currentPoint;
     @JsonIgnore
     private Tile currentTile;
 
-    private float movementCooldown = 0f;
+    private Queue<Point> pathToTarget = new LinkedList<>();
+    private Point movingFrom = null;
+    private Point movingTo = null;
 
-    @JsonIgnore
-    private Queue<Tile> pathToTarget = new LinkedList<>();
-
-    @JsonIgnore
-    private Tile movingFrom = null;
-
-    @JsonIgnore
-    private Tile movingTo = null;
-
-    private float moveProgress = 0f;
-    private float moveSpeed = 0.7f;
+    private float moveSpeed = 1f;
 
     public NPC(NPCtype npcName, ArrayList<User> users,
-               ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission) {
+               ArrayList<NPCMission> missions, int daysLeftToUnlockThirdMission
+                , Point currentPoint) {
         this.npcName = npcName;
         this.friendshipLevels = new HashMap<>();
         this.friendshipPoints = new HashMap<>();
         this.talkedToNPCToday = new HashMap<>();
         this.gaveGiftToNPCToday = new HashMap<>();
+        this.currentPoint = currentPoint;
         this.missions = new ArrayList<>(missions);
         this.unlockedMissions = new HashMap<>();
         for (User user : users) {
@@ -125,20 +121,9 @@ public class NPC {
     }
 
     public Result talkToNPC (WeatherType currentWeather, User currentPlayer){
-//        for (Dialog dialog : npcName.getDialogs()) {
-//            if (currentWeather.equals(dialog.getWeatherType())
-//                    && friendshipLevels.get(currentPlayer.getUsername()) == dialog.getRequiredFriendshipLevel()) {
-//                if (!talkedToNPCToday.get(currentPlayer.getUsername())) {
-//                    friendshipPoints.merge(currentPlayer.getUsername(), 20, Integer::sum);
-//                    this.updateFriendshipLevel(currentPlayer);
-//                    talkedToNPCToday.put(currentPlayer.getUsername(), true);
-//                }
-//                return dialog.useDialog();
-//            }
-//        }
-//        return new Result(false,"No dialog available");
         return generateDialogueFromLLM(currentWeather, currentPlayer);
     }
+
     public Result doMission(int missionIndex, User currentPlayer) {
 
         if (missionIndex > unlockedMissions.size()) { return new Result(false, "False index."); }
@@ -200,7 +185,7 @@ public class NPC {
             if (npc.getDaysLeftToUnlockThirdMission() > 0)
                 npc.setDaysLeftToUnlockThirdMission(npc.getDaysLeftToUnlockThirdMission() - 1);
             for (String username : npc.getTalkedToNPCToday().keySet()) {
-                User user = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
+                User user = currentGame.getPlayerByUsername(username);
                 npc.getTalkedToNPCToday().put(user.getUsername(), false);
                 npc.getGaveGiftToNPCToday().put(user.getUsername(), false);
                 if (npc.getFriendshipLevels().get(user.getUsername()) == 3) {
@@ -246,8 +231,8 @@ public class NPC {
     }
 
     private Result generateDialogueFromLLM(WeatherType currentWeather, User currentPlayer) {
-        String OPENROUTER_API_KEY = "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";
-        String LLM_MODEL = "qwen/qwen3-coder:free";
+        String OPENROUTER_API_KEY = ConfigLoader.getApiKey();
+        String LLM_MODEL = "qwen/qwen3-235b-a22b-07-25:free";
         String OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
         HttpClient client = HttpClient.newHttpClient();
@@ -319,6 +304,10 @@ public class NPC {
         }
     }
 
+    public Point currentPointGetter() {
+        return this.currentPoint;
+    }
+
     public Tile currentTileGetter() {
         return this.currentTile;
     }
@@ -326,14 +315,13 @@ public class NPC {
     public void updateRoutine(Game currentGame) {
         MapOfGame map = currentGame.getMap();
         int currentHour = currentGame.getTimeAndDate().getHour();
-        int currentDayOfWeek = currentGame.getTimeAndDate().getDayOfWeek().ordinal(); // 0 for Sunday, 6 for Saturday
 
         Point targetLocation = null;
 
-        if (currentHour >= 6 && currentHour < 9) {
+        if (currentHour >= 6 && currentHour < 10) {
             targetLocation = npcName.getHomeLocation();
         }
-        else if (currentHour >= 9 && currentHour < 17) {
+        else if (currentHour >= 10 && currentHour < 17) {
             targetLocation = npcName.getWorkLocation();
         }
         else if (currentHour >= 17 && currentHour < 22) {
@@ -347,134 +335,125 @@ public class NPC {
             return;
         }
 
-        Tile destinationTile = map.getTile(targetLocation.x, targetLocation.y);
-
-        if (!isMoving() && (currentTile == null || !currentTile.equals(destinationTile))) {
-            List<Tile> path = findShortestPath(currentTile, destinationTile, map, 50);
+        if (!isMoving() && (currentPoint == null || !currentPoint.equals(targetLocation))) {
+            List<Point> path = findShortestPath(currentPoint, targetLocation, map, 1000);
             if (!path.isEmpty()) {
                 setPathToTarget(path);
             }
+            else {
+                System.out.println("No path found for " + targetLocation);
+            }
         }
-        updateMovement(0.0166f);
+        updateMovement(0.018f);
     }
 
     public boolean isMoving() {
         return movingTo != null;
     }
 
-    public void startMove(Tile from, Tile to) {
+    public void startMove(Point from, Point to) {
         this.movingFrom = from;
         this.movingTo = to;
-        this.moveProgress = 0f;
     }
 
     public void updateMovement(float delta) {
+        if (MainApp.getInstance().getCurrentGame() == null) {
+            System.out.println("currrentgame is null");
+            return;
+        }
         if (movingTo != null) {
-            moveProgress += moveSpeed * delta;
-            if (moveProgress >= 1f) {
-                moveProgress = 0f;
-                if (currentTile != null) {
-                    currentTile.setContainedNPC(null);
-                }
-                currentTile = movingTo;
-                currentTile.setContainedNPC(this);
-                movingFrom = null;
-                movingTo = null;
+            currentPoint = movingTo;
+            movingFrom = null;
+            movingTo = null;
 
-                if (!pathToTarget.isEmpty()) {
-                    startMove(currentTile, pathToTarget.poll());
-                } else {
-                    resetCooldown();
-                }
+            if (!pathToTarget.isEmpty()) {
+                startMove(currentPoint, pathToTarget.poll());
+            }
+            else {
+                Map<String, Object> params = new HashMap<>();
+                params.put("npcName", this.getName());
+                params.put("currentPoint", currentPoint);
+                params.put("movingTo", movingTo);
+                params.put("movingFrom", movingFrom);
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "updateNpcPosition",
+                    params,
+                    MainApp.getInstance().getLoggedInUser().getUsername()
+                );
+                this.currentTile.setContainedNPC(null);
+                this.currentTile = MainApp.getInstance().getCurrentGame().getMap().getTile(currentPoint.x, currentPoint.y);
+                currentTile.setContainedNPC(this);
             }
         }
     }
 
-    public void setPathToTarget(List<Tile> path) {
+    public void setPathToTarget(List<Point> path) {
         this.pathToTarget.clear();
         this.pathToTarget.addAll(path);
         if (!this.pathToTarget.isEmpty()) {
-            startMove(currentTile, this.pathToTarget.poll());
+            startMove(currentPoint, this.pathToTarget.poll());
         }
     }
 
-    public Tile getMovingFrom() {
+    public Point getMovingFrom() {
         return movingFrom;
     }
 
-    public Tile getMovingTo() {
+    public Point getMovingTo() {
         return movingTo;
     }
 
-    public float getMoveProgress() {
-        return moveProgress;
+    public void setCurrentPoint(Point currentPoint) {
+        this.currentPoint = currentPoint;
     }
 
-    public float getMovementCooldown() {
-        return movementCooldown;
-    }
-
-    public void reduceCooldown(float delta) {
-        movementCooldown -= delta;
-    }
-
-    public void resetCooldown() {
-        movementCooldown = (3f + MathUtils.random(2f));
+    public Tile getCurrentTile() {
+        return currentTile;
     }
 
     public void setCurrentTile(Tile currentTile) {
         this.currentTile = currentTile;
     }
 
-    private List<Tile> findShortestPath(Tile start, Tile goal, MapOfGame map, int maxSteps) {
-        if (start == null || goal == null || start.equals(goal)) return new ArrayList<>();
-
-        Queue<Tile> queue = new LinkedList<>();
-        Map<Tile, Tile> cameFrom = new HashMap<>();
-        Set<Tile> visited = new HashSet<>();
-
-        queue.add(start);
-        visited.add(start);
-        cameFrom.put(start, null);
-
-        int steps = 0;
-        while (!queue.isEmpty() && steps <= maxSteps) {
-            Tile current = queue.poll();
-
-            if (current.equals(goal)) break;
-
-            for (Tile neighbor : getWalkableNeighbors(current, map)) {
-                if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);
-                    cameFrom.put(neighbor, current);
-                    queue.add(neighbor);
-                }
-            }
-            steps++;
+    private List<Point> findShortestPath(Point start, Point goal, MapOfGame map, int maxSteps) {
+        if (start == null || goal == null || start.equals(goal)) {
+            return new ArrayList<>();
         }
 
-        List<Tile> path = new LinkedList<>();
-        Tile step = goal;
-        while (step != null && !step.equals(start)) {
-            path.add(0, step);
-            step = cameFrom.get(step);
+        List<Point> path = new ArrayList<>();
+        int currentX = start.x;
+        int currentY = start.y;
+
+        // Move horizontally first
+        while (currentX != goal.x) {
+            if (path.size() >= maxSteps) return new ArrayList<>(); // Path is too long
+            currentX += (goal.x > currentX) ? 1 : -1;
+            path.add(new Point(currentX, currentY));
         }
 
-        if (path.size() > maxSteps || !path.contains(goal)) return new ArrayList<>();
+        // Then move vertically
+        while (currentY != goal.y) {
+            if (path.size() >= maxSteps) return new ArrayList<>(); // Path is too long
+            currentY += (goal.y > currentY) ? 1 : -1;
+            path.add(new Point(currentX, currentY));
+        }
+
         return path;
     }
 
-    private List<Tile> getWalkableNeighbors(Tile tile, MapOfGame map) {
-        List<Tile> neighbors = new ArrayList<>();
+    private List<Point> getWalkableNeighbors(Point tile, MapOfGame map) {
+        List<Point> neighbors = new ArrayList<>();
         int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
         for (int[] dir : directions) {
-            int nx = tile.getX() + dir[0];
-            int ny = tile.getY() + dir[1];
+            int nx = tile.x + dir[0];
+            int ny = tile.y + dir[1];
             Tile neighbor = map.getTile(nx, ny);
             if (neighbor != null && neighbor.getisWalkable()) {
                 if (neighbor.getContainedNPC() == null || neighbor.getContainedNPC().equals(this)) {
-                    neighbors.add(neighbor);
+                    neighbors.add(new Point(nx, ny));
                 }
             }
         }
@@ -482,17 +461,21 @@ public class NPC {
     }
 
     public void reloadAfterLoad(Tile tile) {
+        this.currentPoint = new Point(tile.getX(), tile.getY());
         this.currentTile = tile;
-        this.pathToTarget = new LinkedList<>();
-        this.movingFrom = null;
-        this.movingTo = null;
-        this.moveProgress = 0f;
-        this.movementCooldown = 0f;
+        //this.pathToTarget = new LinkedList<>();
 
-        if (tile.getContainedNPC() == null || !tile.getContainedNPC().equals(this)) {
+        if (this.currentPoint != null && tile.getContainedNPC() == null) {
             tile.setContainedNPC(this);
         }
     }
 
 
+    public void setMovingTo(Point movingTo) {
+        this.movingTo = movingTo;
+    }
+
+    public void setMovingFrom(Point movingFrom) {
+        this.movingFrom = movingFrom;
+    }
 }

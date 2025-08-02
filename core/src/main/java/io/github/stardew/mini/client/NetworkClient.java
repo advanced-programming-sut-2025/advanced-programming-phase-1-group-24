@@ -221,22 +221,32 @@ public class NetworkClient extends WebSocketClient {
                     return;
                 }
                 if (Message.POP_UP_NOTIFICATION.equalsIgnoreCase(message.getType())) {
-                    System.out.println("[DEBUG-NWCLIENT] Received POP_UP_NOTIFICATION type. Processing...");
                     Map<String, Object> notificationData = (Map<String, Object>) message.getBody();
                     String title = (String) notificationData.get("title");
-                    String notificationBody = (String) notificationData.get("body"); // Using 'body' for the message content
+                    String notificationBody = (String) notificationData.get("body");
 
-                    System.out.println("[DEBUG-NWCLIENT] Pop-up Notification: Title=" + title + ", Body=" + notificationBody);
 
                     Gdx.app.postRunnable(() -> {
                         if (MainApp.getInstance().getCurrentGameView() != null) {
-                            System.out.println("[DEBUG-NWCLIENT] GameView available. Calling showPopupNotification.");
                             MainApp.getInstance().getCurrentGameView().showErrorDialog(MainApp.getInstance().getCurrentGameView().getStage(), notificationBody);
                         } else {
                             System.err.println("[DEBUG-NWCLIENT] GameView is null! Cannot show pop-up notification.");
                         }
                     });
-                    return; // Message handled
+                    return;
+                }
+                if (Message.REACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> reactionData = (Map<String, Object>) message.getBody();
+                    String sender = (String) reactionData.get("senderUsername");
+                    String content = (String) reactionData.get("reactionContent");
+                    boolean isImage = (Boolean) reactionData.get("isImage");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showReactionForPlayer(sender, content, isImage);
+                        }
+                    });
+                    return; // Done with this message
                 }
                 System.err.println("❌ requestId was null");
             }
@@ -396,6 +406,20 @@ public class NetworkClient extends WebSocketClient {
             gameId,
             "GameController",
             "handleChatMessage",
+            params,
+            senderUsername
+        );
+    }
+
+    public CompletableFuture<Message<?>> sendReaction(String gameId, String senderUsername, String reactionContent, boolean isImage) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("reactionContent", reactionContent);
+        params.put("isImage", isImage);
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleReaction",
             params,
             senderUsername
         );

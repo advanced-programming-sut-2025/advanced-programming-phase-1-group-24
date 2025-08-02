@@ -20,7 +20,9 @@ import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.client.MainApp;
@@ -69,6 +71,9 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+        for (User player : players) {
+            playerAddedMissions.put(player.getUsername(), new ArrayList<>());
+        }
     }
 
     public Game() {
@@ -126,9 +131,9 @@ public class Game {
       timeAndDate.advanceHour();
       getCurrentPlayer().handleSpecialFoodsEffects();
       updateMachines();
-      for (NPC npc : this.getNpcs()) {
-          npc.updateRoutine(this);
-      }
+//      for (NPC npc : this.getNpcs()) {
+//          npc.updateRoutine(this);
+//      }
     }
 
     public  void updateMachines() {  //use this method every hour
@@ -250,10 +255,10 @@ public class Game {
             this.npcs = new ArrayList<>();
         }
         NPC sebastian = new NPC(NPCtype.Sebastian, players, new ArrayList<>(Arrays.asList(
-            new NPCMission(Map.of("Iron Bar", 50), Map.of("Diamond", 2)),
-            new NPCMission(Map.of("Pumpkin Pie", 1), Map.of("Gold Coin", 5000)),
-            new NPCMission(Map.of("Rock", 150), Map.of("Quartz", 50))
-        )), 30);
+            new NPCMission("Sebastian mission 1", Map.of("Iron Bar", 50), Map.of("Diamond", 2)),
+            new NPCMission("Sebastian mission 2", Map.of("Pumpkin Pie",  1), Map.of("Gold Coin", 5000)),
+            new NPCMission("Sebastian mission 3", Map.of("Rock", 150), Map.of("Quartz", 50))
+        )), 30, new Point(NPCtype.Sebastian.getHomeLocation().x, NPCtype.Sebastian.getHomeLocation().y));
         npcs.add(sebastian);
         Tile sebastianHomeTile = map.getTile(sebastian.getNpcName().getHomeLocation().x, sebastian.getNpcName().getHomeLocation().y);
         if (sebastianHomeTile != null) {
@@ -262,10 +267,10 @@ public class Game {
         }
 
         NPC abigail = new NPC(NPCtype.Abigail, players, new ArrayList<>(Arrays.asList(
-            new NPCMission(Map.of("Gold Bar", 1), Map.of("Friendship Level", 1)),
-            new NPCMission(Map.of("Pumpkin", 1), Map.of("Gold Coin", 500)),
-            new NPCMission(Map.of("Wheat", 50), Map.of("Sprinkler", 1))
-        )), 60);
+            new NPCMission("Abigail mission 1", Map.of("Gold Bar", 1), Map.of("Friendship Level", 1)),
+            new NPCMission("Abigail mission 2", Map.of("Pumpkin", 1), Map.of("Gold Coin", 500)),
+            new NPCMission("Abigail mission 3", Map.of("Wheat", 50), Map.of("Sprinkler", 1))
+        )), 60,new Point(NPCtype.Abigail.getHomeLocation().x, NPCtype.Abigail.getHomeLocation().y));
         npcs.add(abigail);
         Tile abigailHomeTile = map.getTile(abigail.getNpcName().getHomeLocation().x, abigail.getNpcName().getHomeLocation().y);
         if (abigailHomeTile != null) {
@@ -274,10 +279,10 @@ public class Game {
         }
 
         NPC harvey = new NPC(NPCtype.Harvey, players, new ArrayList<>(Arrays.asList(
-            new NPCMission(Map.of("Strawberry", 12), Map.of("Gold Coin", 750)),
-            new NPCMission(Map.of("Salmon", 1), Map.of("Friendship Level", 1)),
-            new NPCMission(Map.of("Wine", 1), Map.of("Salad", 5))
-        )), 40);
+            new NPCMission("Harvey mission 1", Map.of("Strawberry", 12), Map.of("Gold Coin", 750)),
+            new NPCMission("Harvey mission 2", Map.of("Salmon", 1), Map.of("Friendship Level", 1)),
+            new NPCMission("Harvey mission 3", Map.of("Wine", 1), Map.of("Salad", 5))
+        )), 40, new Point(NPCtype.Harvey.getHomeLocation().x, NPCtype.Harvey.getHomeLocation().y));
         npcs.add(harvey);
         Tile harveyHomeTile = map.getTile(harvey.getNpcName().getHomeLocation().x, harvey.getNpcName().getHomeLocation().y);
         if (harveyHomeTile != null) {
@@ -286,10 +291,10 @@ public class Game {
         }
 
         NPC leah = new NPC(NPCtype.Leah, players, new ArrayList<>(Arrays.asList(
-            new NPCMission(Map.of("Wood", 10), Map.of("Gold Coin", 500)),
-            new NPCMission(Map.of("Salmon", 1), Map.of("Salmon Dinner Recipe", 1)),
-            new NPCMission(Map.of("Wood", 200), Map.of("Deluxe Scarecrow", 3))
-        )), 90);
+            new NPCMission("Leah mission 1", Map.of("Wood", 10), Map.of("Gold Coin", 500)),
+            new NPCMission("Leah mission 2", Map.of("Salmon", 1), Map.of("Salmon Dinner Recipe", 1)),
+            new NPCMission("Leah mission 3", Map.of("Wood", 200), Map.of("Deluxe Scarecrow", 3))
+        )), 90, new Point(NPCtype.Leah.getHomeLocation().x, NPCtype.Leah.getHomeLocation().y));
         npcs.add(leah);
         Tile leahHomeTile = map.getTile(leah.getNpcName().getHomeLocation().x, leah.getNpcName().getHomeLocation().y);
         if (leahHomeTile != null) {
@@ -298,10 +303,10 @@ public class Game {
         }
 
         NPC robin = new NPC(NPCtype.Robin, players, new ArrayList<>(Arrays.asList(
-            new NPCMission(Map.of("Wood", 80), Map.of("Gold Coin", 1000)),
-            new NPCMission(Map.of("Iron Bar", 10), Map.of("Bee House", 3)),
-            new NPCMission(Map.of("Wood", 1000), Map.of("Gold Coin", 25000))
-        )), 120);
+            new NPCMission("Robin mission 1", Map.of("Wood", 80), Map.of("Gold Coin", 1000)),
+            new NPCMission("Robin mission 2", Map.of("Iron Bar", 10), Map.of("Bee House", 3)),
+            new NPCMission("Robin mission 3", Map.of("Wood", 1000), Map.of("Gold Coin", 25000))
+        )), 120, new Point(NPCtype.Robin.getHomeLocation().x, NPCtype.Abigail.getHomeLocation().y));
         npcs.add(robin);
         Tile robinHomeTile = map.getTile(robin.getNpcName().getHomeLocation().x, robin.getNpcName().getHomeLocation().y);
         if (robinHomeTile != null) {

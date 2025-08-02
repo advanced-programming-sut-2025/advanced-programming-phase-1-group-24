@@ -447,6 +447,7 @@ public class MapSelectionMenuController implements MenuController {
                     Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
                     msg.setType("start-game");
                     playerConnection.getWsContext().send(new Gson().toJson(msg));
+                    MainApp.getInstance().setCurrentGame(currentGame);
                 }
             }
             gs.startGameTimer();

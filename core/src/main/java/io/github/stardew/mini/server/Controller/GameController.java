@@ -37,6 +37,7 @@ import io.github.stardew.mini.client.View.GameView;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
 
+import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.Queue;
@@ -3135,20 +3136,13 @@ public class GameController implements MenuController {
         return new Result(true, result.toString());
     }
 
-    public Result doMission(int missionIndex) {
-        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
-        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        NPC wantedNPC = null;
-        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
-            if (npc.checkIfIsNearNPC(currentTile)) {
-                wantedNPC = npc;
-                break;
+    public Result doMission(String missionInitials, String currentPlayerUsername) {
+        for (User playerr : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if(playerr.getUsername().equals(currentPlayerUsername)) {
+                return NPCMission.doMission(missionInitials, playerr);
             }
         }
-        if (wantedNPC == null) {
-            return new Result(false, "You are not standing next to an npc.");
-        }
-        return wantedNPC.doMission(missionIndex, currentPlayer);
+        return new Result(false, "something went wrong in doing mission");
     }
 
     public Result putFoodInFridge(String itemName) {
@@ -3446,6 +3440,85 @@ public class GameController implements MenuController {
             System.err.println("[ERROR-GAMECONTROLLER] Unknown chat type: " + chatType);
             return Message.BAD_REQUEST.setMessage("Unknown chat type.");
         }
+    }
+
+    public Result updateNpcPosition(String npcName, Point currentPoint, Point movingTo, Point movingFrom, GameServer gs) {
+        NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
+        if (npc != null) {
+
+            // Clear old tile
+            if (npc.currentPointGetter() != null) {
+                Tile oldTile = MainApp.getInstance().getCurrentGame().getMap().getTile(npc.currentPointGetter().x, npc.currentPointGetter().y);
+                if (oldTile != null) {
+                    oldTile.setContainedNPC(null);
+                }
+            }
+            if (npc.currentTileGetter() != null) {
+                npc.currentTileGetter().setContainedNPC(null);
+                npc.setCurrentTile(null);
+            }
+
+            // Update NPC's point and set new tile
+            npc.setCurrentPoint(currentPoint);
+            Tile newTile = MainApp.getInstance().getCurrentGame().getMap().getTile(currentPoint.x, currentPoint.y);
+            if (newTile != null) {
+                newTile.setContainedNPC(npc);
+                npc.setCurrentTile(newTile);
+            }
+            npc.setMovingTo(movingTo);
+            npc.setMovingFrom(movingFrom);
+
+            return new Result(true, "NPC position updated for " + npcName);
+        }
+        return new Result(false, "NPC not found: " + npcName);
+    }
+
+    public Result addNPCMission(String missionInitials, String currentPlayerUsername) {
+        for (User playerr : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if(playerr.getUsername().equals(currentPlayerUsername)) {
+                for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+                    for (NPCMission npcMission : npc.getMissions()) {
+                        if(npcMission.getInitials().equals(missionInitials)) {
+                            if (MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(playerr.getUsername()) == null) {
+                                MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().put(currentPlayerUsername, new ArrayList<>());
+                            }
+                            MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(playerr.getUsername()).add(npcMission);
+                            return new Result(true, "mission added successfully");
+                        }
+                    }
+                }
+            }
+        }
+        return new Result(false, "something went wrong in adding mission");
+    }
+
+
+    public Message<?> handleReaction(User sender, GameServer gs, Map<String, Object> body) {
+        String reactionContent = (String) body.get("reactionContent");
+        Boolean isImage = (Boolean) body.get("isImage");
+
+        if (reactionContent == null || isImage == null) {
+            return Message.BAD_REQUEST.setMessage("Missing reaction content or type.");
+        }
+
+        // Create the broadcast message payload
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("senderUsername", sender.getUsername());
+        broadcastBody.put("reactionContent", reactionContent);
+        broadcastBody.put("isImage", isImage);
+
+        // Create the message object
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Reaction Broadcast", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.REACTION_BROADCAST); // Use our new type
+
+        // Send to all players in the game
+        for (PlayerConnection playerConnection : gs.getPlayers()) {
+            if (playerConnection.getWsContext().session.isOpen()) {
+                playerConnection.getWsContext().send(new Gson().toJson(broadcastMsg));
+            }
+        }
+
+        return Message.OK.setMessage("Reaction broadcasted.");
     }
 
 

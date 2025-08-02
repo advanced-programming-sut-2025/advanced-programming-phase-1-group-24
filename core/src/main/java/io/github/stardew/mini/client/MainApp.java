@@ -367,10 +367,6 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
-    public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
-        currentGame = currentGame;
-    }
-
     public void getCurrentMenu(Menu currentMenu) {
         currentMenu = currentMenu;
     }
