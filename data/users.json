@@ -122,6 +122,15 @@
       "FARMING": 0,
       "FORAGING": 0
     },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia80",
+      "x": 136,
+      "y": 29,
+      "hasBeenBurt": false
+    },
     "machineRecepies": [],
     "cookingRecepies": [
       "Salad",
@@ -169,6 +178,15 @@
       }
     },
     "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia80",
+      "x": 126,
+      "y": 8,
+      "hasBeenBurt": false
+    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -792,6 +810,15 @@
       "FARMING": 0,
       "FORAGING": 0
     },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia50",
+      "x": 16,
+      "y": 8,
+      "hasBeenBurt": false
+    },
     "machineRecepies": [],
     "cookingRecepies": [
       "Salad",
@@ -839,6 +866,15 @@
       }
     },
     "ownedAnimals": [],
+    "homeTile": {
+      "type": "HOUSE",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia50",
+      "x": 6,
+      "y": 8,
+      "hasBeenBurt": false
+    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -1061,9 +1097,9 @@
     "securityAnswer": "morgh",
     "maxEnergy": 200,
     "maxEnergyTurn": 50,
-    "energy": 199,
-    "currentTurnEnergy": 49,
-    "money": 999,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
     "fainted": false,
     "skillsLevel": {
       "FISHING": 0,
@@ -1076,15 +1112,6 @@
       "MINING": 0,
       "FARMING": 0,
       "FORAGING": 0
-    },
-    "currentTile": {
-      "type": "FARM",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "kimia52",
-      "x": 124,
-      "y": 13,
-      "hasBeenBurt": false
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1757,15 +1784,6 @@
       "MINING": 0,
       "FARMING": 0,
       "FORAGING": 0
-    },
-    "currentTile": {
-      "type": "FARM",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "kimia82",
-      "x": 16,
-      "y": 8,
-      "hasBeenBurt": false
     },
     "machineRecepies": [],
     "cookingRecepies": [
