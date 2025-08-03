@@ -181,7 +181,7 @@ public class AppSocket {
                         if (existing != null && existing.isAwaitingReconnect()) {
                             existing.markReconnected();
                             System.out.println("User reconnected: " + existing.getUsername());
-
+                            broadcastOnlinePlayers();
                             GameServer game = getGameOfUser(existing.getUsername());
                             if (game != null) {
                                 game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
@@ -263,7 +263,7 @@ public class AppSocket {
             ws.onClose(ctx -> {
                 System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
                 String sessionId = ctx.sessionId(); // this is the correct method
-                PlayerConnection connection = connectedPlayers.remove(sessionId);
+                PlayerConnection connection = connectedPlayers.get(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
                     GameServer game = getGameOfUser(connection.getUsername());
@@ -277,7 +277,7 @@ public class AppSocket {
                                 if (connection.isAwaitingReconnect() &&
                                     System.currentTimeMillis() - connection.getDisconnectTime() >= 120_000) {
                                     System.out.println("User did not reconnect in time: " + connection.getUsername());
-
+                                    connectedPlayers.remove(sessionId);
                                     GameServer gs = game;
                                     User u = connection.getUser();
                                     try {
