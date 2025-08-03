@@ -48,6 +48,12 @@ public class Game {
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
     private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
+
+    private boolean voteOutInProgress = false;
+    private User playerToVoteOut;
+    private Map<User, Boolean> voteOutVotes = new HashMap<>();
+
+
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
         for (User player : players) {
@@ -116,6 +122,26 @@ public class Game {
 
     public Map<User, Boolean> getTerminationVotes() {
         return terminationVotes;
+    }
+
+    public boolean isVoteOutInProgress() {
+        return voteOutInProgress;
+    }
+
+    public void setVoteOutInProgress(boolean voteOutInProgress) {
+        this.voteOutInProgress = voteOutInProgress;
+    }
+
+    public User getPlayerToVoteOut() {
+        return playerToVoteOut;
+    }
+
+    public void setPlayerToVoteOut(User playerToVoteOut) {
+        this.playerToVoteOut = playerToVoteOut;
+    }
+
+    public Map<User, Boolean> getVoteOutVotes() {
+        return voteOutVotes;
     }
 
     public boolean isUserTurn(User user) {

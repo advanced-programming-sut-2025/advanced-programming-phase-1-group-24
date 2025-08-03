@@ -478,4 +478,12 @@ public class NPC {
     public void setMovingFrom(Point movingFrom) {
         this.movingFrom = movingFrom;
     }
+
+    public void eliminatePlayer(String username){
+        friendshipPoints.remove(username);
+        friendshipLevels.remove(username);
+        unlockedMissions.remove(username);
+        talkedToNPCToday.remove(username);
+        gaveGiftToNPCToday.remove(username);
+    }
 }

@@ -412,6 +412,36 @@ public class ServerController {
                 return gameController.handleReaction(player, server, body);
             }
 
+            case "startForceTerminateVote": {
+                return gameController.startForceTerminateVote(player, server);
+            }
+            case "voteToTerminate": {
+                Boolean approve = (Boolean) body.get("approve");
+                if (approve == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'approve' parameter for vote.");
+                }
+                return gameController.voteToTerminate(player, server, approve);
+            }
+
+            case "startVoteOut": {
+                String targetUsername = (String) body.get("target");
+                if (targetUsername == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'target' username for vote-out.");
+                }
+                return gameController.startVoteOut(player, targetUsername, server);
+            }
+            case "castVoteOut": {
+                Boolean approve = (Boolean) body.get("approve");
+                if (approve == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'approve' parameter for vote.");
+                }
+                return gameController.castVoteOut(player, approve, server);
+            }
+
+            case "talk": {
+                return gameController.talk(player, server, body);
+            }
+
             case "updateNpcPosition": {
                 String npcName = (String) body.get("npcName");
                 Point currentPoint = GameSaver.convertObject(body.get("currentPoint"), Point.class);

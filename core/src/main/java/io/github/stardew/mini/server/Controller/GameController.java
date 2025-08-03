@@ -34,6 +34,7 @@ import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Tools.*;
 import io.github.stardew.mini.client.View.GameView;
+import io.github.stardew.mini.server.AppSocket;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
 
@@ -3519,6 +3520,262 @@ public class GameController implements MenuController {
         }
 
         return Message.OK.setMessage("Reaction broadcasted.");
+    }
+
+    public Message<?> startForceTerminateVote(User player, GameServer gs) {
+        Game currentGame = gs.getGame();
+
+        if (currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("A termination vote is already in progress!");
+        }
+
+        // Start the vote and auto-approve for the initiator
+        currentGame.setVoteInProgress(true);
+        currentGame.getTerminationVotes().clear();
+        currentGame.getTerminationVotes().put(player, true);
+
+        // Notify all players to start voting
+        Map<String, Object> body = new HashMap<>();
+        body.put("initiator", player.getUsername());
+        Message<Map<String, Object>> voteRequestMessage = new Message<>(200, "A vote to terminate the game has started.", body, Message.MessageType.RESPONSE);
+        voteRequestMessage.setType("force_terminate_vote_started"); // New specific message type
+
+        for (PlayerConnection connection : gs.getPlayers()) {
+            connection.send(new Gson().toJson(voteRequestMessage));
+        }
+
+        // Check vote status immediately in case the initiator is the only player
+        checkVoteStatus(gs);
+
+        return Message.OK.setMessage("Termination vote started. Your vote is recorded as YES.");
+    }
+
+    public Message<?> voteToTerminate(User player, GameServer gs, boolean approve) {
+        Game currentGame = gs.getGame();
+
+        if (!currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("No active termination vote!");
+        }
+
+        if (currentGame.getTerminationVotes().containsKey(player)) {
+            return Message.BAD_REQUEST.setMessage("You have already voted!");
+        }
+
+        currentGame.getTerminationVotes().put(player, approve);
+
+        checkVoteStatus(gs);
+
+        return Message.OK.setMessage("Your vote has been recorded.");
+    }
+
+    private void checkVoteStatus(GameServer gs) {
+        Game currentGame = gs.getGame();
+        List<User> players = currentGame.getPlayers();
+        Map<User, Boolean> votes = currentGame.getTerminationVotes();
+
+        if (votes.size() == players.size()) { // All players have voted
+            boolean allYes = votes.values().stream().allMatch(v -> v);
+
+            if (allYes) {
+                // Terminate game
+                for (User player : players) {
+                    player.updateMaxMoney();
+                    player.setPlayedGames(player.getPlayedGames() + 1);
+                    player.updateGameFields();
+                }
+                // In a real scenario, you'd save user data here.
+                // UserDatabase.saveUsers(new ArrayList<>(ServerApp.getInstance().getAllUsers().values()));
+
+                // Broadcast termination message
+                Message<?> terminationMessage = new Message<>(200, "Game terminated by unanimous vote.", null, Message.MessageType.RESPONSE);
+                terminationMessage.setType("game_terminated");
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(terminationMessage));
+                }
+
+                // Clean up server state
+                AppSocket.removeGame(gs);
+                gs.stopServer();
+
+            } else {
+                // Cancel vote
+                currentGame.setVoteInProgress(false);
+                currentGame.getTerminationVotes().clear();
+
+                // Broadcast cancellation message
+                Message<?> cancellationMessage = new Message<>(200, "Game termination cancelled due to a 'No' vote.", null, Message.MessageType.RESPONSE);
+                cancellationMessage.setType("vote_cancelled");
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(cancellationMessage));
+                }
+            }
+        }
+    }
+
+    public Message<?> startVoteOut(User initiator, String targetUsername, GameServer gs) {
+        Game currentGame = gs.getGame();
+        if (currentGame.isVoteOutInProgress() || currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("A vote is already in progress.");
+        }
+
+        User target = gs.getUserByUsername(targetUsername);
+        if (target == null) {
+            return Message.NOT_FOUND.setMessage("Player to vote out not found.");
+        }
+
+        currentGame.setVoteOutInProgress(true);
+        currentGame.setPlayerToVoteOut(target);
+        currentGame.getVoteOutVotes().clear();
+        // The initiator's vote is implicitly 'yes' and is cast like any other player.
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("initiator", initiator.getUsername());
+        body.put("target", targetUsername);
+        Message<Map<String, Object>> voteRequestMessage = new Message<>(200, "A vote to eliminate a player has started.", body, Message.MessageType.RESPONSE);
+        voteRequestMessage.setType("vote_out_started");
+
+        for (PlayerConnection connection : gs.getPlayers()) {
+            connection.send(new Gson().toJson(voteRequestMessage));
+        }
+
+        return Message.OK.setMessage("Vote to eliminate " + targetUsername + " has started.");
+    }
+
+    public Message<?> castVoteOut(User voter, boolean vote, GameServer gs) {
+        Game currentGame = gs.getGame();
+        if (!currentGame.isVoteOutInProgress()) {
+            return Message.BAD_REQUEST.setMessage("No vote-out is currently in progress.");
+        }
+        if (currentGame.getVoteOutVotes().containsKey(voter)) {
+            return Message.BAD_REQUEST.setMessage("You have already voted.");
+        }
+
+        currentGame.getVoteOutVotes().put(voter, vote);
+        checkVoteOutStatus(gs);
+        return Message.OK.setMessage("Your vote has been cast.");
+    }
+
+    private void checkVoteOutStatus(GameServer gs) {
+        Game currentGame = gs.getGame();
+        // Use a copy to avoid issues if the list is modified during iteration
+        List<User> playersBeforeVote = new ArrayList<>(currentGame.getPlayers());
+        Map<User, Boolean> votes = currentGame.getVoteOutVotes();
+
+        if (votes.size() == playersBeforeVote.size()) {
+            long yesVotes = votes.values().stream().filter(v -> v).count();
+            boolean votePassed = yesVotes >= (playersBeforeVote.size() / 2.0);
+            User targetPlayer = currentGame.getPlayerToVoteOut();
+
+            if (votePassed) {
+                eliminatePlayer(targetPlayer, gs); // This removes the player and sends them a specific message
+
+                // Now, notify the *remaining* players of the result and update their game state.
+                Map<String, Object> body = new HashMap<>();
+                body.put("target", targetPlayer.getUsername());
+                body.put("outcome", "eliminated");
+
+                Message<Map<String, Object>> resultMessage = new Message<>(200, "Vote passed.", body, Message.MessageType.RESPONSE);
+                resultMessage.setType("vote_out_result");
+
+                for (PlayerConnection connection : gs.getPlayers()) { // This is now the updated list of players
+                    connection.send(new Gson().toJson(resultMessage));
+                }
+
+            } else {
+                // Cancel vote
+                currentGame.setVoteOutInProgress(false);
+                currentGame.getVoteOutVotes().clear();
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("target", targetPlayer.getUsername());
+                body.put("outcome", "failed");
+
+                Message<Map<String, Object>> resultMessage = new Message<>(200, "Vote failed.", body, Message.MessageType.RESPONSE);
+                resultMessage.setType("vote_out_result");
+
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(resultMessage));
+                }
+            }
+
+            // Reset vote state
+            currentGame.setVoteOutInProgress(false);
+            currentGame.setPlayerToVoteOut(null);
+            currentGame.getVoteOutVotes().clear();
+        }
+    }
+
+    private void eliminatePlayer(User playerToEliminate, GameServer gs) {
+        PlayerConnection connectionToEliminate = gs.getPlayerConnectionByUsername(playerToEliminate.getUsername());
+        if (connectionToEliminate != null) {
+            // Send a specific message to the eliminated player
+            Message<?> eliminatedMessage = new Message<>(200, "You have been voted out.", null, Message.MessageType.RESPONSE);
+            eliminatedMessage.setType("you_were_eliminated");
+            connectionToEliminate.send(new Gson().toJson(eliminatedMessage));
+
+            // Close the connection after a short delay to ensure the message is sent
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    connectionToEliminate.getWsContext().session.close(1000, "You have been voted out.");
+                }
+            }, 500); // 500ms delay
+
+            gs.getPlayers().remove(connectionToEliminate);
+        }
+        // Also remove from the game object's player list
+        gs.getGame().getPlayers().remove(playerToEliminate);
+
+        for (NPC npc : gs.getGame().getNpcs()) {
+            npc.eliminatePlayer(playerToEliminate.getUsername());
+        }
+
+        gs.getGame().getPlayerAddedMissions().remove(playerToEliminate.getUsername());
+    }
+
+    public Message<?> talk(User sender, GameServer gs, Map<String, Object> body) {
+        String recipientUsername = (String) body.get("recipient");
+        String messageContent = (String) body.get("message");
+        User recipient = gs.getUserByUsername(recipientUsername);
+        Game game = gs.getGame();
+
+        if (recipient == null) {
+            return Message.NOT_FOUND.setMessage("Recipient not found.");
+        }
+
+        if (!isAdjacent(sender.getCurrentTile(), recipient.getCurrentTile())) {
+            return Message.FORBIDDEN.setMessage("Players are not adjacent.");
+        }
+        Friendship friendship = game.getFriendship(sender.getUsername(), recipientUsername);
+        if (friendship == null) {
+            return Message.NOT_FOUND.setMessage("Friendship not found.");
+        }
+
+        if (sender.getPartner() != null && recipient.getPartner() != null && sender.getPartner().equals(recipient)) {
+            friendship.addXp(50);
+            sender.addEnergy(50);
+            recipient.addEnergy(50);
+        } else {
+            friendship.addXp(20);
+        }
+
+        friendship.getTalkHistory().add(new FriendshipMessage(sender.getUsername(), recipient.getUsername(), messageContent));
+
+        PlayerConnection recipientConnection = gs.getPlayerConnectionByUsername(recipientUsername);
+        if (recipientConnection != null) {
+            FriendshipMessage notificationMessage = new FriendshipMessage(sender.getUsername(), recipient.getUsername(), sender.getUsername() + " sent you a message: " + messageContent);
+            recipient.addToNotifications(notificationMessage);
+
+            // Also send a direct message to the client to trigger the notification UI
+            Map<String, Object> notificationBody = new HashMap<>();
+            notificationBody.put("sender", sender.getUsername());
+            notificationBody.put("message", messageContent);
+
+            Message<Map<String,Object>> notification = new Message<>(200, "new_message", notificationBody, Message.MessageType.RESPONSE);
+            notification.setType("notification");
+            recipientConnection.send(new Gson().toJson(notification));
+        }
+        return Message.OK.setMessage("Message sent.");
     }
 
 

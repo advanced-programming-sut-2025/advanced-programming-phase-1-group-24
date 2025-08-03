@@ -246,9 +246,64 @@ public class NetworkClient extends WebSocketClient {
                             MainApp.getInstance().getCurrentGameView().showReactionForPlayer(sender, content, isImage);
                         }
                     });
-                    return; // Done with this message
+                    return;
                 }
-                System.err.println("❌ requestId was null");
+                if ("force_terminate_vote_started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showForceTerminationVoteDialog(initiator);
+                        }
+                    });
+                } else if ("vote_cancelled".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().cancelTermination(message.getMessage());
+                        }
+                    });
+                } else if ("game_terminated".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handleGameTermination(message.getMessage());
+                        }
+                    });
+                } else if ("vote_out_started".equalsIgnoreCase(message.getType())) {
+                Map<String, Object> data = (Map<String, Object>) message.getBody();
+                String initiator = (String) data.get("initiator");
+                String target = (String) data.get("target");
+                Gdx.app.postRunnable(() -> {
+                    if (MainApp.getInstance().getCurrentGameView() != null) {
+                        MainApp.getInstance().getCurrentGameView().showVoteOutConfirmationDialog(initiator, target);
+                    }
+                });
+            } else if ("vote_out_result".equalsIgnoreCase(message.getType())) {
+                Map<String, Object> data = (Map<String, Object>) message.getBody();
+                String target = (String) data.get("target");
+                String outcome = (String) data.get("outcome");
+                String resultMessage = "The vote to eliminate " + target + " " + (outcome.equals("eliminated") ? "passed." : "failed.");
+
+                // If the vote passed, remove the player from the local game state
+                if ("eliminated".equals(outcome)) {
+                    Game currentGame = MainApp.getInstance().getCurrentGame();
+                    if (currentGame != null) {
+                        currentGame.getPlayers().removeIf(p -> p.getUsername().equals(target));
+                    }
+                }
+
+                Gdx.app.postRunnable(() -> {
+                    if (MainApp.getInstance().getCurrentGameView() != null) {
+                        MainApp.getInstance().getCurrentGameView().handlePlayerEliminated(target, resultMessage);
+                    }
+                });
+            } else if ("you_were_eliminated".equalsIgnoreCase(message.getType())) {
+                Gdx.app.postRunnable(() -> {
+                    if (MainApp.getInstance().getCurrentGameView() != null) {
+                        MainApp.getInstance().getCurrentGameView().handleYouAreEliminated(message.getMessage());
+                    }
+                });
+            }
+            System.err.println("❌ requestId was null");
             }
         } catch (Exception e) {
             System.err.println("❌ Failed to parse message: " + e.getMessage());

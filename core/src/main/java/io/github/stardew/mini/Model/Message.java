@@ -12,7 +12,6 @@ public class Message<T> {
     public static final String CHAT_PUBLIC = "chat_public";
     public static final String CHAT_PRIVATE = "chat_private";
     public static final String POP_UP_NOTIFICATION = "pop_up_notification";
-    public static final String REACTION = "reaction";
     public static final String REACTION_BROADCAST = "reaction-broadcast";
 
     private int status;
