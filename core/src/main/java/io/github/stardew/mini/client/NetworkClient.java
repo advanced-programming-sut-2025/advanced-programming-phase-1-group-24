@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Base64Coder;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.GameAudioManager;
 import io.github.stardew.mini.Model.Growables.Growable;
@@ -317,13 +318,29 @@ public class NetworkClient extends WebSocketClient {
                     Map<String,Object> b = (Map<String,Object>) message.getBody();
                     String trackId = (String) b.get("trackId");
                     String base64  = (String) b.get("data");
+//
+                    if (base64 == null || base64.isEmpty()) {
+                        System.err.println("Empty base64 data for track: " + trackId);
+                        return;
+                    }
 
-                    byte[] bytes = Base64Coder.decode(base64);
+                    // Delete previous temp files to avoid accumulation
+                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
+                        old.delete();
+                    }
+//                    String bytes = Arrays.toString(Base64Coder.decode(base64));
+//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+//                    fh.writeBytes(bytes.getBytes(), false);
+                    byte[] decodedBytes = Base64Coder.decode(base64);
                     FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
-                    fh.writeBytes(bytes, false);
+                    fh.writeBytes(decodedBytes, false);
 
                     // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
-                    GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+                    try {
+                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+                    } catch (GdxRuntimeException e) {
+                        System.err.println("Failed to play audio: " + e.getMessage());
+                    }
                 }
 
 
@@ -544,7 +561,8 @@ public class NetworkClient extends WebSocketClient {
     }
 
     public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
-        String b64 = Arrays.toString(Base64Coder.encode(raw));
+        //String b64 = Arrays.toString(Base64Coder.encode(raw));
+        String b64 = new String(Base64Coder.encode(raw));
         Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
             "name", name,
             "data", b64);

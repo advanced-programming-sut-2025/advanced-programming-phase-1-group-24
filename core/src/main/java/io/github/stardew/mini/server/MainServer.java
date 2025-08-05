@@ -29,17 +29,17 @@ public class MainServer {
 //            })
 //            .start(8080);
 
-//        app = Javalin.create(config -> {
-//            // ─── این بلاک را اضافه کن ─────────────────────────────────
-//            config.jetty.modifyWebSocketServletFactory((factory, handler) -> {
-//                // 200 KB برای متن
-//                factory.setMaxTextMessageSize(200 * 1024);
-//                // 200 KB برای باینری (اگر نیاز است)
-//                factory.setMaxBinaryMessageSize(200 * 1024);
-//            });
-//            // ─── بقیهٔ تنظیمات معمولت ────────────────────────────────
-//            config.showJavalinBanner = false;
-//        }).start(8080);
+        app = Javalin.create(config -> {
+            // ─── این بلاک را اضافه کن ─────────────────────────────────
+            config.jetty.modifyWebSocketServletFactory((factory) -> {
+                // 200 KB برای متن
+                factory.setMaxTextMessageSize(512 * 1024);
+                // 200 KB برای باینری (اگر نیاز است)
+                factory.setMaxBinaryMessageSize(512 * 1024);
+            });
+            // ─── بقیهٔ تنظیمات معمولت ────────────────────────────────
+            config.showJavalinBanner = false;
+        }).start(8080);
 //        app = Javalin.create(config -> {
 //            config.showJavalinBanner = false;
 //            config.ws.defaultMaxTextMessageSize = 200 * 1024;
@@ -60,7 +60,7 @@ public class MainServer {
 //            });
 //        }).start(8080);
 
-        app = Javalin.create().start(8080);
+        //app = Javalin.create().start(8080);
         app.before(ctx -> ctx.contentType("application/json"));
         app.get("/", ctx -> ctx.result("{\"message\":\"Hello from Stardew Mini Server!\"}"));
 
