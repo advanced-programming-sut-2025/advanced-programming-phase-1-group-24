@@ -71,6 +71,10 @@ public class AppSocket {
                 String rawMessage = ctx.message();
                 System.out.println("Received message: " + rawMessage);
 
+                int messageSize = rawMessage.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+                System.out.println("Received message size (bytes): " + messageSize);
+                //System.out.println("Received message: " + rawMessage);
+
                 // Handle ping messages (e.g., from client keep-alive)
                 if ("ping".equals(rawMessage)) {
                     // Optionally respond with pong (not required unless client expects it)

@@ -16,16 +16,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -111,16 +111,25 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
+    },
+    "currentTile": {
+      "type": "FARM",
+      "isWalkable": true,
+      "isPlowed": false,
+      "tileOwner": "kimia80",
+      "x": 24,
+      "y": 3,
+      "hasBeenBurt": false
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -174,7 +183,7 @@
       "isWalkable": true,
       "isPlowed": false,
       "tileOwner": "kimia80",
-      "x": 126,
+      "x": 6,
       "y": 8,
       "hasBeenBurt": false
     },
@@ -215,16 +224,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -308,16 +317,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -403,16 +412,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -505,16 +514,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -600,16 +609,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -695,16 +704,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -790,16 +799,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -894,16 +903,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -989,16 +998,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1084,41 +1093,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
-    },
-    "currentTile": {
-      "type": "FARM",
-      "isWalkable": false,
-      "isPlowed": false,
-      "productOfGrowable": {
-        "growableType": "ForagingCrop",
-        "age": 0,
-        "currentStage": 0,
-        "isWateredToday": false,
-        "hasBeenFertalized": false,
-        "hasBeenAttackedByCrow": false,
-        "daysLeftToDie": 2,
-        "foragingCropType": "Leek",
-        "name": "Leek",
-        "isSellable": true,
-        "price": 60,
-        "isPlaceable": false,
-        "isEatable": false,
-        "productQuality": "Normal"
-      },
-      "tileOwner": "kimia52",
-      "x": 16,
-      "y": 6,
-      "hasBeenBurt": false
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1172,7 +1156,7 @@
       "isWalkable": true,
       "isPlowed": false,
       "tileOwner": "kimia52",
-      "x": 6,
+      "x": 126,
       "y": 8,
       "hasBeenBurt": false
     },
@@ -1211,16 +1195,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1306,16 +1290,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1401,16 +1385,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1496,16 +1480,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1591,16 +1575,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1686,16 +1670,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1781,24 +1765,24 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "currentTile": {
       "type": "FARM",
       "isWalkable": true,
       "isPlowed": false,
       "tileOwner": "kimia82",
-      "x": 133,
-      "y": 1,
+      "x": 129,
+      "y": 26,
       "hasBeenBurt": false
     },
     "machineRecepies": [],
@@ -1894,16 +1878,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -1989,16 +1973,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -2084,16 +2068,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -2179,16 +2163,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -2274,16 +2258,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "skillExperience": {
-      "FORAGING": 0,
+      "MINING": 0,
       "FARMING": 0,
       "FISHING": 0,
-      "MINING": 0
+      "FORAGING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
