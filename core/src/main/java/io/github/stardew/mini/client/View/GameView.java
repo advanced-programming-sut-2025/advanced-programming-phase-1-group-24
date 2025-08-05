@@ -41,6 +41,7 @@ import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.NetworkClient;
@@ -106,6 +107,7 @@ import java.util.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
@@ -243,6 +245,42 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private SelectBox<String> trackSelect;
     private TextButton uploadButton;
     private Map<String,String> trackNameToId = new HashMap<>();
+
+    private ChatDialog chatDialog;
+    private ImageButton chatButton;
+
+    private Dialog reactionMenuDialog;
+    private Dialog changeReactionsDialog;
+    private ImageButton reactionButton;
+    private final ArrayList<String> imageReactions = new ArrayList<>(Arrays.asList(
+        "reactions/grinning_face.png", "reactions/heart.png",
+        "reactions/thumbs_up.png", "reactions/cry.png",
+        "reactions/shocked.png", "reactions/cool.png",
+        "reactions/angry.png", "reactions/sad.png",
+        "reactions/laughing.png", "reactions/sleeping.png"
+    ));
+    private ArrayList<String> textReactions = new ArrayList<>(Arrays.asList(
+        "Hi!", "Bye!", "Wait", "Help!", "Thanks", "Nooo", "Let's go!", "Nice!"
+    ));
+
+    private final Map<String, ReactionBubble> activeReactions = new ConcurrentHashMap<>();
+
+    private Dialog forceTerminationDialog;
+
+    private Dialog voteOutPlayersDialog;
+    private Dialog voteOutConfirmationDialog;
+
+    private boolean isEating = false;
+    private float eatingStateTime = 0f;
+
+    private boolean isGivingGift = false;
+    private float giftGivingStateTime = 0f;
+
+    private boolean isShowingGoodJob = false;
+    private float goodJobStateTime = 0f;
+
+    private final List<FloatingMessage> floatingMessages = new ArrayList<>();
+
 
 
 
@@ -539,6 +577,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
     @Override
     public boolean keyDown(int keycode) {
+
+        if (chatDialog.isVisible()) {
+            return true;
+        }
+
         if (isFishingActive) {
             if (keycode == Input.Keys.SPACE) {
                 fishingMinigameDialog.setGreenBarMovingUp(true);
@@ -600,12 +643,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             } else if (mousePos.y < camera.position.y) {
                 direction = "down";
             }
-            if(equippedItem == null) {
+            if (equippedItem == null) {
                 showErrorDialog(stage, "Pick a fertilizer first!");
-            }
-            else{
+            } else {
                 Result result = controller.fertalizeGrowable(equippedItem.getName(), direction);
-                showErrorDialog(stage,result.getMessage());
+                showErrorDialog(stage, result.getMessage());
             }
         }
         if (keycode == Input.Keys.C) {
@@ -675,9 +717,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             if (equippedItem != null) {
                 Result eatResult = controller.eat(equippedItem.getName());
                 if (eatResult.isSuccessful()) {
-                    showErrorDialog(stage, eatResult.message());
                     equippedItem = null;
                     updateEquippedItemSlot();
+                    isEating = true;
+                    eatingStateTime = 0f;
                 } else {
                     showErrorDialog(stage, eatResult.message());
                 }
@@ -883,11 +926,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             controller.crowAttack();
         }
 
-        if(keycode == Input.Keys.R){
-            if(equippedItem == null){
-                showErrorDialog(stage,"First choose an item!");
-            }
-            else {
+        if (keycode == Input.Keys.R) {
+            if (equippedItem == null) {
+                showErrorDialog(stage, "First choose an item!");
+            } else {
                 itemToPlace = equippedItem;
                 startPlacingItem(itemToPlace);
             }
@@ -927,6 +969,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         if (showInventoryMenu || showBackpackMenu) return false;
         return false;
     }
+
     private Animal getAnimalNearPlayer() {
         int playerX = currentPlayer.getCurrentTile().getX();
         int playerY = currentPlayer.getCurrentTile().getY();
@@ -988,24 +1031,24 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 });
             return true;
         }
-        if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
-            Result result = controller.startForceTerminateVote();
-            if (!result.isSuccessful()) {
-                showErrorDialog(stage, result.message());
-            }
-            return true;
-        }
+//        if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
+//            Result result = controller.startForceTerminateVote();
+//            if (!result.isSuccessful()) {
+//                showErrorDialog(stage, result.message());
+//            }
+//            return true;
+//        }
 //        if (isClickInside(mouseX, mouseY, nextTurnButton)) {
 //            if(equippedItem != null) {
 //                equippedItem = null;
 //            }
-//            //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
-////                System.out.println("touchdown");
-////                if (isAnyDialogOpen()) {
-////                    //showErrorDialog(stage,"Cannot end turn while another menu is open.");
-////                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
-////                    return true;
-////                }
+            //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
+//                System.out.println("touchdown");
+//                if (isAnyDialogOpen()) {
+//                    //showErrorDialog(stage,"Cannot end turn while another menu is open.");
+//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+//                    return true;
+//                }
 //            Result result = controller.nextTurn();
 //            if (!result.isSuccessful()) {
 //                showErrorDialog(stage, result.message());
@@ -1715,10 +1758,29 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Result result;
-                switch (scenario){
+                switch (scenario) {
                     case "Gift":
-                        result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
+                        result = controller.sendGift(giftReciever, equippedItem.getName(), Integer.toString(purchaseQuantity));
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("giftReciever", giftReciever);
+                        params.put("equippedItem", equippedItem.getName());
+                        params.put("quantity", Integer.toString(purchaseQuantity));
+
+                        MainApp.getInstance().getNetworkClient()
+                            .sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "GameController",
+                                "sendGift",
+                                params,
+                                MainApp.getInstance().getLoggedInUser().getUsername())
+                            .thenAccept(response -> {
+                                if (response.getStatus() == 200) {
+                                } else {
+                                    showFloatingMessage("Failed to send gift.");
+                                }
+                            });
                         break;
+
                     case "Machine":
                         result=controller.artisanUse(pendingMachineName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
                         break;
@@ -1736,7 +1798,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 pendingProductName = null;
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
                 numItemDialog.hide();
-                if(!result.message().equals("")){
+                if (!result.message().equals("")) {
                     showTimedErrorLabel(stage, result.message(), 2);
                 }
                 Gdx.input.setInputProcessor(GameView.this);
@@ -1879,7 +1941,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         createNPCSpeechBubbleDialog();
 
         createFridgeDialog();
+
+        chatDialog = new ChatDialog(GameAssetManager.skin, controller, this);
+        chatDialog.setVisible(false);
+        MainApp.getInstance().setChatDialogInstance(chatDialog);
+
+        createReactionMenuDialogs();
+
+        createForceTerminationDialog();
+
+        createVoteOutDialogs();
     }
+
     private void createNumItemDialog() {
         numItemDialog = new Dialog("select Number", GameAssetManager.skin);
         numItemDialog.padTop(40f);
@@ -1891,6 +1964,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         stage.addActor(numItemDialog);
     }
+
     private void createShopMenusDialogs() {
         shopMenuDialog = new Dialog("Shop Menu", GameAssetManager.skin, "custom-window");
         shopMenuDialog.padTop(40f);
@@ -2109,6 +2183,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         animalMenuDialog.setVisible(false);
         stage.addActor(animalMenuDialog);
     }
+
     private void updateAnimalInfoLabel() {
         if (selectedAnimal == null || animalInfoLabel == null) return;
 
@@ -2174,7 +2249,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         });
 
 
-
         exitButton = new TextButton("Exit", GameAssetManager.skin);
         exitButton.addListener(new ClickListener() {
             @Override
@@ -2198,8 +2272,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         });
 
         grabButton.setVisible(false);
-
-
 
 
         machineMenuDialog.getContentTable().add(recipesButton).row();
@@ -2516,51 +2588,45 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             @Override
             protected void result(Object obj) {
                 String action = (String) obj;
-                Result result;
+                Map<String, Object> params = new HashMap<>();
+                params.put("targetUsername", targetUsername);
 
+                String methodName = "";
                 switch (action) {
                     case "hug":
-                        result = controller.hug(targetUsername);
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            Tile tile1 = currentPlayer.getCurrentTile();
-                            Tile tile2 = MainApp.getInstance().getCurrentGame().getPlayerByUsername(targetUsername).getCurrentTile();
-                            float heartX = (float) (GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX())) / 2;
-                            float heartY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((float) (tile2.getY() + tile1.getY()) / 2));
-                            heartEffects.add(new HeartEffect(heartX, heartY));
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "hug";
                         break;
                     case "flower":
-                        result = controller.sendFlower(targetUsername);
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            Tile tile1 = currentPlayer.getCurrentTile();
-                            Tile tile2 = MainApp.getInstance().getCurrentGame().getPlayerByUsername(targetUsername).getCurrentTile();
-
-                            float midX = GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX()) / 2f;
-                            float midY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((tile1.getY() + tile2.getY()) / 2f));
-
-                            Flower flower = new Flower(randomStuffType.Bouquet.getTexture(), midX, midY);
-                            activeFlowers.add(flower);
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "sendFlower";
                         break;
                     case "propose":
-                        result = controller.askMarriage(targetUsername, "ring");
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            currentPlayer.setProposing(true);
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "askMarriage";
                         break;
                     case "close":
                         relationshipDialog.hide();
                         Gdx.input.setInputProcessor(GameView.this);
+                        return;
                     default:
                         relationshipDialog.hide();
                         Gdx.input.setInputProcessor(GameView.this);
+                        return;
                 }
+
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    methodName,
+                    params,
+                    currentPlayer.getUsername()
+                ).thenAccept(response -> {
+                    if (response.getStatus() != 200) {
+                        Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
+                    } else {
+                        Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
+                    }
+                });
+                relationshipDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
             }
         };
         TextButton hugButton = new TextButton("Hug", GameAssetManager.skin, "custom-button");
@@ -2736,10 +2802,23 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 doMissionButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
+                        if (MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(currentPlayer.getUsername()) == null) {
+                            MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().put(currentPlayer.getUsername(), new ArrayList<>());
+                        }
                         if (MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(currentPlayer.getUsername()).contains(mission)) {
                             showErrorDialog(stage, "Mission is already in your mission list!");
                         } else {
                             MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(player.getUsername()).add(mission);
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("mission", mission.getInitials());
+                            params.put("currentPlayer", currentPlayer.getUsername());
+                            MainApp.getInstance().getNetworkClient().sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "GameController",
+                                "addNPCMission",
+                                params,
+                                MainApp.getInstance().getLoggedInUser().getUsername()
+                            );
                             showErrorDialog(stage, "Mission added successfully!");
                         }
                         npcQuestDialog.hide();
@@ -2792,11 +2871,13 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             case "gift":
                 if (equippedItem == null) {
                     showErrorDialog(stage, "You haven't selected any gift yet.");
-                }
-                else{
-                    Result npcResult = selectedNPC.giveGift(equippedItem.getName(),currentPlayer);
+                } else {
+                    Result npcResult = selectedNPC.giveGift(equippedItem.getName(), currentPlayer);
                     if (npcResult.isSuccessful()) {
                         currentPlayer.getBackpack().grabItem(equippedItem.getName(), 1);
+                        showFloatingMessage(npcResult.message());
+                        isGivingGift = true;
+                        giftGivingStateTime = 0f;
                     }
                     showErrorDialog(stage, npcResult.message());
                 }
@@ -3060,6 +3141,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         batch.setProjectionMatrix(camera.combined);
         createUI();
 
+        stage.addActor(chatDialog);
+        chatDialog.toFront();
+
         clockHud = new ClockHud(stage);
         friendsButton = new TextButton("Friends", GameAssetManager.skin, "custom-button");
         friendsButton.setSize(100, 100);
@@ -3107,6 +3191,33 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         forceTerminateButton.setColor(Color.PINK);
         forceTerminateButton.setPosition(110, Gdx.graphics.getHeight() - 100);
         forceTerminateButton.setTouchable(Touchable.enabled);
+        forceTerminateButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "startForceTerminateVote",
+                    new HashMap<>(),
+                    currentPlayer.getUsername()
+                ).thenAccept(response -> {
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Force terminate vote has been initiated.");
+                        });
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to start vote: " + response.getMessage());
+                        });
+                    }
+                }).exceptionally(ex -> {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, "Error starting vote: " + ex.getMessage());
+                    });
+                    return null;
+                });
+            }
+        });
         stage.addActor(forceTerminateButton);
 
         energyLabel = new Label("Energy", GameAssetManager.skin, "custom-label");
@@ -3302,84 +3413,49 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                     );
                 }
             });
-        //MainApp.getInstance().setCurrentGameViewIfNull(this);
-        //MainApp.getInstance().setCurrentGameView(this);
 
-
-//        trackSelect = new SelectBox<>(GameAssetManager.skin);
-//        float padding = 10;
-//        // گوشهٔ راست و وسط عمودی
-//        float x = Gdx.graphics.getWidth() - trackSelect.getWidth() - padding;
-//        float y = (Gdx.graphics.getHeight() - trackSelect.getHeight()) / 2f;
-//        trackSelect.setPosition(x, y);
-//        stage.addActor(trackSelect);
-//
-//
-//        // 1. اول یک دکمهٔ آپلود می‌سازیم:
-//        TextButton uploadButton = new TextButton("آپلود موزیک", GameAssetManager.skin);
-//        uploadButton.setPosition(
-//            trackSelect.getX(),
-//            trackSelect.getY() - uploadButton.getHeight() - 10
-//        );
-//        stage.addActor(uploadButton);
-//
-//// 2. وقتی دکمه کلیک شد، از کاربر مسیر فایل را می‌خواهیم:
-//        uploadButton.addListener(new ClickListener() {
-//            @Override
-//            public void clicked(InputEvent event, float x, float y) {
-//                // اینجا باید مسیر فایل را از یک FileChooser جاوا (مثلاً Swing JFileChooser)
-//                // یا هر روشی که خودت پیاده می‌کنی بگیری:
-//                String chosenFilePath = FileChooserUtil.showFileChooserAndGetPath();
-//                if (chosenFilePath != null) {
-//                    try {
-//                        byte[] data = Files.readAllBytes(Paths.get(chosenFilePath));
-//                        String name = new File(chosenFilePath).getName();
-//                        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
-//                        MainApp.getInstance().getNetworkClient()
-//                            .uploadTrack(gameId, name, data)
-//                            .thenAccept(msg -> {
-//
-//                            });
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-
-
-
-        // گرفتن لیست ترک‌ها از سرور
-//        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
-//        MainApp.getInstance().getNetworkClient()
-//            .listTracks(gameId)
-//            .thenAccept(msg -> {
-//                @SuppressWarnings("unchecked")
-//                List<Map<String,Object>> body = (List<Map<String,Object>>) msg.getBody();
-//                List<String> names = new ArrayList<>();
-//                for (Map<String,Object> m : body) {
-//                    String id   = (String) m.get("id");
-//                    String name = (String) m.get("name");
-//                    trackNameToId.put(name, id);
-//                    names.add(name);
-//                }
-//                Gdx.app.postRunnable(() ->
-//                    trackSelect.setItems(names.toArray(new String[0]))
-//                );
-//            });
-//
-//        // وقتی کاربر ترک جدیدی انتخاب کرد
-//        trackSelect.addListener(new ChangeListener() {
-//            @Override public void changed(ChangeEvent event, Actor actor) {
-//                String chosen = trackSelect.getSelected();
-//                String trackId = trackNameToId.get(chosen);
-//                if (trackId != null) {
-//                    MainApp.getInstance().getNetworkClient()
-//                        .switchTrack(gameId, trackId);
-//                }
-//            }
-//        });
         initAudioUI();
+
+        ImageButton.ImageButtonStyle chatButtonStyle = new ImageButton.ImageButtonStyle();
+        chatButtonStyle.imageUp = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+        chatButtonStyle.imageDown = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+        chatButtonStyle.over = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
+
+        chatButton = new ImageButton(chatButtonStyle);
+        chatButton.setSize(80, 80);
+        chatButton.setPosition(Gdx.graphics.getWidth() - 400, 20);
+        chatButton.setTouchable(Touchable.enabled);
+        chatButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (chatDialog.isVisible()) {
+                    chatDialog.hide();
+                    chatDialog.setVisible(false);
+                    Gdx.input.setInputProcessor(GameView.this);
+                } else {
+                    chatDialog.show(stage);
+                    chatDialog.setVisible(true);
+                    chatDialog.toFront();
+                }
+            }
+        });
+        stage.addActor(chatButton);
+
+        ImageButton.ImageButtonStyle reactionButtonStyle = new ImageButton.ImageButtonStyle();
+        reactionButtonStyle.imageUp = new TextureRegionDrawable(new Texture(Gdx.files.internal("reactions/grinning_face.png")));
+        reactionButton = new ImageButton(reactionButtonStyle);
+        reactionButton.setSize(60, 60);
+        reactionButton.setPosition(chatButton.getX() - reactionButton.getWidth() - 10, 30);
+        reactionButton.setTouchable(Touchable.enabled);
+
+        reactionButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                reactionMenuDialog.setVisible(true);
+                showReactionMenu();
+            }
+        });
+        stage.addActor(reactionButton);
     }
 
 
@@ -3449,9 +3525,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
 
 
-
         determineAvatar();
-        showNotifications();
+        //showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());
         if (currentPlayer.isProposing()) {
             currentPlayer.setProposingTimer(currentPlayer.getProposingTimer() + v);
@@ -3561,6 +3636,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         drawPlayer();
         drawAllPlayers();
+
+        Iterator<FloatingMessage> msgIterator = floatingMessages.iterator();
+        while (msgIterator.hasNext()) {
+            FloatingMessage msg = msgIterator.next();
+            msg.update(Gdx.graphics.getDeltaTime());
+            if (msg.isFinished()) {
+                msgIterator.remove();
+            } else {
+                msg.draw(batch, smallFont);
+            }
+        }
+
         // --- DRAW HEART EFFECTS ---
         Iterator<HeartEffect> iterator = heartEffects.iterator();
         while (iterator.hasNext()) {
@@ -3620,6 +3707,32 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
             int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
             batch.draw(getItemTexture(equippedItem), drawX, drawY, tileSize, tileSize);
+        }
+
+        if (isEating) {
+            eatingStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.eatingAnimation.getKeyFrame(eatingStateTime);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
+            }
+            if (InventoryAssets.eatingAnimation.isAnimationFinished(eatingStateTime)) {
+                isEating = false;
+            }
+        }
+
+        if (isGivingGift) {
+            giftGivingStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.giftGivingAnimation.getKeyFrame(giftGivingStateTime, true);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
+            }
+            if (giftGivingStateTime > 2.0f) {
+                isGivingGift = false;
+            }
         }
 
 
@@ -3832,7 +3945,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //                }
 //            }
 //        }
-        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive) {
+        if (!showFullMap && !terminalVisible && !currentPlayer.hasFainted() && !isFishingActive && !chatDialog.isVisible()) {
             moveCooldown -= v;
             if (moveCooldown <= 0f) {
                 int dx = 0, dy = 0, direction = -1;
@@ -3930,44 +4043,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                             talkButton.addListener(new ClickListener() {
                                 @Override
                                 public void clicked(InputEvent event, float x, float y) {
-                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(),currentPlayer).message());
-                                    event.stop();
-                                }
-                            });
-                            stage.addActor(talkButton);
-                            npcTalkButtons.put(npc, talkButton);
-                        }
-
-                        // Calculate screen position for the button above the NPC
-                        float npcCenterX = tile.getX() * tileSize + tileSize / 2f;
-                        float npcTopY = (rows - tile.getY() - 1) * tileSize + tileSize * 2f;
-
-                        Vector3 buttonWorldCoords = new Vector3(npcCenterX, npcTopY, 0);
-                        camera.project(buttonWorldCoords);
-
-                        talkButton.setPosition(buttonWorldCoords.x - talkButton.getWidth() / 2f, buttonWorldCoords.y);
-                        talkButton.setVisible(true);
-                    }
-                }
-            }
-        }
-
-        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
-            for (Tile[] tileRow : MainApp.getInstance().getCurrentGame().getMap().getMap()) {
-                for (Tile tile : tileRow) {
-                    if (tile.getContainedNPC() != null) {
-                        NPC npc = tile.getContainedNPC();
-                        TextButton talkButton = npcTalkButtons.get(npc);
-
-                        if (talkButton == null) {
-                            talkButton = new TextButton("...", GameAssetManager.skin, "custom-button");
-                            talkButton.setSize(tileSize / 2f, tileSize / 2f);
-                            talkButton.getLabel().setFontScale(0.5f);
-                            talkButton.setColor(Color.WHITE);
-                            talkButton.addListener(new ClickListener() {
-                                @Override
-                                public void clicked(InputEvent event, float x, float y) {
-                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(),currentPlayer).message());
+                                    showNPCSpeechBubble(npc, npc.talkToNPC(MainApp.getInstance().getCurrentGame().getCurrentWeatherType(), currentPlayer).message());
                                     event.stop();
                                 }
                             });
@@ -4026,6 +4102,22 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        drawReactions(batch);
+
+        if (isShowingGoodJob) {
+            goodJobStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.goodJobAnimation.getKeyFrame(goodJobStateTime);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                // Draw animation slightly above the player's head
+                batch.draw(currentFrame, drawX, drawY + tileSize, tileSize, tileSize);
+            }
+            if (InventoryAssets.goodJobAnimation.isAnimationFinished(goodJobStateTime)) {
+                isShowingGoodJob = false;
+            }
+        }
+
         batch.end(); // ✅ this must come BEFORE stage rendering
 
         drawShapeRenderer(tiles, tileSize);
@@ -4065,16 +4157,44 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                currentPlayer.perfectFishingSkillUpgrade();
             }
 
-            Fish finalFish = new Fish(finalQuality, currentCaughtFish.getType());
+            final ProductQuality finalllQuality = finalQuality;
 
-            Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
-            if (addFishResult.isSuccessful()) {
-                if (perfectCatch) showErrorDialog(stage,"Perfect catch!");
-                showErrorDialog(stage, "You caught a " + finalQuality.name() + " " + finalFish.getName() + "!");
-                currentPlayer.addSkillExperience(Skill.FISHING);
-            } else {
-                showErrorDialog(stage, "You caught the fish, but your backpack is full!");
-            }
+            // Send the caught fish details to the server instead of adding it locally
+            Map<String, Object> params = new HashMap<>();
+            params.put("fishName", currentCaughtFish.getName());
+            params.put("quality", finalQuality.name());
+            params.put("perfectCatch", perfectCatch);
+
+            MainApp.getInstance().getNetworkClient().sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "GameController",
+                "addCaughtFish",
+                params,
+                currentPlayer.getUsername()
+            ).thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    Gdx.app.postRunnable(() -> {
+                        Fish finalFish = new Fish(finalllQuality, currentCaughtFish.getType());
+
+                        Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
+                        if (addFishResult.isSuccessful()) {
+                            if (perfectCatch) {
+                                showFloatingMessage("Perfect catch!");
+                                startGoodJobAnimation();
+                            }
+                            showErrorDialog(stage, "You caught a " + finalllQuality.name() + " " + finalFish.getName() + "!");
+                            currentPlayer.addSkillExperience(Skill.FISHING);
+                        } else {
+                            showErrorDialog(stage, "You caught the fish, but your backpack is full!");
+                        }
+                    });
+                } else {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, "Failed to add fish: " + response.getMessage());
+                    });
+                }
+            });
+
         } else {
             showErrorDialog(stage, "The " + currentCaughtFish.getName() + " got away!");
         }
@@ -4105,8 +4225,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
-        }
-        else if(tiles[y][x].getContainedItem() instanceof Machine machine) {
+        } else if (tiles[y][x].getContainedItem() instanceof Machine machine) {
             batch.draw(machine.getType().getTexture(), x * tileSize,
                 (rows - y - 1) * tileSize,
                 tileSize, tileSize);
@@ -4249,12 +4368,13 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
     }
+
     private void drawShops(int tileSize, int rows) {
         List<Shop> shops = MainApp.getInstance().getCurrentGame().getMap().getShops(); // <-- Ensure you have this method
         for (Shop shop : shops) {
             for (int i = shop.getX(); i < shop.getX() + shop.getWidth(); i++) {
                 for (int j = shop.getY(); j < shop.getY() + shop.getHeight(); j++) {
-                    batch.draw(TileType.NPCLAND.getTexture(), i * tileSize, (rows-j-1) * tileSize, tileSize, tileSize);
+                    batch.draw(TileType.NPCLAND.getTexture(), i * tileSize, (rows - j - 1) * tileSize, tileSize, tileSize);
                 }
             }
         }
@@ -4268,6 +4388,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
     }
+
     private void drawHabitats(int tileSize, int rows) {
         for (Farm farm : MainApp.getInstance().getCurrentGame().getMap().getFarms()) {
             for (Habitat barn : farm.getBarn()) {
@@ -4319,6 +4440,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         }
     }
+
     private void drawTiles(int rows, Tile[][] tiles, int tileSize) {
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -4713,7 +4835,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
     private void drawSelectedTool(Texture itemTex) {
-        if (itemTex == null) { return; }
+        if (itemTex == null) {
+            return;
+        }
         if (currentPlayer == null || currentPlayer.getCurrentTile() == null) return;
 
         Tile tile = currentPlayer.getCurrentTile();
@@ -4775,11 +4899,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 Gdx.input.setInputProcessor(this);
             }
         } else {
-            int tileSize = GameAssetManager.TILE_SIZE;
-
+            // For other tools, send the action to the server
             float playerTileGridX = currentPlayer.getCurrentTile().getX();
             float playerTileGridY = currentPlayer.getCurrentTile().getY();
-
+            int tileSize = GameAssetManager.TILE_SIZE;
             float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
             float playerWorldY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
 
@@ -4792,23 +4915,35 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             float deltaY = actualMouseWorldY - playerWorldY;
 
             int direction = get4DirectionalAngle(deltaX, deltaY);
+            String directionName = InventoryAssets.DIRECTION_NAMES.get(direction);
 
-            float angleRad = MathUtils.atan2(deltaY, deltaX);
-            float angleDeg = angleRad * MathUtils.radDeg;
-            if (angleDeg < 0) {
-                angleDeg += 360;
-            }
+            if (directionName != null) {
+                isToolBeingUsed = true; // Optimistically start animation
+                toolUsageStateTime = 0f;
 
-            // Start the tool usage animation (for non-fishing tools)
-            isToolBeingUsed = true;
-            toolUsageStateTime = 0f;
+                Map<String, Object> params = new HashMap<>();
+                params.put("direction", directionName);
+                params.put("toolName", toolToUse.getName());
 
-            if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
-                Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
-                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-            } else {
-                Result result = controller.useTool("Down");
-                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "useTool",
+                    params,
+                    currentPlayer.getUsername()
+                ).thenAccept(response -> {
+                    if (response.getStatus() != 200) {
+                        Gdx.app.postRunnable(() -> showErrorDialog(stage, "Action failed: " + response.getMessage()));
+                    } else {
+                        if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
+                            Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+                            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                        } else {
+                            Result result = controller.useTool("Down");
+                            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                        }
+                    }
+                });
             }
         }
     }
@@ -5031,7 +5166,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
     public Texture getItemTexture(Item item) {
-        if(item == null) {return null;}
+        if (item == null) {
+            return null;
+        }
         if (item instanceof Fish) {
             return ((Fish) item).getType().getTexture();
         }
@@ -5050,23 +5187,23 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         if (item instanceof Machine) {
             return ((Machine) item).getType().getTexture();
         }
-        for(SourceType sourceType : SourceType.values()) {
-            if(sourceType.getName().equalsIgnoreCase(item.getName())) {
+        for (SourceType sourceType : SourceType.values()) {
+            if (sourceType.getName().equalsIgnoreCase(item.getName())) {
                 return sourceType.getTexture();
             }
         }
-        for(ForagingCropType foragingCropType : ForagingCropType.values()) {
-            if(foragingCropType.getName().equalsIgnoreCase(item.getName())) {
+        for (ForagingCropType foragingCropType : ForagingCropType.values()) {
+            if (foragingCropType.getName().equalsIgnoreCase(item.getName())) {
                 return foragingCropType.getTexture();
             }
         }
-        for(CropType cropType : CropType.values()) {
-            if(cropType.getName().equalsIgnoreCase(item.getName())) {
+        for (CropType cropType : CropType.values()) {
+            if (cropType.getName().equalsIgnoreCase(item.getName())) {
                 return cropType.getCropProductTexture();
             }
         }
-        for(FruitType fruitType : FruitType.values()) {
-            if(fruitType.getName().equalsIgnoreCase(item.getName())) {
+        for (FruitType fruitType : FruitType.values()) {
+            if (fruitType.getName().equalsIgnoreCase(item.getName())) {
                 return fruitType.getTexture();
             }
         }
@@ -5308,8 +5445,21 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 doMissionButton.addListener(new ClickListener() {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
-                        Result result = NPCMission.doMission(mission, currentPlayer);
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("mission", mission.getInitials());
+                        params.put("currentPlayer", currentPlayer.getUsername());
+                        Result result = NPCMission.doMission(mission.getInitials(), currentPlayer);
                         showErrorDialog(stage, result.getMessage());
+                        if (result.isSuccessful()) {
+                            MainApp.getInstance().getNetworkClient().sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "GameController",
+                                "doNPCMission",
+                                params,
+                                MainApp.getInstance().getLoggedInUser().getUsername()
+                            );
+                            startGoodJobAnimation();
+                        }
                         MissionsMenuDialog.hide();
                     }
                 });
@@ -5484,116 +5634,115 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         stage.addActor(skillsDialog);
     }
 
-    private void showNotifications() {
-        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
-        if (notifications.isEmpty()) return;
-        Gdx.input.setInputProcessor(stage);
-
-        StringBuilder generalNotifications = new StringBuilder();
-
-        for (FriendshipMessage notification : notifications) {
-            String message = notification.getMessage();
-
-            if (message.endsWith("has asked to marry you")) {
-                Dialog proposalDialog = proposalNotification(notification);
-                Gdx.input.setInputProcessor(stage);
-                proposalDialog.show(stage);
-            } else if (message.equals("force terminate has started!")) {
-                Dialog forceTerminationDialog = forceTerminationNotification();
-                Gdx.input.setInputProcessor(stage);
-                forceTerminationDialog.show(stage);
-            } else {
-                generalNotifications.append("- From ").append(notification.getSender())
-                    .append(": ").append(message).append("\n");
-            }
-        }
-
-        if (!generalNotifications.isEmpty()) {
-            Dialog generalDialog = new Dialog("Notifications", GameAssetManager.skin, "custom-window") {
-                @Override
-                protected void result(Object obj) {
-                    Gdx.input.setInputProcessor(GameView.this);
-                }
-            };
-            Label notificationLabel = new Label(generalNotifications.toString(), GameAssetManager.skin, "custom-label");
-            notificationLabel.setWrap(true);
-
-            generalDialog.getContentTable().add(notificationLabel).width(400).pad(20);
-            generalDialog.getContentTable().row();
-
-            TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
-            generalDialog.button(okButton, true);
-            Gdx.input.setInputProcessor(stage);
-            generalDialog.show(stage);
-        }
-
-        notifications.clear();
-    }
-
-    @NotNull
-    private Dialog proposalNotification(FriendshipMessage notification) {
-        String sender = notification.getSender();
-
-        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
-            @Override
-            protected void result(Object obj) {
-                Gdx.input.setInputProcessor(GameView.this);
-                boolean accepted = (Boolean) obj;
-                if (accepted) {
-                    controller.respondToMarriage("accept", sender);
-                    currentPlayer.setAccepting(true);
-                } else {
-                    controller.respondToMarriage("reject", sender);
-                    currentPlayer.setRejecting(true);
-                }
-            }
-        };
-        Label label = new Label(sender + " has asked to marry you", GameAssetManager.skin, "custom-label");
-        proposalDialog.getContentTable().add(label).pad(10);
-
-        TextButton acceptButton = new TextButton("Accept", GameAssetManager.skin, "custom-button");
-        TextButton rejectButton = new TextButton("Reject", GameAssetManager.skin, "custom-button");
-
-        proposalDialog.button(acceptButton, true);
-        proposalDialog.button(rejectButton, false);
-        return proposalDialog;
-    }
-
-    @NotNull
-    private Dialog forceTerminationNotification() {
-        Dialog forceTerminationDialog = new Dialog("Force Termination", GameAssetManager.skin, "custom-window") {
-            @Override
-            protected void result(Object obj) {
-                Gdx.input.setInputProcessor(GameView.this);
-                boolean accepted = (Boolean) obj;
-                if (accepted) {
-                    Result result = controller.voteToTerminate(true, currentPlayer);
-                    if(!result.isSuccessful()) showErrorDialog(stage, result.message());
-                    else {
-                        if (gameTickTask != null) {
-                            gameTickTask.cancel();
-                        }
-                        MainApp.getInstance().setCurrentGame(null);
-                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(),GameAssetManager.skin));
-                    }
-                } else {
-                    Result result = controller.voteToTerminate(false, currentPlayer);
-                    showErrorDialog(stage, result.message());
-                }
-            }
-        };
-        Label label = new Label("Do you want to force terminate this game ?", GameAssetManager.skin, "custom-label");
-        forceTerminationDialog.getContentTable().add(label).pad(10);
-
-        TextButton acceptButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
-        TextButton rejectButton = new TextButton("No", GameAssetManager.skin, "custom-button");
-
-        forceTerminationDialog.button(acceptButton, true);
-        forceTerminationDialog.button(rejectButton, false);
-        return forceTerminationDialog;
-    }
-
+//    private void showNotifications() {
+//        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
+//        if (notifications.isEmpty()) return;
+//        Gdx.input.setInputProcessor(stage);
+//
+//        StringBuilder generalNotifications = new StringBuilder();
+//
+//        for (FriendshipMessage notification : notifications) {
+//            String message = notification.getMessage();
+//
+//            if (message.endsWith("has asked to marry you")) {
+//                Dialog proposalDialog = proposalNotification(notification);
+//                Gdx.input.setInputProcessor(stage);
+//                proposalDialog.show(stage);
+//            } else if (message.equals("force terminate has started!")) {
+//                Dialog forceTerminationDialog = forceTerminationNotification();
+//                Gdx.input.setInputProcessor(stage);
+//                forceTerminationDialog.show(stage);
+//            } else {
+//                generalNotifications.append("- From ").append(notification.getSender())
+//                    .append(": ").append(message).append("\n");
+//            }
+//        }
+//
+//        if (!generalNotifications.isEmpty()) {
+//            Dialog generalDialog = new Dialog("Notifications", GameAssetManager.skin, "custom-window") {
+//                @Override
+//                protected void result(Object obj) {
+//                    Gdx.input.setInputProcessor(GameView.this);
+//                }
+//            };
+//            Label notificationLabel = new Label(generalNotifications.toString(), GameAssetManager.skin, "custom-label");
+//            notificationLabel.setWrap(true);
+//
+//            generalDialog.getContentTable().add(notificationLabel).width(400).pad(20);
+//            generalDialog.getContentTable().row();
+//
+//            TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+//            generalDialog.button(okButton, true);
+//            Gdx.input.setInputProcessor(stage);
+//            generalDialog.show(stage);
+//        }
+//
+//        notifications.clear();
+//    }
+//
+//    @NotNull
+//    private Dialog proposalNotification(FriendshipMessage notification) {
+//        String sender = notification.getSender();
+//
+//        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
+//            @Override
+//            protected void result(Object obj) {
+//                Gdx.input.setInputProcessor(GameView.this);
+//                boolean accepted = (Boolean) obj;
+//                if (accepted) {
+//                    controller.respondToMarriage("accept", sender);
+//                    currentPlayer.setAccepting(true);
+//                } else {
+//                    controller.respondToMarriage("reject", sender);
+//                    currentPlayer.setRejecting(true);
+//                }
+//            }
+//        };
+//        Label label = new Label(sender + " has asked to marry you", GameAssetManager.skin, "custom-label");
+//        proposalDialog.getContentTable().add(label).pad(10);
+//
+//        TextButton acceptButton = new TextButton("Accept", GameAssetManager.skin, "custom-button");
+//        TextButton rejectButton = new TextButton("Reject", GameAssetManager.skin, "custom-button");
+//
+//        proposalDialog.button(acceptButton, true);
+//        proposalDialog.button(rejectButton, false);
+//        return proposalDialog;
+//    }
+//
+//    @NotNull
+//    private Dialog forceTerminationNotification() {
+//        Dialog forceTerminationDialog = new Dialog("Force Termination", GameAssetManager.skin, "custom-window") {
+//            @Override
+//            protected void result(Object obj) {
+//                Gdx.input.setInputProcessor(GameView.this);
+//                boolean accepted = (Boolean) obj;
+//                if (accepted) {
+//                    Result result = controller.voteToTerminate(true, currentPlayer);
+//                    if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+//                    else {
+//                        if (gameTickTask != null) {
+//                            gameTickTask.cancel();
+//                        }
+//                        MainApp.getInstance().setCurrentGame(null);
+//                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+//                    }
+//                } else {
+//                    Result result = controller.voteToTerminate(false, currentPlayer);
+//                    showErrorDialog(stage, result.message());
+//                }
+//            }
+//        };
+//        Label label = new Label("Do you want to force terminate this game ?", GameAssetManager.skin, "custom-label");
+//        forceTerminationDialog.getContentTable().add(label).pad(10);
+//
+//        TextButton acceptButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
+//        TextButton rejectButton = new TextButton("No", GameAssetManager.skin, "custom-button");
+//
+//        forceTerminationDialog.button(acceptButton, true);
+//        forceTerminationDialog.button(rejectButton, false);
+//        return forceTerminationDialog;
+//    }
 
 
     public void handleCommand(Scanner scanner) {
@@ -5701,8 +5850,24 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
             System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
-        } else if ((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
-            System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")), matcher.group("username")));
+        }  else if ((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("targetUsername", matcher.group("username"));
+            params.put("level", Integer.parseInt(matcher.group("level")));
+
+            MainApp.getInstance().getNetworkClient().sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "GameController",
+                "cheatSetFriendshipLevel",
+                params,
+                currentPlayer.getUsername()
+            ).thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
+                } else {
+                    Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
+                }
+            });
         }
         ///////////////////////////////////////////////////////////////////////////////////////////
 //        if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
@@ -6148,7 +6313,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //        errorLabel.setFontScale(1.2f);
 //
 //        // Optional background for visibility
-    ////       errorLabel.setBackground(skin.getDrawable("window"));
+
+    /// /       errorLabel.setBackground(skin.getDrawable("window"));
 //
 //        float width = Gdx.graphics.getWidth() * 0.4f;
 //        float height = Gdx.graphics.getHeight() * 0.15f;
@@ -6198,6 +6364,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             })
         ));
     }
+
     public void showTimedErrorLabel(Stage stage, String message, float durationSeconds) {
         Skin skin = GameAssetManager.skin;
 
@@ -6408,7 +6575,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             voteOutButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    showErrorDialog(stage, "Vote Out Players functionality not yet implemented.");
+                    showVoteOutPlayersDialog();
                     settingsMenuDialog.hide();
                     isSettingsMenuCurrentlyVisible = false;
                 }
@@ -6763,31 +6930,33 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
     private void updateNPCMovement(float delta) {
-        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
-            npc.updateMovement(delta);
+        Game currentGame = MainApp.getInstance().getCurrentGame();
+        if (currentGame == null) return;
+
+        for (NPC npc : currentGame.getNpcs()) {
+            npc.updateRoutine(currentGame);
         }
     }
 
     private void drawNPCs(int rows, int tileSize) {
         for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
-            if (npc.currentTileGetter() == null) continue;
+            if (npc.currentPointGetter() == null) continue;
 
             float x, y;
 
             if (npc.isMoving()) {
-                Tile from = npc.getMovingFrom();
-                Tile to = npc.getMovingTo();
-                float p = npc.getMoveProgress();
+                Point from = npc.getMovingFrom();
+                Point to = npc.getMovingTo();
 
-                x = MathUtils.lerp(from.getX(), to.getX(), p) * tileSize;
+                x = MathUtils.lerp(from.x, to.x, 0.5f) * tileSize;
                 y = MathUtils.lerp(
-                    rows - from.getY() - 1,
-                    rows - to.getY() - 1,
-                    p
+                    rows - from.y - 1,
+                    rows - to.y - 1,
+                    0.5f
                 ) * tileSize;
             } else {
-                x = npc.currentTileGetter().getX() * tileSize;
-                y = (rows - npc.currentTileGetter().getY() - 1) * tileSize;
+                x = npc.currentPointGetter().x * tileSize;
+                y = (rows - npc.currentPointGetter().y - 1) * tileSize;
             }
 
             batch.draw(npc.getNpcName().getTextureRegion(), x, y, tileSize, tileSize * 2f);
@@ -6910,6 +7079,646 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ChatDialog getChatDialog() {
+        return chatDialog;
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    private void createReactionMenuDialogs() {
+        // Main dialog for showing and sending reactions
+        reactionMenuDialog = new Dialog("Reactions", GameAssetManager.skin, "custom-window");
+        reactionMenuDialog.padTop(40);
+        reactionMenuDialog.setModal(true);
+        reactionMenuDialog.setMovable(false);
+        reactionMenuDialog.setVisible(false);
+        stage.addActor(reactionMenuDialog);
+
+        // Dialog for editing the list of reactions
+        changeReactionsDialog = new Dialog("Change Reactions", GameAssetManager.skin, "custom-window");
+        changeReactionsDialog.padTop(40);
+        changeReactionsDialog.setModal(true);
+        changeReactionsDialog.setMovable(false);
+        changeReactionsDialog.setVisible(false);
+        stage.addActor(changeReactionsDialog);
+    }
+
+    private void showReactionMenu() {
+        Table content = reactionMenuDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(10);
+
+        // --- Image Reactions Section ---
+        content.add(new Label("Reactions", GameAssetManager.skin, "custom-label")).colspan(4).row();
+        Table imageTable = new Table();
+        for (int i = 0; i < imageReactions.size(); i++) {
+            Texture emojiTexture = new Texture(Gdx.files.internal(imageReactions.get(i)));
+            ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
+            style.imageUp = new TextureRegionDrawable(emojiTexture);
+            ImageButton imgButton = new ImageButton(style);
+
+            final String reactionName = imageReactions.get(i).replace("reactions/", "").replace(".png", "");
+            int index = i;
+            imgButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    sendReactionToServer(imageReactions.get(index), true); // SEND IMAGE REACTION
+                    reactionMenuDialog.hide();
+                    reactionMenuDialog.setVisible(false);
+                    Gdx.input.setInputProcessor(GameView.this);
+                }
+            });
+
+            imageTable.add(imgButton).size(80, 80).pad(5);
+            if ((i + 1) % 5 == 0) {
+                imageTable.row();
+            }
+        }
+        content.add(imageTable).row();
+
+        // --- Text Reactions Section ---
+        content.add(new Label("Quick Chat", GameAssetManager.skin, "custom-label")).colspan(4).padTop(20).row();
+        Table textTable = new Table();
+        for (int i = 0; i < textReactions.size(); i++) {
+            String reaction = textReactions.get(i);
+            TextButton textBtn = new TextButton(reaction, GameAssetManager.skin, "custom-button");
+            textBtn.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    sendReactionToServer(reaction, false);
+                    reactionMenuDialog.hide();
+                    reactionMenuDialog.setVisible(false);
+                    Gdx.input.setInputProcessor(GameView.this);
+                }
+            });
+
+            textTable.add(textBtn).minWidth(100).height(50).pad(5);
+            if ((i + 1) % 4 == 0) { // 4 buttons per row
+                textTable.row();
+            }
+        }
+        content.add(textTable).row();
+
+        // --- Control Buttons ---
+        TextButton changeButton = new TextButton("Change Text Reactions", GameAssetManager.skin, "custom-button");
+        changeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                reactionMenuDialog.hide();
+                showChangeReactionsMenu();
+            }
+        });
+
+        TextButton closeButton = new TextButton("Close", GameAssetManager.skin, "custom-button");
+        closeButton.setColor(Color.RED);
+        closeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                reactionMenuDialog.hide();
+                reactionMenuDialog.setVisible(false);
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        Table controls = new Table();
+        controls.add(changeButton).pad(10);
+        controls.add(closeButton).pad(10);
+        content.add(controls).colspan(4).padTop(20);
+
+        reactionMenuDialog.pack();
+        reactionMenuDialog.show(stage);
+        reactionMenuDialog.setVisible(true);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    /**
+     * Shows the dialog for editing ONLY the text reactions.
+     */
+    private void showChangeReactionsMenu() {
+        updateChangeReactionsTable(); // Rebuild the content
+        changeReactionsDialog.show(stage);
+        reactionMenuDialog.setVisible(false);
+        changeReactionsDialog.setVisible(true);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    /**
+     * Rebuilds the content of the "Change Text Reactions" dialog.
+     */
+    private void updateChangeReactionsTable() {
+        Table content = changeReactionsDialog.getContentTable();
+        content.clear();
+        content.defaults().pad(5);
+
+        for (int i = 0; i < textReactions.size(); i++) {
+            String reaction = textReactions.get(i);
+            Label reactionLabel = new Label(reaction, GameAssetManager.skin, "custom-label");
+            TextButton removeButton = new TextButton("Remove", GameAssetManager.skin, "custom-button");
+            removeButton.setColor(Color.FIREBRICK);
+            final int indexToRemove = i;
+            removeButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    textReactions.remove(indexToRemove);
+                    updateChangeReactionsTable();
+                }
+            });
+            content.add(reactionLabel).expandX().left();
+            content.add(removeButton).right().row();
+        }
+
+        if (textReactions.size() < 8) {
+            content.add(new Label("Add New:", GameAssetManager.skin, "custom-label")).left().padTop(20);
+            TextField newReactionField = new TextField("", GameAssetManager.skin);
+            newReactionField.setMessageText("Type reaction...");
+            content.add(newReactionField).width(200).row();
+
+            TextButton addButton = new TextButton("Add", GameAssetManager.skin, "custom-button");
+            addButton.setColor(Color.FOREST);
+            addButton.addListener(new ClickListener() {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    String newReaction = newReactionField.getText().trim();
+                    if (!newReaction.isEmpty() && textReactions.size() < 8) {
+                        textReactions.add(newReaction);
+                        updateChangeReactionsTable();
+                    }
+                }
+            });
+            content.add(addButton).colspan(2).center().padTop(10).row();
+        } else {
+            content.add(new Label("Text reaction list is full (8/8)", GameAssetManager.skin, "custom-label")).colspan(2).center().padTop(20).row();
+        }
+
+        TextButton backButton = new TextButton("Back", GameAssetManager.skin, "custom-button");
+        backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                changeReactionsDialog.hide();
+                reactionMenuDialog.setVisible(true);
+                changeReactionsDialog.setVisible(false);
+                showReactionMenu();
+            }
+        });
+        content.add(backButton).colspan(2).center().padTop(20);
+
+        changeReactionsDialog.pack();
+    }
+
+    private static class ReactionBubble {
+        final User owner;
+        final String content;
+        final boolean isImage;
+        float timer = 5f; // Display for 5 seconds
+        Texture imageTexture; // Only for image reactions
+        Label textLabel; // Only for text reactions
+
+        ReactionBubble(User owner, String content, boolean isImage, Skin skin) {
+            this.owner = owner;
+            this.content = content;
+            this.isImage = isImage;
+
+            if (isImage) {
+                this.imageTexture = new Texture(Gdx.files.internal(content));
+            } else {
+                this.textLabel = new Label(content, skin, "custom-label");
+                this.textLabel.setAlignment(Align.center);
+                this.textLabel.setWrap(true);
+            }
+        }
+
+        void update(float delta) {
+            timer -= delta;
+        }
+
+        boolean isFinished() {
+            return timer <= 0;
+        }
+
+        void dispose() {
+            if (imageTexture != null) {
+                imageTexture.dispose();
+            }
+        }
+    }
+
+    public void showReactionForPlayer(String username, String reactionContent, boolean isImage) {
+        User player = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
+        if (player != null) {
+            if (activeReactions.containsKey(username)) {
+                activeReactions.get(username).dispose();
+            }
+            activeReactions.put(username, new ReactionBubble(player, reactionContent, isImage, GameAssetManager.skin));
+        }
+    }
+
+    private void sendReactionToServer(String reaction, boolean isImage) {
+        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+        String username = currentPlayer.getUsername();
+        MainApp.getInstance().getNetworkClient().sendReaction(gameId, username, reaction, isImage)
+            .exceptionally(ex -> {
+                Gdx.app.postRunnable(() -> showErrorDialog(stage, "Failed to send reaction: " + ex.getMessage()));
+                return null;
+            });
+    }
+
+    private void drawReactions(SpriteBatch batch) {
+        Iterator<Map.Entry<String, ReactionBubble>> iterator = activeReactions.entrySet().iterator();
+        while (iterator.hasNext()) {
+            ReactionBubble bubble = iterator.next().getValue();
+            bubble.update(Gdx.graphics.getDeltaTime());
+
+            if (bubble.isFinished()) {
+                bubble.dispose();
+                iterator.remove();
+                continue;
+            }
+
+            User owner = bubble.owner;
+            if (owner == null || owner.getCurrentTile() == null) continue;
+
+            int tileSize = GameAssetManager.TILE_SIZE;
+            int rows = MainApp.getInstance().getCurrentGame().getMap().getMap().length;
+            float playerX = owner.getCurrentTile().getX() * tileSize;
+            float playerY = (rows - owner.getCurrentTile().getY() - 1) * tileSize + (tileSize * 2);
+
+            if (bubble.isImage) {
+                batch.draw(bubble.imageTexture, playerX, playerY, tileSize, tileSize);
+            } else {
+                bubble.textLabel.setPosition(playerX, playerY);
+                bubble.textLabel.setSize(tileSize, tileSize);
+                bubble.textLabel.draw(batch, 1f);
+            }
+        }
+    }
+
+    private void createForceTerminationDialog() {
+        forceTerminationDialog = new Dialog("Force Termination Vote", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                boolean vote = (Boolean) object;
+                sendTerminationVote(vote);
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        };
+        forceTerminationDialog.padTop(40);
+        forceTerminationDialog.setModal(true);
+        forceTerminationDialog.setMovable(false);
+        forceTerminationDialog.setVisible(false);
+
+        TextButton yesButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
+        TextButton noButton = new TextButton("No", GameAssetManager.skin, "custom-button");
+
+        forceTerminationDialog.button(yesButton, true);
+        forceTerminationDialog.button(noButton, false);
+        stage.addActor(forceTerminationDialog);
+    }
+
+    public void showForceTerminationVoteDialog(String initiator) {
+        if (initiator.equals(currentPlayer.getUsername())) {
+            // The initiator doesn't need to vote again.
+            return;
+        }
+        forceTerminationDialog.getContentTable().clear();
+        Label label = new Label(initiator + " has started a vote to terminate the game.\nDo you agree?", GameAssetManager.skin, "custom-label");
+        label.setWrap(true);
+        forceTerminationDialog.getContentTable().add(label).width(400).pad(20);
+        forceTerminationDialog.show(stage);
+        forceTerminationDialog.setVisible(true);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void sendTerminationVote(boolean vote) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("approve", vote);
+        MainApp.getInstance().getNetworkClient().sendPost(
+            MainApp.getInstance().getCurrentGame().getNetworkId(),
+            "GameController",
+            "voteToTerminate",
+            params,
+            currentPlayer.getUsername()
+        ).thenAccept(response -> {
+            if (response.getStatus() != 200) {
+                Gdx.app.postRunnable(() -> {
+                    showErrorDialog(stage, "Failed to send vote: " + response.getMessage());
+                });
+            } else {
+                Gdx.app.postRunnable(() -> {
+                    showTimedErrorLabel(stage, "Your vote has been submitted.", 2f);
+                });
+            }
+        }).exceptionally(ex -> {
+            Gdx.app.postRunnable(() -> {
+                showErrorDialog(stage, "Error sending vote: " + ex.getMessage());
+            });
+            return null;
+        });
+    }
+
+    public void handleGameTermination(String message) {
+        showErrorDialog(stage, message);
+        // Add a delay or an OK button listener before switching screens
+        com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+            @Override
+            public void run() {
+                if (gameTickTask != null) {
+                    gameTickTask.cancel();
+                }
+                MainApp.getInstance().setCurrentGame(null);
+                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+            }
+        }, 5); // 5-second delay
+    }
+
+    public void cancelTermination(String message) {
+        forceTerminationDialog.setVisible(false);
+        showErrorDialog(stage, message);
+        Gdx.input.setInputProcessor(GameView.this);
+    }
+
+    private void createVoteOutDialogs() {
+        // Dialog to select a player to vote out
+        voteOutPlayersDialog = new Dialog("Vote Out Player", GameAssetManager.skin, "custom-window");
+        voteOutPlayersDialog.padTop(40);
+        voteOutPlayersDialog.setModal(true);
+        voteOutPlayersDialog.setMovable(false);
+        voteOutPlayersDialog.setVisible(false);
+        stage.addActor(voteOutPlayersDialog);
+
+        // Dialog to confirm voting yes/no
+        voteOutConfirmationDialog = new Dialog("Vote in Progress", GameAssetManager.skin, "custom-window");
+        voteOutConfirmationDialog.padTop(40);
+        voteOutConfirmationDialog.setModal(true);
+        voteOutConfirmationDialog.setMovable(false);
+        voteOutConfirmationDialog.setVisible(false);
+        stage.addActor(voteOutConfirmationDialog);
+    }
+
+    private void showVoteOutPlayersDialog() {
+        voteOutPlayersDialog.getContentTable().clear();
+        voteOutPlayersDialog.getButtonTable().clear();
+
+        Table content = voteOutPlayersDialog.getContentTable();
+        content.defaults().pad(10);
+
+        Label title = new Label("Who do you want to vote out?", GameAssetManager.skin, "custom-label");
+        content.add(title).colspan(1).row();
+
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if (!player.getUsername().equals(currentPlayer.getUsername())) {
+                TextButton playerButton = new TextButton(player.getUsername(), GameAssetManager.skin, "custom-button");
+                playerButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        startVoteOutOnServer(player.getUsername());
+                        voteOutPlayersDialog.hide();
+                        voteOutPlayersDialog.setVisible(false);
+                        Gdx.input.setInputProcessor(GameView.this);
+                    }
+                });
+                content.add(playerButton).width(300).height(50).row();
+            }
+        }
+
+        TextButton cancelButton = new TextButton("Cancel", GameAssetManager.skin, "custom-button");
+        cancelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                voteOutPlayersDialog.hide();
+                voteOutPlayersDialog.setVisible(false);
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+        voteOutPlayersDialog.getButtonTable().add(cancelButton);
+
+        voteOutPlayersDialog.show(stage);
+        voteOutPlayersDialog.setVisible(true);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void startVoteOutOnServer(String targetUsername) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("target", targetUsername);
+        MainApp.getInstance().getNetworkClient().sendPost(
+            MainApp.getInstance().getCurrentGame().getNetworkId(),
+            "GameController",
+            "startVoteOut",
+            params,
+            currentPlayer.getUsername()
+        );
+    }
+
+    public void showVoteOutConfirmationDialog(String initiator, String target) {
+        voteOutConfirmationDialog.getContentTable().clear();
+        voteOutConfirmationDialog.getButtonTable().clear();
+
+        Label label = new Label(initiator + " started a vote to eliminate " + target + ".\nYour vote?", GameAssetManager.skin, "custom-label");
+        label.setWrap(true);
+        voteOutConfirmationDialog.getContentTable().add(label).width(400).pad(20);
+
+        TextButton yesButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
+        yesButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                sendVoteOut(true);
+                voteOutConfirmationDialog.hide();
+                voteOutConfirmationDialog.setVisible(false);
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        TextButton noButton = new TextButton("No", GameAssetManager.skin, "custom-button");
+        noButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                sendVoteOut(false);
+                voteOutConfirmationDialog.hide();
+                voteOutConfirmationDialog.setVisible(false);
+                Gdx.input.setInputProcessor(GameView.this);
+            }
+        });
+
+        voteOutConfirmationDialog.getButtonTable().add(yesButton).pad(10);
+        voteOutConfirmationDialog.getButtonTable().add(noButton).pad(10);
+
+        voteOutConfirmationDialog.show(stage);
+        voteOutConfirmationDialog.setVisible(true);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void sendVoteOut(boolean vote) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("approve", vote);
+        MainApp.getInstance().getNetworkClient().sendPost(
+            MainApp.getInstance().getCurrentGame().getNetworkId(),
+            "GameController",
+            "castVoteOut",
+            params,
+            currentPlayer.getUsername()
+        );
+    }
+
+    public void handlePlayerEliminated(String eliminatedPlayerUsername, String message) {
+        showErrorDialog(stage, message);
+        // The server sends an updated player list. The drawAllPlayers method will
+        // automatically stop drawing the eliminated player on the next render frame
+        // because they will be gone from the game.getPlayers() list.
+    }
+
+    public void handleYouAreEliminated(String message) {
+        Dialog eliminatedDialog = new Dialog("Eliminated", GameAssetManager.skin, "custom-window");
+        eliminatedDialog.text(message);
+        eliminatedDialog.button("OK", true);
+        eliminatedDialog.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if (gameTickTask != null) {
+                    gameTickTask.cancel();
+                }
+                MainApp.getInstance().setCurrentGame(null);
+                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+            }
+        });
+        eliminatedDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    public void handlePlayerInteraction(Map<String, Object> data) {
+        String action = (String) data.get("action");
+        String senderName = (String) data.get("sender");
+        String receiverName = (String) data.get("receiver");
+
+        User sender = MainApp.getInstance().getCurrentGame().getPlayerByUsername(senderName);
+        User receiver = MainApp.getInstance().getCurrentGame().getPlayerByUsername(receiverName);
+
+        if (sender == null) return;
+
+        switch (action) {
+            case "hug":
+                if (receiver != null) {
+                    Tile tile1 = sender.getCurrentTile();
+                    Tile tile2 = receiver.getCurrentTile();
+                    float heartX = (float) (GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX())) / 2;
+                    float heartY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((float) (tile2.getY() + tile1.getY()) / 2));
+                    heartEffects.add(new HeartEffect(heartX, heartY));
+                }
+                break;
+            case "gift":
+                isGivingGift = true;
+                giftGivingStateTime = 0f;
+                break;
+            case "flower":
+                if (receiver != null) {
+                    Tile tile1 = sender.getCurrentTile();
+                    Tile tile2 = receiver.getCurrentTile();
+                    float midX = GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX()) / 2f;
+                    float midY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((tile1.getY() + tile2.getY()) / 2f));
+                    Flower flower = new Flower(randomStuffType.Bouquet.getTexture(), midX, midY);
+                    activeFlowers.add(flower);
+                }
+                break;
+            case "propose_start":
+                sender.setProposing(true);
+                break;
+            case "propose_end":
+                System.out.println("propose end called");
+                boolean accepted = (Boolean) data.get("accepted");
+                System.out.println("1");
+                User proposer = MainApp.getInstance().getCurrentGame().getPlayerByUsername((String) data.get("proposer"));
+                System.out.println("2");
+                User responder = MainApp.getInstance().getCurrentGame().getPlayerByUsername((String) data.get("responder"));
+                System.out.println("3");
+                if (proposer != null) {
+                    proposer.setProposing(false);
+                    System.out.println("7");
+                }
+                System.out.println("4");
+                if (responder != null) {
+                    System.out.println("5");
+                    if (accepted) responder.setAccepting(true);
+                    else responder.setRejecting(true);
+                }
+                System.out.println("6");
+                break;
+        }
+    }
+
+    public void showMarriageProposalDialog(String proposerUsername) {
+        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                boolean accepted = (Boolean) object;
+                Map<String, Object> params = new HashMap<>();
+                params.put("proposerUsername", proposerUsername);
+                params.put("accepted", accepted);
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "respondToMarriage",
+                    params,
+                    currentPlayer.getUsername()
+                );
+            }
+        };
+        Label label = new Label(proposerUsername + " has asked to marry you!", GameAssetManager.skin, "custom-label");
+        proposalDialog.getContentTable().add(label).pad(10);
+        proposalDialog.button("Accept", true);
+        proposalDialog.button("Reject", false);
+        proposalDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private static class FloatingMessage {
+        String text;
+        float x, y;
+        float timer;
+        float alpha;
+        static final float DURATION = 2.0f;
+        static final float FADE_TIME = 0.5f;
+
+        FloatingMessage(String text, float x, float y) {
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.timer = 0;
+            this.alpha = 1.0f;
+        }
+
+        void update(float delta) {
+            timer += delta;
+            // Start fading out
+            if (timer > DURATION - FADE_TIME) {
+                alpha = (DURATION - timer) / FADE_TIME;
+            }
+        }
+
+        boolean isFinished() {
+            return timer >= DURATION;
+        }
+
+        void draw(SpriteBatch batch, BitmapFont font) {
+            font.setColor(1, 1, 1, alpha); // Set color with alpha for fading
+            GlyphLayout layout = new GlyphLayout(font, text);
+            font.draw(batch, text, x - layout.width / 2, y);
+            font.setColor(Color.WHITE); // Reset color for other UI elements
+        }
+    }
+
+    public void showFloatingMessage(String message) {
+        float x = camera.position.x;
+        float y = camera.position.y;
+        floatingMessages.add(new FloatingMessage(message, x, y));
+    }
+
+    public void startGoodJobAnimation() {
+        isShowingGoodJob = true;
+        goodJobStateTime = 0f;
     }
 
 

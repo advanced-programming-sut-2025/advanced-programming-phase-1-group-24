@@ -1,15 +1,22 @@
 package io.github.stardew.mini.server.Controller;
 
 import io.github.stardew.mini.Model.GameSummary;
+import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.NPCManagement.NPC;
+import io.github.stardew.mini.Model.NPCManagement.NPCMission;
 import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.LobbyManager;
 import io.github.stardew.mini.server.ServerApp;
 import io.javalin.http.Context;
 import org.eclipse.jetty.server.Server;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,19 +31,12 @@ public class ServerController {
     private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
     private final MainMenuController mainMenuController= new MainMenuController();
-    private final LoginMenuController loginMenuController = new LoginMenuController();
+
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server) throws Exception{
         String controllerName = message.getControllerName();
         String methodName = message.getMethodName();
         Map<String, Object> body = message.getBody();
         String username = message.getUsername();
-
-//        if (controllerName.equals("LoginMenuController")) {
-//            String user = (String) body.get("username");
-//            String pass = (String) body.get("password");
-//            //String stayloggedin = (String) body.get("stayLoggedIn");
-//            return loginMenuController.login(user,pass,false);
-//        }
 
         if (controllerName == null || methodName == null || username == null) {
             return Message.BAD_REQUEST.setMessage("Missing controllerName, methodName, or username");
@@ -61,7 +61,7 @@ public class ServerController {
 
         switch (controllerName) {
             case "GameController":
-                return routeToGameController(methodName, body, server, player);
+                return routeToGameController(methodName, body, server, player, message);
 
             case "HouseMenuController":
                 // TODO: Implement this
@@ -90,14 +90,14 @@ public class ServerController {
 
 
             default:
-                return routeToGameController(methodName, body, server, player);
+                return routeToGameController(methodName, body, server, player, message);
         }
     }
 
 
     //We shouldn't always return ok
 
-    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player) throws Exception {
+    private Message<?> routeToGameController(String methodName, Map<String, Object> body, GameServer server, User player, Message<Map<String, Object>> fullMessage) throws Exception {
         Result result;
 
         switch (methodName) {
@@ -106,12 +106,6 @@ public class ServerController {
                 String dy = (String) body.get("dy");
                 String direction = (String) body.get("direction");
                 return gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
-            }
-
-            case "useTool": {
-                String direction = (String) body.get("direction");
-                result = gameController.useTool(direction, player, server);
-                return Message.ok(result);
             }
 
             case "plantGrowable": {
@@ -149,7 +143,6 @@ public class ServerController {
                 String count = (String) body.get("count");
                 String itemName = (String) body.get("itemName");
                 result = gameController.cheatAddItem(itemName,count, player, server);
-                System.out.println("cccccccccccCccc");
                 return Message.ok(result).setMessage(result.getMessage());
 
             }
@@ -162,6 +155,105 @@ public class ServerController {
 //                // مستقیم به کلاینت می‌فرستیم
 //                return Message.ok(lb);
 //            }
+            case "handleChatMessage": {
+                String senderUsername = fullMessage.getUsername();
+                String gameId = fullMessage.getGameID();
+                return gameController.handleChatMessage(senderUsername, gameId, body, server); // Modified call
+            }
+
+            case "handleReaction": {
+                return gameController.handleReaction(player, server, body);
+            }
+
+            case "startForceTerminateVote": {
+                return gameController.startForceTerminateVote(player, server);
+            }
+            case "voteToTerminate": {
+                Boolean approve = (Boolean) body.get("approve");
+                if (approve == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'approve' parameter for vote.");
+                }
+                return gameController.voteToTerminate(player, server, approve);
+            }
+
+            case "startVoteOut": {
+                String targetUsername = (String) body.get("target");
+                if (targetUsername == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'target' username for vote-out.");
+                }
+                return gameController.startVoteOut(player, targetUsername, server);
+            }
+            case "castVoteOut": {
+                Boolean approve = (Boolean) body.get("approve");
+                if (approve == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing 'approve' parameter for vote.");
+                }
+                return gameController.castVoteOut(player, approve, server);
+            }
+
+            case "useTool": {
+                String direction = (String) body.get("direction");
+                String toolName = (String) body.get("toolName");
+                if (direction == null || toolName == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing direction or toolName.");
+                }
+                Result toolResult = gameController.useToolServer(direction, player, server, toolName);
+                if (toolResult.isSuccessful()) {
+                    return Message.OK.setMessage(toolResult.message());
+                } else {
+                    return Message.FORBIDDEN.setMessage(toolResult.message());
+                }
+            }
+
+            case "addCaughtFish": {
+                Message<?> fishResult = gameController.addCaughtFish(player, server, body);
+                return fishResult;
+            }
+
+            case "talk": {
+                return gameController.talk(player, server, body);
+            }
+            case "hug": {
+                return gameController.hug(player, server, body);
+            }
+            case "sendGift": {
+                return gameController.sendGift(player, server, body);
+            }
+            case "sendFlower": {
+                return gameController.sendFlower(player, server, body);
+            }
+            case "askMarriage": {
+                return gameController.askMarriage(player, server, body);
+            }
+            case "respondToMarriage": {
+                return gameController.respondToMarriage(player, server, body);
+            }
+            case "cheatSetFriendshipLevel": {
+                return gameController.cheatSetFriendshipLevel(player, server, body);
+            }
+
+            case "updateNpcPosition": {
+                String npcName = (String) body.get("npcName");
+                Point currentPoint = GameSaver.convertObject(body.get("currentPoint"), Point.class);
+                Point movingTo = GameSaver.convertObject(body.get("movingTo"), Point.class);
+                Point movingFrom = GameSaver.convertObject(body.get("movingFrom"), Point.class);
+
+                result = gameController.updateNpcPosition(npcName, currentPoint, movingTo, movingFrom, server);
+                return Message.ok(result);
+            }
+            case "doNPCMission": {
+                String mission = (String) body.get("mission");
+                String currentPlayer = (String) body.get("currentPlayer");
+                Result resulttt = gameController.doMission(mission, currentPlayer);
+                return Message.ok(resulttt);
+            }
+            case "addNPCMission": {
+                String mission = (String) body.get("mission");
+                String currentPlayer = (String) body.get("currentPlayer");
+                Result resultttt = gameController.addNPCMission(mission,currentPlayer);
+                return Message.ok(resultttt);
+            }
+
 
             default:
                 return Message.BAD_REQUEST.setMessage("Unknown method: " + methodName);
@@ -265,7 +357,7 @@ public class ServerController {
     private Message<?> routeToMainMenuController(String methodName, Map<String, Object> body, User player) {
         switch (methodName) {
             case "showUserInfo": {
-                Result result= mainMenuController.showUserInfo(player.getUsername());
+               Result result= mainMenuController.showUserInfo(player.getUsername());
                 return Message.OK.setMessage(result.getMessage());
             }
 
