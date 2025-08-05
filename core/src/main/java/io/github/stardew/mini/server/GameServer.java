@@ -192,79 +192,6 @@ public class GameServer extends Thread {
         isWaitingForPlayersToGoHome = waitingForPlayersToGoHome;
     }
 
-//    public void broadcastLeaderboard() {
-//        List<Map<String, Object>> leaderboard = new ArrayList<>();
-//
-//        for (PlayerConnection player : players) {
-//            User user = player.getUser();
-//            Map<String, Object> entry = new HashMap<>();
-//            entry.put("username", user.getUsername());
-//            entry.put("money", user.getMoney());
-//            entry.put("skills", user.getSkillsLevel());
-//
-//            int skillSum = user.getSkillsLevel().values().stream().mapToInt(i -> i).sum();
-//            entry.put("skillSum", skillSum);
-//            entry.put("missions", 0); // hardcoded
-//
-//            int score = user.getMoney() + skillSum + 0;
-//            entry.put("score", score);
-//
-//            leaderboard.add(entry);
-//        }
-//
-//        // Sort by score descending
-//        leaderboard.sort((a, b) -> ((Integer) b.get("score")) - ((Integer) a.get("score")));
-//
-//        // Send to all players
-//        Map<String, Object> body = new HashMap<>();
-//        body.put("leaderboard", leaderboard);
-//
-//        Message<Map<String, Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
-//        msg.setType("leaderboard-update");
-//
-//        String json = new Gson().toJson(msg);
-//
-//        for (PlayerConnection player : players) {
-//            player.getWsContext().send(json);
-//        }
-//    }
-//public void broadcastLeaderboard() {
-//    List<Map<String, Object>> leaderboard = new ArrayList<>();
-//
-//    for (PlayerConnection pc : players) {
-//        User user = pc.getUser();
-//        int money = user.getMoney();
-//        int skillSum = user.getSkillsLevel().values().stream().mapToInt(Integer::intValue).sum();
-//        int missions = 0; // موقتا هاردکد
-//        int score = money + skillSum + missions;
-//
-//        Map<String, Object> entry = new HashMap<>();
-//        entry.put("username", user.getUsername());
-//        entry.put("money", money);
-//        entry.put("skillSum", skillSum);
-//        entry.put("missions", missions);
-//        entry.put("score", score);
-//
-//        leaderboard.add(entry);
-//    }
-//
-//    // مرتب‌سازی نزولی بر اساس امتیاز
-//    leaderboard.sort((a, b) -> ((Integer) b.get("score")).compareTo((Integer) a.get("score")));
-//
-//    // ارسال به‌روزرسانی برای همه
-//    Map<String, Object> body = new HashMap<>();
-//    body.put("leaderboard", leaderboard);
-//    Message<Map<String, Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
-//    msg.setType("leaderboard-update");
-//    String json = new Gson().toJson(msg);
-//
-//    for (PlayerConnection pc : players) {
-//        if (pc.getWsContext().session.isOpen()) {
-//            pc.getWsContext().send(json);
-//        }
-//    }
-//}
-// در کلاس GameServer
 public List<Map<String, Object>> buildLeaderboard() {
     List<Map<String, Object>> leaderboard = new ArrayList<>();
 
@@ -310,6 +237,13 @@ public List<Map<String, Object>> buildLeaderboard() {
                 break;
             }
         }
+    }
+
+    public void broadcastRadioUpdate(String base64Data) {
+        Message<Map<String,String>> msg = Message.ok(Map.of("data", base64Data));
+        msg.setType("radio-update");
+        String j = new Gson().toJson(msg);
+        players.forEach(pc -> pc.getWsContext().send(j));
     }
 
 

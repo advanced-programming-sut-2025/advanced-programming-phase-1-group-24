@@ -1,5 +1,6 @@
 package io.github.stardew.mini.server;
 
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,8 +34,9 @@ public class ServerApp {
     private final ConcurrentHashMap<String, User> allUsers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Game> allGames = new ConcurrentHashMap<>();
    // private final CopyOnWriteArrayList<GameServer> allActiveGames = new CopyOnWriteArrayList<>();
+   private final RadioService radioService = new RadioService();
 
-
+    private final Gson gson = new Gson();
     private ServerApp() {
 //        Config config = new Config();
 //        config.useSingleServer().setAddress("redis://127.0.0.1:6379"); // change host/port if needed
@@ -180,5 +182,10 @@ public void addGame(Game game) {
             return mapper.readValue(reader, Game.class);
         }
     }
+
+    public RadioService getRadioService() { return radioService; }
+
+
+    public Gson getGson() { return gson; }
 
 }

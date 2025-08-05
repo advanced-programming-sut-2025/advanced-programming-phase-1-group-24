@@ -5,8 +5,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
@@ -35,8 +35,6 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.client.View.*;
@@ -219,6 +217,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         CropAssets.dispose();
         InventoryAssets.dispose();
         ShopAssets.dispose();
+        GameAudioManager.getInstance().dispose();
         batch.dispose();
         // save games
 //        if (currentGame != null) {

@@ -2,7 +2,11 @@
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Base64Coder;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.GameAudioManager;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
@@ -26,16 +30,14 @@ import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.util.HashMap;
+import java.io.ByteArrayInputStream;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 public class NetworkClient extends WebSocketClient {
@@ -310,6 +312,22 @@ public class NetworkClient extends WebSocketClient {
                     return;
                 }
 
+                if ("radio-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+                    String trackId = (String) b.get("trackId");
+                    String base64  = (String) b.get("data");
+
+                    byte[] bytes = Base64Coder.decode(base64);
+                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+                    fh.writeBytes(bytes, false);
+
+                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
+                    GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+                }
+
+
+
 
 
 
@@ -523,6 +541,22 @@ public class NetworkClient extends WebSocketClient {
             }
         }
         return result;
+    }
+
+    public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
+        String b64 = Arrays.toString(Base64Coder.encode(raw));
+        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
+            "name", name,
+            "data", b64);
+        return sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+    public CompletableFuture<Message<?>> listTracks(String gameId) {
+        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername());
+        return sendGet(gameId, "RadioController", "list", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+    public CompletableFuture<Message<?>> switchTrack(String gameId, String trackId) {
+        Map<String,Object> p = Map.of("trackId", trackId);
+        return sendPost(gameId, "RadioController", "switch", p, MainApp.getInstance().getLoggedInUser().getUsername());
     }
 
 
