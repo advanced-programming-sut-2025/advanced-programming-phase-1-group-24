@@ -43,6 +43,7 @@ import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.HouseMenuController;
@@ -90,9 +91,15 @@ import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 import org.jetbrains.annotations.NotNull;
+import io.github.stardew.mini.client.FileChooserUtil;
+
 
 //import java.awt.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.*;
@@ -232,6 +239,12 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     String giftReciever, artisanName;
 
     private Table leaderboardTable;
+
+    private SelectBox<String> trackSelect;
+    private TextButton uploadButton;
+    private Map<String,String> trackNameToId = new HashMap<>();
+
+
 
 
     private void loadFont() {
@@ -3292,6 +3305,81 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         //MainApp.getInstance().setCurrentGameViewIfNull(this);
         //MainApp.getInstance().setCurrentGameView(this);
 
+
+//        trackSelect = new SelectBox<>(GameAssetManager.skin);
+//        float padding = 10;
+//        // گوشهٔ راست و وسط عمودی
+//        float x = Gdx.graphics.getWidth() - trackSelect.getWidth() - padding;
+//        float y = (Gdx.graphics.getHeight() - trackSelect.getHeight()) / 2f;
+//        trackSelect.setPosition(x, y);
+//        stage.addActor(trackSelect);
+//
+//
+//        // 1. اول یک دکمهٔ آپلود می‌سازیم:
+//        TextButton uploadButton = new TextButton("آپلود موزیک", GameAssetManager.skin);
+//        uploadButton.setPosition(
+//            trackSelect.getX(),
+//            trackSelect.getY() - uploadButton.getHeight() - 10
+//        );
+//        stage.addActor(uploadButton);
+//
+//// 2. وقتی دکمه کلیک شد، از کاربر مسیر فایل را می‌خواهیم:
+//        uploadButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                // اینجا باید مسیر فایل را از یک FileChooser جاوا (مثلاً Swing JFileChooser)
+//                // یا هر روشی که خودت پیاده می‌کنی بگیری:
+//                String chosenFilePath = FileChooserUtil.showFileChooserAndGetPath();
+//                if (chosenFilePath != null) {
+//                    try {
+//                        byte[] data = Files.readAllBytes(Paths.get(chosenFilePath));
+//                        String name = new File(chosenFilePath).getName();
+//                        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+//                        MainApp.getInstance().getNetworkClient()
+//                            .uploadTrack(gameId, name, data)
+//                            .thenAccept(msg -> {
+//
+//                            });
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+
+
+
+        // گرفتن لیست ترک‌ها از سرور
+//        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+//        MainApp.getInstance().getNetworkClient()
+//            .listTracks(gameId)
+//            .thenAccept(msg -> {
+//                @SuppressWarnings("unchecked")
+//                List<Map<String,Object>> body = (List<Map<String,Object>>) msg.getBody();
+//                List<String> names = new ArrayList<>();
+//                for (Map<String,Object> m : body) {
+//                    String id   = (String) m.get("id");
+//                    String name = (String) m.get("name");
+//                    trackNameToId.put(name, id);
+//                    names.add(name);
+//                }
+//                Gdx.app.postRunnable(() ->
+//                    trackSelect.setItems(names.toArray(new String[0]))
+//                );
+//            });
+//
+//        // وقتی کاربر ترک جدیدی انتخاب کرد
+//        trackSelect.addListener(new ChangeListener() {
+//            @Override public void changed(ChangeEvent event, Actor actor) {
+//                String chosen = trackSelect.getSelected();
+//                String trackId = trackNameToId.get(chosen);
+//                if (trackId != null) {
+//                    MainApp.getInstance().getNetworkClient()
+//                        .switchTrack(gameId, trackId);
+//                }
+//            }
+//        });
+        initAudioUI();
     }
 
 
@@ -6748,6 +6836,81 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         }
     }
 
+    private void initAudioUI() {
+        // ۱. SelectBox برای سوئیچ ترک
+        trackSelect = new SelectBox<>(GameAssetManager.skin);
+        float padding = 10;
+        float x = Gdx.graphics.getWidth() - 200 - padding; // فرض می‌کنیم پهنایش ۲۰۰
+        float y = (Gdx.graphics.getHeight() - trackSelect.getHeight()) / 2f;
+        trackSelect.setSize(200, 30);
+        trackSelect.setPosition(x, y);
+        stage.addActor(trackSelect);
+
+        // بار اول لیست ترک‌ها را از سرور بگیریم
+        refreshTrackList();
+
+        trackSelect.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String name = trackSelect.getSelected();
+                String id   = trackNameToId.get(name);
+                if (id != null) {
+                    NetworkClient nc = MainApp.getInstance().getNetworkClient();
+                    nc.switchTrack(MainApp.getInstance().getCurrentGame().getNetworkId(), id);
+                }
+            }
+        });
+
+        // ۲. دکمه آپلود
+        uploadButton = new TextButton("Upload Track", GameAssetManager.skin);
+        uploadButton.setSize(200, 30);
+        uploadButton.setPosition(x, y - 40);
+        uploadButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String path = FileChooserUtil.showFileChooserAndGetPath();
+                if (path != null) {
+                    uploadNewTrack(path);
+                }
+            }
+        });
+        stage.addActor(uploadButton);
+    }
+
+    private void refreshTrackList() {
+        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+        MainApp.getInstance().getNetworkClient()
+            .listTracks(gameId)
+            .thenAccept(msg -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String,Object>> list = (List<Map<String,Object>>) msg.getBody();
+                List<String> names = new ArrayList<>();
+                trackNameToId.clear();
+                for (Map<String,Object> m : list) {
+                    String id   = (String) m.get("id");
+                    String name = (String) m.get("name");
+                    trackNameToId.put(name, id);
+                    names.add(name);
+                }
+                Gdx.app.postRunnable(() -> trackSelect.setItems(names.toArray(new String[0])));
+            });
+    }
+
+    private void uploadNewTrack(String filePath) {
+        try {
+            File file = new File(filePath);
+            byte[] data = Files.readAllBytes(file.toPath());
+            String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+            MainApp.getInstance().getNetworkClient()
+                .uploadTrack(gameId, file.getName(), data)
+                .thenAccept(resp -> {
+                    // وقتی سرور OK داد، دوباره لیست را بگیریم
+                    Gdx.app.postRunnable(this::refreshTrackList);
+                });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 
 }

@@ -176,7 +176,6 @@ public class AppSocket {
 
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
-
                         PlayerConnection existing = getPlayerConnectionByUsername(message.getUsername());
                         if (existing != null && existing.isAwaitingReconnect()) {
                             existing.markReconnected();

@@ -78,6 +78,8 @@ public class ServerController {
                 return  routeToPreGameMenuController(methodName, body, server, player);
             case "MainMenuController":
                 return routeToMainMenuController(methodName, body, player);
+            case "RadioController":
+                return RadioController.route(methodName, body, server);
 
 
             default:
