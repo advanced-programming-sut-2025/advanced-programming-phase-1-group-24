@@ -13,6 +13,10 @@ public class Message<T> {
     public static final String CHAT_PRIVATE = "chat_private";
     public static final String POP_UP_NOTIFICATION = "pop_up_notification";
     public static final String REACTION_BROADCAST = "reaction-broadcast";
+    public static final String PLAYER_INTERACTION_BROADCAST = "player_interaction_broadcast";
+    public static final String MARRIAGE_PROPOSAL = "marriage_proposal";
+    public static final String MARRIAGE_RESPONSE_UPDATE = "marriage_response_update";
+    public static final String FRIENDSHIP_UPDATED = "friendship_updated";
 
     private int status;
     private String message;

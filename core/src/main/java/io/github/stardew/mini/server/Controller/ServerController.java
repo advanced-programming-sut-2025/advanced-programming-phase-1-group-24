@@ -377,12 +377,6 @@ public class ServerController {
                 return gameController.tryMove(Integer.parseInt(dx), Integer.parseInt(dy), Integer.parseInt(direction), player, server);
             }
 
-            case "useTool": {
-                String direction = (String) body.get("direction");
-                result = gameController.useTool(direction, player, server);
-                return Message.ok(result);
-            }
-
             case "plantGrowable": {
                 String seedName = (String) body.get("seedName");
                 String direction = (String) body.get("direction");
@@ -400,6 +394,29 @@ public class ServerController {
             case "buildGreenHouse": {
                 result = gameController.buildGreenHouse(player, server);
                 return Message.ok(result);
+            }
+//            case "exitGame": {
+//                result = gameController.exitGame(player, server);
+//                return Message.ok(result);
+//            }
+//            case "getSavedGames": {
+//                List<GameSummary> summaries = gameController.getSavedGamesForUser(player.getUsername());
+//                return Message.ok(summaries);
+//            }
+//            case "cheatAddMoney": {
+//                String count = (String) body.get("money");
+//                result = gameController.cheatAddMoney(count, player, server);
+//                return Message.ok(result).setMessage(result.getMessage());
+//            }
+            case "cheatAddItem": {
+                System.out.println("going to cheat add item");
+                String count = (String) body.get("count");
+                System.out.println("1");
+                String itemName = (String) body.get("itemName");
+                System.out.println("2");
+                result = gameController.cheatAddItem(itemName,count, player, server);
+                System.out.println("7");
+                return Message.ok(result).setMessage(result.getMessage());
             }
 
             case "handleChatMessage": {
@@ -438,8 +455,45 @@ public class ServerController {
                 return gameController.castVoteOut(player, approve, server);
             }
 
+            case "useTool": {
+                String direction = (String) body.get("direction");
+                String toolName = (String) body.get("toolName");
+                if (direction == null || toolName == null) {
+                    return Message.BAD_REQUEST.setMessage("Missing direction or toolName.");
+                }
+                Result toolResult = gameController.useToolServer(direction, player, server, toolName);
+                if (toolResult.isSuccessful()) {
+                    return Message.OK.setMessage(toolResult.message());
+                } else {
+                    return Message.FORBIDDEN.setMessage(toolResult.message());
+                }
+            }
+
+            case "addCaughtFish": {
+                Message<?> fishResult = gameController.addCaughtFish(player, server, body);
+                return fishResult;
+            }
+
             case "talk": {
                 return gameController.talk(player, server, body);
+            }
+            case "hug": {
+                return gameController.hug(player, server, body);
+            }
+            case "sendGift": {
+                return gameController.sendGift(player, server, body);
+            }
+            case "sendFlower": {
+                return gameController.sendFlower(player, server, body);
+            }
+            case "askMarriage": {
+                return gameController.askMarriage(player, server, body);
+            }
+            case "respondToMarriage": {
+                return gameController.respondToMarriage(player, server, body);
+            }
+            case "cheatSetFriendshipLevel": {
+                return gameController.cheatSetFriendshipLevel(player, server, body);
             }
 
             case "updateNpcPosition": {

@@ -37,6 +37,7 @@ import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
@@ -256,6 +257,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
     private boolean isGivingGift = false;
     private float giftGivingStateTime = 0f;
+
+    private boolean isShowingGoodJob = false;
+    private float goodJobStateTime = 0f;
+
+    private final List<FloatingMessage> floatingMessages = new ArrayList<>();
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -1567,7 +1573,26 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 switch (scenario) {
                     case "Gift":
                         result = controller.sendGift(giftReciever, equippedItem.getName(), Integer.toString(purchaseQuantity));
+                        Map<String, Object> params = new HashMap<>();
+                        params.put("giftReciever", giftReciever);
+                        params.put("equippedItem", equippedItem.getName());
+                        params.put("quantity", Integer.toString(purchaseQuantity));
+
+                        MainApp.getInstance().getNetworkClient()
+                            .sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "GameController",
+                                "sendGift",
+                                params,
+                                MainApp.getInstance().getLoggedInUser().getUsername())
+                            .thenAccept(response -> {
+                                if (response.getStatus() == 200) {
+                                } else {
+                                    showFloatingMessage("Failed to send gift.");
+                                }
+                            });
                         break;
+
                     case "Machine":
 
                         result = controller.artisanUse(pendingMachineName, equippedItem.getName(), null, MainApp.getInstance().getCurrentGame().getMap());
@@ -2376,51 +2401,45 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             @Override
             protected void result(Object obj) {
                 String action = (String) obj;
-                Result result;
+                Map<String, Object> params = new HashMap<>();
+                params.put("targetUsername", targetUsername);
 
+                String methodName = "";
                 switch (action) {
                     case "hug":
-                        result = controller.hug(targetUsername);
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            Tile tile1 = currentPlayer.getCurrentTile();
-                            Tile tile2 = MainApp.getInstance().getCurrentGame().getPlayerByUsername(targetUsername).getCurrentTile();
-                            float heartX = (float) (GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX())) / 2;
-                            float heartY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((float) (tile2.getY() + tile1.getY()) / 2));
-                            heartEffects.add(new HeartEffect(heartX, heartY));
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "hug";
                         break;
                     case "flower":
-                        result = controller.sendFlower(targetUsername);
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            Tile tile1 = currentPlayer.getCurrentTile();
-                            Tile tile2 = MainApp.getInstance().getCurrentGame().getPlayerByUsername(targetUsername).getCurrentTile();
-
-                            float midX = GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX()) / 2f;
-                            float midY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((tile1.getY() + tile2.getY()) / 2f));
-
-                            Flower flower = new Flower(randomStuffType.Bouquet.getTexture(), midX, midY);
-                            activeFlowers.add(flower);
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "sendFlower";
                         break;
                     case "propose":
-                        result = controller.askMarriage(targetUsername, "ring");
-                        if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                        else {
-                            currentPlayer.setProposing(true);
-                            Gdx.input.setInputProcessor(GameView.this);
-                        }
+                        methodName = "askMarriage";
                         break;
                     case "close":
                         relationshipDialog.hide();
                         Gdx.input.setInputProcessor(GameView.this);
+                        return;
                     default:
                         relationshipDialog.hide();
                         Gdx.input.setInputProcessor(GameView.this);
+                        return;
                 }
+
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    methodName,
+                    params,
+                    currentPlayer.getUsername()
+                ).thenAccept(response -> {
+                    if (response.getStatus() != 200) {
+                        Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
+                    } else {
+                        Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
+                    }
+                });
+                relationshipDialog.hide();
+                Gdx.input.setInputProcessor(GameView.this);
             }
         };
         TextButton hugButton = new TextButton("Hug", GameAssetManager.skin, "custom-button");
@@ -2669,7 +2688,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                     Result npcResult = selectedNPC.giveGift(equippedItem.getName(), currentPlayer);
                     if (npcResult.isSuccessful()) {
                         currentPlayer.getBackpack().grabItem(equippedItem.getName(), 1);
-                        showTimedErrorLabel(stage, npcResult.message(), 2f);
+                        showFloatingMessage(npcResult.message());
                         isGivingGift = true;
                         giftGivingStateTime = 0f;
                     }
@@ -3261,7 +3280,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
 
         determineAvatar();
-        showNotifications();
+        //showNotifications();
         energyLabel.setText("Energy: " + currentPlayer.getEnergy());
         if (currentPlayer.isProposing()) {
             currentPlayer.setProposingTimer(currentPlayer.getProposingTimer() + v);
@@ -3371,6 +3390,18 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         drawPlayer();
         drawAllPlayers();
+
+        Iterator<FloatingMessage> msgIterator = floatingMessages.iterator();
+        while (msgIterator.hasNext()) {
+            FloatingMessage msg = msgIterator.next();
+            msg.update(Gdx.graphics.getDeltaTime());
+            if (msg.isFinished()) {
+                msgIterator.remove();
+            } else {
+                msg.draw(batch, smallFont);
+            }
+        }
+
         // --- DRAW HEART EFFECTS ---
         Iterator<HeartEffect> iterator = heartEffects.iterator();
         while (iterator.hasNext()) {
@@ -3443,7 +3474,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
                 batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
             }
-            if (giftGivingStateTime > 4.0f) {
+            if (giftGivingStateTime > 2.0f) {
                 isGivingGift = false;
             }
         }
@@ -3822,6 +3853,20 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         drawReactions(batch);
 
+        if (isShowingGoodJob) {
+            goodJobStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.goodJobAnimation.getKeyFrame(goodJobStateTime);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                // Draw animation slightly above the player's head
+                batch.draw(currentFrame, drawX, drawY + tileSize, tileSize, tileSize);
+            }
+            if (InventoryAssets.goodJobAnimation.isAnimationFinished(goodJobStateTime)) {
+                isShowingGoodJob = false;
+            }
+        }
+
         batch.end(); // ✅ this must come BEFORE stage rendering
 
         drawShapeRenderer(tiles, tileSize);
@@ -3858,19 +3903,46 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 } else if (finalQuality == ProductQuality.Golden) {
                     finalQuality = ProductQuality.Iridium;
                 }
-                currentPlayer.perfectFishingSkillUpgrade();
             }
 
-            Fish finalFish = new Fish(finalQuality, currentCaughtFish.getType());
+            final ProductQuality finalllQuality = finalQuality;
 
-            Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
-            if (addFishResult.isSuccessful()) {
-                if (perfectCatch) showErrorDialog(stage, "Perfect catch!");
-                showErrorDialog(stage, "You caught a " + finalQuality.name() + " " + finalFish.getName() + "!");
-                currentPlayer.addSkillExperience(Skill.FISHING);
-            } else {
-                showErrorDialog(stage, "You caught the fish, but your backpack is full!");
-            }
+            // Send the caught fish details to the server instead of adding it locally
+            Map<String, Object> params = new HashMap<>();
+            params.put("fishName", currentCaughtFish.getName());
+            params.put("quality", finalQuality.name());
+            params.put("perfectCatch", perfectCatch);
+
+            MainApp.getInstance().getNetworkClient().sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "GameController",
+                "addCaughtFish",
+                params,
+                currentPlayer.getUsername()
+            ).thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    Gdx.app.postRunnable(() -> {
+                        Fish finalFish = new Fish(finalllQuality, currentCaughtFish.getType());
+
+                        Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
+                        if (addFishResult.isSuccessful()) {
+                            if (perfectCatch) {
+                                showFloatingMessage("Perfect catch!");
+                                startGoodJobAnimation();
+                            }
+                            showErrorDialog(stage, "You caught a " + finalllQuality.name() + " " + finalFish.getName() + "!");
+                            currentPlayer.addSkillExperience(Skill.FISHING);
+                        } else {
+                            showErrorDialog(stage, "You caught the fish, but your backpack is full!");
+                        }
+                    });
+                } else {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, "Failed to add fish: " + response.getMessage());
+                    });
+                }
+            });
+
         } else {
             showErrorDialog(stage, "The " + currentCaughtFish.getName() + " got away!");
         }
@@ -4575,11 +4647,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 Gdx.input.setInputProcessor(this);
             }
         } else {
-            int tileSize = GameAssetManager.TILE_SIZE;
-
+            // For other tools, send the action to the server
             float playerTileGridX = currentPlayer.getCurrentTile().getX();
             float playerTileGridY = currentPlayer.getCurrentTile().getY();
-
+            int tileSize = GameAssetManager.TILE_SIZE;
             float playerWorldX = playerTileGridX * tileSize + tileSize / 2f;
             float playerWorldY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - 1 - playerTileGridY) * tileSize + tileSize / 2f;
 
@@ -4592,23 +4663,35 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             float deltaY = actualMouseWorldY - playerWorldY;
 
             int direction = get4DirectionalAngle(deltaX, deltaY);
+            String directionName = InventoryAssets.DIRECTION_NAMES.get(direction);
 
-            float angleRad = MathUtils.atan2(deltaY, deltaX);
-            float angleDeg = angleRad * MathUtils.radDeg;
-            if (angleDeg < 0) {
-                angleDeg += 360;
-            }
+            if (directionName != null) {
+                isToolBeingUsed = true; // Optimistically start animation
+                toolUsageStateTime = 0f;
 
-            // Start the tool usage animation (for non-fishing tools)
-            isToolBeingUsed = true;
-            toolUsageStateTime = 0f;
+                Map<String, Object> params = new HashMap<>();
+                params.put("direction", directionName);
+                params.put("toolName", toolToUse.getName());
 
-            if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
-                Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
-                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-            } else {
-                Result result = controller.useTool("Down");
-                if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "useTool",
+                    params,
+                    currentPlayer.getUsername()
+                ).thenAccept(response -> {
+                    if (response.getStatus() != 200) {
+                        Gdx.app.postRunnable(() -> showErrorDialog(stage, "Action failed: " + response.getMessage()));
+                    } else {
+                        if (InventoryAssets.DIRECTION_NAMES != null && InventoryAssets.DIRECTION_NAMES.containsKey(direction)) {
+                            Result result = controller.useTool(InventoryAssets.DIRECTION_NAMES.get(direction));
+                            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                        } else {
+                            Result result = controller.useTool("Down");
+                            if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                        }
+                    }
+                });
             }
         }
     }
@@ -5121,6 +5204,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                                 params,
                                 MainApp.getInstance().getLoggedInUser().getUsername()
                             );
+                            startGoodJobAnimation();
                         }
                         MissionsMenuDialog.hide();
                     }
@@ -5296,115 +5380,115 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         stage.addActor(skillsDialog);
     }
 
-    private void showNotifications() {
-        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
-        if (notifications.isEmpty()) return;
-        Gdx.input.setInputProcessor(stage);
-
-        StringBuilder generalNotifications = new StringBuilder();
-
-        for (FriendshipMessage notification : notifications) {
-            String message = notification.getMessage();
-
-            if (message.endsWith("has asked to marry you")) {
-                Dialog proposalDialog = proposalNotification(notification);
-                Gdx.input.setInputProcessor(stage);
-                proposalDialog.show(stage);
-            } else if (message.equals("force terminate has started!")) {
-                Dialog forceTerminationDialog = forceTerminationNotification();
-                Gdx.input.setInputProcessor(stage);
-                forceTerminationDialog.show(stage);
-            } else {
-                generalNotifications.append("- From ").append(notification.getSender())
-                    .append(": ").append(message).append("\n");
-            }
-        }
-
-        if (!generalNotifications.isEmpty()) {
-            Dialog generalDialog = new Dialog("Notifications", GameAssetManager.skin, "custom-window") {
-                @Override
-                protected void result(Object obj) {
-                    Gdx.input.setInputProcessor(GameView.this);
-                }
-            };
-            Label notificationLabel = new Label(generalNotifications.toString(), GameAssetManager.skin, "custom-label");
-            notificationLabel.setWrap(true);
-
-            generalDialog.getContentTable().add(notificationLabel).width(400).pad(20);
-            generalDialog.getContentTable().row();
-
-            TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
-            generalDialog.button(okButton, true);
-            Gdx.input.setInputProcessor(stage);
-            generalDialog.show(stage);
-        }
-
-        notifications.clear();
-    }
-
-    @NotNull
-    private Dialog proposalNotification(FriendshipMessage notification) {
-        String sender = notification.getSender();
-
-        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
-            @Override
-            protected void result(Object obj) {
-                Gdx.input.setInputProcessor(GameView.this);
-                boolean accepted = (Boolean) obj;
-                if (accepted) {
-                    controller.respondToMarriage("accept", sender);
-                    currentPlayer.setAccepting(true);
-                } else {
-                    controller.respondToMarriage("reject", sender);
-                    currentPlayer.setRejecting(true);
-                }
-            }
-        };
-        Label label = new Label(sender + " has asked to marry you", GameAssetManager.skin, "custom-label");
-        proposalDialog.getContentTable().add(label).pad(10);
-
-        TextButton acceptButton = new TextButton("Accept", GameAssetManager.skin, "custom-button");
-        TextButton rejectButton = new TextButton("Reject", GameAssetManager.skin, "custom-button");
-
-        proposalDialog.button(acceptButton, true);
-        proposalDialog.button(rejectButton, false);
-        return proposalDialog;
-    }
-
-    @NotNull
-    private Dialog forceTerminationNotification() {
-        Dialog forceTerminationDialog = new Dialog("Force Termination", GameAssetManager.skin, "custom-window") {
-            @Override
-            protected void result(Object obj) {
-                Gdx.input.setInputProcessor(GameView.this);
-                boolean accepted = (Boolean) obj;
-                if (accepted) {
-                    Result result = controller.voteToTerminate(true, currentPlayer);
-                    if (!result.isSuccessful()) showErrorDialog(stage, result.message());
-                    else {
-                        if (gameTickTask != null) {
-                            gameTickTask.cancel();
-                        }
-                        MainApp.getInstance().setCurrentGame(null);
-                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
-                    }
-                } else {
-                    Result result = controller.voteToTerminate(false, currentPlayer);
-                    showErrorDialog(stage, result.message());
-                }
-            }
-        };
-        Label label = new Label("Do you want to force terminate this game ?", GameAssetManager.skin, "custom-label");
-        forceTerminationDialog.getContentTable().add(label).pad(10);
-
-        TextButton acceptButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
-        TextButton rejectButton = new TextButton("No", GameAssetManager.skin, "custom-button");
-
-        forceTerminationDialog.button(acceptButton, true);
-        forceTerminationDialog.button(rejectButton, false);
-        return forceTerminationDialog;
-    }
+//    private void showNotifications() {
+//        List<FriendshipMessage> notifications = currentPlayer.getNotifications();
+//        if (notifications.isEmpty()) return;
+//        Gdx.input.setInputProcessor(stage);
+//
+//        StringBuilder generalNotifications = new StringBuilder();
+//
+//        for (FriendshipMessage notification : notifications) {
+//            String message = notification.getMessage();
+//
+//            if (message.endsWith("has asked to marry you")) {
+//                Dialog proposalDialog = proposalNotification(notification);
+//                Gdx.input.setInputProcessor(stage);
+//                proposalDialog.show(stage);
+//            } else if (message.equals("force terminate has started!")) {
+//                Dialog forceTerminationDialog = forceTerminationNotification();
+//                Gdx.input.setInputProcessor(stage);
+//                forceTerminationDialog.show(stage);
+//            } else {
+//                generalNotifications.append("- From ").append(notification.getSender())
+//                    .append(": ").append(message).append("\n");
+//            }
+//        }
+//
+//        if (!generalNotifications.isEmpty()) {
+//            Dialog generalDialog = new Dialog("Notifications", GameAssetManager.skin, "custom-window") {
+//                @Override
+//                protected void result(Object obj) {
+//                    Gdx.input.setInputProcessor(GameView.this);
+//                }
+//            };
+//            Label notificationLabel = new Label(generalNotifications.toString(), GameAssetManager.skin, "custom-label");
+//            notificationLabel.setWrap(true);
+//
+//            generalDialog.getContentTable().add(notificationLabel).width(400).pad(20);
+//            generalDialog.getContentTable().row();
+//
+//            TextButton okButton = new TextButton("OK", GameAssetManager.skin, "custom-button");
+//            generalDialog.button(okButton, true);
+//            Gdx.input.setInputProcessor(stage);
+//            generalDialog.show(stage);
+//        }
+//
+//        notifications.clear();
+//    }
+//
+//    @NotNull
+//    private Dialog proposalNotification(FriendshipMessage notification) {
+//        String sender = notification.getSender();
+//
+//        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
+//            @Override
+//            protected void result(Object obj) {
+//                Gdx.input.setInputProcessor(GameView.this);
+//                boolean accepted = (Boolean) obj;
+//                if (accepted) {
+//                    controller.respondToMarriage("accept", sender);
+//                    currentPlayer.setAccepting(true);
+//                } else {
+//                    controller.respondToMarriage("reject", sender);
+//                    currentPlayer.setRejecting(true);
+//                }
+//            }
+//        };
+//        Label label = new Label(sender + " has asked to marry you", GameAssetManager.skin, "custom-label");
+//        proposalDialog.getContentTable().add(label).pad(10);
+//
+//        TextButton acceptButton = new TextButton("Accept", GameAssetManager.skin, "custom-button");
+//        TextButton rejectButton = new TextButton("Reject", GameAssetManager.skin, "custom-button");
+//
+//        proposalDialog.button(acceptButton, true);
+//        proposalDialog.button(rejectButton, false);
+//        return proposalDialog;
+//    }
+//
+//    @NotNull
+//    private Dialog forceTerminationNotification() {
+//        Dialog forceTerminationDialog = new Dialog("Force Termination", GameAssetManager.skin, "custom-window") {
+//            @Override
+//            protected void result(Object obj) {
+//                Gdx.input.setInputProcessor(GameView.this);
+//                boolean accepted = (Boolean) obj;
+//                if (accepted) {
+//                    Result result = controller.voteToTerminate(true, currentPlayer);
+//                    if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+//                    else {
+//                        if (gameTickTask != null) {
+//                            gameTickTask.cancel();
+//                        }
+//                        MainApp.getInstance().setCurrentGame(null);
+//                        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//                        MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+//                    }
+//                } else {
+//                    Result result = controller.voteToTerminate(false, currentPlayer);
+//                    showErrorDialog(stage, result.message());
+//                }
+//            }
+//        };
+//        Label label = new Label("Do you want to force terminate this game ?", GameAssetManager.skin, "custom-label");
+//        forceTerminationDialog.getContentTable().add(label).pad(10);
+//
+//        TextButton acceptButton = new TextButton("Yes", GameAssetManager.skin, "custom-button");
+//        TextButton rejectButton = new TextButton("No", GameAssetManager.skin, "custom-button");
+//
+//        forceTerminationDialog.button(acceptButton, true);
+//        forceTerminationDialog.button(rejectButton, false);
+//        return forceTerminationDialog;
+//    }
 
 
     public void handleCommand(Scanner scanner) {
@@ -5423,9 +5507,39 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatAdvanceDate(matcher.group("number")));
         } else if ((matcher = GameMenuCommands.CHEAT_ADVANCE_TIME.getMatcher(input)) != null) {
             System.out.println(controller.cheatAdvanceTime(matcher.group("number")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
-            System.out.println(controller.cheatAddMoney(matcher.group("count")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
+        }  else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+//            System.out.println(controller.cheatAddMoney(matcher.group("count")));
+            String sountString = matcher.group("count").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("money",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println("yasssssssssss");
+                            int count = Integer.parseInt(sountString);
+                            currentPlayer.addMoney(count);
+//                            if (!result.isSuccessful()) {
+//                                showErrorDialog(stage, result.message());
+//                            } else {
+//                                showErrorDialog(stage, result.message()); // or update the UI
+//                            }
+                            System.out.println(result.message());
+                        });
+                    } else {
+                        System.out.println("nooooo wayyyyy???");
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println(result.message());
+                            // showErrorDialog(stage, "Failed to use cheat: " + response.getMessage());
+                        });
+                    }
+                });
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_ANIMAL_FRIENDSHIP.getMatcher(input)) != null) {
             System.out.println(controller.cheatAnimalFriendship(matcher.group("name"), matcher.group("amount")));
         } else if ((matcher = GameMenuCommands.CHeat_THOR.getMatcher(input)) != null) {
             System.out.println(controller.cheatThor(matcher.group("x"), matcher.group("y")));
@@ -5435,16 +5549,87 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatUnlimitedEnergy());
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
             System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
-        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
-            String itemName = matcher.group("itemName");
-            int count = Integer.parseInt(matcher.group("count"));
-            System.out.println(controller.cheatAddItem(itemName, count));
-        } else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
+        }else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+//            String itemName = matcher.group("itemName");
+//            int count = Integer.parseInt(matcher.group("count"));
+//            System.out.println(controller.cheatAddItem(itemName, count));
+            String sountString = matcher.group("count").trim();
+            String itemName =matcher.group("itemName").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("itemName",itemName);
+            params.put("count",sountString);
+            MainApp.getInstance().getNetworkClient().sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    int count = Integer.parseInt(sountString);
+                    Item item = Item.getRandomItem(itemName);
+                    if (item == null) {
+                        System.out.println("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                        return;
+                    }
+                    currentPlayer.getBackpack().addItem(item,count);
+                    Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
+                } else {
+                    Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
+                }
+            });
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    System.out.println("salamsalasmsalmsalsams");
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println("yasssssssssss");
+                            int count = Integer.parseInt(sountString);
+                            Item item = Item.getRandomItem(itemName);
+                            if (item == null) {
+                                System.out.println("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                                return;
+                            }
+                            currentPlayer.getBackpack().addItem(item,count);
+//                            if (!result.isSuccessful()) {
+//                                showErrorDialog(stage, result.message());
+//                            } else {
+//                                showErrorDialog(stage, result.message()); // or update the UI
+//                            }
+                            System.out.println(result.message());
+                        });
+                    } else {
+                        System.out.println("nooooo wayyyyy???");
+                        Gdx.app.postRunnable(() -> {
+                            System.out.println(result.message());
+                            // showErrorDialog(stage, "Failed to use cheat: " + response.getMessage());
+                        });
+                    }
+                });
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_WALK.getMatcher(input)) != null) {
             System.out.println(controller.cheatWalk(Integer.parseInt(matcher.group("x")), Integer.parseInt(matcher.group("y"))).message());
         } else if ((matcher = GameMenuCommands.CHEAT_SET_SKILL.getMatcher(input)) != null) {
             System.out.println(controller.cheatSetSkill(matcher.group("skill"), matcher.group("number")));
-        } else if ((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
-            System.out.println(controller.cheatSetFriendshipLevel(Integer.parseInt(matcher.group("level")), matcher.group("username")));
+        }  else if ((matcher = GameMenuCommands.CHEAT_SET_LEVEL.getMatcher(input)) != null) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("targetUsername", matcher.group("username"));
+            params.put("level", Integer.parseInt(matcher.group("level")));
+
+            MainApp.getInstance().getNetworkClient().sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "GameController",
+                "cheatSetFriendshipLevel",
+                params,
+                currentPlayer.getUsername()
+            ).thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
+                } else {
+                    Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
+                }
+            });
         }
         ///////////////////////////////////////////////////////////////////////////////////////////
 //        if ((matcher = GameMenuCommands.NEXT_TURN.getMatcher(input)) != null) {
@@ -6964,6 +7149,138 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         });
         eliminatedDialog.show(stage);
         Gdx.input.setInputProcessor(stage);
+    }
+
+    public void handlePlayerInteraction(Map<String, Object> data) {
+        String action = (String) data.get("action");
+        String senderName = (String) data.get("sender");
+        String receiverName = (String) data.get("receiver");
+
+        User sender = MainApp.getInstance().getCurrentGame().getPlayerByUsername(senderName);
+        User receiver = MainApp.getInstance().getCurrentGame().getPlayerByUsername(receiverName);
+
+        if (sender == null) return;
+
+        switch (action) {
+            case "hug":
+                if (receiver != null) {
+                    Tile tile1 = sender.getCurrentTile();
+                    Tile tile2 = receiver.getCurrentTile();
+                    float heartX = (float) (GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX())) / 2;
+                    float heartY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((float) (tile2.getY() + tile1.getY()) / 2));
+                    heartEffects.add(new HeartEffect(heartX, heartY));
+                }
+                break;
+            case "gift":
+                isGivingGift = true;
+                giftGivingStateTime = 0f;
+                break;
+            case "flower":
+                if (receiver != null) {
+                    Tile tile1 = sender.getCurrentTile();
+                    Tile tile2 = receiver.getCurrentTile();
+                    float midX = GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX()) / 2f;
+                    float midY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((tile1.getY() + tile2.getY()) / 2f));
+                    Flower flower = new Flower(randomStuffType.Bouquet.getTexture(), midX, midY);
+                    activeFlowers.add(flower);
+                }
+                break;
+            case "propose_start":
+                sender.setProposing(true);
+                break;
+            case "propose_end":
+                System.out.println("propose end called");
+                boolean accepted = (Boolean) data.get("accepted");
+                System.out.println("1");
+                User proposer = MainApp.getInstance().getCurrentGame().getPlayerByUsername((String) data.get("proposer"));
+                System.out.println("2");
+                User responder = MainApp.getInstance().getCurrentGame().getPlayerByUsername((String) data.get("responder"));
+                System.out.println("3");
+                if (proposer != null) {
+                    proposer.setProposing(false);
+                    System.out.println("7");
+                }
+                System.out.println("4");
+                if (responder != null) {
+                    System.out.println("5");
+                    if (accepted) responder.setAccepting(true);
+                    else responder.setRejecting(true);
+                }
+                System.out.println("6");
+                break;
+        }
+    }
+
+    public void showMarriageProposalDialog(String proposerUsername) {
+        Dialog proposalDialog = new Dialog("Marriage Proposal", GameAssetManager.skin, "custom-window") {
+            @Override
+            protected void result(Object object) {
+                boolean accepted = (Boolean) object;
+                Map<String, Object> params = new HashMap<>();
+                params.put("proposerUsername", proposerUsername);
+                params.put("accepted", accepted);
+                MainApp.getInstance().getNetworkClient().sendPost(
+                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController",
+                    "respondToMarriage",
+                    params,
+                    currentPlayer.getUsername()
+                );
+            }
+        };
+        Label label = new Label(proposerUsername + " has asked to marry you!", GameAssetManager.skin, "custom-label");
+        proposalDialog.getContentTable().add(label).pad(10);
+        proposalDialog.button("Accept", true);
+        proposalDialog.button("Reject", false);
+        proposalDialog.show(stage);
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private static class FloatingMessage {
+        String text;
+        float x, y;
+        float timer;
+        float alpha;
+        static final float DURATION = 2.0f;
+        static final float FADE_TIME = 0.5f;
+
+        FloatingMessage(String text, float x, float y) {
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.timer = 0;
+            this.alpha = 1.0f;
+        }
+
+        void update(float delta) {
+            timer += delta;
+            // Start fading out
+            if (timer > DURATION - FADE_TIME) {
+                alpha = (DURATION - timer) / FADE_TIME;
+            }
+        }
+
+        boolean isFinished() {
+            return timer >= DURATION;
+        }
+
+        void draw(SpriteBatch batch, BitmapFont font) {
+            font.setColor(1, 1, 1, alpha); // Set color with alpha for fading
+            GlyphLayout layout = new GlyphLayout(font, text);
+            font.draw(batch, text, x - layout.width / 2, y);
+            font.setColor(Color.WHITE); // Reset color for other UI elements
+        }
+    }
+
+    public void showFloatingMessage(String message) {
+        float x = camera.position.x;
+        float y = camera.position.y;
+        floatingMessages.add(new FloatingMessage(message, x, y));
+    }
+
+    public void startGoodJobAnimation() {
+        isShowingGoodJob = true;
+        goodJobStateTime = 0f;
     }
 }
 

@@ -1,13 +1,16 @@
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
+import io.github.stardew.mini.Model.Friendships.Friendship;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.Model.User;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -302,7 +305,77 @@ public class NetworkClient extends WebSocketClient {
                         MainApp.getInstance().getCurrentGameView().handleYouAreEliminated(message.getMessage());
                     }
                 });
-            }
+            }  else if (Message.PLAYER_INTERACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handlePlayerInteraction(data);
+                        }
+                    });
+                } else if (Message.MARRIAGE_PROPOSAL.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String proposer = (String) data.get("proposer");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showMarriageProposalDialog(proposer);
+                        }
+                    });
+                } else if (Message.MARRIAGE_RESPONSE_UPDATE.equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game == null) return;
+
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        boolean accepted = (Boolean) data.get("accepted");
+                        String proposerName = (String) data.get("proposer");
+                        String responderName = (String) data.get("responder");
+
+                        User proposer = game.getPlayerByUsername(proposerName);
+                        User responder = game.getPlayerByUsername(responderName);
+                        if (proposer == null || responder == null) return;
+
+                        Friendship friendship = game.getFriendship(proposerName, responderName);
+                        if (friendship == null) return;
+
+                        int newLevel = ((Number) data.get("newFriendshipLevel")).intValue();
+                        friendship.setLevel(newLevel);
+
+                        if (accepted) {
+                            int newMoney = ((Number) data.get("newMoney")).intValue();
+                            proposer.setPartner(responder);
+                            responder.setPartner(proposer);
+                            proposer.setMoney(newMoney);
+                            responder.setMoney(newMoney);
+
+                            Item ring = proposer.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+                            if (ring != null) {
+                                responder.getBackpack().addItem(ring, 1);
+                                proposer.getBackpack().removeItem(ring.getName(),1);
+                            }
+
+                        } else {
+                            int newEnergy = ((Number) data.get("proposerNewEnergy")).intValue();
+                            proposer.setEnergy(newEnergy);
+                            proposer.setDaysSinceRejection(7);
+                        }
+                    });
+                } else if (Message.FRIENDSHIP_UPDATED.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game != null) {
+                            String p1 = (String) data.get("player1");
+                            String p2 = (String) data.get("player2");
+                            int level = ((Number) data.get("level")).intValue();
+                            int xp = ((Number) data.get("xp")).intValue();
+                            Friendship f = game.getFriendship(p1, p2);
+                            if (f != null) {
+                                f.setLevel(level);
+                                // You might need a setXp method in Friendship if you want to sync it perfectly
+                            }
+                        }
+                    });
+                }
             System.err.println("❌ requestId was null");
             }
         } catch (Exception e) {
