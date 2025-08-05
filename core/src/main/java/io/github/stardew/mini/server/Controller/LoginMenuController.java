@@ -1,8 +1,10 @@
 package io.github.stardew.mini.server.Controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Result;
@@ -10,7 +12,6 @@ import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.LoginMenuView;
 import io.github.stardew.mini.server.ServerApp;
-import io.github.stardew.mini.server.security.AuthUtil;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -96,34 +97,46 @@ public class LoginMenuController implements MenuController {
 
 
 
-    public Result login(String username, String password, boolean stayLoggedIn) {
+    public Message<?> login(String username, String password, boolean stayLoggedIn) {
         ServerApp app = ServerApp.getInstance();
         User matchedUser = app.getUserByUsername(username);
 
         if (matchedUser == null) {
             System.out.println("username " + username + " not found");
-            return new Result(false, "username does not exist!");
+            Result result =  new Result(false, "username does not exist!");
+            return Message.NOT_FOUND.setMessage(result.getMessage());
         }
 
         String hashedInput = hashSHA256(password);
         if (!matchedUser.getPassword().equals(hashedInput)) {
-            return new Result(false, "incorrect password!");
+            Result result = new Result(false, "incorrect password!");
+            return Message.FORBIDDEN.setMessage(result.getMessage());
         }
 
         // Login successful
-        MainApp.getInstance().setLoggedInUser(matchedUser);
-        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-        if (stayLoggedIn) {
-            //app.setStayLoggedIn(true);
-            saveLoggedInUserToFile(matchedUser); // ✅ save user
-        } else {
-            //app.setStayLoggedIn(false);
-            clearLoggedInUserFile(); // ✅ delete file if user doesn't want to stay logged in
+//        MainApp.getInstance().setLoggedInUser(matchedUser);
+//        MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+//        if (stayLoggedIn) {
+//            //app.setStayLoggedIn(true);
+//            saveLoggedInUserToFile(matchedUser); // ✅ save user
+//        } else {
+//            //app.setStayLoggedIn(false);
+//            clearLoggedInUserFile(); // ✅ delete file if user doesn't want to stay logged in
+//        }
+        ObjectMapper mapper = GameSaver.createCustomObjectMapper();
+
+        Map<String, Object> body = new HashMap<>();
+        try {
+            String usergson = mapper.writeValueAsString(matchedUser);
+            body.put("user", usergson);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
 
 
-
-        return new Result(true, "you are now in main menu!");
+        Result result = new Result(true, "you are now in main menu!");
+        return new Message<>(200,result.getMessage(),body,Message.MessageType.RESPONSE);
     }
 
     public Result pickQuestion(Matcher matcher) {

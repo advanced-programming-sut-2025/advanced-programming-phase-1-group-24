@@ -3,10 +3,7 @@ package io.github.stardew.mini.server;
 
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.server.Controller.AuthController;
-import io.github.stardew.mini.server.Controller.GameController;
-import io.github.stardew.mini.server.Controller.ServerController;
-import io.github.stardew.mini.server.Controller.SignupMenuController;
+import io.github.stardew.mini.server.Controller.*;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
@@ -176,6 +173,29 @@ public class AppSocket {
                         }
                         return;  // skip the rest of onMessage
                     }
+
+                    if ("LoginMenuController".equals(message.getControllerName())
+                        && "login".equals(message.getMethodName())) {
+                        // Extract credentials from the incoming message body
+                        @SuppressWarnings("unchecked")
+                        Map<String,Object> creds = (Map<String,Object>) message.getBody();
+                        String user = (String) creds.get("username");
+                        String pass = (String) creds.get("password");
+
+                        try {
+                            // Generate the JWT
+                            Message resp = new LoginMenuController().login(user, pass,false);
+                            //Message<String> response = message1;
+                            resp.setRequestId(message.getRequestId());
+                            ctx.send(gson.toJson(resp));
+                        } catch (IllegalArgumentException e) {
+                            Message<String> err = (Message<String>) Message.UNAUTHORIZED.setMessage(e.getMessage());
+                            err.setRequestId(message.getRequestId());
+                            ctx.send(gson.toJson(err));
+                        }
+                        return;  // skip the rest of onMessage
+                    }
+
 
 
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {

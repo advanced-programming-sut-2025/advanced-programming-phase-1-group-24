@@ -24,12 +24,19 @@ public class ServerController {
     private final PreGameMenuController preGameMenuController = new PreGameMenuController();
     private final LobbyController lobbyController = new LobbyController();
     private final MainMenuController mainMenuController= new MainMenuController();
-
+    private final LoginMenuController loginMenuController = new LoginMenuController();
     public Message<?> routingTheRequests(Message<Map<String, Object>> message, GameServer server) throws Exception{
         String controllerName = message.getControllerName();
         String methodName = message.getMethodName();
         Map<String, Object> body = message.getBody();
         String username = message.getUsername();
+
+//        if (controllerName.equals("LoginMenuController")) {
+//            String user = (String) body.get("username");
+//            String pass = (String) body.get("password");
+//            //String stayloggedin = (String) body.get("stayLoggedIn");
+//            return loginMenuController.login(user,pass,false);
+//        }
 
         if (controllerName == null || methodName == null || username == null) {
             return Message.BAD_REQUEST.setMessage("Missing controllerName, methodName, or username");
@@ -258,7 +265,7 @@ public class ServerController {
     private Message<?> routeToMainMenuController(String methodName, Map<String, Object> body, User player) {
         switch (methodName) {
             case "showUserInfo": {
-               Result result= mainMenuController.showUserInfo(player.getUsername());
+                Result result= mainMenuController.showUserInfo(player.getUsername());
                 return Message.OK.setMessage(result.getMessage());
             }
 

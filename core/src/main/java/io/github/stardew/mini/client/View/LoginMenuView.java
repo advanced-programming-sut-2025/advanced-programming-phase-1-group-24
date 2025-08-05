@@ -10,7 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.server.Controller.LoginMenuController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
@@ -19,6 +22,8 @@ import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
@@ -106,8 +111,44 @@ public class LoginMenuView implements Screen,AppMenu {
 
                 // Optional local check (you can remove this if you only want WS auth)
                 boolean stayLoggedIn = stayLoggedInCheckbox.isChecked();
-                Result result = controller.login(username, password, stayLoggedIn);
-                errorLabel.setText(result.message());
+                Map<String, Object> body = new HashMap<>();
+                body.put("username", username);
+                body.put("password", password);
+                body.put("stayLoggedIn", stayLoggedIn);
+                MainApp.getInstance().getNetworkClient().sendPost(null,"LoginMenuController","login",body,null)
+                    .thenAccept(result -> {
+                        if(result.getStatus() == 200) {
+                            Gdx.app.postRunnable(() -> {
+                                try {
+                                    Object bodyRaw = result.getBody();
+                                    if (bodyRaw instanceof Map<?, ?> bodyMap) {
+                                        Object gameJsonObj = bodyMap.get("user");
+
+                                        if (gameJsonObj instanceof  String json) {
+                                            try {
+                                                User user = GameSaver.createCustomObjectMapper().readValue(json, User.class);
+                                                MainApp.getInstance().setLoggedInUser(user);
+                                                System.out.println("Logged in");
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                System.out.println("failed to deserialize user");
+                                            }
+                                        }
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    System.err.println("❌ Failed to parse user");
+                                }
+                                MainApp.getInstance().setCurrentMenu(Menu.MainMenu); // Now the menu can read the game safely
+                            });
+                        }
+                        else
+                            Gdx.app.postRunnable(() -> {
+                                errorLabel.setText(result.getMessage());
+                            });
+                    });
+                //Result result = controller.login(username, password, stayLoggedIn);
+
 
                 // Now do the WebSocket login
                 MainApp.getInstance().wsLogin(username, password)
@@ -117,6 +158,7 @@ public class LoginMenuView implements Screen,AppMenu {
                             MainApp.getInstance().setJwtToken(jwt);
 
                             MainApp.getInstance().connectToServer();
+                            System.out.println("Connected to server");
                             Gdx.app.postRunnable(() ->
                                 MainApp.getInstance()
                                     .setScreen(new MainMenuView(new MainMenuController(), skin))
@@ -152,28 +194,28 @@ public class LoginMenuView implements Screen,AppMenu {
 
 
     }
-        @Override public void render ( float delta){
-            Gdx.gl.glClearColor(0, 0, 0, 1);
-            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-            stage.act(delta);
-            stage.draw();
-        }
+    @Override public void render ( float delta){
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act(delta);
+        stage.draw();
+    }
 
 
-        @Override public void resize ( int width, int height){
-            stage.getViewport().update(width, height, true);
-        }
+    @Override public void resize ( int width, int height){
+        stage.getViewport().update(width, height, true);
+    }
 
-        @Override public void pause () {
-        }
-        @Override public void resume () {
-        }
-        @Override public void hide () {
-        }
-        @Override public void dispose () {
-            stage.dispose();
-            skin.dispose();
-        }
+    @Override public void pause () {
+    }
+    @Override public void resume () {
+    }
+    @Override public void hide () {
+    }
+    @Override public void dispose () {
+        stage.dispose();
+        skin.dispose();
+    }
 
     @Override
     public void handleCommand(Scanner scanner, Consumer<String> callback) {
@@ -285,7 +327,7 @@ public class LoginMenuView implements Screen,AppMenu {
                     else if(user == null)
                         errorLabel.setText("Please enter a valid username");
                     else
-                    questionLabel.setText("Security Question: " + user.getSecurityQuestion());
+                        questionLabel.setText("Security Question: " + user.getSecurityQuestion());
                 }
             });
 
@@ -300,5 +342,5 @@ public class LoginMenuView implements Screen,AppMenu {
         @Override public void hide() {}
         @Override public void dispose() { stage.dispose(); skin.dispose(); }
     }
-    }
+}
 
