@@ -41,6 +41,10 @@ import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.Model.Reccepies.*;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Reccepies.*;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.HouseMenuController;
@@ -88,9 +92,15 @@ import io.github.stardew.mini.Model.TimeManagement.RainDrop;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.User;
 import org.jetbrains.annotations.NotNull;
+import io.github.stardew.mini.client.FileChooserUtil;
+
 
 //import java.awt.*;
 import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.*;
@@ -98,6 +108,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
@@ -208,8 +219,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
     private Dialog relationshipDialog;
     private final List<Flower> activeFlowers = new ArrayList<>();
+    private final List<Hay> activeHays = new ArrayList<>();
 
-    private TextButton nextTurnButton;
+    //private TextButton nextTurnButton;
     private TextButton exitGameButton;
     private TextButton forceTerminateButton;
     private Label energyLabel;
@@ -227,6 +239,12 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private boolean hasShownFaintMessage = false; // Add this to your screen class
     private String scenario = "";
     String giftReciever, artisanName;
+
+    private Table leaderboardTable;
+
+    private SelectBox<String> trackSelect;
+    private TextButton uploadButton;
+    private Map<String,String> trackNameToId = new HashMap<>();
 
     private ChatDialog chatDialog;
     private ImageButton chatButton;
@@ -262,6 +280,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private float goodJobStateTime = 0f;
 
     private final List<FloatingMessage> floatingMessages = new ArrayList<>();
+
+
+
+
 
     private void loadFont() {
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("font/stardew-valley.ttf"));
@@ -513,8 +535,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 }
                 if (animal.getCurrentTile() == null) continue;
                 batch.draw(animal.getAnimalType().getTexture(), x, y, tileSize, tileSize);
-                if (animal.getProduct() != null) {
-                    batch.draw(animal.getProduct().getAnimalProductType().getTexture(), x, y, tileSize / 2, tileSize / 2);
+                if(animal.getProduct() !=null ){
+                    batch.draw(animal.getProduct().getAnimalProductType().getTexture(), x, y, tileSize/2, tileSize/2);
                 }
             }
         }
@@ -584,11 +606,31 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             if (equippedItem == null) {
                 showErrorDialog(stage, "Pick a seed first!");
             } else {
-                result = controller.plantGrowable(equippedItem.getName(), direction);
-                if (!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
+                //result = controller.plantGrowable(equippedItem.getName(), direction);
+                //if(!result.isSuccessful()) showErrorDialog(stage, result.getMessage());
+                Map<String, Object> params = new HashMap<>();
+                params.put("seedName", equippedItem.getName());
+                params.put("direction", direction);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "GameController", "plantGrowable", params, currentPlayer.getUsername())
+                    .thenAccept(response -> {
+                        if (response.getStatus() != 200) {
+                            Gdx.app.postRunnable(() -> {
+                                showErrorDialog(stage, response.getMessage());
+                        });
+                        }
+                    }).exceptionally(ex -> {
+                        ex.printStackTrace();
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to plant growbale: " + ex.getMessage());
+                        });
+                        return null;
+                    });
             }
         }
-        if (keycode == Input.Keys.O) {
+        if(keycode == Input.Keys.O){
             Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(mousePos);
             String direction = "";
@@ -610,8 +652,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         }
         if (keycode == Input.Keys.C) {
             if (showToolsMenu) {
-                if (showInventoryMenu || showBackpackMenu || (cookingMenuDialog != null && showCookingMenu))
-                    return false;
+                if (showInventoryMenu || showBackpackMenu || (cookingMenuDialog != null && showCookingMenu)) return false;
                 Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 camera.unproject(mousePos);
                 useSelectedTool(mousePos.x, mousePos.y);
@@ -652,8 +693,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
             if (keycode == Input.Keys.DOWN) {
                 selectedFridgeSlot += maxItemsPerRow;
-                if (selectedFridgeSlot >= totalSlots)
-                    selectedFridgeSlot = Math.min(totalSlots - 1, selectedFridgeSlot % maxItemsPerRow);
+                if (selectedFridgeSlot >= totalSlots) selectedFridgeSlot = Math.min(totalSlots - 1, selectedFridgeSlot % maxItemsPerRow);
                 updateFridgeMenuTable();
                 return true;
             }
@@ -806,29 +846,29 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         if (keycode == Input.Keys.NUM_3) {
             if (showInventoryMenu || showBackpackMenu) return false;
-            for (Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()) {
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
                 friendship.setLevel(3);
             }
             return true;
         }
-        if (keycode == Input.Keys.NUM_2) {
+        if(keycode == Input.Keys.NUM_2){
             if (showInventoryMenu || showBackpackMenu) return false;
-            for (Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()) {
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
                 friendship.setLevel(2);
             }
             return true;
 
         }
-        if (keycode == Input.Keys.NUM_1) {
+        if(keycode == Input.Keys.NUM_1){
             if (showInventoryMenu || showBackpackMenu) return false;
-            for (Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()) {
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
                 friendship.setLevel(1);
             }
             return true;
         }
-        if (keycode == Input.Keys.NUM_0) {
+        if(keycode == Input.Keys.NUM_0){
             if (showInventoryMenu || showBackpackMenu) return false;
-            for (Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()) {
+            for(Friendship friendship : MainApp.getInstance().getCurrentGame().getAllFriendships()){
                 friendship.setLevel(0);
             }
             return true;
@@ -866,7 +906,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(neededTile);
             System.out.println(neededTile.getContainedGrowable());
             System.out.println(neededTile.getContainedGrowable().getCurrentStage());
-            if (neededTile.getContainedGrowable() != null) {
+            if(neededTile.getContainedGrowable() != null) {
                 System.out.println(neededTile.getContainedGrowable().getAge());
                 System.out.println(neededTile.getContainedGrowable().getGrowableType());
                 System.out.println(neededTile.getContainedGrowable().getDaysLeftToDie());
@@ -874,7 +914,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(neededTile.getContainedItem());
             System.out.println(neededTile.getContainedNPC());
             System.out.println(neededTile.getProductOfGrowable());
-            if (neededTile.getProductOfGrowable() != null) {
+            if(neededTile.getProductOfGrowable() != null){
                 System.out.println(neededTile.getProductOfGrowable().getGrowableType());
             }
             System.out.println(neededTile.isHasBeenBurt());
@@ -963,17 +1003,32 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             return true;
         }
         if (isClickInside(mouseX, mouseY, exitGameButton)) {
-            Result result = controller.exitGame();
-            if (!result.isSuccessful()) {
-                showErrorDialog(stage, result.message());
-            } else {
-                if (gameTickTask != null) {
-                    gameTickTask.cancel();
-                }
-                MainApp.getInstance().setCurrentGame(null);
-                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
-                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
-            }
+            //Result result = controller.exitGame();
+            Map<String, Object> params = new HashMap<>();
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "exitGame", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    if (response.getStatus() == 200) {
+                        Gson gson = new Gson();
+                        // convert response.body (which is Object) to JSON string then parse as Result
+                        Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+
+                        if (!result.isSuccessful()) {
+                            Gdx.app.postRunnable(() -> showErrorDialog(stage, result.message()));
+                        } else {
+                            Gdx.app.postRunnable(() -> {
+                                MainApp.getInstance().setCurrentGame(null);
+                                MainApp.getInstance().setCurrentMenu(Menu.MainMenu);
+                                MainApp.getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
+                            });
+                        }
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, "Failed to exit game: " + response.getMessage());
+                        });
+                    }
+                });
             return true;
         }
 //        if (isClickInside(mouseX, mouseY, forceTerminateButton)) {
@@ -983,10 +1038,10 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //            }
 //            return true;
 //        }
-        if (isClickInside(mouseX, mouseY, nextTurnButton)) {
-            if (equippedItem != null) {
-                equippedItem = null;
-            }
+//        if (isClickInside(mouseX, mouseY, nextTurnButton)) {
+//            if(equippedItem != null) {
+//                equippedItem = null;
+//            }
             //if (Gdx.input.getInputProcessor() != GameView.this || isAnyDialogOpen()) {
 //                System.out.println("touchdown");
 //                if (isAnyDialogOpen()) {
@@ -994,12 +1049,12 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
 //                    return true;
 //                }
-            Result result = controller.nextTurn();
-            if (!result.isSuccessful()) {
-                showErrorDialog(stage, result.message());
-            }
-            return true;
-        }
+//            Result result = controller.nextTurn();
+//            if (!result.isSuccessful()) {
+//                showErrorDialog(stage, result.message());
+//            }
+//            return true;
+//        }
         if (stage.touchDown(screenX, screenY, pointer, button)) {
             return true;
         }
@@ -1020,8 +1075,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
                 if (tile != null && tile.canBuildOn()) {
 
-                    Result result = houseMenuController.placeItem(itemToPlace.getName(), tile);
-                    showErrorDialog(stage, result.getMessage());
+                    Result result = houseMenuController.placeItem(itemToPlace.getName(),tile);
+                    showErrorDialog(stage,result.getMessage());
 
                 } else {
                     showErrorDialog(stage, "Tile is not buildable.");
@@ -1046,21 +1101,57 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 Tile tile = MainApp.getInstance().getCurrentGame().getMap().getMap()[tileY][tileX];
 
                 if (tile != null && tile.canBuildOn()) {
-                    if (buildingToPlace == null || storeController.isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
-                        Result result;
+                    if (buildingToPlace == null || isAreaPlaceable(tileX, tileY, buildingToPlace.getWidth(), buildingToPlace.getHeight())) {
+                        //Result result;
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////
+//                        if (buildingToPlace == null) {
+//                            result = storeController.buyFromCarpenter(selectedShop,"Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+//                        } else {
+//                            buildingToPlace.setX(tileX);
+//                            buildingToPlace.setY(tileY);
+//                            result = storeController.buyFromCarpenter(selectedShop,buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+//                        }
+//                        if (result.isSuccessful()) {
+//                            //updateHabitatTiles();
+//                            showErrorDialog(stage, "Building placed!");
+//                        } else {
+//                            showErrorDialog(stage, result.message());
+//                        }
+                        ////////////////////////////////////////////////////////////////////////////////////////////////
+                        String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                        Map<String, Object> body = new HashMap<>();
+                        body.put("shopName", selectedShop.getShopName());
+
                         if (buildingToPlace == null) {
-                            result = storeController.buyFromCarpenter(selectedShop, "Shipping Bin", Integer.toString(tileX), Integer.toString(tileY));
+                            body.put("itemName", "Shipping Bin");
                         } else {
-                            buildingToPlace.setX(tileX);
-                            buildingToPlace.setY(tileY);
-                            result = storeController.buyFromCarpenter(selectedShop, buildingToPlace.getHabitatType().getName(), Integer.toString(tileX), Integer.toString(tileY));
+                            body.put("itemName", buildingToPlace.getHabitatType().getName());
                         }
-                        if (result.isSuccessful()) {
-                            //updateHabitatTiles();
-                            showErrorDialog(stage, "Building placed!");
-                        } else {
-                            showErrorDialog(stage, result.message());
-                        }
+                        body.put("x", tileX + "");
+                        body.put("y", tileY + "");
+
+                        MainApp.getInstance().getNetworkClient()
+                            .sendPost(
+                                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                "StoreMenuController",
+                                "buyFromCarpenter",
+                                body,
+                                username
+                            ).thenAccept(response -> {
+                                Gson gson = new Gson();
+                                Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+
+                                Gdx.app.postRunnable(() -> {
+                                    if (result.isSuccessful()) {
+                                        showErrorDialog(stage, "Building placed!");
+                                        // Optionally: refresh map/buildings
+                                    } else {
+                                        showErrorDialog(stage, result.message());
+                                    }
+                                });
+                            });
+
                     } else {
                         showErrorDialog(stage, "Building doesnt fit here!");
                     }
@@ -1208,7 +1299,40 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             tileY >= currentFarm.getY() && tileY < currentFarm.getY() + currentFarm.getHeight();
     }
 
+    public boolean isAreaPlaceable(int x, int y, int width, int height) {
+        Game game = MainApp.getInstance().getCurrentGame();
+        User player = game.getCurrentPlayer();
+        MapOfGame map = game.getMap();
+        Farm farm = map.getFarmByOwner(player);
 
+        for (int i = x; i < x + width; i++) {
+            for (int j = y; j < y + height; j++) {
+                // Check bounds
+                if (i < farm.getX() || i >= farm.getX() + farm.getWidth() ||
+                    j < farm.getY() || j >= farm.getY() + farm.getHeight()) {
+                    return false;
+                }
+                // Check occupation
+                if (isOccupied(i, j)) {
+                    return false;
+                }
+                Tile tile = map.getTile(x, y);
+                if (tile.getType() != TileType.FARM) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public boolean isOccupied(int x, int y) {
+        MapOfGame map = MainApp.getInstance().getCurrentGame().getMap();
+        Tile tile = map.getTile(x, y);
+        return tile != null && (
+            tile.getContainedGrowable() != null ||
+                tile.getProductOfGrowable() != null ||
+                tile.getContainedItem() != null
+        ); // or tile.isBlocked() if such a method exists
+    }
     @Override
     public boolean keyUp(int i) {
         if (isFishingActive) {
@@ -1340,8 +1464,27 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                         } else if (item.getShopItemType() == ShopItemType.ANIMAL) {
                             showBuyAnimalDialog(item);
                         } else if (item.getShopItemType() == ShopItemType.TOOL_UPGRADE) {
-                            Result result = storeController.upgradeTool(selectedShop, item.getName());
-                            showErrorDialog(stage, result.message());
+                            String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                            Map<String, Object> body = new HashMap<>();
+                            body.put("shopName", selectedShop.getShopName());
+                            body.put("itemName", item.getName());
+
+                            MainApp.getInstance().getNetworkClient()
+                                .sendPost(
+                                    MainApp.getInstance().getCurrentGame().getNetworkId(),
+                                    "StoreMenuController",
+                                    "upgradeTool",
+                                    body,
+                                    username
+                                ).thenAccept(response -> {
+                                    Gdx.app.postRunnable(() -> {
+                                        showErrorDialog(stage, response.getMessage());
+                                    });
+                                });
+                            //////////////////////////////////////////////////////////////////////////////////////////
+//                            Result result = storeController.upgradeTool(selectedShop,item.getName());
+//                            showErrorDialog(stage,result.message());
                         } else {
                             purchaseQuantity = 1;
                             showPurchaseDialog();
@@ -1408,10 +1551,30 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                     showErrorDialog(stage, "Please enter a name for the animal.");
                     return;
                 }
+                ///    ////////////////////////////////////////////////////////////////
+                String username = MainApp.getInstance().getLoggedInUser().getUsername();
 
-                Result result = storeController.buyAnimal(selectedShop, item.getName(), enteredName);
-                buyAnimalDialog.hide();
-                showErrorDialog(stage, result.message());
+                Map<String, Object> body = new HashMap<>();
+                body.put("shopName", selectedShop.getShopName());
+                body.put("itemName", item.getName());
+                body.put("animalName", enteredName);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(
+                        MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "StoreMenuController",
+                        "buyAnimal",
+                        body,
+                        username
+                    ).thenAccept(response -> {
+                        Gdx.app.postRunnable(() -> {
+                            showErrorDialog(stage, response.getMessage());
+                        });
+                    });
+/// /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                Result result = storeController.buyAnimal(selectedShop,item.getName(), enteredName);
+//                buyAnimalDialog.hide();
+//                showErrorDialog(stage, result.message());
             }
         });
 
@@ -1485,11 +1648,36 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         buyButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Result result = storeController.purchase(selectedShop, selectedShopItem, purchaseQuantity);
+                /// ///////////////////////////////////////////////////////////////////////////////////////////
+                String username = MainApp.getInstance().getLoggedInUser().getUsername();
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("shopName", selectedShop.getShopName()); // Or whatever uniquely identifies the shop
+                body.put("itemName", selectedShopItem.getName());
+                body.put("count", purchaseQuantity);
+
+                MainApp.getInstance().getNetworkClient()
+                    .sendPost(
+                        MainApp.getInstance().getCurrentGame().getNetworkId(),
+                        "StoreMenuController",
+                        "purchase",
+                        body,
+                        username
+                    ).thenAccept(response -> {
+                    Gdx.app.postRunnable(() -> {
+                        showErrorDialog(stage, response.getMessage());
+                       // if (response.getStatus() == 200) {
+                            shopPurchaseDialog.hide();
+                            shopPurchaseDialog.setVisible(false);
+                       // }
+                    });
+                });
+                // Result result = storeController.purchase(selectedShop,selectedShopItem, purchaseQuantity);
                 //buyItem(currentPlayer, selectedShopItem, purchaseQuantity);
-                shopPurchaseDialog.hide();
-                shopPurchaseDialog.setVisible(false);
-                showErrorDialog(stage, result.message());
+//                shopPurchaseDialog.hide();
+//                shopPurchaseDialog.setVisible(false);
+               // showErrorDialog(stage, result.message());
+                /// ///////////////////////////////////////////////////////////////////////////////////////////
                 //Gdx.input.setInputProcessor(GameView.this);
             }
         });
@@ -1594,14 +1782,13 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                         break;
 
                     case "Machine":
-
-                        result = controller.artisanUse(pendingMachineName, equippedItem.getName(), null, MainApp.getInstance().getCurrentGame().getMap());
+                        result=controller.artisanUse(pendingMachineName,equippedItem.getName(),null,MainApp.getInstance().getCurrentGame().getMap());
                         break;
                     case "Sell":
-                        result = storeController.placeInShippingBin(equippedItem.getName(), purchaseQuantity);
+                        result=storeController.placeInShippingBin(equippedItem.getName(),purchaseQuantity);
                         break;
                     default:
-                        result = new Result(true, "");
+                        result = new Result(true,"");
                         break;
 
                 }
@@ -1898,7 +2085,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         animalMenuDialog.getContentTable().defaults().pad(5);
 
         // ========== TOP INFO AREA ==========
-        animalInfoLabel = new Label("", GameAssetManager.skin, "custom-label"); // <-- fixed here
+        animalInfoLabel = new Label("", GameAssetManager.skin,"custom-label"); // <-- fixed here
         animalInfoLabel.setWrap(true);
         animalMenuDialog.getContentTable().add(animalInfoLabel).width(300).row();
 
@@ -1911,7 +2098,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 
         HorizontalGroup shepherdGroup = new HorizontalGroup();
         shepherdGroup.space(10);
-        shepherdGroup.addActor(new Label("To:", GameAssetManager.skin, "custom-label"));
+        shepherdGroup.addActor(new Label("To:", GameAssetManager.skin,"custom-label"));
         shepherdGroup.addActor(xField);
         shepherdGroup.addActor(yField);
 
@@ -2011,11 +2198,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         if (selectedAnimal.getLivingPlace() != null) {
             Habitat habitat = selectedAnimal.getLivingPlace();
             info.append("Habitat: (").append(habitat.getX()).append(",").append(habitat.getY())
-                .append(")-(").append(habitat.getX() + habitat.getWidth() - 1).append(",").append(habitat.getY() + habitat.getHeight() - 1).append(")\n");
+                .append(")-(").append(habitat.getX() + habitat.getWidth()-1).append(",").append(habitat.getY()+habitat.getHeight()-1).append(")\n");
         }
         if (currentFarm != null) {
             info.append("Farm: (").append(currentFarm.getX()).append(",").append(currentFarm.getY())
-                .append(")-(").append(currentFarm.getX() + currentFarm.getWidth() - 1).append(",").append(currentFarm.getY() + currentFarm.getHeight() - 1).append(")\n");
+                .append(")-(").append(currentFarm.getX() + currentFarm.getWidth()-1).append(",").append(currentFarm.getY()+currentFarm.getHeight()-1).append(")\n");
         }
         animalInfoLabel.setText(info.toString());
         animalInfoLabel.setFontScale(0.5f);
@@ -2866,30 +3053,44 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             result = controller.shepherdAnimal(selectedAnimal.getName(), Integer.toString(x), Integer.toString(y)); // implement this
         } else {
             switch (choice) {
-                case "feed":
-                    result = controller.feedHay(selectedAnimal.getName());
+                case "feed": result = controller.feedHay(selectedAnimal.getName());
+                    if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                    else {
+                        Tile tile1 = currentPlayer.getCurrentTile();
+                        Tile tile2 = selectedAnimal.getCurrentTile();
+
+                        float midX = GameAssetManager.TILE_SIZE * (tile1.getX() + tile2.getX()) / 2f;
+                        float midY = GameAssetManager.TILE_SIZE * (MainApp.getInstance().getCurrentGame().getMap().getHeight() - ((tile1.getY() + tile2.getY()) / 2f));
+
+                        Hay hay = new Hay(randomStuffType.Hay.getTexture(), midX, midY);
+                        activeHays.add(hay);
+                        Gdx.input.setInputProcessor(GameView.this);
+                    }
                     break;
-                case "pet":
-                    result = controller.petAnimal(selectedAnimal.getName());
+                case "pet": result =
+                    controller.petAnimal(selectedAnimal.getName());
+                    if (!result.isSuccessful()) showErrorDialog(stage, result.message());
+                    else {
+                        Tile tile = selectedAnimal.getCurrentTile();
+                        Tile[][] tiles = MainApp.getInstance().getCurrentGame().getMap().getMap();
+                        int tileSize = GameAssetManager.TILE_SIZE;
+                        int rows = tiles.length;
+                        float heartX = tile.getX() * tileSize + (tileSize / 2);
+                        float heartY = (rows - tile.getY() - 1) * tileSize + (tileSize);
+                        heartEffects.add(new HeartEffect(heartX, heartY));
+                        Gdx.input.setInputProcessor(GameView.this);
+                    }
                     break;
-                case "sell":
-                    result = controller.sellAnimal(selectedAnimal.getName());
-                    break;
-                case "collect":
-                    result = controller.collectProduct(selectedAnimal.getName());
-                    break;
-                case "release":
-                    result = controller.releaseAnimal(selectedAnimal.getName());
-                    break;
-                case "cancel":
-                    result = new Result(true, "");
-                    break;
-                default:
-                    result = new Result(false, choice);
-                    break;
+                case "sell": result = controller.sellAnimal(selectedAnimal.getName()); break;
+                case "collect": result = controller.collectProduct(selectedAnimal.getName()); break;
+                case "release": result = controller.releaseAnimal(selectedAnimal.getName()); break;
+                case "cancel": result = new Result(true, ""); break;
+                default: result = new Result(false, choice); break;
             }
         }
-        showErrorDialog(stage, result.message());
+        if(!choice.equalsIgnoreCase("feed") && !choice.equalsIgnoreCase("pet")) {
+            showErrorDialog(stage, result.message());
+        }
         animalMenuDialog.hide();
         selectedAnimal = null;
     }
@@ -2922,7 +3123,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             //(skillsDialog != null && skillsDialog.isVisible()) ||
             (shopMenuDialog != null && shopMenuDialog.isVisible()) ||
                 // (buyAnimalDialog != null && buyAnimalDialog.isVisible()) ||
-                (shopPurchaseDialog != null && shopPurchaseDialog.isVisible());
+                (shopPurchaseDialog != null && shopPurchaseDialog.isVisible()) ;
         //(machineMenuDialog != null && machineMenuDialog.isVisible()) ||
         // (animalMenuDialog != null &&  animalMenuDialog.isVisible()) ||
         // (friendsDialog != null && friendsDialog.isVisible());
@@ -2951,31 +3152,31 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         friendsButton.setTouchable(Touchable.enabled);
         stage.addActor(friendsButton);
 
-        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
-        nextTurnButton.setSize(200, 100);
-        nextTurnButton.setColor(Color.MAGENTA);
-        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
-        nextTurnButton.setTouchable(Touchable.enabled);
-        nextTurnButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                if (Gdx.input.getInputProcessor() != GameView.this) {
-                    // showErrorDialog(stage, "Cannot end turn while another menu is open.");
-                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
-                    // return;
-                }
-//                if (isAnyDialogOpen()) {
-//                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
-//                    return;
+//        nextTurnButton = new TextButton("Next Turn", GameAssetManager.skin, "custom-button");
+//        nextTurnButton.setSize(200, 100);
+//        nextTurnButton.setColor(Color.MAGENTA);
+//        nextTurnButton.setPosition(Gdx.graphics.getWidth() - 300, 10);
+//        nextTurnButton.setTouchable(Touchable.enabled);
+//        nextTurnButton.addListener(new ClickListener() {
+//            @Override
+//            public void clicked(InputEvent event, float x, float y) {
+//                if (Gdx.input.getInputProcessor() != GameView.this) {
+//                    // showErrorDialog(stage, "Cannot end turn while another menu is open.");
+//                    showTimedErrorLabel( stage, "Cannot end turn while another menu is open.", 2f) ;
+//                    // return;
 //                }
-
-//                Result result = controller.nextTurn();
-//                if (!result.isSuccessful()) {
-//                    showErrorDialog(stage, result.message());
-//                }
-            }
-        });
-        stage.addActor(nextTurnButton);
+////                if (isAnyDialogOpen()) {
+////                    showTimedErrorLabel(stage, "Cannot end turn while another menu is open.", 2f);
+////                    return;
+////                }
+//
+////                Result result = controller.nextTurn();
+////                if (!result.isSuccessful()) {
+////                    showErrorDialog(stage, result.message());
+////                }
+//            }
+//        });
+//        stage.addActor(nextTurnButton);
 
 
         exitGameButton = new TextButton("Exit", GameAssetManager.skin, "custom-button");
@@ -3173,6 +3374,48 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        MainApp.getInstance().setCurrentGameView(this);
+
+        leaderboardTable = new Table(GameAssetManager.skin);
+        leaderboardTable.left().pad(10);
+        leaderboardTable.setFillParent(true);
+
+        // ستون‌های ثابت
+        leaderboardTable.add("Rank").pad(5);
+        leaderboardTable.add("Player").pad(5);
+        leaderboardTable.add("Money").pad(5);
+        leaderboardTable.add("Skills").pad(5);
+        leaderboardTable.add("Missions").pad(5);
+        leaderboardTable.add("Score").pad(5);
+        leaderboardTable.row();
+
+        stage.addActor(leaderboardTable);
+
+        // 2. پس‌فرستادن درخواست به سرور برای دریافت اولیه‌ی لیست
+        MainApp.getInstance().getNetworkClient()
+            .sendPost(
+                MainApp.getInstance().getCurrentGame().getNetworkId(),
+                "ServerController",         // controller name
+                "getLeaderboard",         // method name
+                Collections.emptyMap(),// no params
+                MainApp.getInstance().getCurrentGameView().currentPlayer.getUsername()
+            )
+            .thenAccept(response -> {
+                if (response.getStatus() == 200) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> body = (Map<String,Object>) response.getBody();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,Object>> lb = (List<Map<String,Object>>) body.get("leaderboard");
+                    Gdx.app.postRunnable(() -> updateLeaderboard(lb));
+                } else {
+                    Gdx.app.postRunnable(() ->
+                        showErrorDialog(stage, "Failed to load leaderboard: " + response.getMessage())
+                    );
+                }
+            });
+
+        initAudioUI();
+
         ImageButton.ImageButtonStyle chatButtonStyle = new ImageButton.ImageButtonStyle();
         chatButtonStyle.imageUp = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
         chatButtonStyle.imageDown = new TextureRegionDrawable(InventoryAssets.chatButtonBackground);
@@ -3214,6 +3457,9 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         });
         stage.addActor(reactionButton);
     }
+
+
+
 
     private void determineAvatar() {
         switch (MainApp.getInstance().getCurrentGame().getCurrentPlayer().getAvatar()) {
@@ -3267,16 +3513,16 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //            hasShownFaintMessage = false; // Reset if player regains energy
 //        }
 
-        if (currentPlayer.hasFainted()) {
-            if (!hasShownFaintMessage) {
-                showTimedErrorLabel(stage, "You don't have enough energy! Go to next turn!", 5f, () -> {
-                    controller.nextTurn();
-                });
-                hasShownFaintMessage = true;
+            if (currentPlayer.hasFainted()) {
+                if (!hasShownFaintMessage) {
+                    showTimedErrorLabel(stage, "You don't have enough energy!", 5f, () -> {
+                        //controller.nextTurn();
+                    });
+                    hasShownFaintMessage = true;
+                }
+            } else {
+                hasShownFaintMessage = false;
             }
-        } else {
-            hasShownFaintMessage = false;
-        }
 
 
         determineAvatar();
@@ -3425,6 +3671,16 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         }
 
+        //Draw all active Hays
+        Iterator<Hay> itere = activeHays.iterator();
+        while (itere.hasNext()) {
+            Hay hay = itere.next();
+            hay.update(Gdx.graphics.getDeltaTime());
+            hay.draw(batch);
+            if (hay.isFinished()) {
+                itere.remove();
+            }
+        }
         updateToolsMenuTable();
         if (isToolBeingUsed) {
             toolUsageStateTime += Gdx.graphics.getDeltaTime();
@@ -3695,21 +3951,13 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 int dx = 0, dy = 0, direction = -1;
 
                 if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-                    dx = 0;
-                    dy = -1;
-                    direction = 3;
+                    dx = 0; dy = -1; direction = 3;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-                    dx = 0;
-                    dy = 1;
-                    direction = 1;
+                    dx = 0; dy = 1; direction = 1;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    dx = -1;
-                    dy = 0;
-                    direction = 0;
+                    dx = -1; dy = 0; direction = 0;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    dx = 1;
-                    dy = 0;
-                    direction = 2;
+                    dx = 1; dy = 0; direction = 2;
                 }
 
                 if (direction != -1) {
@@ -3751,17 +3999,20 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                                     Object tileRaw = bodyMap.get("tile");
                                     Object energyRaw = bodyMap.get("energy");
                                     Object dirRaw = bodyMap.get("movingDirection");
+                                    Object faintedRaw = bodyMap.get("hasFainted");
 
                                     Tile tile = GameSaver.convertObject(tileRaw, Tile.class);
                                     int energy = ((Number) energyRaw).intValue();
                                     int dir = ((Number) dirRaw).intValue();
+                                    boolean fainted = ((Boolean) faintedRaw).booleanValue();
 
                                     User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
                                     currentPlayer.setCurrentTile(tile);
                                     currentPlayer.setEnergy(energy);
+                                    currentPlayer.setFainted(fainted);
                                     currentPlayer.setMovingDirection(dir);
                                 } else {
-                                    System.err.println("Response body is not a map");
+                                  System.err.println("Response body is not a map");
                                 }
                             }
                         }).exceptionally(ex -> {
@@ -3903,6 +4154,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 } else if (finalQuality == ProductQuality.Golden) {
                     finalQuality = ProductQuality.Iridium;
                 }
+               currentPlayer.perfectFishingSkillUpgrade();
             }
 
             final ProductQuality finalllQuality = finalQuality;
@@ -4196,11 +4448,11 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 if (tile != null && tile.getTexture() != null) {
                     batch.draw(tile.getTexture(), x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                 }
-                if (tile == TileType.EMPTY) {
+                if(tile == TileType.EMPTY){
                     Season season = MainApp.getInstance().getCurrentGame().getTimeAndDate().getSeason();
                     switch (season) {
                         case SUMMER:
-                            batch.draw(GameAssetManager.FlOORING_50, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
+                            batch.draw(GameAssetManager.FlOORING_50,x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
                             break;
                         case AUTUMN:
                             batch.draw(GameAssetManager.FLOORING_64, x * tileSize, (rows - y - 1) * tileSize, tileSize, tileSize);
@@ -4425,12 +4677,12 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         if (gameHour >= 18 && gameHour < 22) {
             alpha = (gameHour - 18) / 4f * 0.8f;
         } else if (gameHour >= 22) {
-            alpha = 1f;
+            alpha = 0.8f;
         } else {
             alpha = 0f;
         }
 
-        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 1f); // max darkness = 0.8
+        darkOverlayColor.a = MathUtils.clamp(alpha, 0f, 0.8f); // max darkness = 0.8
     }
 
     private boolean tryMove(int dx, int dy, int direction) {
@@ -4763,6 +5015,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
                 itemSlotStack.add(highlightImage);
             }
 
+            System.out.println(item.getName());
+            System.out.println(item.getClass());
             Texture itemTex = getItemTexture(item);
             if (itemTex != null) {
                 Image itemImage = new Image(itemTex);
@@ -5549,32 +5803,16 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             System.out.println(controller.cheatUnlimitedEnergy());
         } else if ((matcher = GameMenuCommands.CHEAT_WEATHER.getMatcher(input)) != null) {
             System.out.println(controller.cheatChangeWeather(matcher.group("weather")));
-        }else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+        }
+        else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
 //            String itemName = matcher.group("itemName");
 //            int count = Integer.parseInt(matcher.group("count"));
 //            System.out.println(controller.cheatAddItem(itemName, count));
             String sountString = matcher.group("count").trim();
             String itemName =matcher.group("itemName").trim();
             Map<String, Object> params = new HashMap<>();
-            params.put("itemName",itemName);
-            params.put("count",sountString);
-            MainApp.getInstance().getNetworkClient().sendPost(
-                MainApp.getInstance().getCurrentGame().getNetworkId(),
-                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
-                .thenAccept(response -> {
-                if (response.getStatus() == 200) {
-                    int count = Integer.parseInt(sountString);
-                    Item item = Item.getRandomItem(itemName);
-                    if (item == null) {
-                        System.out.println("CLIENT: Item not found: " + itemName); // <-- ADD THIS
-                        return;
-                    }
-                    currentPlayer.getBackpack().addItem(item,count);
-                    Gdx.app.postRunnable(() -> showFloatingMessage(response.getMessage()));
-                } else {
-                    Gdx.app.postRunnable(() -> showErrorDialog(stage, response.getMessage()));
-                }
-            });
+            params.put("itemName",matcher.group("itemName"));
+            params.put("count",matcher.group("count"));
             MainApp.getInstance().getNetworkClient()
                 .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
                     "GameController", "cheatAddItem", params, currentPlayer.getUsername())
@@ -5858,6 +6096,100 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
 //        }
         else {
             System.out.println("invalid command");
+        }
+    }
+//    public void handleCommand(Scanner scanner, Consumer<String> outputCallback){
+//    String input = scanner.nextLine().trim();
+//        Matcher matcher;
+//
+//        if ((matcher = GameMenuCommands.SHOW_MENU.getMatcher(input)) != null) {
+//            //outputCallback.accept(controller.showCurrentMenu());
+//        } else if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+//            String countStr = matcher.group("count").trim();
+//            Map<String, Object> params = new HashMap<>();
+//            params.put("money", countStr);
+//            MainApp.getInstance().getNetworkClient()
+//                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+//                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+//                .thenAccept(response -> {
+//                    Gson gson = new Gson();
+//                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+//                    if (response.getStatus() == 200) {
+//                        Gdx.app.postRunnable(() -> {
+//                            int count = Integer.parseInt(countStr);
+//                            currentPlayer.addMoney(count);
+//                            outputCallback.accept(result.message());
+//                        });
+//                    } else {
+//                        Gdx.app.postRunnable(() -> {
+//                            outputCallback.accept("Failed: " + result.message());
+//                        });
+//                    }
+//                });
+//        }
+//        // Add outputCallback.accept(...) in all other cases where System.out.println is used
+//        else {
+//            outputCallback.accept("invalid command");
+//        }
+//    }
+
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
+        String input = scanner.nextLine().trim();
+        Matcher matcher;
+
+         if ((matcher = GameMenuCommands.CHEAT_ADD_MONEY.getMatcher(input)) != null) {
+            String amount = matcher.group("count").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("money", amount);
+
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddMoney", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    Gdx.app.postRunnable(() -> {
+                        if (response.getStatus() == 200) {
+                            currentPlayer.addMoney(Integer.parseInt(amount));
+                            callback.accept(result.message());
+                        } else {
+                            callback.accept("Error: " + result.message());
+                        }
+                    });
+                });
+
+        } else if ((matcher = GameMenuCommands.CHEAT_ADD_ITEM.getMatcher(input)) != null) {
+
+            String sountString = matcher.group("count").trim();
+            String itemName =matcher.group("itemName").trim();
+            Map<String, Object> params = new HashMap<>();
+            params.put("itemName",matcher.group("itemName"));
+            params.put("count",matcher.group("count"));
+            MainApp.getInstance().getNetworkClient()
+                .sendPost(MainApp.getInstance().getCurrentGame().getNetworkId(),
+                    "GameController", "cheatAddItem", params, currentPlayer.getUsername())
+                .thenAccept(response -> {
+                    Gson gson = new Gson();
+                    Result result = gson.fromJson(gson.toJson(response.getBody()), Result.class);
+                    if (response.getStatus() == 200) {
+                        Gdx.app.postRunnable(() -> {
+                            int count = Integer.parseInt(sountString);
+                            Item item = Item.getRandomItem(itemName);
+                            if (item == null) {
+                                callback.accept("CLIENT: Item not found: " + itemName); // <-- ADD THIS
+                                return;
+                            }
+                            currentPlayer.getBackpack().addItem(item,count);
+                            callback.accept(result.message());
+                        });
+                    } else {
+                        Gdx.app.postRunnable(() -> {
+                            callback.accept(result.message());
+                        });
+                    }
+                });
+        }else {
+            callback.accept("Invalid command");
         }
     }
 
@@ -6356,14 +6688,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             stage.addActor(cookingMenuDialog);
         }
 
-        if (showInventoryMenu) {
-            showInventoryMenu = false;
-            if (inventoryMenuTable != null) inventoryMenuTable.setVisible(false);
-        }
-        if (showBackpackMenu) {
-            showBackpackMenu = false;
-            if (backpackMenuTable != null) backpackMenuTable.setVisible(false);
-        }
+        if (showInventoryMenu) { showInventoryMenu = false; if(inventoryMenuTable != null) inventoryMenuTable.setVisible(false); }
+        if (showBackpackMenu) { showBackpackMenu = false; if(backpackMenuTable != null) backpackMenuTable.setVisible(false); }
 
         cookingMenuDialog.setVisible(true);
         cookingMenuDialog.show(stage);
@@ -6509,14 +6835,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             stage.addActor(buildingMenuDialog);
         }
 
-        if (showInventoryMenu) {
-            showInventoryMenu = false;
-            if (inventoryMenuTable != null) inventoryMenuTable.setVisible(false);
-        }
-        if (showBackpackMenu) {
-            showBackpackMenu = false;
-            if (backpackMenuTable != null) backpackMenuTable.setVisible(false);
-        }
+        if (showInventoryMenu) { showInventoryMenu = false; if(inventoryMenuTable != null) inventoryMenuTable.setVisible(false); }
+        if (showBackpackMenu) { showBackpackMenu = false; if(backpackMenuTable != null) backpackMenuTable.setVisible(false); }
 
         buildingMenuDialog.setVisible(true);
         buildingMenuDialog.show(stage);
@@ -6640,6 +6960,124 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
 
             batch.draw(npc.getNpcName().getTextureRegion(), x, y, tileSize, tileSize * 2f);
+        }
+    }
+
+    public void showDisconnectedDialog(String username) {
+        Dialog dialog = new Dialog("Disconnected", GameAssetManager.skin, "dialog") {
+            @Override
+            protected void result(Object object) {
+                // در صورت نیاز کاری انجام بده
+            }
+        };
+        dialog.text(username + " has been disconnected. Waiting for reconnection...");
+        dialog.button("OK");
+        dialog.show(stage);  // فرض بر اینکه `stage` داخل GameView هست
+    }
+
+    public void updateLeaderboard(List<Map<String, Object>> leaderboard) {
+        // پاک کردن ردیف‌های قبلی، ولی نگه‌داشتن عنوان ستون:
+        leaderboardTable.clearChildren();
+        // دوباره عنوان ستون
+        leaderboardTable.add("Rank").pad(5);
+        leaderboardTable.add("Player").pad(5);
+        leaderboardTable.add("Money").pad(5);
+        leaderboardTable.add("Skills").pad(5);
+        leaderboardTable.add("Missions").pad(5);
+        leaderboardTable.add("Score").pad(5);
+        leaderboardTable.row();
+
+        for (int i = 0; i < leaderboard.size(); i++) {
+            Map<String, Object> entry = leaderboard.get(i);
+            String username = (String) entry.get("username");
+            int money      = ((Number)entry.get("money")).intValue();
+            int skillSum   = ((Number)entry.get("skillSum")).intValue();
+            int missions   = ((Number)entry.get("missions")).intValue();
+            int score      = ((Number)entry.get("score")).intValue();
+
+            leaderboardTable.add(String.valueOf(i+1)).pad(5);
+            leaderboardTable.add(username).pad(5);
+            leaderboardTable.add(String.valueOf(money)).pad(5);
+            leaderboardTable.add(String.valueOf(skillSum)).pad(5);
+            leaderboardTable.add(String.valueOf(missions)).pad(5);
+            leaderboardTable.add(String.valueOf(score)).pad(5);
+            leaderboardTable.row();
+        }
+    }
+
+    private void initAudioUI() {
+        // ۱. SelectBox برای سوئیچ ترک
+        trackSelect = new SelectBox<>(GameAssetManager.skin);
+        float padding = 10;
+        float x = Gdx.graphics.getWidth() - 200 - padding; // فرض می‌کنیم پهنایش ۲۰۰
+        float y = (Gdx.graphics.getHeight() - trackSelect.getHeight()) / 2f;
+        trackSelect.setSize(200, 30);
+        trackSelect.setPosition(x, y);
+        stage.addActor(trackSelect);
+
+        // بار اول لیست ترک‌ها را از سرور بگیریم
+        refreshTrackList();
+
+        trackSelect.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String name = trackSelect.getSelected();
+                String id   = trackNameToId.get(name);
+                if (id != null) {
+                    NetworkClient nc = MainApp.getInstance().getNetworkClient();
+                    nc.switchTrack(MainApp.getInstance().getCurrentGame().getNetworkId(), id);
+                }
+            }
+        });
+
+        // ۲. دکمه آپلود
+        uploadButton = new TextButton("Upload Track", GameAssetManager.skin);
+        uploadButton.setSize(200, 30);
+        uploadButton.setPosition(x, y - 40);
+        uploadButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                String path = FileChooserUtil.showFileChooserAndGetPath();
+                if (path != null) {
+                    uploadNewTrack(path);
+                }
+            }
+        });
+        stage.addActor(uploadButton);
+    }
+
+    private void refreshTrackList() {
+        String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+        MainApp.getInstance().getNetworkClient()
+            .listTracks(gameId)
+            .thenAccept(msg -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String,Object>> list = (List<Map<String,Object>>) msg.getBody();
+                List<String> names = new ArrayList<>();
+                trackNameToId.clear();
+                for (Map<String,Object> m : list) {
+                    String id   = (String) m.get("id");
+                    String name = (String) m.get("name");
+                    trackNameToId.put(name, id);
+                    names.add(name);
+                }
+                Gdx.app.postRunnable(() -> trackSelect.setItems(names.toArray(new String[0])));
+            });
+    }
+
+    private void uploadNewTrack(String filePath) {
+        try {
+            File file = new File(filePath);
+            byte[] data = Files.readAllBytes(file.toPath());
+            String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
+            MainApp.getInstance().getNetworkClient()
+                .uploadTrack(gameId, file.getName(), data)
+                .thenAccept(resp -> {
+                    // وقتی سرور OK داد، دوباره لیست را بگیریم
+                    Gdx.app.postRunnable(this::refreshTrackList);
+                });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -7282,5 +7720,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         isShowingGoodJob = true;
         goodJobStateTime = 0f;
     }
-}
 
+
+}

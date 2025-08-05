@@ -5,6 +5,7 @@ import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.server.Lobby;
 import io.github.stardew.mini.server.LobbyManager;
+import io.github.stardew.mini.server.AppSocket;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ public class LobbyController {
         Map<String, Object> body = new HashMap<>();
         if (canJoinLobby) {
             return new Message<>(200, "joined lobby", body, Message.MessageType.RESPONSE);
+            //broadcastOnlinePlayers();
         }
         else
             return Message.FORBIDDEN.setMessage("You are not allowed to join this lobby");

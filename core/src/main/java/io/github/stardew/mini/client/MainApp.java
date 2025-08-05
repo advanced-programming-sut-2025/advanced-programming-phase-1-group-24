@@ -5,8 +5,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.*;
+import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.Model.Things.*;
+import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplate;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.*;
@@ -31,6 +34,10 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
@@ -43,6 +50,8 @@ import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -50,7 +59,7 @@ public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames; // Instead of new ArrayList<>()
+    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = new ArrayList<>(); // Instead of new ArrayList<>()
     private io.github.stardew.mini.Model.Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
@@ -58,7 +67,10 @@ public class MainApp extends com.badlogic.gdx.Game {
     private Menu currentMenu = Menu.GameMenu;
     private User loggedInUser = loadLoggedInUser();// instead of null
     private NetworkClient networkClient;
+
     private String jwtToken;
+    private List<Map<String,String>> onlinePlayers = new ArrayList<>();
+
     private ChatDialog chatDialogInstance;
 
     public ChatDialog getChatDialogInstance() {
@@ -69,6 +81,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.chatDialogInstance = chatDialogInstance;
     }
 
+
     public String getJwtToken() {
         return jwtToken;
     }
@@ -76,19 +89,22 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.jwtToken = jwtToken;
     }
 
-    public void setCurrentGameId(String gameId) {
-        currentGame.setNetworkId(gameId);
+
+
+    public List<Map<String,String>> getOnlinePlayers() {
+        return onlinePlayers;
     }
+
 
     @Override
     public void create() {
         instance = this;
         batch = new SpriteBatch();
         GameAssetManager.load();
-        users = UserDatabase.loadUsers();
-        if (users == null) {
-            users = new ArrayList<>();
-        }
+//        users = UserDatabase.loadUsers();
+//        if (users == null) {
+//            users = new ArrayList<>();
+//        }
         connectToServer();
         //loggedInUser = new User("nikki", "1234", "nik", "aa", true);
         setScreen(new SignupMenuView(new SignupMenuController(), GameAssetManager.skin));
@@ -146,7 +162,7 @@ public class MainApp extends com.badlogic.gdx.Game {
             npCtype.initTexture();
         }
         // Initialize game data
-        activeGames = loadActiveGames();
+//        activeGames = loadActiveGames();
         if (FarmTemplateManager.getTemplates() == null) {
             FarmTemplateManager.loadTemplates();
         }
@@ -214,11 +230,12 @@ public class MainApp extends com.badlogic.gdx.Game {
         CropAssets.dispose();
         InventoryAssets.dispose();
         ShopAssets.dispose();
+        GameAudioManager.getInstance().dispose();
         batch.dispose();
         // save games
-        if (currentGame != null) {
-            currentGame.getMap().getShops().clear();
-        }
+//        if (currentGame != null) {
+//            currentGame.getMap().getShops().clear();
+//        }
         //saveActiveGames();
         // ✅ Gracefully close WebSocket
         if (networkClient != null && networkClient.isOpen()) {
@@ -368,6 +385,31 @@ public class MainApp extends com.badlogic.gdx.Game {
         }
     }
 
+    public void setCurrentGameId(String gameId) {
+        currentGame.setNetworkId(gameId);
+    }
+
+    public void updateOnlinePlayers(List<Map<String,String>> list) {
+        this.onlinePlayers = new ArrayList<>(list);
+        // اگر MainMenuView نمایش داده شده، ریفرشش کن
+        if (currentMenu == Menu.MainMenu && getCurrentGameView() == null) {
+            Gdx.app.postRunnable(() -> {
+                if (getScreen() instanceof MainMenuView) {
+                    ((MainMenuView) screen).updateOnlinePlayers(onlinePlayers);
+                }
+            });
+        }
+    }
+
+
+
+
+
+
+    public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
+        currentGame = currentGame;
+    }
+
     public void getCurrentMenu(Menu currentMenu) {
         currentMenu = currentMenu;
     }
@@ -394,4 +436,20 @@ public class MainApp extends com.badlogic.gdx.Game {
     public void setCurrentGameView(GameView currentGameView) {
         this.currentGameView = currentGameView;
     }
+
+    public void showPlayerDisconnectedMessage(String username) {
+        Gdx.app.postRunnable(() -> {
+            if (getScreen() instanceof GameView gameView) {
+                gameView.showDisconnectedDialog(username);
+            }
+        });
+    }
+
+    public void setCurrentGameViewIfNull(GameView view) {
+        if (this.currentGameView == null) {
+            this.currentGameView = view;
+        }
+    }
+
+
 }

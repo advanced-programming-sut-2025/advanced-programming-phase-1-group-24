@@ -1,11 +1,13 @@
 package io.github.stardew.mini.server.Controller;
 
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.Model.Result;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.SignupMenuView;
+import io.github.stardew.mini.server.ServerApp;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,7 +17,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,11 +34,11 @@ SignupMenuView view;
         boolean gender = genderString.equalsIgnoreCase("male") ? false : true;
 
         // Check username duplication
-        for (User user : app.getUsers()) {
-            if (user.getUsername().equals(username)) {
-                return new Result(false, "username is already taken! try adding numbers or -");
-            }
-        }
+//        for (User user : app.getUsers()) {
+//            if (user.getUsername().equals(username)) {
+//                return new Result(false, "username is already taken! try adding numbers or -");
+//            }
+//        }
 
         // Check username format
         if (!isValidUsername(username)) {
@@ -68,9 +72,9 @@ SignupMenuView view;
         User newUser = new User(username, hashedPassword, nickname, email, gender);
 
         // Save user
-        app.getUsers().add(newUser);
-        UserDatabase.saveUsers(app.getUsers());
-        app.setLoggedInUser(newUser); // not added yet until question is picked
+//        app.getUsers().add(newUser);
+//        UserDatabase.saveUsers(app.getUsers());
+//        app.setLoggedInUser(newUser); // not added yet until question is picked
 
         // Show security questions
         StringBuilder questionsList = new StringBuilder("choose a security question:\n");
@@ -81,25 +85,51 @@ SignupMenuView view;
 
         return new Result(true, questionsList.toString());
     }
-    public static Result pickQuestion(String answer, String confirm, String question) {
-        MainApp app = MainApp.getInstance();
-        User currentUser = app.getLoggedInUser();
 
-        if (currentUser == null) {
-            return new Result(false, "no pending user registration found!");
+    public Message<Result> signup(Map<String,Object> body) {
+        String username = (String) body.get("username");
+        String password = (String) body.get("password");
+        String confirm = (String) body.get("confirm");
+        String nickname = (String) body.get("nickname");
+        String email = (String) body.get("email");
+        String genderStr = (String) body.get("gender");
+
+        // از همان لاجیک قبلی استفاده می‌کنیم
+        Result r = register(username, password, confirm, nickname, email, genderStr);
+        if (!r.isSuccessful()) {
+            return (Message<Result>) Message.BAD_REQUEST.setMessage(r.message());
         }
+        User u = ServerApp.getInstance().getUserByUsername(username);
+        if (u == null) {
+
+            u = new User(username, hashSHA256(password), nickname, email, genderStr.equalsIgnoreCase("female"));
+            ServerApp.getInstance().addUser(u);
+            ServerApp.getInstance().saveUsers();
+            //UserDatabase.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
+        }
+
+        return Message.ok(r);
+    }
+
+    public static Result pickQuestion(String answer, String confirm, String question) {
+//        MainApp app = MainApp.getInstance();
+//        User currentUser = app.getLoggedInUser();
+//
+//        if (currentUser == null) {
+//            return new Result(false, "no pending user registration found!");
+//        }
 
         if (!answer.equals(confirm)) {
             return new Result(false, "answer and confirmation do not match!");
         }
 
-        currentUser.setSecurityQuestion(question);
-        currentUser.setSecurityAnswer(answer);
-
-        // Finally save the user
-        app.getUsers().add(currentUser);
-        UserDatabase.saveUsers(app.getUsers());
-        app.setLoggedInUser(null); // clear pending user
+//        currentUser.setSecurityQuestion(question);
+//        currentUser.setSecurityAnswer(answer);
+//
+//        // Finally save the user
+//        app.getUsers().add(currentUser);
+//        UserDatabase.saveUsers(app.getUsers());
+//        app.setLoggedInUser(null); // clear pending user
 
         return new Result(true, "user registered successfully. you are now in login menu!");
     }
@@ -124,54 +154,54 @@ SignupMenuView view;
 
 
 
-    public Result forgetPassword(Matcher matcher, Scanner scanner) {
-        String username = matcher.group("username");
-        MainApp app = MainApp.getInstance();
-        User user = app.getUserByUsername(username);
-
-        if (user == null)
-            return new Result(false, "no user with this username exists!");
-
-        System.out.println("security question: " + user.getSecurityQuestion());
-        String input = scanner.nextLine().trim();
-        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
-        Matcher answerMatcher = answerPattern.matcher(input);
-
-        if (!answerMatcher.matches()) {
-            return new Result(false, "invalid format! expected: answer -a <answer>");
-        }
-
-        String answer = answerMatcher.group("answer").trim();
-        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
-            return new Result(false, "incorrect answer! returning to main menu...");
-        }
-
-
-        System.out.print("do you want to choose your own password? (yes/no): ");
-        String choice = scanner.nextLine().trim().toLowerCase();
-
-        String newPassword;
-        if (choice.equals("yes")) {
-            while (true) {
-                System.out.print("enter new password: ");
-                newPassword = scanner.nextLine().trim();
-                if (!isStrongPassword(newPassword)) {
-                    System.out.println("password format is invalid! try again.");
-                } else {
-                    break;
-                }
-            }
-        } else {
-            // generate a random password
-            newPassword = generateStrongRandomPassword();
-            System.out.println("your new password is: " + newPassword);
-        }
-        String hashedPassword = hashSHA256(newPassword);
-        user.setPassword(hashedPassword);
-        UserDatabase.saveUsers(app.getUsers());
-
-        return new Result(true, "password changed successfully! you can now log in.");
-    }
+//    public Result forgetPassword(Matcher matcher, Scanner scanner) {
+//        String username = matcher.group("username");
+//        MainApp app = MainApp.getInstance();
+//        User user = app.getUserByUsername(username);
+//
+//        if (user == null)
+//            return new Result(false, "no user with this username exists!");
+//
+//        System.out.println("security question: " + user.getSecurityQuestion());
+//        String input = scanner.nextLine().trim();
+//        Pattern answerPattern = Pattern.compile("^answer\\s+-a\\s+(?<answer>.+)$");
+//        Matcher answerMatcher = answerPattern.matcher(input);
+//
+//        if (!answerMatcher.matches()) {
+//            return new Result(false, "invalid format! expected: answer -a <answer>");
+//        }
+//
+//        String answer = answerMatcher.group("answer").trim();
+//        if (!user.getSecurityAnswer().equalsIgnoreCase(answer)) {
+//            return new Result(false, "incorrect answer! returning to main menu...");
+//        }
+//
+//
+//        System.out.print("do you want to choose your own password? (yes/no): ");
+//        String choice = scanner.nextLine().trim().toLowerCase();
+//
+//        String newPassword;
+//        if (choice.equals("yes")) {
+//            while (true) {
+//                System.out.print("enter new password: ");
+//                newPassword = scanner.nextLine().trim();
+//                if (!isStrongPassword(newPassword)) {
+//                    System.out.println("password format is invalid! try again.");
+//                } else {
+//                    break;
+//                }
+//            }
+//        } else {
+//            // generate a random password
+//            newPassword = generateStrongRandomPassword();
+//            System.out.println("your new password is: " + newPassword);
+//        }
+//        String hashedPassword = hashSHA256(newPassword);
+//        user.setPassword(hashedPassword);
+//        UserDatabase.saveUsers(app.getUsers());
+//
+//        return new Result(true, "password changed successfully! you can now log in.");
+//    }
 
     public static String hashSHA256(String input) {
         try {
@@ -227,4 +257,72 @@ SignupMenuView view;
         return password.toString();
     }
 
+//    public Message<Result> setSecurityQuestion(Map<String,Object> body) {
+//        String username = (String) body.get("username");
+//        String question = (String) body.get("question");
+//        String answer   = (String) body.get("answer");
+//        String confirm  = (String) body.get("confirm");
+//
+//        User u = ServerApp.getInstance().getUserByUsername(username);
+//        if (u == null) {
+//            return (Message<Result>) Message.NOT_FOUND.setMessage("User not found: " + username);
+//        }
+//        if (!answer.equals(confirm)) {
+//            return (Message<Result>) Message.BAD_REQUEST.setMessage("Answer confirmation does not match");
+//        }
+//
+//        u.setSecurityQuestion(question);
+//        u.setSecurityAnswer(answer);
+//        UserDatabase.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
+//
+//        //return Message.ok(new Result(true, "Security question set"));
+//        Message<Result> ok = Message.ok(new Result(true, "Security question set"));
+//        ok.setUsername(username);    // ← این رو اضافه کن
+//        return ok;
+//    }
+public Message<Result> setSecurityQuestion(Map<String,Object> body) {
+    String username = (String) body.get("username");
+    String question = (String) body.get("question");
+    String answer   = (String) body.get("answer");
+    String confirm  = (String) body.get("confirm");
+
+    ServerApp app = ServerApp.getInstance();
+    User u = app.getUserByUsername(username);
+    if (u == null) {
+        Message<Result> resp = new Message<Result>(
+            400,
+            "User not found" + username,
+            null,
+            Message.MessageType.RESPONSE
+        );
+        resp.setUsername(username);
+        return resp;
+    }
+    if (!answer.equals(confirm)) {
+        Message<Result> resp = new Message<Result>(
+            400,
+            "Answer confirmation does not match",
+            null,
+            Message.MessageType.RESPONSE
+        );
+        resp.setUsername(username);
+        return resp;
+    }
+
+    u.setSecurityQuestion(question);
+    u.setSecurityAnswer(answer);
+    app.saveUsers(); // یا UserDatabase.saveUsers(app.getAllUsers())
+
+    Message<Result> resp = new Message<>(
+        200,
+        "Security question set",
+        new Result(true, "Security question set"),
+        Message.MessageType.RESPONSE
+    );
+    resp.setUsername(username);
+    return resp;
 }
+
+}
+
+

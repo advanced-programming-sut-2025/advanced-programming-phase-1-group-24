@@ -6,7 +6,9 @@ import io.javalin.websocket.WsContext;
 public class PlayerConnection {
     private final String username;
     private final WsContext wsContext;
-    private final User user;
+    private  User user;
+    private long disconnectTime = -1;
+    private boolean awaitingReconnect = false;
 
     public PlayerConnection(String username, WsContext wsContext) {
         this.username = username;
@@ -30,6 +32,28 @@ public class PlayerConnection {
         if (wsContext.session.isOpen()) {
             wsContext.send(json);
         }
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void markDisconnected() {
+        this.disconnectTime = System.currentTimeMillis();
+        this.awaitingReconnect = true;
+    }
+
+    public boolean isAwaitingReconnect() {
+        return awaitingReconnect;
+    }
+
+    public long getDisconnectTime() {
+        return disconnectTime;
+    }
+
+    public void markReconnected() {
+        this.awaitingReconnect = false;
+        this.disconnectTime = -1;
     }
 }
 

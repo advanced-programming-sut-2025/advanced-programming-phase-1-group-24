@@ -28,7 +28,6 @@ public class UserDatabase {
         }
     }
 
-
     public static void saveUsers(ArrayList<User> users) {
         try {
             File file = new File(FILE_PATH);
@@ -42,7 +41,5 @@ public class UserDatabase {
             e.printStackTrace();
         }
     }
-
-
 }
 

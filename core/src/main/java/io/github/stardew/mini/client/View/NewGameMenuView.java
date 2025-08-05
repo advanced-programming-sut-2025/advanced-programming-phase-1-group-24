@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.zip.GZIPInputStream;
 
 public class NewGameMenuView implements AppMenu, Screen {
@@ -146,6 +147,7 @@ public class NewGameMenuView implements AppMenu, Screen {
                 MainApp.getInstance().setCurrentMenu(Menu.PreGameMenu);
             }
         });
+
 
 //        startGameButton.addListener(new ClickListener() {
 //            public void clicked(InputEvent event, float x, float y) {
@@ -375,6 +377,6 @@ public class NewGameMenuView implements AppMenu, Screen {
     }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
     }
 }

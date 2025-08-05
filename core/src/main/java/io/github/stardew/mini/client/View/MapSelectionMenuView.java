@@ -32,6 +32,7 @@ import io.github.stardew.mini.Model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class MapSelectionMenuView implements AppMenu, Screen {
     private MapSelectionMenuController controller;
@@ -237,7 +238,9 @@ public class MapSelectionMenuView implements AppMenu, Screen {
     public void dispose() {
     }
 
+
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
+
     }
 }

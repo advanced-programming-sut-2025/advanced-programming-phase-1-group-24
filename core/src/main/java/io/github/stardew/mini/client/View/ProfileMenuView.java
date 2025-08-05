@@ -18,6 +18,7 @@ import io.github.stardew.mini.Model.Avatar;
 import io.github.stardew.mini.Model.Result;
 
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class ProfileMenuView implements Screen,AppMenu {
     private final ProfileMenuController controller;
@@ -173,7 +174,7 @@ public class ProfileMenuView implements Screen,AppMenu {
     @Override public void dispose() { stage.dispose(); skin.dispose(); }
 
     @Override
-    public void handleCommand(Scanner scanner) {
+    public void handleCommand(Scanner scanner, Consumer<String> callback) {
 
     }
 }

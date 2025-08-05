@@ -50,6 +50,13 @@ public class Message<T> {
     }
 
 
+
+    public static Message success(String message) {
+        return new Message<>(200, message, null, Message.MessageType.RESPONSE);
+    }
+
+
+
     public static <T> Message<T> ok(T body) {
         return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
     }
