@@ -115,6 +115,9 @@ public class GameAssetManager {
     public static Texture abigaillTexture;
     public static Texture haleyyTexture;
     public static Texture shaneeTexture;
+    public static Texture bedTexture;
+    public static Texture bedsideTableTexture;
+    public static Texture bushTexture;
 
     public static Texture SECRET_HEART ;
 
@@ -168,6 +171,9 @@ public class GameAssetManager {
         haleyyTexture = new Texture(Gdx.files.internal("assets/Villagers/Haley.png"));
         shaneeTexture = new Texture(Gdx.files.internal("assets/Villagers/Shane.png"));
         abigaillTexture = new Texture(Gdx.files.internal("assets/Villagers/Abigail.png"));
+        bedTexture = new Texture(Gdx.files.internal("Decor/bed.png"));
+        bedsideTableTexture = new Texture(Gdx.files.internal("Decor/bedsideTable.png"));
+        bushTexture = new Texture(Gdx.files.internal("Decor/bush.png"));
         // Only one column
         System.arraycopy(tmp[0], 0, dropFrames, 0, 11);
 
@@ -388,6 +394,9 @@ public class GameAssetManager {
         if(Coop != null) Coop.dispose();
         if(Big_Coop != null) Big_Coop.dispose();
         if(Deluxe_Coop != null) Deluxe_Coop.dispose();
+        if (bedTexture != null) bedTexture.dispose();
+        if (bedsideTableTexture != null) bedsideTableTexture.dispose();
+        if (bushTexture != null) bushTexture.dispose();
 
         if(SECRET_HEART != null) SECRET_HEART.dispose();
     }

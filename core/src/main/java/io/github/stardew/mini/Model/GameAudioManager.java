@@ -3,6 +3,7 @@ package io.github.stardew.mini.Model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 
 import java.util.HashMap;
 
@@ -23,12 +24,20 @@ public class GameAudioManager {
         return instance;
     }
 
-    public void playMusic(String path, boolean loop, float volume) {
-        if (currentMusic != null) currentMusic.stop();
-        currentMusic = Gdx.audio.newMusic(Gdx.files.internal(path));
+    public void playMusic(FileHandle fh, boolean loop, float volume) {
+        if (currentMusic != null) {
+            currentMusic.stop();
+            currentMusic.dispose();
+        }
+        currentMusic = Gdx.audio.newMusic(fh);
         currentMusic.setLooping(loop);
         currentMusic.setVolume(volume);
         currentMusic.play();
+    }
+
+    // keep string overload for existing assets-based calls
+    public void playMusic(String path, boolean loop, float volume) {
+        playMusic(Gdx.files.internal(path), loop, volume);
     }
 
     public void stopMusic() {

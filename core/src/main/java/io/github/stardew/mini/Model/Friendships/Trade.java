@@ -1,9 +1,15 @@
 package io.github.stardew.mini.Model.Friendships;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @JsonIdentityInfo(
     generator = ObjectIdGenerators.IntSequenceGenerator.class,
     property = "@id"
@@ -21,6 +27,11 @@ public class Trade {
     private boolean hasBeenAnswered;
     private int id;
     private static int numberOfTrades = 0;
+
+    @JsonIgnore
+    private List<Map<String, Object>> senderOffer = new ArrayList<>();
+    @JsonIgnore
+    private List<Map<String, Object>> recipientOffer = new ArrayList<>();
 
     public Trade(User sender, User recipient, String typeOfTrade, int amountOfOfferedItems, String offeredItem,
                  String requestedItem, int amountOfRequestedItem, int requestedPrice, boolean accept) {
@@ -122,5 +133,21 @@ public class Trade {
 
     public void setHasBeenAnswered(boolean hasBeenAnswered) {
         this.hasBeenAnswered = hasBeenAnswered;
+    }
+
+    public List<Map<String, Object>> getSenderOffer() {
+        return senderOffer;
+    }
+
+    public void setSenderOffer(List<Map<String, Object>> senderOffer) {
+        this.senderOffer = senderOffer;
+    }
+
+    public List<Map<String, Object>> getRecipientOffer() {
+        return recipientOffer;
+    }
+
+    public void setRecipientOffer(List<Map<String, Object>> recipientOffer) {
+        this.recipientOffer = recipientOffer;
     }
 }
