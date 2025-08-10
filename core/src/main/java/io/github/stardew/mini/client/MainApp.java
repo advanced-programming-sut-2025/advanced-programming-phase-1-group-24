@@ -5,15 +5,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
+import io.github.stardew.mini.Model.*;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.Food;
-import io.github.stardew.mini.Model.Things.FoodType;
+import io.github.stardew.mini.Model.Things.*;
 import io.github.stardew.mini.server.Controller.*;
 import com.google.gson.JsonObject;
 import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
@@ -35,10 +34,12 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import io.github.stardew.mini.Model.Reccepies.MachineType;
 import io.github.stardew.mini.Model.Reccepies.randomStuffType;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.client.View.*;
+import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.Model.UserDatabase;
 import io.github.stardew.mini.client.View.*;
 import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.client.View.*;
@@ -69,6 +70,16 @@ public class MainApp extends com.badlogic.gdx.Game {
 
     private String jwtToken;
     private List<Map<String,String>> onlinePlayers = new ArrayList<>();
+
+    private ChatDialog chatDialogInstance;
+
+    public ChatDialog getChatDialogInstance() {
+        return chatDialogInstance;
+    }
+
+    public void setChatDialogInstance(ChatDialog chatDialogInstance) {
+        this.chatDialogInstance = chatDialogInstance;
+    }
 
 
     public String getJwtToken() {
@@ -219,6 +230,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         CropAssets.dispose();
         InventoryAssets.dispose();
         ShopAssets.dispose();
+        GameAudioManager.getInstance().dispose();
         batch.dispose();
         // save games
 //        if (currentGame != null) {
@@ -341,9 +353,16 @@ public class MainApp extends com.badlogic.gdx.Game {
         changeScreen();
     }
     public void changeScreen() {
+
+        if (this.getScreen() instanceof GameView) {
+            this.setCurrentGameView(null);
+        }
+
         switch (currentMenu) {
             case GameMenu:
-                getInstance().setScreen(new GameView(new GameController()));
+                GameView newGameView = new GameView(new GameController());
+                this.setCurrentGameView(newGameView);
+                getInstance().setScreen(newGameView);
                 break;
             case MainMenu:
                 getInstance().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.skin));
@@ -424,6 +443,12 @@ public class MainApp extends com.badlogic.gdx.Game {
                 gameView.showDisconnectedDialog(username);
             }
         });
+    }
+
+    public void setCurrentGameViewIfNull(GameView view) {
+        if (this.currentGameView == null) {
+            this.currentGameView = view;
+        }
     }
 
 

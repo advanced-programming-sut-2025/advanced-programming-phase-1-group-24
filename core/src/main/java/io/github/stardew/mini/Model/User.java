@@ -782,7 +782,7 @@ public class User {
             }
         }
         this.getBackpack().grabItem(item.getName(),1);
-        return new Result(false, "Item eaten successfully!");
+        return new Result(true, "Item eaten successfully!");
     }
     public boolean isBuffMaxEnergy() {
         return buffMaxEnergy;

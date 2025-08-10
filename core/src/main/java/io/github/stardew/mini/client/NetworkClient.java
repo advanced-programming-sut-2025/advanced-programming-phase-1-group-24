@@ -2,19 +2,28 @@
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Base64Coder;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.GameAudioManager;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.GameView;
 import io.github.stardew.mini.client.View.MainMenuView;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.PlayerConnection;
@@ -25,16 +34,14 @@ import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.util.HashMap;
+import java.io.ByteArrayInputStream;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 public class NetworkClient extends WebSocketClient {
@@ -241,6 +248,7 @@ public class NetworkClient extends WebSocketClient {
                                 if (gameJsonObj instanceof  String json) {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        game.reloadExtraData();
                                         MainApp.getInstance().setCurrentGame(game);
                                         // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
@@ -285,6 +293,67 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 }
+//                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    List<Map<String,Object>> lb =
+//                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+//
+//                    Gdx.app.postRunnable(() ->
+//                        MainApp.getInstance().getCurrentGameView().updateLeaderboard(lb)
+//                    );
+//                    return;
+//                }
+                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,Object>> lb =
+                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+
+                    GameView view = MainApp.getInstance().getCurrentGameView();
+                    if (view != null) {
+                        Gdx.app.postRunnable(() -> view.updateLeaderboard(lb));
+                    } else {
+                        System.out.println("⚠️ Warning: GameView is null. Dropping leaderboard update.");
+                    }
+                    return;
+                }
+
+                if ("radio-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+                    String trackId = (String) b.get("trackId");
+                    String base64  = (String) b.get("data");
+//
+                    if (base64 == null || base64.isEmpty()) {
+                        System.err.println("Empty base64 data for track: " + trackId);
+                        return;
+                    }
+
+                    // Delete previous temp files to avoid accumulation
+                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
+                        old.delete();
+                    }
+//                    String bytes = Arrays.toString(Base64Coder.decode(base64));
+//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+//                    fh.writeBytes(bytes.getBytes(), false);
+                    byte[] decodedBytes = Base64Coder.decode(base64);
+                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+                    fh.writeBytes(decodedBytes, false);
+
+                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
+                    try {
+                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+                    } catch (GdxRuntimeException e) {
+                        System.err.println("Failed to play audio: " + e.getMessage());
+                    }
+                }
+
+
+
+
+
+
+
+
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {
@@ -338,6 +407,180 @@ public class NetworkClient extends WebSocketClient {
                         } catch (Exception e){
                             e.printStackTrace();
                             System.out.println("❌ Failed to parse updated plant.");
+                        }
+                    });
+                }
+                if ("chat-message".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> chatData = (Map<String, Object>) message.getBody();
+                    String sender = (String) chatData.get("sender");
+                    String messageContent = (String) chatData.get("messageContent");
+                    String chatType = (String) chatData.get("chatType");
+                    String recipient = (String) chatData.get("recipient");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getChatDialogInstance() != null) {
+                            if (Message.CHAT_PUBLIC.equals(chatType)) {
+                                MainApp.getInstance().getChatDialogInstance().addPublicMessage(sender, messageContent);
+                            } else if (Message.CHAT_PRIVATE.equals(chatType)) {
+                                String currentUsername = MainApp.getInstance().getLoggedInUser().getUsername();
+                                String chatPartner = sender.equals(currentUsername) ? recipient : sender;
+                                MainApp.getInstance().getChatDialogInstance().addPrivateMessage(sender, chatPartner, messageContent);
+                            }
+                        } else {
+                        }
+                    });
+                    return;
+                }
+                if (Message.POP_UP_NOTIFICATION.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> notificationData = (Map<String, Object>) message.getBody();
+                    String title = (String) notificationData.get("title");
+                    String notificationBody = (String) notificationData.get("body");
+
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showErrorDialog(MainApp.getInstance().getCurrentGameView().getStage(), notificationBody);
+                        } else {
+                            System.err.println("[DEBUG-NWCLIENT] GameView is null! Cannot show pop-up notification.");
+                        }
+                    });
+                    return;
+                }
+                if (Message.REACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> reactionData = (Map<String, Object>) message.getBody();
+                    String sender = (String) reactionData.get("senderUsername");
+                    String content = (String) reactionData.get("reactionContent");
+                    boolean isImage = (Boolean) reactionData.get("isImage");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showReactionForPlayer(sender, content, isImage);
+                        }
+                    });
+                    return;
+                }
+                if ("force_terminate_vote_started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showForceTerminationVoteDialog(initiator);
+                        }
+                    });
+                } else if ("vote_cancelled".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().cancelTermination(message.getMessage());
+                        }
+                    });
+                } else if ("game_terminated".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handleGameTermination(message.getMessage());
+                        }
+                    });
+                } else if ("vote_out_started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    String target = (String) data.get("target");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showVoteOutConfirmationDialog(initiator, target);
+                        }
+                    });
+                } else if ("vote_out_result".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String target = (String) data.get("target");
+                    String outcome = (String) data.get("outcome");
+                    String resultMessage = "The vote to eliminate " + target + " " + (outcome.equals("eliminated") ? "passed." : "failed.");
+
+                    // If the vote passed, remove the player from the local game state
+                    if ("eliminated".equals(outcome)) {
+                        Game currentGame = MainApp.getInstance().getCurrentGame();
+                        if (currentGame != null) {
+                            currentGame.getPlayers().removeIf(p -> p.getUsername().equals(target));
+                        }
+                    }
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handlePlayerEliminated(target, resultMessage);
+                        }
+                    });
+                } else if ("you_were_eliminated".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handleYouAreEliminated(message.getMessage());
+                        }
+                    });
+                }  else if (Message.PLAYER_INTERACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handlePlayerInteraction(data);
+                        }
+                    });
+                } else if (Message.MARRIAGE_PROPOSAL.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String proposer = (String) data.get("proposer");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showMarriageProposalDialog(proposer);
+                        }
+                    });
+                } else if (Message.MARRIAGE_RESPONSE_UPDATE.equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game == null) return;
+
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        boolean accepted = (Boolean) data.get("accepted");
+                        String proposerName = (String) data.get("proposer");
+                        String responderName = (String) data.get("responder");
+
+                        User proposer = game.getPlayerByUsername(proposerName);
+                        User responder = game.getPlayerByUsername(responderName);
+                        if (proposer == null || responder == null) return;
+
+                        Friendship friendship = game.getFriendship(proposerName, responderName);
+                        if (friendship == null) return;
+
+                        int newLevel = ((Number) data.get("newFriendshipLevel")).intValue();
+                        friendship.setLevel(newLevel);
+
+                        if (accepted) {
+                            int newMoney = ((Number) data.get("newMoney")).intValue();
+                            proposer.setPartner(responder);
+                            responder.setPartner(proposer);
+                            proposer.setMoney(newMoney);
+                            responder.setMoney(newMoney);
+
+                            Item ring = proposer.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+                            if (ring != null) {
+                                responder.getBackpack().addItem(ring, 1);
+                                proposer.getBackpack().removeItem(ring.getName(),1);
+                            }
+
+                        } else {
+                            int newEnergy = ((Number) data.get("proposerNewEnergy")).intValue();
+                            proposer.setEnergy(newEnergy);
+                            proposer.setDaysSinceRejection(7);
+                        }
+                    });
+                } else if (Message.FRIENDSHIP_UPDATED.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game != null) {
+                            String p1 = (String) data.get("player1");
+                            String p2 = (String) data.get("player2");
+                            int level = ((Number) data.get("level")).intValue();
+                            int xp = ((Number) data.get("xp")).intValue();
+                            Friendship f = game.getFriendship(p1, p2);
+                            if (f != null) {
+                                f.setLevel(level);
+                                // You might need a setXp method in Friendship if you want to sync it perfectly
+                            }
                         }
                     });
                 }
@@ -493,6 +736,60 @@ public class NetworkClient extends WebSocketClient {
             }
         }
         return result;
+    }
+
+    public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
+        //String b64 = Arrays.toString(Base64Coder.encode(raw));
+        String b64 = new String(Base64Coder.encode(raw));
+        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
+            "name", name,
+            "data", b64);
+        return sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+    public CompletableFuture<Message<?>> listTracks(String gameId) {
+        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername());
+        return sendGet(gameId, "RadioController", "list", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+    public CompletableFuture<Message<?>> switchTrack(String gameId, String trackId) {
+        Map<String,Object> p = Map.of("trackId", trackId);
+        return sendPost(gameId, "RadioController", "switch", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+
+    public CompletableFuture<Message<?>> sendChatMessage(
+        String gameId,
+        String senderUsername,
+        String messageContent,
+        String recipientUsername,
+        String chatType
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("messageContent", messageContent);
+        params.put("chatType", chatType);
+        if (recipientUsername != null) {
+            params.put("recipientUsername", recipientUsername);
+        }
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleChatMessage",
+            params,
+            senderUsername
+        );
+    }
+
+    public CompletableFuture<Message<?>> sendReaction(String gameId, String senderUsername, String reactionContent, boolean isImage) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("reactionContent", reactionContent);
+        params.put("isImage", isImage);
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleReaction",
+            params,
+            senderUsername
+        );
     }
 
 
