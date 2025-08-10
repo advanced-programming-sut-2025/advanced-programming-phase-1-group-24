@@ -7031,8 +7031,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         });
 
         // ۲. دکمه آپلود
-        uploadButton = new TextButton("Upload Track", GameAssetManager.skin);
-        uploadButton.setSize(200, 30);
+        uploadButton = new TextButton("Upload Track", GameAssetManager.skin,"custom-button");
+        uploadButton.setSize(400, 45);
         uploadButton.setPosition(x, y - 40);
         uploadButton.addListener(new ChangeListener() {
             @Override

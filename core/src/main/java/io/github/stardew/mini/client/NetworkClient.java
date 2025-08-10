@@ -317,35 +317,91 @@ public class NetworkClient extends WebSocketClient {
                     return;
                 }
 
+//                if ("radio-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+//                    String trackId = (String) b.get("trackId");
+//                    String base64  = (String) b.get("data");
+//
+//                    if (base64 == null || base64.isEmpty()) {
+//                        System.err.println("Empty base64 data for track: " + trackId);
+//                        return;
+//                    }
+//
+//                    // پاک کردن فایل‌های قدیمی tmp
+//                    for (FileHandle old : Gdx.files.local(".").list()) {
+//                        if (old.name().startsWith("radio_tmp_")) {
+//                            old.delete();
+//                        }
+//                    }
+//
+//                    // decode with java.util.Base64 (safer compatibility with server)
+//                    byte[] decodedBytes = java.util.Base64.getDecoder().decode(base64);
+//
+//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+//                    fh.writeBytes(decodedBytes, false);
+//
+//                    GameAudioManager.getInstance().playMusic(fh, true, 1f);
+//                }
+
                 if ("radio-update".equalsIgnoreCase(message.getType())) {
                     @SuppressWarnings("unchecked")
                     Map<String,Object> b = (Map<String,Object>) message.getBody();
                     String trackId = (String) b.get("trackId");
+                    String name    = (String) b.get("name");   // سرور هم اینو می‌فرسته
                     String base64  = (String) b.get("data");
-//
-                    if (base64 == null || base64.isEmpty()) {
-                        System.err.println("Empty base64 data for track: " + trackId);
+
+                    if (base64 == null || base64.isEmpty()) return;
+
+                    byte[] decodedBytes;
+                    try {
+                        decodedBytes = java.util.Base64.getDecoder().decode(base64);
+                    } catch (IllegalArgumentException ex) {
+                        System.err.println("[RADIO] base64 decode failed: " + ex.getMessage());
                         return;
                     }
 
-                    // Delete previous temp files to avoid accumulation
-                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
-                        old.delete();
-                    }
-//                    String bytes = Arrays.toString(Base64Coder.decode(base64));
-//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
-//                    fh.writeBytes(bytes.getBytes(), false);
-                    byte[] decodedBytes = Base64Coder.decode(base64);
-                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
-                    fh.writeBytes(decodedBytes, false);
-
-                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
+                    // sniff header برای تشخیص فرمت
+                    String ext = "bin";
                     try {
-                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
-                    } catch (GdxRuntimeException e) {
-                        System.err.println("Failed to play audio: " + e.getMessage());
+                        int headerLen = Math.min(decodedBytes.length, 12);
+                        String header = new String(decodedBytes, 0, headerLen, java.nio.charset.StandardCharsets.US_ASCII);
+                        if (header.startsWith("RIFF")) ext = "wav";
+                        else if (header.startsWith("OggS")) ext = "ogg";
+                        else if (header.startsWith("ID3") || (decodedBytes.length > 1 && (decodedBytes[0] & 0xFF) == 0xFF && ((decodedBytes[1] & 0xE0) == 0xE0))) ext = "mp3";
+                        else if (name != null && name.lastIndexOf('.') > 0) {
+                            ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+                        }
+                    } catch (Exception ignored) {}
+
+                    String fname = "radio_tmp_" + trackId + "." + ext;
+                    FileHandle fh = Gdx.files.local(fname);
+                    fh.writeBytes(decodedBytes, false);
+                    System.out.println("[RADIO] wrote file: " + fh.file().getAbsolutePath() + " ext=" + ext + " size=" + fh.length());
+
+                    // اگر WAV یا OGG بود، سعی کن پخش کنی (libGDX اغلب WAV/OGG را پشتیبانی می‌کند)
+                    if ("wav".equals(ext) || "ogg".equals(ext)) {
+                        try {
+                            double durationSeconds = fh.length() / 176400.0;
+                            boolean shouldLoop = durationSeconds > 2.0; // اگر کوتاه‌تر از 2 ثانیه، لوپ نکن
+
+                            System.out.println("[RADIO] estimated duration (s): " + durationSeconds + " -> loop=" + shouldLoop);
+
+                            GameAudioManager.getInstance().playMusic(fh, shouldLoop, 1f);
+                            System.out.println("[RADIO] playback started for " + fname + " (loop=" + shouldLoop + ")");
+                        } catch (GdxRuntimeException e) {
+                            System.err.println("[RADIO] Failed to play audio: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    } else if ("mp3".equals(ext)) {
+                        System.err.println("[RADIO] Received MP3. libGDX desktop OpenAL backend ممکن است MP3 را پشتیبانی نکند. بهتر است فایل را به WAV/OGG تبدیل کنید یا آپلود فقط WAV/OGG مجاز باشد.");
+                    } else {
+                        System.err.println("[RADIO] Unknown/unsupported audio format: " + ext);
                     }
+
+                    return;
                 }
+
 
 
 
@@ -738,14 +794,34 @@ public class NetworkClient extends WebSocketClient {
         return result;
     }
 
-    public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
-        //String b64 = Arrays.toString(Base64Coder.encode(raw));
-        String b64 = new String(Base64Coder.encode(raw));
-        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
-            "name", name,
-            "data", b64);
-        return sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
-    }
+//    public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
+//        //String b64 = Arrays.toString(Base64Coder.encode(raw));
+//        String b64 = new String(Base64Coder.encode(raw));
+//        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
+//            "name", name,
+//            "data", b64);
+//        return sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
+//    }
+public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
+    // use java.util.Base64 for consistent encoding
+    String b64 = java.util.Base64.getEncoder().encodeToString(raw);
+
+    System.out.println("[UPLOAD] raw bytes length = " + raw.length);
+    System.out.println("[UPLOAD] base64 length = " + b64.length());
+
+    Map<String,Object> p = Map.of(
+        "ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
+        "name", name,
+        "data", b64
+    );
+    CompletableFuture<Message<?>> fut =
+        sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
+
+    // optionally log when future completes
+    fut.thenAccept(msg -> System.out.println("[UPLOAD] server response: " + msg.getStatus() + " / " + msg.getMessage()));
+    return fut;
+}
+
     public CompletableFuture<Message<?>> listTracks(String gameId) {
         Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername());
         return sendGet(gameId, "RadioController", "list", p, MainApp.getInstance().getLoggedInUser().getUsername());
