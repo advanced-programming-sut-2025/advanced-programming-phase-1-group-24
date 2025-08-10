@@ -178,31 +178,54 @@ public class AppSocket {
                     }
 
 
+//                    if ("connect".equals(message.getType()) && message.getUsername() != null) {
+//                        System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
+//                        PlayerConnection existing = getPlayerConnectionByUsername(message.getUsername());
+//                        if (existing != null && existing.isAwaitingReconnect()) {
+//                            existing.markReconnected();
+//                            System.out.println("User reconnected: " + existing.getUsername());
+//                            broadcastOnlinePlayers();
+//                            GameServer game = getGameOfUser(existing.getUsername());
+//                            if (game != null) {
+//                                game.replacePlayerConnection(existing);
+//                                game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
+//                            }
+//                        } else {
+//                            PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
+//                            connection.markReconnected();
+//                            connectedPlayers.put(ctx.sessionId(), connection);
+//                            GameServer game = getGameOfUser(connection.getUsername());
+//                            if (game != null) {
+//                                game.replacePlayerConnection(connection);
+//                            }
+//                            broadcastOnlinePlayers();
+//                            System.out.println("User connected: " + message.getUsername());
+//                        }
+//                    }
                     if ("connect".equals(message.getType()) && message.getUsername() != null) {
                         System.out.println("[WS MESSAGE] Received 'connect' for username = " + message.getUsername() + ", sessionId = " + ctx.sessionId());
+
                         PlayerConnection existing = getPlayerConnectionByUsername(message.getUsername());
                         if (existing != null && existing.isAwaitingReconnect()) {
                             existing.markReconnected();
                             System.out.println("User reconnected: " + existing.getUsername());
-                            broadcastOnlinePlayers();
+
                             GameServer game = getGameOfUser(existing.getUsername());
                             if (game != null) {
-                                game.replacePlayerConnection(existing);
                                 game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
                             }
-                        } else {
-                            PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
-                            connection.markReconnected();
-                            connectedPlayers.put(ctx.sessionId(), connection);
-                            GameServer game = getGameOfUser(connection.getUsername());
-                            if (game != null) {
-                                game.replacePlayerConnection(connection);
-                            }
-                            broadcastOnlinePlayers();
-                            System.out.println("User connected: " + message.getUsername());
                         }
-                    }
 
+                        PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
+                        connection.markReconnected();
+                        connectedPlayers.put(ctx.sessionId(), connection);
+                        GameServer game = getGameOfUser(connection.getUsername());
+                        if (game != null) {
+                            game.replacePlayerConnection(connection);
+                        }
+                        broadcastOnlinePlayers();
+                        System.out.println("User connected: " + message.getUsername());
+                    }
                     Message<?> response;
                     System.out.println("message.getType(): " + message.getType());
                     System.out.println("message.getUsername(): " + message.getUsername());
@@ -267,7 +290,7 @@ public class AppSocket {
             ws.onClose(ctx -> {
                 System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
                 String sessionId = ctx.sessionId(); // this is the correct method
-                PlayerConnection connection = connectedPlayers.get(sessionId);
+                PlayerConnection connection = connectedPlayers.remove(sessionId);
                 if (connection != null) {
                     System.out.println("User disconnected: " + connection.getUsername());
                     GameServer game = getGameOfUser(connection.getUsername());

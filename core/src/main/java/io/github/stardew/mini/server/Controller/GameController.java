@@ -139,7 +139,6 @@ public class GameController implements MenuController {
             .collect(Collectors.toList());
     }
 
-
     public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
         Game currentGame = gameServer.getGame();
 
@@ -153,11 +152,11 @@ public class GameController implements MenuController {
         for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
         }
-        //ServerApp.getInstance().saveUsers();
+        ServerApp.getInstance().saveUsers();
         //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
 
         // Step 2: Clean up game objects
-       // currentGame.getMap().getShops().clear();
+        // currentGame.getMap().getShops().clear();
 
         // Step 3: Save game to disk and global state
         currentGame.resetLoadGamesStatus();
@@ -166,10 +165,6 @@ public class GameController implements MenuController {
         ///    ///////////////////////////////////////////////////////////////
         //ServerApp.getInstance().saveAllGamesToRedis();
         GameDatabase.saveGameToDatabase(gameServer.getGame());
-        for (User player : currentGame.getPlayers()) {
-            player.updateGameFields();
-        }
-        ServerApp.getInstance().saveUsers();
         //////////////////////////////////////////////
         // Step 4: Safely stop game server
         gameServer.stopServer();                         // stop timer and thread
@@ -186,6 +181,52 @@ public class GameController implements MenuController {
 
         return new Result(true, "Game exited and saved successfully. Returning to game menu...");
     }
+//    public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
+//        Game currentGame = gameServer.getGame();
+//
+//        if (currentGame == null)
+//            return new Result(false, "No active game to exit!");
+//
+//        if (!currentGame.getMainPlayer().equals(currentUser))
+//            return new Result(false, "Only the game owner can exit the game!");
+//
+//        // Step 1: Save game state
+//        for (User player : currentGame.getPlayers()) {
+//            player.updateMaxMoney();
+//        }
+//        //ServerApp.getInstance().saveUsers();
+//        //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
+//
+//        // Step 2: Clean up game objects
+//       // currentGame.getMap().getShops().clear();
+//
+//        // Step 3: Save game to disk and global state
+//        currentGame.resetLoadGamesStatus();
+//        ServerApp.getInstance().addGame(currentGame);
+//        ServerApp.getInstance().saveAllGames();
+//        ///    ///////////////////////////////////////////////////////////////
+//        //ServerApp.getInstance().saveAllGamesToRedis();
+//        GameDatabase.saveGameToDatabase(gameServer.getGame());
+//        for (User player : currentGame.getPlayers()) {
+//            player.updateGameFields();
+//        }
+//        ServerApp.getInstance().saveUsers();
+//        //////////////////////////////////////////////
+//        // Step 4: Safely stop game server
+//        gameServer.stopServer();                         // stop timer and thread
+//        AppSocket.removeGame(gameServer);                // remove from activeGames
+//
+//        // Optional: close player connections or notify players here
+//        for (PlayerConnection player : gameServer.getPlayers()) {
+//            if (!player.getUser().equals(currentUser) && player.getWsContext().session.isOpen()) {
+//                Message<String> exitMsg = Message.ok("Game ended by the host.");
+//                exitMsg.setType("game-ended");
+//                player.getWsContext().send(new Gson().toJson(exitMsg));
+//            }
+//        }
+//
+//        return new Result(true, "Game exited and saved successfully. Returning to game menu...");
+//    }
 
 //    public boolean checkEnergy() {
 //        Game game = MainApp.getInstance().getCurrentGame();
