@@ -11,7 +11,8 @@ public class FileChooserUtil {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select an audio file");
         // فقط پسوندهای wav, mp3, ogg قابل انتخاب باشند
-        chooser.setFileFilter(new FileNameExtensionFilter("Audio files", "wav", "mp3", "ogg", "m4a"));
+        //chooser.setFileFilter(new FileNameExtensionFilter("Audio files", "wav", "mp3", "ogg", "m4a"));
+        chooser.setFileFilter(new FileNameExtensionFilter("Audio files", "wav", "ogg"));
 
         int result = chooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {

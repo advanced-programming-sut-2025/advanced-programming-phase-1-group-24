@@ -16,16 +16,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "skillExperience": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "currentTile": {
       "type": "HOUSE",
@@ -126,19 +126,19 @@
     "maxEnergyTurn": 50,
     "energy": 200,
     "currentTurnEnergy": 50,
-    "money": 0,
+    "money": 12000,
     "fainted": false,
     "skillsLevel": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "skillExperience": {
-      "FISHING": 0,
-      "FARMING": 10,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "currentTile": {
       "type": "HOUSE",
@@ -146,13 +146,8 @@
       "isPlowed": false,
       "tileOwner": "zahra22",
       "x": 126,
-      "y": 6,
+      "y": 5,
       "hasBeenBurt": false
-    },
-    "equippedTool": {
-      "name": "scythe",
-      "type": "SCYTHE",
-      "material": "Initial"
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -164,9 +159,7 @@
     "backpack": {
       "type": "INITIAL",
       "maxSize": 12,
-      "inventoryItems": {
-        "Dandelion": 1
-      },
+      "inventoryItems": {},
       "tools": [
         {
           "name": "hoe",
@@ -249,16 +242,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "skillExperience": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -344,16 +337,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "skillExperience": {
-      "FISHING": 0,
-      "FARMING": 0,
       "MINING": 0,
-      "FORAGING": 0
+      "FISHING": 0,
+      "FORAGING": 0,
+      "FARMING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [

@@ -57,9 +57,9 @@ public class ServerApp {
         return null;
     }
     private void loadAllUsers() {
-       ArrayList<User> loadedUsers = UserDatabase.loadUsers();
+       //ArrayList<User> loadedUsers = UserDatabase.loadUsers();
         ///    //////////////////////////////////////////////////////
-        //ArrayList<User> loadedUsers = UserDatabaseSQL.loadUsers();
+        ArrayList<User> loadedUsers = UserDatabaseSQL.loadUsers();
         ///////////////////////////////////////////////////////////////////////
         if (loadedUsers == null) return;
         for (User user : loadedUsers) {

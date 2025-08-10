@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.util.HashMap;
 
@@ -24,24 +25,56 @@ public class GameAudioManager {
         return instance;
     }
 
+    //    public void playMusic(String path, boolean loop, float volume) {
+//        if (currentMusic != null) currentMusic.stop();
+//        currentMusic = Gdx.audio.newMusic(Gdx.files.internal(path));
+//        currentMusic.setLooping(loop);
+//        currentMusic.setVolume(volume);
+//        currentMusic.play();
+//    }
+// new overload
     public void playMusic(FileHandle fh, boolean loop, float volume) {
-        if (currentMusic != null) {
-            currentMusic.stop();
-            currentMusic.dispose();
+        try {
+            if (currentMusic != null) {
+                currentMusic.stop();
+                currentMusic.dispose();
+            }
+            currentMusic = Gdx.audio.newMusic(fh);
+
+            currentMusic.setLooping(loop);
+            currentMusic.setVolume(volume);
+
+
+            currentMusic.setOnCompletionListener(new Music.OnCompletionListener() {
+                @Override
+                public void onCompletion(Music m) {
+                    m.dispose();
+                    System.out.println("Playback finished and disposed: " + fh.name());
+                }
+            });
+
+            currentMusic.play();
+        } catch (GdxRuntimeException e) {
+            System.err.println("GameAudioManager.playMusic(FileHandle) failed: " + e.getMessage());
+            throw e;
         }
-        currentMusic = Gdx.audio.newMusic(fh);
-        currentMusic.setLooping(loop);
-        currentMusic.setVolume(volume);
-        currentMusic.play();
     }
+
 
     // keep string overload for existing assets-based calls
     public void playMusic(String path, boolean loop, float volume) {
         playMusic(Gdx.files.internal(path), loop, volume);
     }
 
+
     public void stopMusic() {
-        if (currentMusic != null) currentMusic.stop();
+        if (currentMusic != null) {
+            try {
+                currentMusic.stop();
+                currentMusic.dispose();
+            } catch (Exception ignored) {}
+            currentMusic = null;
+        }
     }
 
     public void pauseMusic() {
