@@ -187,19 +187,20 @@ public class AppSocket {
                             broadcastOnlinePlayers();
                             GameServer game = getGameOfUser(existing.getUsername());
                             if (game != null) {
+                                game.replacePlayerConnection(existing);
                                 game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
                             }
+                        } else {
+                            PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
+                            connection.markReconnected();
+                            connectedPlayers.put(ctx.sessionId(), connection);
+                            GameServer game = getGameOfUser(connection.getUsername());
+                            if (game != null) {
+                                game.replacePlayerConnection(connection);
+                            }
+                            broadcastOnlinePlayers();
+                            System.out.println("User connected: " + message.getUsername());
                         }
-
-                        PlayerConnection connection = new PlayerConnection(message.getUsername(), ctx);
-                        connection.markReconnected();
-                        connectedPlayers.put(ctx.sessionId(), connection);
-                        GameServer game = getGameOfUser(connection.getUsername());
-                        if (game != null) {
-                            game.replacePlayerConnection(connection);
-                        }
-                        broadcastOnlinePlayers();
-                        System.out.println("User connected: " + message.getUsername());
                     }
 
                     Message<?> response;

@@ -7032,7 +7032,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     }
 
     private void initAudioUI() {
-        // ۱. SelectBox برای سوئیچ ترک
         trackSelect = new SelectBox<>(GameAssetManager.skin);
         float padding = 10;
         float x = Gdx.graphics.getWidth() - 200 - padding; // فرض می‌کنیم پهنایش ۲۰۰
@@ -7041,7 +7040,6 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         trackSelect.setPosition(x, y);
         stage.addActor(trackSelect);
 
-        // بار اول لیست ترک‌ها را از سرور بگیریم
         refreshTrackList();
 
         trackSelect.addListener(new ChangeListener() {
@@ -7056,9 +7054,8 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
             }
         });
 
-        // ۲. دکمه آپلود
-        uploadButton = new TextButton("Upload Track", GameAssetManager.skin);
-        uploadButton.setSize(200, 30);
+        uploadButton = new TextButton("Upload Track", GameAssetManager.skin, "custom-button");
+        uploadButton.setSize(400, 45);
         uploadButton.setPosition(x, y - 40);
         uploadButton.addListener(new ChangeListener() {
             @Override

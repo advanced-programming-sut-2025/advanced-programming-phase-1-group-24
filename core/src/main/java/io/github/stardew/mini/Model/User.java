@@ -2,6 +2,7 @@ package io.github.stardew.mini.Model;
 
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
@@ -63,7 +64,10 @@ public class User {
     private ArrayList<Gift> recievedGift = new ArrayList<>();
     private User partner;
     private int daysSinceRejection;
+
+    @JsonIgnore
     private ArrayList<Trade> tradingHistory = new ArrayList<>();
+    @JsonIgnore
     private ArrayList<FriendshipMessage> tradeNotifications = new ArrayList<>();
 
     private boolean buffMaxEnergy;

@@ -153,7 +153,7 @@ public class GameController implements MenuController {
         for (User player : currentGame.getPlayers()) {
             player.updateMaxMoney();
         }
-        ServerApp.getInstance().saveUsers();
+        //ServerApp.getInstance().saveUsers();
         //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
 
         // Step 2: Clean up game objects
@@ -166,6 +166,10 @@ public class GameController implements MenuController {
         ///    ///////////////////////////////////////////////////////////////
         //ServerApp.getInstance().saveAllGamesToRedis();
         GameDatabase.saveGameToDatabase(gameServer.getGame());
+        for (User player : currentGame.getPlayers()) {
+            player.updateGameFields();
+        }
+        ServerApp.getInstance().saveUsers();
         //////////////////////////////////////////////
         // Step 4: Safely stop game server
         gameServer.stopServer();                         // stop timer and thread

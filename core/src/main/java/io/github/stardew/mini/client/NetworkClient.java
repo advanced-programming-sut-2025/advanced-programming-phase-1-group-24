@@ -319,36 +319,63 @@ public class NetworkClient extends WebSocketClient {
                     }
                     return;
                 }
-
                 if ("radio-update".equalsIgnoreCase(message.getType())) {
                     @SuppressWarnings("unchecked")
                     Map<String,Object> b = (Map<String,Object>) message.getBody();
                     String trackId = (String) b.get("trackId");
                     String base64  = (String) b.get("data");
-//
+
                     if (base64 == null || base64.isEmpty()) {
                         System.err.println("Empty base64 data for track: " + trackId);
                         return;
                     }
 
-                    // Delete previous temp files to avoid accumulation
-                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
-                        old.delete();
+                    // پاک کردن فایل‌های قدیمی tmp
+                    for (FileHandle old : Gdx.files.local(".").list()) {
+                        if (old.name().startsWith("radio_tmp_")) {
+                            old.delete();
+                        }
                     }
-//                    String bytes = Arrays.toString(Base64Coder.decode(base64));
-//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
-//                    fh.writeBytes(bytes.getBytes(), false);
-                    byte[] decodedBytes = Base64Coder.decode(base64);
+
+                    // decode with java.util.Base64 (safer compatibility with server)
+                    byte[] decodedBytes = java.util.Base64.getDecoder().decode(base64);
+
                     FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
                     fh.writeBytes(decodedBytes, false);
 
-                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
-                    try {
-                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
-                    } catch (GdxRuntimeException e) {
-                        System.err.println("Failed to play audio: " + e.getMessage());
-                    }
+                    GameAudioManager.getInstance().playMusic(fh, true, 1f);
                 }
+
+
+//                if ("radio-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+//                    String trackId = (String) b.get("trackId");
+//                    String base64  = (String) b.get("data");
+////
+//                    if (base64 == null || base64.isEmpty()) {
+//                        System.err.println("Empty base64 data for track: " + trackId);
+//                        return;
+//                    }
+//
+//                    // Delete previous temp files to avoid accumulation
+//                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
+//                        old.delete();
+//                    }
+////                    String bytes = Arrays.toString(Base64Coder.decode(base64));
+////                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+////                    fh.writeBytes(bytes.getBytes(), false);
+//                    byte[] decodedBytes = Base64Coder.decode(base64);
+//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+//                    fh.writeBytes(decodedBytes, false);
+//
+//                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
+//                    try {
+//                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+//                    } catch (GdxRuntimeException e) {
+//                        System.err.println("Failed to play audio: " + e.getMessage());
+//                    }
+//                }
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {

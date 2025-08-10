@@ -2,6 +2,7 @@ package io.github.stardew.mini.Model;
 
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Friendship;
@@ -52,10 +53,14 @@ public class Game {
     private Map<String, Boolean> mapSelectionStatus = new HashMap<>();
     private Map<String, Boolean> loadStatus = new HashMap<>();
 
+    @JsonIgnore
     private boolean voteOutInProgress = false;
+    @JsonIgnore
     private User playerToVoteOut;
+    @JsonIgnore
     private Map<User, Boolean> voteOutVotes = new HashMap<>();
 
+    @JsonIgnore
     private final Map<String, Trade> activeTrades = new ConcurrentHashMap<>();
 
     private final List<Point> treePoints = new ArrayList<>();
