@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
@@ -40,6 +41,7 @@ import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
 import io.github.stardew.mini.server.ServerApp;
 
+import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.Queue;
@@ -98,73 +100,6 @@ public class GameController implements MenuController {
         }
         return Message.FORBIDDEN.setMessage("You can not move there.");
     }
-//    public Message<?> tryMove(int dx, int dy, int direction, User player, GameServer gs) {
-//        System.out.println(player.getUsername());
-//        int x = player.getCurrentTile().getX();
-//        int y = player.getCurrentTile().getY();
-//        int newX = x + dx;
-//        int newY = y + dy;
-//
-//        if (newX >= 0 && newY >= 0 &&
-//            newY < gs.getGame().getMap().getMap().length &&
-//            newX < gs.getGame().getMap().getMap()[0].length &&
-//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
-//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
-//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
-//                    (player.getPartner() != null &&
-//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
-//
-//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
-//            player.reduceEnergy(1);
-//            player.setMovingDirection(direction);
-//
-//            Map<String, Object> params = new HashMap<>();
-//            params.put("tile", player.getCurrentTile());
-//            params.put("energy", player.getEnergy());
-//            params.put("movingDirection", player.getMovingDirection());
-//
-//            // ✅ Include all players' states
-//            List<Map<String, Object>> playerStates = new ArrayList<>();
-//            for (User u : gs.getGame().getPlayers()) {
-//                Map<String, Object> playerData = new HashMap<>();
-//                playerData.put("username", u.getUsername());
-//                playerData.put("tile", u.getCurrentTile());
-//                playerData.put("energy", u.getEnergy());
-//                playerData.put("movingDirection", u.getMovingDirection());
-//                playerStates.add(playerData);
-//            }
-//
-//            params.put("players", playerStates); // ✅ Include player list in response
-//
-//            return new Message<>(200, "You can walk there.", params, Message.MessageType.RESPONSE);
-//        }
-//
-//        return Message.FORBIDDEN.setMessage("You can not move there.");
-//    }
-
-
-//    public Result tryMove(int dx, int dy, int direction, User player, GameServer gs) {
-//        int x = player.getCurrentTile().getX();
-//        int y = player.getCurrentTile().getY();
-//        int newX = x + dx;
-//        int newY = y + dy;
-//
-//        if (newX >= 0 && newY >= 0 &&
-//            newY < gs.getGame().getMap().getMap().length &&
-//            newX < gs.getGame().getMap().getMap()[0].length &&
-//            gs.getGame().getMap().getMap()[newY][newX].getisWalkable() &&
-//            !(gs.getGame().getMap().isInsideAnyFarm(newX, newY) != null &&
-//                !(gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getUsername()) ||
-//                    (player.getPartner() != null &&
-//                        gs.getGame().getMap().getMap()[newY][newX].getTileOwner().equals(player.getPartner().getUsername()))))) {
-//
-//            player.setCurrentTile(gs.getGame().getMap().getMap()[newY][newX]);
-//            player.reduceEnergy(1);
-//            player.setMovingDirection(direction);
-//            return new Result(true, "You can move.");
-//        }
-//        return new Result(false, "You can't move.");
-//    }
 
 
     public Result exitGame() {
@@ -204,7 +139,6 @@ public class GameController implements MenuController {
             .collect(Collectors.toList());
     }
 
-
     public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
         Game currentGame = gameServer.getGame();
 
@@ -219,11 +153,13 @@ public class GameController implements MenuController {
             player.updateMaxMoney();
         }
         ServerApp.getInstance().saveUsers();
+        //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
 
         // Step 2: Clean up game objects
-       // currentGame.getMap().getShops().clear();
+        // currentGame.getMap().getShops().clear();
 
         // Step 3: Save game to disk and global state
+        currentGame.resetLoadGamesStatus();
         ServerApp.getInstance().addGame(currentGame);
         ServerApp.getInstance().saveAllGames();
         ///    ///////////////////////////////////////////////////////////////
@@ -245,6 +181,52 @@ public class GameController implements MenuController {
 
         return new Result(true, "Game exited and saved successfully. Returning to game menu...");
     }
+//    public Result exitGame(User currentUser, GameServer gameServer) throws Exception {
+//        Game currentGame = gameServer.getGame();
+//
+//        if (currentGame == null)
+//            return new Result(false, "No active game to exit!");
+//
+//        if (!currentGame.getMainPlayer().equals(currentUser))
+//            return new Result(false, "Only the game owner can exit the game!");
+//
+//        // Step 1: Save game state
+//        for (User player : currentGame.getPlayers()) {
+//            player.updateMaxMoney();
+//        }
+//        //ServerApp.getInstance().saveUsers();
+//        //UserDatabaseSQL.saveUsers((ArrayList<User>) ServerApp.getInstance().getAllUsers().values().stream().toList());
+//
+//        // Step 2: Clean up game objects
+//       // currentGame.getMap().getShops().clear();
+//
+//        // Step 3: Save game to disk and global state
+//        currentGame.resetLoadGamesStatus();
+//        ServerApp.getInstance().addGame(currentGame);
+//        ServerApp.getInstance().saveAllGames();
+//        ///    ///////////////////////////////////////////////////////////////
+//        //ServerApp.getInstance().saveAllGamesToRedis();
+//        GameDatabase.saveGameToDatabase(gameServer.getGame());
+//        for (User player : currentGame.getPlayers()) {
+//            player.updateGameFields();
+//        }
+//        ServerApp.getInstance().saveUsers();
+//        //////////////////////////////////////////////
+//        // Step 4: Safely stop game server
+//        gameServer.stopServer();                         // stop timer and thread
+//        AppSocket.removeGame(gameServer);                // remove from activeGames
+//
+//        // Optional: close player connections or notify players here
+//        for (PlayerConnection player : gameServer.getPlayers()) {
+//            if (!player.getUser().equals(currentUser) && player.getWsContext().session.isOpen()) {
+//                Message<String> exitMsg = Message.ok("Game ended by the host.");
+//                exitMsg.setType("game-ended");
+//                player.getWsContext().send(new Gson().toJson(exitMsg));
+//            }
+//        }
+//
+//        return new Result(true, "Game exited and saved successfully. Returning to game menu...");
+//    }
 
 //    public boolean checkEnergy() {
 //        Game game = MainApp.getInstance().getCurrentGame();
@@ -323,103 +305,99 @@ public class GameController implements MenuController {
         }
     }
 
-    public Result useTool(String direction, User player, GameServer gs) {
-        Tool currentTool = player.getEquippedTool();
+    public Result useToolServer(String direction, User player, GameServer gs, String toolName) {
+        Tool currentTool = player.getBackpack().getTool(toolName);
         if (currentTool == null) {
-            return new Result(false, "You don't have an equipped tool");
-
+            return new Result(false, "You don't have this tool.");
         }
+        player.setEquippedTool(currentTool); // Ensure server-side state is correct
+
         int x = 0;
         int y = 0;
-        if (direction.equals("up")) y--;
-        else if (direction.equals("down")) y++;
-        else if (direction.equals("left")) x--;
-        else if (direction.equals("right")) x++;
+        if (direction.equals("up")) y = -1;
+        else if (direction.equals("down")) y = 1;
+        else if (direction.equals("left")) x = -1;
+        else if (direction.equals("right")) x = 1;
+
         Tile currentTile = player.getCurrentTile();
-        Tile[][] map = gs.getGame().getMap().getMap();
-        if (currentTile.getX() + x < 0 || currentTile.getX() + x >= map[0].length || currentTile.getY() + y < 0 || currentTile.getY() + y >= map.length) {
-            return new Result(false, "Direction is wrong");
-        } else {
-            if (currentTool instanceof Axe) {
-                return ((Axe) currentTool).useAxe(x, y, currentTile, gs.getGame().getMap(), player,
-                    gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof Hoe) {
-                Result result = ((Hoe) currentTool).useHoe(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-                return result;
-            } else if (currentTool instanceof MilkPail) {
-                return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, gs.getGame().getMap(), gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof PickAxe) {
-                return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof Scythe) {
-                return ((Scythe) currentTool).useScythe(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof WateringCan) {
-                return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, gs.getGame().getMap(), player, gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
-            } else if (currentTool instanceof Shear) {
-                return ((Shear) currentTool).useShear(x, y, currentTile, player, gs.getGame().getMap(), gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier());
+        MapOfGame map = gs.getGame().getMap();
+        Tile[][] mapTiles = map.getMap();
+
+        int targetX = currentTile.getX() + x;
+        int targetY = currentTile.getY() + y;
+
+        if (targetX < 0 || targetX >= mapTiles[0].length || targetY < 0 || targetY >= mapTiles.length) {
+            return new Result(false, "Direction is out of bounds.");
+        }
+
+        double energyWeatherModifier = gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier();
+        Result toolResult = new Result(false, "Unknown tool type.");
+
+        if (currentTool instanceof Axe) {
+            toolResult = ((Axe) currentTool).useAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FORAGING);
+                broadcastSkillUpdate(player, gs);
             }
-            return new Result(true, "You have used a tool");
+        } else if (currentTool instanceof Hoe) {
+            toolResult = ((Hoe) currentTool).useHoe(x, y, currentTile, map, player, energyWeatherModifier);
+        } else if (currentTool instanceof MilkPail) {
+            toolResult = ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, map, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
+        } else if (currentTool instanceof PickAxe) {
+            toolResult = ((PickAxe) currentTool).usePickAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.MINING);
+                broadcastSkillUpdate(player, gs);
+            }
+        } else if (currentTool instanceof Scythe) {
+            toolResult = ((Scythe) currentTool).useScythe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
+        } else if (currentTool instanceof WateringCan) {
+            toolResult = ((WateringCan) currentTool).useWateringCan(x, y, currentTile, map, player, energyWeatherModifier);
+        } else if (currentTool instanceof Shear) {
+            toolResult = ((Shear) currentTool).useShear(x, y, currentTile, player, map, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
+        }
+
+        if (toolResult.isSuccessful()) {
+            Tile affectedTile = map.getTile(targetX, targetY);
+            broadcastTileUpdate(affectedTile, gs);
+        }
+
+        return toolResult;
+    }
+
+    private void broadcastTileUpdate(Tile tile, GameServer gs) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("tile", tile);
+        Message<Map<String, Object>> msg = new Message<>(200, "Tile Updated", body, Message.MessageType.RESPONSE);
+        msg.setType("tile-situation-update");
+        for (PlayerConnection pc : gs.getPlayers()) {
+            pc.send(new Gson().toJson(msg));
         }
     }
 
-    //    public Result createGame(String users, Scanner scanner) {
-//        MainApp app = MainApp.getInstance();
-//        User creator = app.getLoggedInUser();
-//
-//        if (creator == null)
-//            return new Result(false, "please login first!");
-//
-//        // Split usernames and clean empty entries (e.g., if user types extra spaces)
-//        List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
-//                .filter(usersString -> !usersString.isEmpty())
-//                .toList();
-//
-//        if (usernames.isEmpty())
-//            return new Result(false, "you must specify at least one username!");
-//
-//        if (usernames.size() > 3)
-//            return new Result(false, "you can specify up to 3 usernames!");
-//
-//        // Check if the creator is already in a game
-//        for (Game game : app.getAllGames()) {
-//            if (game.hasUser(creator))
-//                return new Result(false, "you are already in another game!");
-//        }
-//
-//        ArrayList<User> players = new ArrayList<>();
-//        players.add(creator); // Add the logged-in user first
-//
-//        for (String username : usernames) {
-//            User user = app.getUserByUsername(username);
-//            if (user == null)
-//                return new Result(false, "invalid username: " + username);
-//
-//            // Check if the user is already in a game
-//            Game game = app.getGameByUser(user);
-//            if (game != null) {
-//                return new Result(false, username + " is already in another game!");
-//            }
-//            players.add(user);
-//        }
-//        for (User player : players) {
-//            player.updateGameFields();
-//        }
-//        // Create and add the game
-//        Game newGame = new Game(players, creator, creator);
-//        //load farm.json            ONLY ONCEEEEEEE
-//        if (FarmTemplateManager.getTemplates() == null) {
-//            FarmTemplateManager.loadTemplates();
-//        }
-//        //create a new game and put it as currentgame in app
-//        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
-//
-//        app.getAllGames().add(newGame);
-//        app.setCurrentGame(newGame);
-//
-//        handleMapSelection(players, scanner);
-//
-//        return new Result(true, "game created successfully!");
-//    }
-
+    private void broadcastSkillUpdate(User player, GameServer gs) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("username", player.getUsername());
+        body.put("skillsLevel", player.getSkillsLevel());
+        body.put("skillExperience", player.getSkillExperience());
+        Message<Map<String, Object>> msg = new Message<>(200, "Skills Updated", body, Message.MessageType.RESPONSE);
+        msg.setType("skill-update");
+        for (PlayerConnection pc : gs.getPlayers()) {
+            pc.send(new Gson().toJson(msg));
+        }
+    }
 
     public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
@@ -767,6 +745,7 @@ public class GameController implements MenuController {
             user.resetEnergyForNewDay();
             if (user.getOwnedAnimals() != null || !user.getOwnedAnimals().isEmpty()) {
                 for (Animal animal : user.getOwnedAnimals()) {
+                    System.out.println("animal's name: " + animal.getName());
                     animal.updateProductEndDay();
                     animal.endOfDayUpdate();
                 }
@@ -2724,76 +2703,76 @@ public class GameController implements MenuController {
         return new Result(true, historyBuilder.toString());
     }
 
-    public Result hug(String username) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        String senderUsername = game.getCurrentPlayer().getUsername();
-        User sender = game.getCurrentPlayer();
-        User receiver = game.getPlayerByUsername(username);
-        Friendship friendship = game.getFriendship(senderUsername, username);
-
-        if (sender == null || receiver == null || friendship == null)
-            return new Result(false, "One or both users of the relation not found.");
-        if (friendship.getLevel() < 2) {
-            return new Result(false, "You have not enough level!");
-        }
-        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
-            return new Result(false, "Players are not adjacent.");
-        if (sender.getPartner() != null && sender.getPartner().equals(receiver)) {
-            friendship.addXp(50);
-            sender.addEnergy(50);
-            receiver.addEnergy(50);
-        } else friendship.addXp(60);
-        return new Result(true, "You succesfully hugged " + username + "(ah che chendeshi)");
-    }
-
-    public Result askMarriage(String username, String ring) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        String senderUsername = game.getCurrentPlayer().getUsername();
-        User sender = game.getCurrentPlayer();
-        User receiver = game.getPlayerByUsername(username);
-        Friendship friendship = game.getFriendship(senderUsername, username);
-
-        if (sender == null || receiver == null || friendship == null)
-            return new Result(false, "One or both users of the relation not found.");
-        if (friendship.getLevel() < 3) {
-            return new Result(false, "You have not enough level!");
-        }
-        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
-            return new Result(false, "Players are not adjacent.");
-        if (sender.isGender())
-            return new Result(false, "Only the male players can ask marriage.");
-        if (sender.isGender() == receiver.isGender()) {
-            return new Result(false, "The male player can only ask a woman to marry him.");
-        }
-        //Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
-        if (!sender.getBackpack().hasItem("Wedding Ring", 1))
-            return new Result(false, "You don't have any ring!");
-        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiver.getUsername(), senderUsername + "has asked to marry you"));
-        return new Result(true, "You're marriage request has been sent successfully to " + receiver.getUsername());
-    }
-
-    public Result respondToMarriage(String response, String username) {
-        Game game = MainApp.getInstance().getCurrentGame();
-        User currentPlayer = game.getCurrentPlayer();
-        User receiver = game.getPlayerByUsername(username);
-        Friendship friendship = game.getFriendship(currentPlayer.getUsername(), username);
-        if (response.equals("accept")) {
-            randomStuff ring = (randomStuff) receiver.getBackpack().grabItemAndReturn("Wedding Ring", 1);
-            currentPlayer.getBackpack().addItem(ring, 1);
-            friendship.setLevel(4);
-            currentPlayer.setPartner(receiver);
-            receiver.setPartner(currentPlayer);
-            int sharedMoney = currentPlayer.getMoney() + receiver.getMoney();
-            currentPlayer.setMoney(sharedMoney);
-            receiver.setMoney(sharedMoney);
-            return new Result(true, "You are married now. Ishalla mobarakesh bad!");
-        } else {
-            friendship.setLevel(0);
-            receiver.setEnergy(receiver.getEnergy() / 2);
-            receiver.setDaysSinceRejection(7);
-            return new Result(false, "fekr kardi pool dari ya ghiafe!");
-        }
-    }
+//    public Result hug(String username) {
+//        Game game = MainApp.getInstance().getCurrentGame();
+//        String senderUsername = game.getCurrentPlayer().getUsername();
+//        User sender = game.getCurrentPlayer();
+//        User receiver = game.getPlayerByUsername(username);
+//        Friendship friendship = game.getFriendship(senderUsername, username);
+//
+//        if (sender == null || receiver == null || friendship == null)
+//            return new Result(false, "One or both users of the relation not found.");
+//        if (friendship.getLevel() < 2) {
+//            return new Result(false, "You have not enough level!");
+//        }
+//        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
+//            return new Result(false, "Players are not adjacent.");
+//        if (sender.getPartner() != null && sender.getPartner().equals(receiver)) {
+//            friendship.addXp(50);
+//            sender.addEnergy(50);
+//            receiver.addEnergy(50);
+//        } else friendship.addXp(60);
+//        return new Result(true, "You succesfully hugged " + username + "(ah che chendeshi)");
+//    }
+//
+//    public Result askMarriage(String username, String ring) {
+//        Game game = MainApp.getInstance().getCurrentGame();
+//        String senderUsername = game.getCurrentPlayer().getUsername();
+//        User sender = game.getCurrentPlayer();
+//        User receiver = game.getPlayerByUsername(username);
+//        Friendship friendship = game.getFriendship(senderUsername, username);
+//
+//        if (sender == null || receiver == null || friendship == null)
+//            return new Result(false, "One or both users of the relation not found.");
+//        if (friendship.getLevel() < 3) {
+//            return new Result(false, "You have not enough level!");
+//        }
+//        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile()))
+//            return new Result(false, "Players are not adjacent.");
+//        if (sender.isGender())
+//            return new Result(false, "Only the male players can ask marriage.");
+//        if (sender.isGender() == receiver.isGender()) {
+//            return new Result(false, "The male player can only ask a woman to marry him.");
+//        }
+//        //Item item = sender.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+//        if (!sender.getBackpack().hasItem("Wedding Ring", 1))
+//            return new Result(false, "You don't have any ring!");
+//        receiver.addToNotifications(new FriendshipMessage(senderUsername, receiver.getUsername(), senderUsername + "has asked to marry you"));
+//        return new Result(true, "You're marriage request has been sent successfully to " + receiver.getUsername());
+//    }
+//
+//    public Result respondToMarriage(String response, String username) {
+//        Game game = MainApp.getInstance().getCurrentGame();
+//        User currentPlayer = game.getCurrentPlayer();
+//        User receiver = game.getPlayerByUsername(username);
+//        Friendship friendship = game.getFriendship(currentPlayer.getUsername(), username);
+//        if (response.equals("accept")) {
+//            randomStuff ring = (randomStuff) receiver.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+//            currentPlayer.getBackpack().addItem(ring, 1);
+//            friendship.setLevel(4);
+//            currentPlayer.setPartner(receiver);
+//            receiver.setPartner(currentPlayer);
+//            int sharedMoney = currentPlayer.getMoney() + receiver.getMoney();
+//            currentPlayer.setMoney(sharedMoney);
+//            receiver.setMoney(sharedMoney);
+//            return new Result(true, "You are married now. Ishalla mobarakesh bad!");
+//        } else {
+//            friendship.setLevel(0);
+//            receiver.setEnergy(receiver.getEnergy() / 2);
+//            receiver.setDaysSinceRejection(7);
+//            return new Result(false, "fekr kardi pool dari ya ghiafe!");
+//        }
+//    }
 
     public void startTrade() {
         User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
@@ -3294,14 +3273,11 @@ public class GameController implements MenuController {
 
 
     public Result cheatAddItem(String itemName, String countString,User user,GameServer gameserver) {
-        System.out.println("1");
         int count = Integer.parseInt(countString);
         Item item = Item.getRandomItem(itemName);
-        System.out.println("2");
         if (item == null) {
             return new Result(false, "No item found.");
         }
-        System.out.println("3");
         if (count == 0) return new Result(false, "Invalid count.");
         User player = gameserver.getGame().getPlayerByUsername(user.getUsername());
         return player.getBackpack().addItem(item, count);
@@ -3384,20 +3360,13 @@ public class GameController implements MenuController {
         return new Result(true, result.toString());
     }
 
-    public Result doMission(int missionIndex) {
-        Tile currentTile = MainApp.getInstance().getCurrentGame().getCurrentPlayer().getCurrentTile();
-        User currentPlayer = MainApp.getInstance().getCurrentGame().getCurrentPlayer();
-        NPC wantedNPC = null;
-        for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
-            if (npc.checkIfIsNearNPC(currentTile)) {
-                wantedNPC = npc;
-                break;
+    public Result doMission(String missionInitials, String currentPlayerUsername) {
+        for (User playerr : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if(playerr.getUsername().equals(currentPlayerUsername)) {
+                return NPCMission.doMission(missionInitials, playerr);
             }
         }
-        if (wantedNPC == null) {
-            return new Result(false, "You are not standing next to an npc.");
-        }
-        return wantedNPC.doMission(missionIndex, currentPlayer);
+        return new Result(false, "something went wrong in doing mission");
     }
 
     public Result putFoodInFridge(String itemName) {
@@ -3628,6 +3597,955 @@ public class GameController implements MenuController {
             }
         }
         return new Result(false, "No recipe found.");
+    }
+    // در GameController
+//    public Message<Map<String,Object>> getLeaderboard(GameServer gs) {
+//        List<Map<String,Object>> leaderboard = buildLeaderboard(gs); // همون منطق قبلی‌ات تو broadcastLeaderboard
+//        Map<String,Object> body = Map.of("leaderboard", leaderboard);
+//        Message<Map<String,Object>> msg = new Message<>(200, "Leaderboard", body, Message.MessageType.RESPONSE);
+//        return msg;
+//    }
+    public Message<Map<String,Object>> getLeaderboard(GameServer gs) {
+        List<Map<String,Object>> lb = gs.buildLeaderboard();
+        Map<String, Object> body = Map.of("leaderboard", lb);
+        Message<Map<String,Object>> msg = new Message<>(200, "Leaderboard", body, Message.MessageType.RESPONSE);
+        return msg;
+    }
+
+    public Message<?> handleChatMessage(String senderUsername, String gameId, Map<String, Object> body, GameServer gameServer) {
+        String messageContent = (String) body.get("messageContent");
+        String chatType = (String) body.get("chatType");
+        String recipientUsername = (String) body.get("recipientUsername");
+        List<String> mentionedUsers = (List<String>) body.get("mentionedUsers");
+
+
+        if (senderUsername == null || messageContent == null || chatType == null) {
+            System.err.println("[ERROR-GAMECONTROLLER] Missing crucial chat message parameters.");
+            return Message.BAD_REQUEST.setMessage("Missing chat message parameters (sender, content, or type).");
+        }
+
+        Map<String, Object> chatMessageData = new HashMap<>();
+        chatMessageData.put("sender", senderUsername);
+        chatMessageData.put("messageContent", messageContent);
+        chatMessageData.put("chatType", chatType);
+        if (recipientUsername != null) {
+            chatMessageData.put("recipient", recipientUsername);
+        }
+
+        Message<Map<String, Object>> chatMessage = new Message<>(200, "Chat message received", chatMessageData, Message.MessageType.RESPONSE);
+        chatMessage.setType("chat-message");
+
+        if (Message.CHAT_PUBLIC.equals(chatType)) {
+            for (PlayerConnection playerConnection : gameServer.getPlayers()) {
+                if (playerConnection.getWsContext().session.isOpen()) {
+                    playerConnection.getWsContext().send(new Gson().toJson(chatMessage));
+                }
+            }
+
+            if (mentionedUsers != null && !mentionedUsers.isEmpty()) {
+                for (String mentionedUser : mentionedUsers) {
+                    PlayerConnection mentionedPlayerConn = gameServer.getPlayerConnectionByUsername(mentionedUser);
+                    if (mentionedPlayerConn != null && mentionedPlayerConn.getWsContext().session.isOpen()) {
+                        Map<String, Object> notificationData = new HashMap<>();
+                        notificationData.put("notificationType", "mention");
+                        notificationData.put("sender", senderUsername);
+                        notificationData.put("messageContent", messageContent);
+                        notificationData.put("title", "You were mentioned in public chat!");
+                        notificationData.put("body", senderUsername + " mentioned you: " + messageContent);
+
+                        Message<Map<String, Object>> notificationMessage = new Message<>(200, "Mention notification", notificationData, Message.MessageType.RESPONSE);
+                        notificationMessage.setType(Message.POP_UP_NOTIFICATION);
+
+                        mentionedPlayerConn.getWsContext().send(new Gson().toJson(notificationMessage));
+                    } else {
+                    }
+                }
+            }
+            return Message.OK.setMessage("Public message broadcasted.");
+        } else if (Message.CHAT_PRIVATE.equals(chatType)) {
+            if (recipientUsername == null) {
+                System.err.println("[ERROR-GAMECONTROLLER] Recipient username is null for private chat.");
+                return Message.BAD_REQUEST.setMessage("Recipient username is required for private chat.");
+            }
+            for (PlayerConnection playerConnection : gameServer.getPlayers()) {
+                if (playerConnection.getWsContext().session.isOpen() &&
+                    (playerConnection.getUsername().equals(senderUsername) || playerConnection.getUsername().equals(recipientUsername))) {
+                    playerConnection.getWsContext().send(new Gson().toJson(chatMessage));
+                }
+            }
+            return Message.OK.setMessage("Private message sent.");
+        } else {
+            System.err.println("[ERROR-GAMECONTROLLER] Unknown chat type: " + chatType);
+            return Message.BAD_REQUEST.setMessage("Unknown chat type.");
+        }
+    }
+
+    public Result updateNpcPosition(String npcName, Point currentPoint, Point movingTo, Point movingFrom, GameServer gs) {
+        NPC npc = MainApp.getInstance().getCurrentGame().getNPC(npcName);
+        if (npc != null) {
+
+            // Clear old tile
+            if (npc.currentPointGetter() != null) {
+                Tile oldTile = MainApp.getInstance().getCurrentGame().getMap().getTile(npc.currentPointGetter().x, npc.currentPointGetter().y);
+                if (oldTile != null) {
+                    oldTile.setContainedNPC(null);
+                }
+            }
+            if (npc.currentTileGetter() != null) {
+                npc.currentTileGetter().setContainedNPC(null);
+                npc.setCurrentTile(null);
+            }
+
+            // Update NPC's point and set new tile
+            npc.setCurrentPoint(currentPoint);
+            Tile newTile = MainApp.getInstance().getCurrentGame().getMap().getTile(currentPoint.x, currentPoint.y);
+            if (newTile != null) {
+                newTile.setContainedNPC(npc);
+                npc.setCurrentTile(newTile);
+            }
+            npc.setMovingTo(movingTo);
+            npc.setMovingFrom(movingFrom);
+
+            return new Result(true, "NPC position updated for " + npcName);
+        }
+        return new Result(false, "NPC not found: " + npcName);
+    }
+
+    public Result addNPCMission(String missionInitials, String currentPlayerUsername) {
+        for (User playerr : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            if(playerr.getUsername().equals(currentPlayerUsername)) {
+                for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
+                    for (NPCMission npcMission : npc.getMissions()) {
+                        if(npcMission.getInitials().equals(missionInitials)) {
+                            if (MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(playerr.getUsername()) == null) {
+                                MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().put(currentPlayerUsername, new ArrayList<>());
+                            }
+                            MainApp.getInstance().getCurrentGame().getPlayerAddedMissions().get(playerr.getUsername()).add(npcMission);
+                            return new Result(true, "mission added successfully");
+                        }
+                    }
+                }
+            }
+        }
+        return new Result(false, "something went wrong in adding mission");
+    }
+
+
+    public Message<?> handleReaction(User sender, GameServer gs, Map<String, Object> body) {
+        String reactionContent = (String) body.get("reactionContent");
+        Boolean isImage = (Boolean) body.get("isImage");
+
+        if (reactionContent == null || isImage == null) {
+            return Message.BAD_REQUEST.setMessage("Missing reaction content or type.");
+        }
+
+        // Create the broadcast message payload
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("senderUsername", sender.getUsername());
+        broadcastBody.put("reactionContent", reactionContent);
+        broadcastBody.put("isImage", isImage);
+
+        // Create the message object
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Reaction Broadcast", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.REACTION_BROADCAST); // Use our new type
+
+        // Send to all players in the game
+        for (PlayerConnection playerConnection : gs.getPlayers()) {
+            if (playerConnection.getWsContext().session.isOpen()) {
+                playerConnection.getWsContext().send(new Gson().toJson(broadcastMsg));
+            }
+        }
+
+        return Message.OK.setMessage("Reaction broadcasted.");
+    }
+
+    public Message<?> startForceTerminateVote(User player, GameServer gs) {
+        Game currentGame = gs.getGame();
+
+        if (currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("A termination vote is already in progress!");
+        }
+
+        // Start the vote and auto-approve for the initiator
+        currentGame.setVoteInProgress(true);
+        currentGame.getTerminationVotes().clear();
+        currentGame.getTerminationVotes().put(player, true);
+
+        // Notify all players to start voting
+        Map<String, Object> body = new HashMap<>();
+        body.put("initiator", player.getUsername());
+        Message<Map<String, Object>> voteRequestMessage = new Message<>(200, "A vote to terminate the game has started.", body, Message.MessageType.RESPONSE);
+        voteRequestMessage.setType("force_terminate_vote_started"); // New specific message type
+
+        for (PlayerConnection connection : gs.getPlayers()) {
+            connection.send(new Gson().toJson(voteRequestMessage));
+        }
+
+        // Check vote status immediately in case the initiator is the only player
+        checkVoteStatus(gs);
+
+        return Message.OK.setMessage("Termination vote started. Your vote is recorded as YES.");
+    }
+
+    public Message<?> voteToTerminate(User player, GameServer gs, boolean approve) {
+        Game currentGame = gs.getGame();
+
+        if (!currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("No active termination vote!");
+        }
+
+        if (currentGame.getTerminationVotes().containsKey(player)) {
+            return Message.BAD_REQUEST.setMessage("You have already voted!");
+        }
+
+        currentGame.getTerminationVotes().put(player, approve);
+
+        checkVoteStatus(gs);
+
+        return Message.OK.setMessage("Your vote has been recorded.");
+    }
+
+    private void checkVoteStatus(GameServer gs) {
+        Game currentGame = gs.getGame();
+        List<User> players = currentGame.getPlayers();
+        Map<User, Boolean> votes = currentGame.getTerminationVotes();
+
+        if (votes.size() == players.size()) { // All players have voted
+            boolean allYes = votes.values().stream().allMatch(v -> v);
+
+            if (allYes) {
+                // Terminate game
+                for (User player : players) {
+                    player.updateMaxMoney();
+                    player.setPlayedGames(player.getPlayedGames() + 1);
+                    player.updateGameFields();
+                }
+                // In a real scenario, you'd save user data here.
+                // UserDatabase.saveUsers(new ArrayList<>(ServerApp.getInstance().getAllUsers().values()));
+
+                // Broadcast termination message
+                Message<?> terminationMessage = new Message<>(200, "Game terminated by unanimous vote.", null, Message.MessageType.RESPONSE);
+                terminationMessage.setType("game_terminated");
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(terminationMessage));
+                }
+
+                // Clean up server state
+                AppSocket.removeGame(gs);
+                gs.stopServer();
+
+            } else {
+                // Cancel vote
+                currentGame.setVoteInProgress(false);
+                currentGame.getTerminationVotes().clear();
+
+                // Broadcast cancellation message
+                Message<?> cancellationMessage = new Message<>(200, "Game termination cancelled due to a 'No' vote.", null, Message.MessageType.RESPONSE);
+                cancellationMessage.setType("vote_cancelled");
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(cancellationMessage));
+                }
+            }
+        }
+    }
+
+    public Message<?> startVoteOut(User initiator, String targetUsername, GameServer gs) {
+        Game currentGame = gs.getGame();
+        if (currentGame.isVoteOutInProgress() || currentGame.isVoteInProgress()) {
+            return Message.BAD_REQUEST.setMessage("A vote is already in progress.");
+        }
+
+        User target = gs.getUserByUsername(targetUsername);
+        if (target == null) {
+            return Message.NOT_FOUND.setMessage("Player to vote out not found.");
+        }
+
+        currentGame.setVoteOutInProgress(true);
+        currentGame.setPlayerToVoteOut(target);
+        currentGame.getVoteOutVotes().clear();
+        // The initiator's vote is implicitly 'yes' and is cast like any other player.
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("initiator", initiator.getUsername());
+        body.put("target", targetUsername);
+        Message<Map<String, Object>> voteRequestMessage = new Message<>(200, "A vote to eliminate a player has started.", body, Message.MessageType.RESPONSE);
+        voteRequestMessage.setType("vote_out_started");
+
+        for (PlayerConnection connection : gs.getPlayers()) {
+            connection.send(new Gson().toJson(voteRequestMessage));
+        }
+
+        return Message.OK.setMessage("Vote to eliminate " + targetUsername + " has started.");
+    }
+
+    public Message<?> castVoteOut(User voter, boolean vote, GameServer gs) {
+        Game currentGame = gs.getGame();
+        if (!currentGame.isVoteOutInProgress()) {
+            return Message.BAD_REQUEST.setMessage("No vote-out is currently in progress.");
+        }
+        if (currentGame.getVoteOutVotes().containsKey(voter)) {
+            return Message.BAD_REQUEST.setMessage("You have already voted.");
+        }
+
+        currentGame.getVoteOutVotes().put(voter, vote);
+        checkVoteOutStatus(gs);
+        return Message.OK.setMessage("Your vote has been cast.");
+    }
+
+    private void checkVoteOutStatus(GameServer gs) {
+        Game currentGame = gs.getGame();
+        // Use a copy to avoid issues if the list is modified during iteration
+        List<User> playersBeforeVote = new ArrayList<>(currentGame.getPlayers());
+        Map<User, Boolean> votes = currentGame.getVoteOutVotes();
+
+        if (votes.size() == playersBeforeVote.size()) {
+            long yesVotes = votes.values().stream().filter(v -> v).count();
+            boolean votePassed = yesVotes >= (playersBeforeVote.size() / 2.0);
+            User targetPlayer = currentGame.getPlayerToVoteOut();
+
+            if (votePassed) {
+                eliminatePlayer(targetPlayer, gs); // This removes the player and sends them a specific message
+
+                // Now, notify the *remaining* players of the result and update their game state.
+                Map<String, Object> body = new HashMap<>();
+                body.put("target", targetPlayer.getUsername());
+                body.put("outcome", "eliminated");
+
+                Message<Map<String, Object>> resultMessage = new Message<>(200, "Vote passed.", body, Message.MessageType.RESPONSE);
+                resultMessage.setType("vote_out_result");
+
+                for (PlayerConnection connection : gs.getPlayers()) { // This is now the updated list of players
+                    connection.send(new Gson().toJson(resultMessage));
+                }
+
+            } else {
+                // Cancel vote
+                currentGame.setVoteOutInProgress(false);
+                currentGame.getVoteOutVotes().clear();
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("target", targetPlayer.getUsername());
+                body.put("outcome", "failed");
+
+                Message<Map<String, Object>> resultMessage = new Message<>(200, "Vote failed.", body, Message.MessageType.RESPONSE);
+                resultMessage.setType("vote_out_result");
+
+                for (PlayerConnection connection : gs.getPlayers()) {
+                    connection.send(new Gson().toJson(resultMessage));
+                }
+            }
+
+            // Reset vote state
+            currentGame.setVoteOutInProgress(false);
+            currentGame.setPlayerToVoteOut(null);
+            currentGame.getVoteOutVotes().clear();
+        }
+    }
+
+    private void eliminatePlayer(User playerToEliminate, GameServer gs) {
+        PlayerConnection connectionToEliminate = gs.getPlayerConnectionByUsername(playerToEliminate.getUsername());
+        if (connectionToEliminate != null) {
+            // Send a specific message to the eliminated player
+            Message<?> eliminatedMessage = new Message<>(200, "You have been voted out.", null, Message.MessageType.RESPONSE);
+            eliminatedMessage.setType("you_were_eliminated");
+            connectionToEliminate.send(new Gson().toJson(eliminatedMessage));
+
+            // Close the connection after a short delay to ensure the message is sent
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    connectionToEliminate.getWsContext().session.close(1000, "You have been voted out.");
+                }
+            }, 500); // 500ms delay
+
+            gs.getPlayers().remove(connectionToEliminate);
+        }
+        // Also remove from the game object's player list
+        gs.getGame().getPlayers().remove(playerToEliminate);
+
+        for (NPC npc : gs.getGame().getNpcs()) {
+            npc.eliminatePlayer(playerToEliminate.getUsername());
+        }
+
+        gs.getGame().getPlayerAddedMissions().remove(playerToEliminate.getUsername());
+    }
+
+    public Message<?> talk(User sender, GameServer gs, Map<String, Object> body) {
+        String recipientUsername = (String) body.get("recipient");
+        String messageContent = (String) body.get("message");
+        User recipient = gs.getUserByUsername(recipientUsername);
+        Game game = gs.getGame();
+
+        if (recipient == null) {
+            return Message.NOT_FOUND.setMessage("Recipient not found.");
+        }
+
+        if (!isAdjacent(sender.getCurrentTile(), recipient.getCurrentTile())) {
+            return Message.FORBIDDEN.setMessage("Players are not adjacent.");
+        }
+        Friendship friendship = game.getFriendship(sender.getUsername(), recipientUsername);
+        if (friendship == null) {
+            return Message.NOT_FOUND.setMessage("Friendship not found.");
+        }
+
+        if (sender.getPartner() != null && recipient.getPartner() != null && sender.getPartner().equals(recipient)) {
+            friendship.addXp(50);
+            sender.addEnergy(50);
+            recipient.addEnergy(50);
+        } else {
+            friendship.addXp(20);
+        }
+
+        friendship.getTalkHistory().add(new FriendshipMessage(sender.getUsername(), recipient.getUsername(), messageContent));
+
+        PlayerConnection recipientConnection = gs.getPlayerConnectionByUsername(recipientUsername);
+        if (recipientConnection != null) {
+            FriendshipMessage notificationMessage = new FriendshipMessage(sender.getUsername(), recipient.getUsername(), sender.getUsername() + " sent you a message: " + messageContent);
+            recipient.addToNotifications(notificationMessage);
+
+            // Also send a direct message to the client to trigger the notification UI
+            Map<String, Object> notificationBody = new HashMap<>();
+            notificationBody.put("sender", sender.getUsername());
+            notificationBody.put("message", messageContent);
+
+            Message<Map<String,Object>> notification = new Message<>(200, "new_message", notificationBody, Message.MessageType.RESPONSE);
+            notification.setType("notification");
+            recipientConnection.send(new Gson().toJson(notification));
+        }
+        return Message.OK.setMessage("Message sent.");
+    }
+
+
+
+    public Message<?> sendGift(User sender, GameServer gs, Map<String, Object> body) {
+        String receiverUsername = (String) body.get("giftReciever");
+        String itemName = (String) body.get("equippedItem");
+        int amount = Integer.parseInt((String) body.get("quantity"));
+        User receiver = gs.getUserByUsername(receiverUsername);
+        Game game = gs.getGame();
+
+        if (receiver == null) return Message.NOT_FOUND.setMessage("Receiver not found.");
+        Friendship friendship = game.getFriendship(sender.getUsername(), receiverUsername);
+        if (friendship == null || friendship.getLevel() < 1) return Message.FORBIDDEN.setMessage("Friendship level not high enough.");
+        if (!sender.getBackpack().hasItem(itemName, amount)) return Message.BAD_REQUEST.setMessage("You don't have enough of that item.");
+
+        Item itemToGift = sender.getBackpack().grabItemAndReturn(itemName, amount);
+        if (!receiver.getBackpack().addItem(itemToGift.copy(), amount).isSuccessful()) {
+            sender.getBackpack().addItem(itemToGift, amount); // Add it back if receiver can't take it
+            return Message.BAD_REQUEST.setMessage(receiverUsername + "'s inventory is full.");
+        }
+
+        Gift gift = new Gift(sender.getUsername(), receiverUsername, itemToGift, amount);
+        friendship.addToGifts(gift);
+        receiver.addRecievedGift(gift);
+
+        // Broadcast a specific gift update
+        Map<String, Object> giftUpdateBody = new HashMap<>();
+        giftUpdateBody.put("sender", sender.getUsername());
+        giftUpdateBody.put("receiver", receiver.getUsername());
+        giftUpdateBody.put("item", GameSaver.convertObject(itemToGift, Map.class));
+        giftUpdateBody.put("amount", amount);
+        Message<Map<String, Object>> giftUpdateMsg = new Message<>(200, "Gift Sent", giftUpdateBody, Message.MessageType.RESPONSE);
+        giftUpdateMsg.setType("GIFT_SENT_UPDATE");
+        gs.broadcastMessage(giftUpdateMsg);
+
+
+        // Broadcast event for animation
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "gift");
+        broadcastBody.put("sender", sender.getUsername());
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Player Gift", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
+        gs.getPlayers().forEach(p -> p.send(new Gson().toJson(broadcastMsg)));
+
+        return Message.OK.setMessage("Gift sent successfully.");
+    }
+
+    public Message<?> sendFlower(User sender, GameServer gs, Map<String, Object> body) {
+        String receiverUsername = (String) body.get("targetUsername");
+        User receiver = gs.getUserByUsername(receiverUsername);
+        Game game = gs.getGame();
+
+        if (receiver == null) return Message.NOT_FOUND.setMessage("Receiver not found.");
+        Friendship friendship = game.getFriendship(sender.getUsername(), receiverUsername);
+        if (friendship == null || friendship.getLevel() < 2) return Message.FORBIDDEN.setMessage("Friendship level not high enough.");
+        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) return Message.FORBIDDEN.setMessage("Players are not adjacent.");
+        if (!sender.getBackpack().hasItem("Bouquet", 1)) return Message.BAD_REQUEST.setMessage("You don't have a bouquet.");
+
+        sender.getBackpack().grabItem("Bouquet", 1);
+        receiver.getBackpack().addItem(new randomStuff(1000, randomStuffType.Bouquet), 1);
+
+        if (friendship.getLevel() == 2) {
+            friendship.setLevel(3);
+        }
+
+        // Broadcast event
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "flower");
+        broadcastBody.put("sender", sender.getUsername());
+        broadcastBody.put("receiver", receiverUsername);
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Player Flower", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
+        gs.getPlayers().forEach(p -> p.send(new Gson().toJson(broadcastMsg)));
+
+        return Message.OK.setMessage("Flower sent.");
+    }
+
+    public Message<?> askMarriage(User sender, GameServer gs, Map<String, Object> body) {
+        String receiverUsername = (String) body.get("targetUsername");
+        User receiver = gs.getUserByUsername(receiverUsername);
+        Game game = gs.getGame();
+
+        // All validation from the original method
+        if (receiver == null) return Message.NOT_FOUND.setMessage("Receiver not found.");
+        Friendship friendship = game.getFriendship(sender.getUsername(), receiverUsername);
+        if (friendship == null || friendship.getLevel() < 3) return Message.FORBIDDEN.setMessage("Friendship level not high enough.");
+        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) return Message.FORBIDDEN.setMessage("Players are not adjacent.");
+        if (sender.isGender()) return Message.FORBIDDEN.setMessage("Only male players can propose.");
+        if (sender.isGender() == receiver.isGender()) return Message.FORBIDDEN.setMessage("Cannot marry same gender.");
+        if (!sender.getBackpack().hasItem("Wedding Ring", 1)) return Message.BAD_REQUEST.setMessage("You need a Wedding Ring.");
+
+        // Send proposal notification only to the recipient
+        PlayerConnection recipientConnection = gs.getPlayerConnectionByUsername(receiverUsername);
+        if (recipientConnection != null) {
+            Map<String, Object> proposalBody = new HashMap<>();
+            proposalBody.put("proposer", sender.getUsername());
+            Message<Map<String, Object>> proposalMsg = new Message<>(200, "Marriage Proposal", proposalBody, Message.MessageType.RESPONSE);
+            proposalMsg.setType(Message.MARRIAGE_PROPOSAL);
+            recipientConnection.send(new Gson().toJson(proposalMsg));
+        }
+
+        // Broadcast proposing animation for sender
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "propose_start");
+        broadcastBody.put("sender", sender.getUsername());
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Player Proposing", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
+        gs.getPlayers().forEach(p -> p.send(new Gson().toJson(broadcastMsg)));
+
+        return Message.OK.setMessage("Proposal sent.");
+    }
+
+    public Message<?> respondToMarriage(User responder, GameServer gs, Map<String, Object> body) {
+        String proposerUsername = (String) body.get("proposerUsername");
+        boolean accepted = (Boolean) body.get("accepted");
+        User proposer = gs.getUserByUsername(proposerUsername);
+        Game game = gs.getGame();
+
+        if (proposer == null) return Message.NOT_FOUND.setMessage("Proposer not found.");
+        Friendship friendship = game.getFriendship(responder.getUsername(), proposerUsername);
+
+        if (accepted) {
+            Item ring = proposer.getBackpack().grabItemAndReturn("Wedding Ring", 1);
+            responder.getBackpack().addItem(ring, 1);
+            friendship.setLevel(4);
+            responder.setPartner(proposer);
+            proposer.setPartner(responder);
+            int sharedMoney = responder.getMoney() + proposer.getMoney();
+            responder.setMoney(sharedMoney);
+            proposer.setMoney(sharedMoney);
+        } else {
+            friendship.setLevel(0);
+            proposer.setEnergy(proposer.getEnergy() / 2);
+            proposer.setDaysSinceRejection(7);
+        }
+
+        // Broadcast the specific marriage response update
+        Map<String, Object> marriageUpdateBody = new HashMap<>();
+        marriageUpdateBody.put("proposer", proposer.getUsername());
+        marriageUpdateBody.put("responder", responder.getUsername());
+        marriageUpdateBody.put("accepted", accepted);
+        Message<Map<String, Object>> marriageUpdateMsg = new Message<>(200, "Marriage Response", marriageUpdateBody, Message.MessageType.RESPONSE);
+        marriageUpdateMsg.setType("MARRIAGE_RESPONSE_UPDATE");
+        gs.broadcastMessage(marriageUpdateMsg);
+
+
+        // Broadcast event for animation
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "propose_end");
+        broadcastBody.put("proposer", proposerUsername);
+        broadcastBody.put("responder", responder.getUsername());
+        broadcastBody.put("accepted", accepted);
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "marriage_response_update", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
+        gs.broadcastMessage(broadcastMsg);
+
+        return Message.OK.setMessage("You have responded to the proposal.");
+    }
+
+    public Message<?> hug(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        User receiver = gs.getUserByUsername(targetUsername);
+        Game game = gs.getGame();
+
+        if (receiver == null) return Message.NOT_FOUND.setMessage("Player not found.");
+        if (!isAdjacent(sender.getCurrentTile(), receiver.getCurrentTile())) return Message.FORBIDDEN.setMessage("Players are not adjacent.");
+
+        Friendship friendship = game.getFriendship(sender.getUsername(), targetUsername);
+        if (friendship == null || friendship.getLevel() < 2) return Message.FORBIDDEN.setMessage("Friendship level not high enough.");
+
+        if (sender.getPartner() != null && sender.getPartner().equals(receiver)) {
+            friendship.addXp(50);
+            sender.addEnergy(50);
+            receiver.addEnergy(50);
+        } else {
+            friendship.addXp(60);
+        }
+
+        // Broadcast event
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "hug");
+        broadcastBody.put("sender", sender.getUsername());
+        broadcastBody.put("receiver", targetUsername);
+        Message<Map<String, Object>> broadcastMsg = new Message<>(200, "Player Hug", broadcastBody, Message.MessageType.RESPONSE);
+        broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
+        gs.getPlayers().forEach(p -> p.send(new Gson().toJson(broadcastMsg)));
+
+        return Message.OK.setMessage("You hugged " + targetUsername);
+    }
+
+    public Message<?> cheatSetFriendshipLevel(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        int level = ((Number) body.get("level")).intValue();
+
+        User target = gs.getUserByUsername(targetUsername);
+        if (target == null) return Message.NOT_FOUND.setMessage("Target player not found.");
+        if (level < 0 || level > 4) return Message.BAD_REQUEST.setMessage("Level must be between 0 and 4.");
+
+        Friendship friendship = gs.getGame().getFriendship(sender.getUsername(), targetUsername);
+        if (friendship == null) return Message.NOT_FOUND.setMessage("Friendship not found.");
+
+        friendship.setLevel(level);
+
+        // Notify both players of the update
+        Map<String, Object> updateBody = new HashMap<>();
+        updateBody.put("player1", friendship.getPlayer1());
+        updateBody.put("player2", friendship.getPlayer2());
+        updateBody.put("level", friendship.getLevel());
+        updateBody.put("xp", friendship.getXp());
+
+        Message<Map<String, Object>> updateMsg = new Message<>(200, "Friendship updated", updateBody, Message.MessageType.RESPONSE);
+        updateMsg.setType(Message.FRIENDSHIP_UPDATED);
+
+        PlayerConnection senderConn = gs.getPlayerConnectionByUsername(sender.getUsername());
+        if (senderConn != null) senderConn.send(new Gson().toJson(updateMsg));
+
+        PlayerConnection targetConn = gs.getPlayerConnectionByUsername(targetUsername);
+        if (targetConn != null) targetConn.send(new Gson().toJson(updateMsg));
+
+        return Message.OK.setMessage("Friendship level set to " + level);
+    }
+
+    public Message<?> addCaughtFish(User player, GameServer gs, Map<String, Object> body) {
+        String fishName = (String) body.get("fishName");
+        String qualityString = (String) body.get("quality");
+        boolean perfectCatch = (Boolean) body.get("perfectCatch");
+
+        if (fishName == null || qualityString == null) {
+            return Message.BAD_REQUEST.setMessage("Missing fish details.");
+        }
+
+        ProductQuality quality;
+        FishType fishType;
+        try {
+            quality = ProductQuality.valueOf(qualityString);
+            System.out.println(fishName + " " + qualityString);
+            fishType = FishType.valueOf(fishName);
+        } catch (IllegalArgumentException e) {
+            return Message.BAD_REQUEST.setMessage("Invalid fish name or quality.");
+        }
+
+
+        Fish finalFish = new Fish(quality, fishType);
+
+        Result addFishResult = player.getBackpack().addItem(finalFish, 1);
+
+        if (addFishResult.isSuccessful()) {
+            player.addSkillExperience(Skill.FISHING);
+            if (perfectCatch) {
+                player.perfectFishingSkillUpgrade();
+            }
+            broadcastSkillUpdate(player, gs);
+            return Message.OK.setMessage("Fish added to inventory.");
+        } else {
+            return Message.FORBIDDEN.setMessage("Your backpack is full.");
+        }
+    }
+
+    public Message<?> initiateTrade(User initiator, GameServer gs, Map<String, Object> body) {
+        String recipientUsername = (String) body.get("recipientUsername");
+        User recipient = gs.getUserByUsername(recipientUsername);
+
+        if (recipient == null) {
+            return Message.NOT_FOUND.setMessage("Player not found.");
+        }
+        if (initiator.getUsername().equals(recipientUsername)) {
+            return Message.BAD_REQUEST.setMessage("You cannot trade with yourself.");
+        }
+
+        String tradeKey = Game.getTradeSessionKey(initiator.getUsername(), recipientUsername);
+        if (gs.getGame().getActiveTrades().containsKey(tradeKey)) {
+            return Message.BAD_REQUEST.setMessage("A trade is already in progress between these players.");
+        }
+
+        PlayerConnection recipientConnection = gs.getPlayerConnectionByUsername(recipientUsername);
+        if (recipientConnection != null) {
+            Map<String, Object> notificationBody = new HashMap<>();
+            notificationBody.put("initiator", initiator.getUsername());
+            Message<Map<String, Object>> requestMsg = new Message<>(200, "Trade Request", notificationBody, Message.MessageType.RESPONSE);
+            requestMsg.setType("trade-request-received");
+            recipientConnection.send(new Gson().toJson(requestMsg));
+        }
+
+        return Message.OK.setMessage("Trade request sent to " + recipientUsername);
+    }
+
+    public Message<?> respondToTrade(User responder, GameServer gs, Map<String, Object> body) {
+        String initiatorUsername = (String) body.get("initiatorUsername");
+        boolean accepted = (Boolean) body.get("accepted");
+        User initiator = gs.getUserByUsername(initiatorUsername);
+        Game game = gs.getGame();
+
+        if (initiator == null) return Message.NOT_FOUND.setMessage("Initiator not found.");
+
+        PlayerConnection initiatorConnection = gs.getPlayerConnectionByUsername(initiatorUsername);
+        PlayerConnection responderConnection = gs.getPlayerConnectionByUsername(responder.getUsername());
+
+        if (accepted) {
+            String tradeKey = Game.getTradeSessionKey(initiatorUsername, responder.getUsername());
+            Trade newTrade = new Trade(initiator, responder, "request", 0, null, null, 0, 0, false);
+            game.getActiveTrades().put(tradeKey, newTrade);
+
+            Map<String, Object> initiatorBody = Map.of("otherPlayer", responder.getUsername());
+            Message<Map<String, Object>> startMsgToInitiator = new Message<>(200, "Trade started", initiatorBody, Message.MessageType.RESPONSE);
+            startMsgToInitiator.setType("trade-session-started");
+
+            Map<String, Object> responderBody = Map.of("otherPlayer", initiator.getUsername());
+            Message<Map<String, Object>> startMsgToResponder = new Message<>(200, "Trade started", responderBody, Message.MessageType.RESPONSE);
+            startMsgToResponder.setType("trade-session-started");
+
+            if (initiatorConnection != null) initiatorConnection.send(new Gson().toJson(startMsgToInitiator));
+            if (responderConnection != null) responderConnection.send(new Gson().toJson(startMsgToResponder));
+
+        } else {
+            if (initiatorConnection != null) {
+                Message<?> declineMsg = Message.OK.setMessage(responder.getUsername() + " declined your trade request.");
+                declineMsg.setType("trade-cancelled");
+                initiatorConnection.send(new Gson().toJson(declineMsg));
+            }
+        }
+        return Message.OK;
+    }
+
+    public Message<?> confirmTradeOffer(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        boolean isConfirmed = (Boolean) body.get("isConfirmed");
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if (targetConnection != null) {
+            Map<String, Object> confirmBody = new HashMap<>();
+            confirmBody.put("isConfirmed", isConfirmed);
+            Message<Map<String, Object>> confirmMsg = new Message<>(200, "Confirmation status updated", confirmBody, Message.MessageType.RESPONSE);
+            confirmMsg.setType("trade-confirmed-by-other");
+            targetConnection.send(new Gson().toJson(confirmMsg));
+        }
+        return Message.OK;
+    }
+
+    public Message<?> updateTradeOffer(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        List<Map<String, Object>> offeredItems = (List<Map<String, Object>>) body.get("offeredItems");
+
+        String tradeKey = Game.getTradeSessionKey(sender.getUsername(), targetUsername);
+        Trade activeTrade = gs.getGame().getActiveTrades().get(tradeKey);
+
+        if (activeTrade == null) return Message.NOT_FOUND.setMessage("No active trade found.");
+
+        if (activeTrade.getSender().getUsername().equals(sender.getUsername())) {
+            activeTrade.setSenderOffer(offeredItems);
+        } else {
+            activeTrade.setRecipientOffer(offeredItems);
+        }
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if (targetConnection != null) {
+            Map<String, Object> updateBody = new HashMap<>();
+            updateBody.put("items", offeredItems);
+            Message<Map<String, Object>> updateMsg = new Message<>(200, "Offer Updated", updateBody, Message.MessageType.RESPONSE);
+            updateMsg.setType("trade-offer-updated");
+            targetConnection.send(new Gson().toJson(updateMsg));
+        }
+        return Message.OK;
+    }
+
+    private boolean executeItemSwap(User player1, User player2, Trade trade) {
+        List<Map<String, Object>> offer1 = trade.getSender().getUsername().equals(player1.getUsername()) ? trade.getSenderOffer() : trade.getRecipientOffer();
+        List<Map<String, Object>> offer2 = trade.getSender().getUsername().equals(player2.getUsername()) ? trade.getSenderOffer() : trade.getRecipientOffer();
+
+        if (!canReceiveItems(player1.getBackpack(), offer2) || !canReceiveItems(player2.getBackpack(), offer1)) {
+            return false;
+        }
+
+        if (!hasOfferedItems(player1.getBackpack(), offer1) || !hasOfferedItems(player2.getBackpack(), offer2)) {
+            return false;
+        }
+
+        for (Map<String, Object> itemData : offer1) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            Item item = player1.getBackpack().grabItemAndReturn(name, count);
+            player2.getBackpack().addItem(item, count);
+        }
+
+        for (Map<String, Object> itemData : offer2) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            Item item = player2.getBackpack().grabItemAndReturn(name, count);
+            player1.getBackpack().addItem(item, count);
+        }
+
+        return true;
+    }
+
+    private boolean canReceiveItems(Backpack backpack, List<Map<String, Object>> itemsToReceive) {
+        int freeSlots = backpack.getMaxSize() - backpack.getInventoryItems().size();
+        int slotsNeeded = 0;
+        for (Map<String, Object> itemData : itemsToReceive) {
+            String name = (String) itemData.get("name");
+            if (!backpack.hasItem(name, 1)) {
+                slotsNeeded++;
+            }
+        }
+        return freeSlots >= slotsNeeded;
+    }
+
+    private boolean hasOfferedItems(Backpack backpack, List<Map<String, Object>> offeredItems) {
+        for (Map<String, Object> itemData : offeredItems) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            if (!backpack.hasItem(name, count)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void broadcastInventoryUpdate(User player, GameServer gs) {
+        PlayerConnection connection = gs.getPlayerConnectionByUsername(player.getUsername());
+        if (connection != null) {
+            Map<String, Object> body = new HashMap<>();
+            Map<String, Integer> serializableInventory = new HashMap<>();
+            for(Map.Entry<Item, Integer> entry : player.getBackpack().getInventoryItems().entrySet()) {
+                serializableInventory.put(entry.getKey().getName(), entry.getValue());
+            }
+            body.put("inventory", serializableInventory);
+
+            Message<Map<String, Object>> invUpdateMsg = new Message<>(200, "Inventory updated", body, Message.MessageType.RESPONSE);
+            invUpdateMsg.setType("inventory-update");
+            connection.send(new Gson().toJson(invUpdateMsg));
+        }
+    }
+
+    public Message<?> finalizeTrade(User finalizer, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        Game game = gs.getGame();
+        String tradeKey = Game.getTradeSessionKey(finalizer.getUsername(), targetUsername);
+        Trade trade = game.getActiveTrades().get(tradeKey);
+
+        if (trade == null) return Message.NOT_FOUND.setMessage("Trade session expired or not found.");
+
+        User targetPlayer = game.getPlayerByUsername(targetUsername);
+        if (targetPlayer == null) return Message.NOT_FOUND.setMessage("Other player not found.");
+
+        boolean swapSuccess = executeItemSwap(trade.getSender(), trade.getRecipient(), trade);
+
+        if (!swapSuccess) {
+            trade.setAccept(false);
+            trade.setHasBeenAnswered(true);
+            trade.getSender().getTradingHistory().add(trade);
+            trade.getRecipient().getTradingHistory().add(trade);
+
+            Message<?> failMsg = Message.BAD_REQUEST.setMessage("Trade failed! An inventory might be full.");
+            failMsg.setType("trade-cancelled");
+            gs.broadcastMessage(failMsg);
+            game.endTradeSession(finalizer.getUsername(), targetUsername);
+            return failMsg;
+        }
+
+        trade.setAccept(true);
+        trade.setHasBeenAnswered(true);
+        trade.getSender().getTradingHistory().add(trade);
+        trade.getRecipient().getTradingHistory().add(trade);
+
+        Message<?> successMsg = Message.OK.setMessage("Trade Successful!");
+        successMsg.setType("trade-finalized");
+        gs.broadcastMessage(successMsg);
+
+        broadcastInventoryUpdate(trade.getSender(), gs);
+        broadcastInventoryUpdate(trade.getRecipient(), gs);
+
+        game.endTradeSession(finalizer.getUsername(), targetUsername);
+        return Message.OK;
+    }
+
+    public Message<?> cancelTrade(User canceller, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        Game game = gs.getGame();
+        String tradeKey = Game.getTradeSessionKey(canceller.getUsername(), targetUsername);
+        Trade trade = game.getActiveTrades().get(tradeKey);
+
+        if (trade != null) {
+            trade.setAccept(false);
+            trade.setHasBeenAnswered(true);
+            trade.getSender().getTradingHistory().add(trade);
+            trade.getRecipient().getTradingHistory().add(trade);
+        }
+
+        Message<?> cancelMsg = Message.OK.setMessage(canceller.getUsername() + " has cancelled the trade.");
+        cancelMsg.setType("trade-cancelled");
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if(targetConnection != null) {
+            targetConnection.send(new Gson().toJson(cancelMsg));
+        }
+
+        game.endTradeSession(canceller.getUsername(), targetUsername);
+        return Message.OK;
+    }
+
+    public Message<?> getTradeHistory(User player, GameServer gs) {
+        List<Trade> history = player.getTradingHistory();
+        if (history == null) {
+            history = new ArrayList<>();
+        }
+
+        // Convert List<Trade> to a serializable format (List<Map>)
+        List<Map<String, Object>> serializableHistory = history.stream().map(trade -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", trade.getId());
+            map.put("sender", trade.getSender().getUsername());
+            map.put("recipient", trade.getRecipient().getUsername());
+
+            map.put("senderOffer", trade.getSenderOffer());
+            map.put("recipientOffer", trade.getRecipientOffer());
+
+            map.put("status", trade.isAccept() ? "Accepted" : "Declined/Cancelled");
+            return map;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("history", serializableHistory);
+
+        Message<Map<String, Object>> response = new Message<>(200, "Trade History", body, Message.MessageType.RESPONSE);
+        response.setType("trade-history-response");
+
+        // Find the specific player's connection and send the message directly
+        PlayerConnection playerConnection = gs.getPlayerConnectionByUsername(player.getUsername());
+        if (playerConnection != null && playerConnection.getWsContext().session.isOpen()) {
+            playerConnection.send(new Gson().toJson(response));
+        }
+
+        return Message.OK.setMessage("History request processed.");
     }
 
 

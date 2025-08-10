@@ -23,11 +23,11 @@ public enum NPCtype {
         new Point(94, 85)),
     Leah("Leah",Arrays.asList("Salad", "Grapes", "Wine"), Arrays.asList("Pomegranate", "Apricot"),
         new Point(72, 85),
-        new Point(94, 58),
+        new Point(94, 59),
         new Point(93, 85)),
     Robin("Robin",Arrays.asList("Spaghetti", "Wood", "Iron Bar"), Arrays.asList("Cookie", "Pancakes"),
         new Point(72, 95),
-        new Point(53, 87),
+        new Point(53, 88),
         new Point(92, 85));
 
     private final String name;

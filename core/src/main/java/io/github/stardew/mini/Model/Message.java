@@ -8,6 +8,19 @@ public class Message<T> {
     public static final Message<?> INTERNAL_SERVER_ERROR = new Message<>(500, "Internal Server Error", null, MessageType.RESPONSE);
     public static final Message<?> BAD_REQUEST = new Message<>(400);
     public static final Message<?> OK = new Message<>(200, "OK", null, MessageType.RESPONSE);
+
+    public static final String CHAT_PUBLIC = "chat_public";
+    public static final String CHAT_PRIVATE = "chat_private";
+    public static final String POP_UP_NOTIFICATION = "pop_up_notification";
+    public static final String REACTION_BROADCAST = "reaction-broadcast";
+    public static final String PLAYER_INTERACTION_BROADCAST = "player_interaction_broadcast";
+    public static final String MARRIAGE_PROPOSAL = "marriage_proposal";
+    public static final String FRIENDSHIP_UPDATED = "friendship_updated";
+    public static final String TILE_UPDATE = "tile-update";
+    public static final String SKILL_UPDATE = "skill-update";
+    public static final String GIFT_SENT_UPDATE = "GIFT_SENT_UPDATE";
+    public static final String MARRIAGE_RESPONSE_UPDATE = "MARRIAGE_RESPONSE_UPDATE";
+
     private int status;
     private String message;
     private T body;
@@ -40,11 +53,15 @@ public class Message<T> {
     }
 
 
-    public static <T> Message<T> ok(T body) {
-        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
-    }
+
     public static Message success(String message) {
         return new Message<>(200, message, null, Message.MessageType.RESPONSE);
+    }
+
+
+
+    public static <T> Message<T> ok(T body) {
+        return new Message<>(200, "OK", body, Message.MessageType.RESPONSE);
     }
 
 
@@ -63,7 +80,6 @@ public class Message<T> {
     public Message(int status) {
         this(status, null, null, null);
     }
-
     // --- Getters and setters ---
 
     public int getStatus() { return status; }

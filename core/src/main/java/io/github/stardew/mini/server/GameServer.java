@@ -20,6 +20,7 @@ public class GameServer extends Thread {
     private final ServerController controller = new ServerController();
     private final GameController gameController = new GameController();
     private Timer timer;
+    private boolean paused = false;
     private boolean isWaitingForPlayersToGoHome = false;
 
     public GameServer(List<PlayerConnection> players,Game game) {
@@ -59,6 +60,13 @@ public class GameServer extends Thread {
 //        }, 5000, 5000); // delay 5s, repeat every 5s
 
         // Optional game loop (e.g., for animation ticks or events)
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                broadcastLeaderboard();
+            }
+        }, 0, 5_000);
         while (running) {
             broadcastGameState();
             try {
@@ -109,6 +117,7 @@ public class GameServer extends Thread {
                         player.getWsContext().send(new Gson().toJson(msg));
                     }
                 }
+                broadcastLeaderboard();
             }
         }, 5000, 5000);
     }
@@ -152,9 +161,106 @@ public class GameServer extends Thread {
         }
         return null;
     }
+    public PlayerConnection getPlayerConnectionByUsername(String username) {
+        for(PlayerConnection player : players){
+            if(player.getUsername().equals(username)){
+                return player;
+            }
+        }
+        return null;
+    }
+    public void pauseGame() {
+        this.paused = true;
+        if (timer != null) timer.cancel();
+    }
 
+    public void resumeGame() {
+        if (paused) {
+            paused = false;
+            startGameTimer();
+        }
+    }
+
+
+    public void notifyPlayerDisconnected(PlayerConnection disconnectedPlayer) {
+        for (PlayerConnection player : players) {
+            if (!player.equals(disconnectedPlayer)) {
+                Map<String, String> body = new HashMap<>();
+                body.put("username", disconnectedPlayer.getUsername());
+
+                Message<Map<String, String>> msg = Message.ok(body);
+                msg.setType("player-disconnected");
+
+                String json = new Gson().toJson(msg);
+                player.getWsContext().send(json);
+            }
+        }
+    }
     public void setWaitingForPlayersToGoHome(boolean waitingForPlayersToGoHome) {
         isWaitingForPlayersToGoHome = waitingForPlayersToGoHome;
     }
+
+public List<Map<String, Object>> buildLeaderboard() {
+    List<Map<String, Object>> leaderboard = new ArrayList<>();
+
+    for (PlayerConnection pc : players) {
+        User user = pc.getUser();
+        int money = user.getMoney();
+        int skillSum = user.getSkillsLevel().values().stream().mapToInt(Integer::intValue).sum();
+        int missions = 0; // temporarily hardcoded
+        int score = money + skillSum + missions;
+
+        Map<String, Object> entry = new HashMap<>();
+        entry.put("username", user.getUsername());
+        entry.put("money", money);
+        entry.put("skillSum", skillSum);
+        entry.put("missions", missions);
+        entry.put("score", score);
+
+        leaderboard.add(entry);
+    }
+
+    // Sort descending by score
+    leaderboard.sort((a,b) -> ((Integer)b.get("score")).compareTo((Integer)a.get("score")));
+    return leaderboard;
+}
+
+    // و متد broadcastLeaderboard را هم می‌توانی بر اساس همین بنویسی:
+    public void broadcastLeaderboard() {
+        Map<String,Object> body = Map.of("leaderboard", buildLeaderboard());
+        Message<Map<String,Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);
+        msg.setType("leaderboard-update");
+        String json = new Gson().toJson(msg);
+
+        for (PlayerConnection pc : players) {
+            if (pc.getWsContext().session.isOpen()) {
+                pc.getWsContext().send(json);
+            }
+        }
+    }
+    public void replacePlayerConnection(PlayerConnection pc) {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).getUsername().equals(pc.getUsername())) {
+                players.set(i, pc);
+                break;
+            }
+        }
+    }
+
+    public void broadcastRadioUpdate(String base64Data) {
+        Message<Map<String,String>> msg = Message.ok(Map.of("data", base64Data));
+        msg.setType("radio-update");
+        String j = new Gson().toJson(msg);
+        players.forEach(pc -> pc.getWsContext().send(j));
+    }
+
+    public void broadcastMessage(Message<?> message) {
+        for (PlayerConnection pc : players) {
+            pc.send(new Gson().toJson(message));
+        }
+    }
+
+
+
 }
 

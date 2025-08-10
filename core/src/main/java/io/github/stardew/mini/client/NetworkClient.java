@@ -1,18 +1,35 @@
+
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
+import com.fasterxml.jackson.core.type.TypeReference;
+import io.github.stardew.mini.Model.Friendships.Friendship;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Base64Coder;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.Model.GameAudioManager;
 import io.github.stardew.mini.Model.Growables.Growable;
 import io.github.stardew.mini.Model.MapManagement.Tile;
 import io.github.stardew.mini.Model.Menus.Menu;
 import io.github.stardew.mini.Model.Message;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.client.View.GameView;
+import io.github.stardew.mini.client.View.MainMenuView;
+import io.github.stardew.mini.server.Controller.MainMenuController;
+import io.github.stardew.mini.server.PlayerConnection;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.View.MainMenuView;
 import io.github.stardew.mini.server.Controller.MainMenuController;
@@ -20,12 +37,14 @@ import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.ByteArrayInputStream;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.*;
 
 public class NetworkClient extends WebSocketClient {
@@ -112,6 +131,28 @@ public class NetworkClient extends WebSocketClient {
                     System.err.println("❌ No future found for requestId: " + requestId);
                 }
             } else {
+
+                if ("online-players".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> body = (Map<String,Object>) message.getBody();
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,String>> list = (List<Map<String,String>>) body.get("players");
+                    MainApp.getInstance().updateOnlinePlayers(list);
+                    return;
+                }
+
+                if ("player-disconnected".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String username = (String) data.get("username");
+
+                    Gdx.app.postRunnable(() -> {
+                        // نمایش دیالوگ یا پیام برای DC
+                        MainApp.getInstance().showPlayerDisconnectedMessage(username);
+                    });
+                    return;
+                }
+
+
                 if ("time-update".equalsIgnoreCase(message.getType())) {
                     Map<String, Object> data = (Map<String, Object>) message.getBody();
                     int hour = ((Double) data.get("hour")).intValue();
@@ -182,7 +223,7 @@ public class NetworkClient extends WebSocketClient {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
                                         game.reloadExtraData();
                                         MainApp.getInstance().setCurrentGame(game);
-                                       // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
+                                        // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -210,6 +251,7 @@ public class NetworkClient extends WebSocketClient {
                                 if (gameJsonObj instanceof  String json) {
                                     try {
                                         Game game = GameSaver.createCustomObjectMapper().readValue(json, Game.class);
+                                        game.reloadExtraData();
                                         MainApp.getInstance().setCurrentGame(game);
                                         // System.out.println("Farms: " + MainApp.getInstance().getCurrentGame().getMap().getFarms().size());
                                         System.out.println("Game successfully deserialized");
@@ -254,6 +296,117 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 }
+//                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    List<Map<String,Object>> lb =
+//                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+//
+//                    Gdx.app.postRunnable(() ->
+//                        MainApp.getInstance().getCurrentGameView().updateLeaderboard(lb)
+//                    );
+//                    return;
+//                }
+                if ("leaderboard-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    List<Map<String,Object>> lb =
+                        (List<Map<String,Object>>)((Map<?,?>)message.getBody()).get("leaderboard");
+
+                    GameView view = MainApp.getInstance().getCurrentGameView();
+                    if (view != null) {
+                        Gdx.app.postRunnable(() -> view.updateLeaderboard(lb));
+                    } else {
+                        System.out.println("⚠️ Warning: GameView is null. Dropping leaderboard update.");
+                    }
+                    return;
+                }
+                if ("radio-update".equalsIgnoreCase(message.getType())) {
+                    @SuppressWarnings("unchecked")
+                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+                    String trackId = (String) b.get("trackId");
+                    String name    = (String) b.get("name");   // سرور هم اینو می‌فرسته
+                    String base64  = (String) b.get("data");
+
+                    if (base64 == null || base64.isEmpty()) return;
+
+                    byte[] decodedBytes;
+                    try {
+                        decodedBytes = java.util.Base64.getDecoder().decode(base64);
+                    } catch (IllegalArgumentException ex) {
+                        System.err.println("[RADIO] base64 decode failed: " + ex.getMessage());
+                        return;
+                    }
+
+                    // sniff header برای تشخیص فرمت
+                    String ext = "bin";
+                    try {
+                        int headerLen = Math.min(decodedBytes.length, 12);
+                        String header = new String(decodedBytes, 0, headerLen, java.nio.charset.StandardCharsets.US_ASCII);
+                        if (header.startsWith("RIFF")) ext = "wav";
+                        else if (header.startsWith("OggS")) ext = "ogg";
+                        else if (header.startsWith("ID3") || (decodedBytes.length > 1 && (decodedBytes[0] & 0xFF) == 0xFF && ((decodedBytes[1] & 0xE0) == 0xE0))) ext = "mp3";
+                        else if (name != null && name.lastIndexOf('.') > 0) {
+                            ext = name.substring(name.lastIndexOf('.') + 1).toLowerCase();
+                        }
+                    } catch (Exception ignored) {}
+
+                    String fname = "radio_tmp_" + trackId + "." + ext;
+                    FileHandle fh = Gdx.files.local(fname);
+                    fh.writeBytes(decodedBytes, false);
+                    System.out.println("[RADIO] wrote file: " + fh.file().getAbsolutePath() + " ext=" + ext + " size=" + fh.length());
+
+                    // اگر WAV یا OGG بود، سعی کن پخش کنی (libGDX اغلب WAV/OGG را پشتیبانی می‌کند)
+                    if ("wav".equals(ext) || "ogg".equals(ext)) {
+                        try {
+                            double durationSeconds = fh.length() / 176400.0;
+                            boolean shouldLoop = durationSeconds > 2.0; // اگر کوتاه‌تر از 2 ثانیه، لوپ نکن
+
+                            System.out.println("[RADIO] estimated duration (s): " + durationSeconds + " -> loop=" + shouldLoop);
+
+                            GameAudioManager.getInstance().playMusic(fh, shouldLoop, 1f);
+                            System.out.println("[RADIO] playback started for " + fname + " (loop=" + shouldLoop + ")");
+                        } catch (GdxRuntimeException e) {
+                            System.err.println("[RADIO] Failed to play audio: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    } else if ("mp3".equals(ext)) {
+                        System.err.println("[RADIO] Received MP3. libGDX desktop OpenAL backend ممکن است MP3 را پشتیبانی نکند. بهتر است فایل را به WAV/OGG تبدیل کنید یا آپلود فقط WAV/OGG مجاز باشد.");
+                    } else {
+                        System.err.println("[RADIO] Unknown/unsupported audio format: " + ext);
+                    }
+
+                    return;
+                }
+
+
+//                if ("radio-update".equalsIgnoreCase(message.getType())) {
+//                    @SuppressWarnings("unchecked")
+//                    Map<String,Object> b = (Map<String,Object>) message.getBody();
+//                    String trackId = (String) b.get("trackId");
+//                    String base64  = (String) b.get("data");
+////
+//                    if (base64 == null || base64.isEmpty()) {
+//                        System.err.println("Empty base64 data for track: " + trackId);
+//                        return;
+//                    }
+//
+//                    // Delete previous temp files to avoid accumulation
+//                    for (FileHandle old : Gdx.files.local("radio_tmp_*").list()) {
+//                        old.delete();
+//                    }
+////                    String bytes = Arrays.toString(Base64Coder.decode(base64));
+////                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+////                    fh.writeBytes(bytes.getBytes(), false);
+//                    byte[] decodedBytes = Base64Coder.decode(base64);
+//                    FileHandle fh = Gdx.files.local("radio_tmp_" + trackId + ".wav");
+//                    fh.writeBytes(decodedBytes, false);
+//
+//                    // پخش به صورت موسیقی پس‌زمینه (loop = true، حجم = 1.0f)
+//                    try {
+//                        GameAudioManager.getInstance().playMusic(fh.path(), true, 1f);
+//                    } catch (GdxRuntimeException e) {
+//                        System.err.println("Failed to play audio: " + e.getMessage());
+//                    }
+//                }
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {
@@ -307,6 +460,289 @@ public class NetworkClient extends WebSocketClient {
                         } catch (Exception e){
                             e.printStackTrace();
                             System.out.println("❌ Failed to parse updated plant.");
+                        }
+                    });
+                }
+                if ("chat-message".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> chatData = (Map<String, Object>) message.getBody();
+                    String sender = (String) chatData.get("sender");
+                    String messageContent = (String) chatData.get("messageContent");
+                    String chatType = (String) chatData.get("chatType");
+                    String recipient = (String) chatData.get("recipient");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getChatDialogInstance() != null) {
+                            if (Message.CHAT_PUBLIC.equals(chatType)) {
+                                MainApp.getInstance().getChatDialogInstance().addPublicMessage(sender, messageContent);
+                            } else if (Message.CHAT_PRIVATE.equals(chatType)) {
+                                String currentUsername = MainApp.getInstance().getLoggedInUser().getUsername();
+                                String chatPartner = sender.equals(currentUsername) ? recipient : sender;
+                                MainApp.getInstance().getChatDialogInstance().addPrivateMessage(sender, chatPartner, messageContent);
+                            }
+                        } else {
+                        }
+                    });
+                    return;
+                }
+                if (Message.POP_UP_NOTIFICATION.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> notificationData = (Map<String, Object>) message.getBody();
+                    String title = (String) notificationData.get("title");
+                    String notificationBody = (String) notificationData.get("body");
+
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showErrorDialog(MainApp.getInstance().getCurrentGameView().getStage(), notificationBody);
+                        } else {
+                            System.err.println("[DEBUG-NWCLIENT] GameView is null! Cannot show pop-up notification.");
+                        }
+                    });
+                    return;
+                }
+                if (Message.REACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> reactionData = (Map<String, Object>) message.getBody();
+                    String sender = (String) reactionData.get("senderUsername");
+                    String content = (String) reactionData.get("reactionContent");
+                    boolean isImage = (Boolean) reactionData.get("isImage");
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showReactionForPlayer(sender, content, isImage);
+                        }
+                    });
+                    return;
+                }
+                if ("force_terminate_vote_started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showForceTerminationVoteDialog(initiator);
+                        }
+                    });
+                } else if ("vote_cancelled".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().cancelTermination(message.getMessage());
+                        }
+                    });
+                } else if ("game_terminated".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handleGameTermination(message.getMessage());
+                        }
+                    });
+                } else if ("vote_out_started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    String target = (String) data.get("target");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showVoteOutConfirmationDialog(initiator, target);
+                        }
+                    });
+                } else if ("vote_out_result".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String target = (String) data.get("target");
+                    String outcome = (String) data.get("outcome");
+                    String resultMessage = "The vote to eliminate " + target + " " + (outcome.equals("eliminated") ? "passed." : "failed.");
+
+                    // If the vote passed, remove the player from the local game state
+                    if ("eliminated".equals(outcome)) {
+                        Game currentGame = MainApp.getInstance().getCurrentGame();
+                        if (currentGame != null) {
+                            currentGame.getPlayers().removeIf(p -> p.getUsername().equals(target));
+                        }
+                    }
+
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handlePlayerEliminated(target, resultMessage);
+                        }
+                    });
+                } else if ("you_were_eliminated".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handleYouAreEliminated(message.getMessage());
+                        }
+                    });
+                }  else if (Message.PLAYER_INTERACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    System.out.println("PLAYER INTERACTION BROADCAST called");
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().handlePlayerInteraction(data);
+                        }
+                    });
+                } else if (Message.MARRIAGE_PROPOSAL.equalsIgnoreCase(message.getType())) {
+                    System.out.println("Debug: MARRIAGE_PROPOSAL received in NetworkClient");
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String proposer = (String) data.get("proposer");
+                    Gdx.app.postRunnable(() -> {
+                        if (MainApp.getInstance().getCurrentGameView() != null) {
+                            MainApp.getInstance().getCurrentGameView().showMarriageProposalDialog(proposer);
+                        }
+                    });
+                } if ("GIFT_SENT_UPDATE".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        String senderUsername = (String) data.get("sender");
+                        String receiverUsername = (String) data.get("receiver");
+                        Item sentItem = GameSaver.convertObject(data.get("item"), Item.class);
+                        int amount = ((Number) data.get("amount")).intValue();
+
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        User sender = game.getPlayerByUsername(senderUsername);
+                        User receiver = game.getPlayerByUsername(receiverUsername);
+
+                        if (sender != null && receiver != null && sentItem != null) {
+                            // No need to adjust inventories again, server has authoritative state
+                            // Just update the gift history for UI
+                            Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
+                            if (friendship != null) {
+                                Gift newGift = new Gift(senderUsername, receiverUsername, sentItem, amount);
+                                friendship.addToGifts(newGift);
+                                receiver.addRecievedGift(newGift);
+                            }
+                        }
+                    });
+                } else if ("MARRIAGE_RESPONSE_UPDATE".equalsIgnoreCase(message.getType())) {
+                    System.out.println("Debug: MARRIAGE_RESPONSE_UPDATE received in NetworkClient");
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        String proposerUsername = (String) data.get("proposer");
+                        String responderUsername = (String) data.get("responder");
+                        boolean accepted = (Boolean) data.get("accepted");
+
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        User proposer = game.getPlayerByUsername(proposerUsername);
+                        User responder = game.getPlayerByUsername(responderUsername);
+
+                        if (proposer != null && responder != null) {
+                            Friendship friendship = game.getFriendship(proposerUsername, responderUsername);
+                            if (accepted) {
+                                friendship.setLevel(4);
+                                proposer.setPartner(responder);
+                                responder.setPartner(proposer);
+                                // The full game state update will handle money and inventory
+                            } else {
+                                friendship.setLevel(0);
+                                proposer.setDaysSinceRejection(7);
+                            }
+                        }
+                    });
+                } else if (Message.FRIENDSHIP_UPDATED.equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game != null) {
+                            String p1 = (String) data.get("player1");
+                            String p2 = (String) data.get("player2");
+                            int level = ((Number) data.get("level")).intValue();
+                            int xp = ((Number) data.get("xp")).intValue();
+                            Friendship f = game.getFriendship(p1, p2);
+                            if (f != null) {
+                                f.setLevel(level);
+                                // You might need a setXp method in Friendship if you want to sync it perfectly
+                            }
+                        }
+                    });
+                }    if ("tile-situation-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        Tile updatedTile = GameSaver.convertObject(data.get("tile"), Tile.class);
+                        if (MainApp.getInstance().getCurrentGame() != null) {
+                            MainApp.getInstance().getCurrentGame().getMap().getMap()[updatedTile.getY()][updatedTile.getX()] = updatedTile;
+                        }
+                    });
+                } else if ("skill-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        String username = (String) data.get("username");
+                        User player = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
+                        if (player != null) {
+                            Map<String, Double> skillsLevelRaw = (Map<String, Double>) data.get("skillsLevel");
+                            Map<Skill, Integer> skillsLevel = new HashMap<>();
+                            for(Map.Entry<String, Double> entry : skillsLevelRaw.entrySet()){
+                                skillsLevel.put(Skill.valueOf(entry.getKey()), entry.getValue().intValue());
+                            }
+
+                            Map<String, Double> skillExperienceRaw = (Map<String, Double>) data.get("skillExperience");
+                            Map<Skill, Integer> skillExperience = new HashMap<>();
+                            for(Map.Entry<String, Double> entry : skillExperienceRaw.entrySet()){
+                                skillExperience.put(Skill.valueOf(entry.getKey()), entry.getValue().intValue());
+                            }
+
+                            player.setSkillsLevel(skillsLevel);
+                            player.setSkillExperience(skillExperience);
+                        }
+                    });
+                } else if ("trade-request-received".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().showTradeRequestDialog(initiator);
+                    });
+                } else if ("trade-session-started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String otherPlayerUsername = (String) data.get("otherPlayer");
+                    User otherPlayer = MainApp.getInstance().getCurrentGame().getPlayerByUsername(otherPlayerUsername);
+                    if (otherPlayer != null) {
+                        Gdx.app.postRunnable(() -> {
+                            MainApp.getInstance().getCurrentGameView().startTradeSession(otherPlayer);
+                        });
+                    }
+                } else if ("trade-offer-updated".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) data.get("items");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().updateRemoteTradeOffer(items);
+                    });
+                } else if ("trade-confirmed-by-other".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    boolean isConfirmed = (Boolean) data.get("isConfirmed");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().updateRemoteTradeConfirmation(isConfirmed);
+                    });
+                } else if ("trade-finalized".equalsIgnoreCase(message.getType()) || "trade-cancelled".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().endTradeSession(message.getMessage());
+                    });
+                } if ("trade-history-response".equalsIgnoreCase(message.getType())) {
+                    System.out.println("[DEBUG] network client received trade-history-response");
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    System.out.println("[DEBUG] 1");
+                    List<Map<String, Object>> history = (List<Map<String, Object>>) data.get("history");
+                    System.out.println("[DEBUG]  2");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().showTradeHistoryDialog(history);
+                        System.out.println("[DEBUG] 3");
+                    });
+                }else if ("inventory-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game != null) {
+                            Map<String, Object> data = (Map<String, Object>) message.getBody();
+                            Map<String, Double> rawInventory = (Map<String, Double>) data.get("inventory");
+
+                            // Convert raw map back to Map<Item, Integer>
+                            Map<Item, Integer> newInventory = new HashMap<>();
+                            for (Map.Entry<String, Double> entry : rawInventory.entrySet()) {
+                                Item item = Item.getRandomItem(entry.getKey());
+                                if (item != null) {
+                                    newInventory.put(item, entry.getValue().intValue());
+                                }
+                            }
+                            // Replace the local player's inventory with the authoritative one from the server
+                            game.getCurrentPlayer().getBackpack().getInventoryItems().clear();
+                            game.getCurrentPlayer().getBackpack().getInventoryItems().putAll(newInventory);
+
+                            // If the trade dialog is open, it should now refresh its inventory view
+                            if (MainApp.getInstance().getCurrentGameView() != null) {
+                                // This is a placeholder; you'd ideally have a direct method
+                                // to refresh the inventory part of the TradeDialog if it's open.
+                                System.out.println("Client inventory updated after trade.");
+                            }
                         }
                     });
                 }
@@ -462,6 +898,72 @@ public class NetworkClient extends WebSocketClient {
             }
         }
         return result;
+    }
+
+    public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
+        // use java.util.Base64 for consistent encoding
+        String b64 = java.util.Base64.getEncoder().encodeToString(raw);
+
+        System.out.println("[UPLOAD] raw bytes length = " + raw.length);
+        System.out.println("[UPLOAD] base64 length = " + b64.length());
+
+        Map<String,Object> p = Map.of(
+            "ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername(),
+            "name", name,
+            "data", b64
+        );
+        CompletableFuture<Message<?>> fut =
+            sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
+
+        // optionally log when future completes
+        fut.thenAccept(msg -> System.out.println("[UPLOAD] server response: " + msg.getStatus() + " / " + msg.getMessage()));
+        return fut;
+    }
+
+    public CompletableFuture<Message<?>> listTracks(String gameId) {
+        Map<String,Object> p = Map.of("ownerUsername", MainApp.getInstance().getLoggedInUser().getUsername());
+        return sendGet(gameId, "RadioController", "list", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+    public CompletableFuture<Message<?>> switchTrack(String gameId, String trackId) {
+        Map<String,Object> p = Map.of("trackId", trackId);
+        return sendPost(gameId, "RadioController", "switch", p, MainApp.getInstance().getLoggedInUser().getUsername());
+    }
+
+    public CompletableFuture<Message<?>> sendChatMessage(
+        String gameId,
+        String senderUsername,
+        String messageContent,
+        String recipientUsername,
+        String chatType
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("messageContent", messageContent);
+        params.put("chatType", chatType);
+        if (recipientUsername != null) {
+            params.put("recipientUsername", recipientUsername);
+        }
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleChatMessage",
+            params,
+            senderUsername
+        );
+    }
+
+    public CompletableFuture<Message<?>> sendReaction(String gameId, String senderUsername, String reactionContent, boolean isImage) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("reactionContent", reactionContent);
+        params.put("isImage", isImage);
+
+        return sendPost(
+            gameId,
+            "GameController",
+            "handleReaction",
+            params,
+            senderUsername
+        );
     }
 
 

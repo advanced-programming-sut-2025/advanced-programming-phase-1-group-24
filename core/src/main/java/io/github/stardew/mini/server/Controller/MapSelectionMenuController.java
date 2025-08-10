@@ -421,6 +421,7 @@ public class MapSelectionMenuController implements MenuController {
         System.out.println("You are starting at coordinates " + player + " " + player.getCurrentTile().getX() + " " + player.getCurrentTile().getY());
 
         currentGame.markPlayerSelectedMap(player.getUsername());
+        currentGame.markPlayerLoadingGame(player.getUsername());
         //currentGame.setCurrentPlayer(player);
         System.out.println(" current  player "+currentGame.getCurrentPlayer().getUsername());
         System.out.println(player.getUsername() +"chose map ");
@@ -447,6 +448,7 @@ public class MapSelectionMenuController implements MenuController {
                     Message<Map<String, Object>> msg = new Message<>(200, "Game started all players have chosen map", body, Message.MessageType.RESPONSE);
                     msg.setType("start-game");
                     playerConnection.getWsContext().send(new Gson().toJson(msg));
+                    MainApp.getInstance().setCurrentGame(currentGame);
                 }
             }
             gs.startGameTimer();

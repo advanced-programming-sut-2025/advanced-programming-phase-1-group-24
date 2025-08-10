@@ -13,14 +13,16 @@ import java.util.Map;
     property = "@id"
 )
 public class NPCMission {
+    private String initials;
     private Map<String, Integer> requiredItems;
     private Map<String, Integer> prizeItems;
     Boolean isAlreadyDone;
 
-    public NPCMission(Map<String, Integer> requiredItems, Map<String, Integer> prizeItems) {
+    public NPCMission(String initials, Map<String, Integer> requiredItems, Map<String, Integer> prizeItems) {
         this.requiredItems = new HashMap<>(requiredItems);
         this.prizeItems = new HashMap<>(prizeItems);
         this.isAlreadyDone = false;
+        this.initials = initials;
     }
 
     public NPCMission() {
@@ -42,16 +44,20 @@ public class NPCMission {
         isAlreadyDone = alreadyDone;
     }
 
-    public static Result doMission(NPCMission selectedMission, User currentUser) {
+    public String getInitials() {
+        return initials;
+    }
+
+    public static Result doMission(String initials, User currentUser) {
         for (NPC npc : MainApp.getInstance().getCurrentGame().getNpcs()) {
             int missionIndex = 1;
-            for (NPCMission mission : npc.getMissions()){
-                if (mission.equals(selectedMission)) {
+            for (NPCMission mission : npc.getMissions()) {
+                if (mission.getInitials().equals(initials)) {
                     return npc.doMission(missionIndex, currentUser);
                 }
                 missionIndex++;
             }
         }
-        return new Result(false,"No mission found");
+        return new Result(false, "No mission found");
     }
 }
