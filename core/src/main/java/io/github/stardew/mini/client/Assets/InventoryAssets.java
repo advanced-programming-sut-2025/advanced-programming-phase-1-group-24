@@ -168,7 +168,7 @@ public class InventoryAssets {
         Texture goodjob1 = new Texture(Gdx.files.internal("GoodJobAnimation/1.png"));
         Texture goodjob2 = new Texture(Gdx.files.internal("GoodJobAnimation/2.png"));
         Texture goodjob3 = new Texture(Gdx.files.internal("GoodJobAnimation/3.png"));
-        goodJobAnimation = new Animation<>(1f, new TextureRegion(goodjob1), new TextureRegion(goodjob2), new TextureRegion(goodjob3));
+        goodJobAnimation = new Animation<>(0.8f, new TextureRegion(goodjob1), new TextureRegion(goodjob2), new TextureRegion(goodjob3));
         goodJobAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 

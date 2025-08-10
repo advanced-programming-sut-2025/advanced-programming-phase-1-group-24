@@ -15,8 +15,11 @@ public class Message<T> {
     public static final String REACTION_BROADCAST = "reaction-broadcast";
     public static final String PLAYER_INTERACTION_BROADCAST = "player_interaction_broadcast";
     public static final String MARRIAGE_PROPOSAL = "marriage_proposal";
-    public static final String MARRIAGE_RESPONSE_UPDATE = "marriage_response_update";
     public static final String FRIENDSHIP_UPDATED = "friendship_updated";
+    public static final String TILE_UPDATE = "tile-update";
+    public static final String SKILL_UPDATE = "skill-update";
+    public static final String GIFT_SENT_UPDATE = "GIFT_SENT_UPDATE";
+    public static final String MARRIAGE_RESPONSE_UPDATE = "MARRIAGE_RESPONSE_UPDATE";
 
     private int status;
     private String message;

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.SaveGame.GameDatabase;
 import io.github.stardew.mini.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
@@ -277,89 +278,81 @@ public class GameController implements MenuController {
         MapOfGame map = gs.getGame().getMap();
         Tile[][] mapTiles = map.getMap();
 
-        if (currentTile.getX() + x < 0 || currentTile.getX() + x >= mapTiles[0].length || currentTile.getY() + y < 0 || currentTile.getY() + y >= mapTiles.length) {
+        int targetX = currentTile.getX() + x;
+        int targetY = currentTile.getY() + y;
+
+        if (targetX < 0 || targetX >= mapTiles[0].length || targetY < 0 || targetY >= mapTiles.length) {
             return new Result(false, "Direction is out of bounds.");
         }
 
         double energyWeatherModifier = gs.getGame().getCurrentWeatherType().getEnergyOfToolsModifier();
+        Result toolResult = new Result(false, "Unknown tool type.");
 
         if (currentTool instanceof Axe) {
-            return ((Axe) currentTool).useAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            toolResult = ((Axe) currentTool).useAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FORAGING);
+                broadcastSkillUpdate(player, gs);
+            }
         } else if (currentTool instanceof Hoe) {
-            return ((Hoe) currentTool).useHoe(x, y, currentTile, map, player, energyWeatherModifier);
+            toolResult = ((Hoe) currentTool).useHoe(x, y, currentTile, map, player, energyWeatherModifier);
         } else if (currentTool instanceof MilkPail) {
-            return ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, map, energyWeatherModifier);
+            toolResult = ((MilkPail) currentTool).useMilkPail(x, y, currentTile, player, map, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
         } else if (currentTool instanceof PickAxe) {
-            return ((PickAxe) currentTool).usePickAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            toolResult = ((PickAxe) currentTool).usePickAxe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.MINING);
+                broadcastSkillUpdate(player, gs);
+            }
         } else if (currentTool instanceof Scythe) {
-            return ((Scythe) currentTool).useScythe(x, y, currentTile, map, player, energyWeatherModifier);
+            toolResult = ((Scythe) currentTool).useScythe(x, y, currentTile, map, player, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
         } else if (currentTool instanceof WateringCan) {
-            return ((WateringCan) currentTool).useWateringCan(x, y, currentTile, map, player, energyWeatherModifier);
+            toolResult = ((WateringCan) currentTool).useWateringCan(x, y, currentTile, map, player, energyWeatherModifier);
         } else if (currentTool instanceof Shear) {
-            return ((Shear) currentTool).useShear(x, y, currentTile, player, map, energyWeatherModifier);
+            toolResult = ((Shear) currentTool).useShear(x, y, currentTile, player, map, energyWeatherModifier);
+            if (toolResult.isSuccessful()) {
+                player.addSkillExperience(Skill.FARMING);
+                broadcastSkillUpdate(player, gs);
+            }
         }
-        return new Result(false, "Tool cannot be used this way.");
+
+        if (toolResult.isSuccessful()) {
+            Tile affectedTile = map.getTile(targetX, targetY);
+            broadcastTileUpdate(affectedTile, gs);
+        }
+
+        return toolResult;
     }
 
-    //    public Result createGame(String users, Scanner scanner) {
-//        MainApp app = MainApp.getInstance();
-//        User creator = app.getLoggedInUser();
-//
-//        if (creator == null)
-//            return new Result(false, "please login first!");
-//
-//        // Split usernames and clean empty entries (e.g., if user types extra spaces)
-//        List<String> usernames = Arrays.stream(users.trim().split("\\s+"))
-//                .filter(usersString -> !usersString.isEmpty())
-//                .toList();
-//
-//        if (usernames.isEmpty())
-//            return new Result(false, "you must specify at least one username!");
-//
-//        if (usernames.size() > 3)
-//            return new Result(false, "you can specify up to 3 usernames!");
-//
-//        // Check if the creator is already in a game
-//        for (Game game : app.getAllGames()) {
-//            if (game.hasUser(creator))
-//                return new Result(false, "you are already in another game!");
-//        }
-//
-//        ArrayList<User> players = new ArrayList<>();
-//        players.add(creator); // Add the logged-in user first
-//
-//        for (String username : usernames) {
-//            User user = app.getUserByUsername(username);
-//            if (user == null)
-//                return new Result(false, "invalid username: " + username);
-//
-//            // Check if the user is already in a game
-//            Game game = app.getGameByUser(user);
-//            if (game != null) {
-//                return new Result(false, username + " is already in another game!");
-//            }
-//            players.add(user);
-//        }
-//        for (User player : players) {
-//            player.updateGameFields();
-//        }
-//        // Create and add the game
-//        Game newGame = new Game(players, creator, creator);
-//        //load farm.json            ONLY ONCEEEEEEE
-//        if (FarmTemplateManager.getTemplates() == null) {
-//            FarmTemplateManager.loadTemplates();
-//        }
-//        //create a new game and put it as currentgame in app
-//        //for the newely created game create a map and initialize it with the function initializeMap that exists in MapOfGame class
-//
-//        app.getAllGames().add(newGame);
-//        app.setCurrentGame(newGame);
-//
-//        handleMapSelection(players, scanner);
-//
-//        return new Result(true, "game created successfully!");
-//    }
+    private void broadcastTileUpdate(Tile tile, GameServer gs) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("tile", tile);
+        Message<Map<String, Object>> msg = new Message<>(200, "Tile Updated", body, Message.MessageType.RESPONSE);
+        msg.setType("tile-situation-update");
+        for (PlayerConnection pc : gs.getPlayers()) {
+            pc.send(new Gson().toJson(msg));
+        }
+    }
 
+    private void broadcastSkillUpdate(User player, GameServer gs) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("username", player.getUsername());
+        body.put("skillsLevel", player.getSkillsLevel());
+        body.put("skillExperience", player.getSkillExperience());
+        Message<Map<String, Object>> msg = new Message<>(200, "Skills Updated", body, Message.MessageType.RESPONSE);
+        msg.setType("skill-update");
+        for (PlayerConnection pc : gs.getPlayers()) {
+            pc.send(new Gson().toJson(msg));
+        }
+    }
 
     public Result startForceTerminateVote() {
         MainApp app = MainApp.getInstance();
@@ -3992,7 +3985,7 @@ public class GameController implements MenuController {
         if (!sender.getBackpack().hasItem(itemName, amount)) return Message.BAD_REQUEST.setMessage("You don't have enough of that item.");
 
         Item itemToGift = sender.getBackpack().grabItemAndReturn(itemName, amount);
-        if (receiver.getBackpack().addItem(itemToGift.copy(), amount).isSuccessful()) {
+        if (!receiver.getBackpack().addItem(itemToGift.copy(), amount).isSuccessful()) {
             sender.getBackpack().addItem(itemToGift, amount); // Add it back if receiver can't take it
             return Message.BAD_REQUEST.setMessage(receiverUsername + "'s inventory is full.");
         }
@@ -4000,6 +3993,17 @@ public class GameController implements MenuController {
         Gift gift = new Gift(sender.getUsername(), receiverUsername, itemToGift, amount);
         friendship.addToGifts(gift);
         receiver.addRecievedGift(gift);
+
+        // Broadcast a specific gift update
+        Map<String, Object> giftUpdateBody = new HashMap<>();
+        giftUpdateBody.put("sender", sender.getUsername());
+        giftUpdateBody.put("receiver", receiver.getUsername());
+        giftUpdateBody.put("item", GameSaver.convertObject(itemToGift, Map.class));
+        giftUpdateBody.put("amount", amount);
+        Message<Map<String, Object>> giftUpdateMsg = new Message<>(200, "Gift Sent", giftUpdateBody, Message.MessageType.RESPONSE);
+        giftUpdateMsg.setType("GIFT_SENT_UPDATE");
+        gs.broadcastMessage(giftUpdateMsg);
+
 
         // Broadcast event for animation
         Map<String, Object> broadcastBody = new HashMap<>();
@@ -4086,12 +4090,6 @@ public class GameController implements MenuController {
         if (proposer == null) return Message.NOT_FOUND.setMessage("Proposer not found.");
         Friendship friendship = game.getFriendship(responder.getUsername(), proposerUsername);
 
-        Map<String, Object> broadcastBody = new HashMap<>();
-        broadcastBody.put("action", "propose_end");
-        broadcastBody.put("proposer", proposerUsername);
-        broadcastBody.put("responder", responder.getUsername());
-        broadcastBody.put("accepted", accepted);
-
         if (accepted) {
             Item ring = proposer.getBackpack().grabItemAndReturn("Wedding Ring", 1);
             responder.getBackpack().addItem(ring, 1);
@@ -4107,9 +4105,25 @@ public class GameController implements MenuController {
             proposer.setDaysSinceRejection(7);
         }
 
+        // Broadcast the specific marriage response update
+        Map<String, Object> marriageUpdateBody = new HashMap<>();
+        marriageUpdateBody.put("proposer", proposer.getUsername());
+        marriageUpdateBody.put("responder", responder.getUsername());
+        marriageUpdateBody.put("accepted", accepted);
+        Message<Map<String, Object>> marriageUpdateMsg = new Message<>(200, "Marriage Response", marriageUpdateBody, Message.MessageType.RESPONSE);
+        marriageUpdateMsg.setType("MARRIAGE_RESPONSE_UPDATE");
+        gs.broadcastMessage(marriageUpdateMsg);
+
+
+        // Broadcast event for animation
+        Map<String, Object> broadcastBody = new HashMap<>();
+        broadcastBody.put("action", "propose_end");
+        broadcastBody.put("proposer", proposerUsername);
+        broadcastBody.put("responder", responder.getUsername());
+        broadcastBody.put("accepted", accepted);
         Message<Map<String, Object>> broadcastMsg = new Message<>(200, "marriage_response_update", broadcastBody, Message.MessageType.RESPONSE);
         broadcastMsg.setType(Message.PLAYER_INTERACTION_BROADCAST);
-        gs.getPlayers().forEach(p -> p.send(new Gson().toJson(broadcastMsg)));
+        gs.broadcastMessage(broadcastMsg);
 
         return Message.OK.setMessage("You have responded to the proposal.");
     }
@@ -4190,7 +4204,8 @@ public class GameController implements MenuController {
         FishType fishType;
         try {
             quality = ProductQuality.valueOf(qualityString);
-            fishType = FishType.valueOf(fishName.toUpperCase().replace(" ", "_"));
+            System.out.println(fishName + " " + qualityString);
+            fishType = FishType.valueOf(fishName);
         } catch (IllegalArgumentException e) {
             return Message.BAD_REQUEST.setMessage("Invalid fish name or quality.");
         }
@@ -4205,13 +4220,288 @@ public class GameController implements MenuController {
             if (perfectCatch) {
                 player.perfectFishingSkillUpgrade();
             }
+            broadcastSkillUpdate(player, gs);
             return Message.OK.setMessage("Fish added to inventory.");
         } else {
             return Message.FORBIDDEN.setMessage("Your backpack is full.");
         }
     }
 
+    public Message<?> initiateTrade(User initiator, GameServer gs, Map<String, Object> body) {
+        String recipientUsername = (String) body.get("recipientUsername");
+        User recipient = gs.getUserByUsername(recipientUsername);
 
+        if (recipient == null) {
+            return Message.NOT_FOUND.setMessage("Player not found.");
+        }
+        if (initiator.getUsername().equals(recipientUsername)) {
+            return Message.BAD_REQUEST.setMessage("You cannot trade with yourself.");
+        }
+
+        String tradeKey = Game.getTradeSessionKey(initiator.getUsername(), recipientUsername);
+        if (gs.getGame().getActiveTrades().containsKey(tradeKey)) {
+            return Message.BAD_REQUEST.setMessage("A trade is already in progress between these players.");
+        }
+
+        PlayerConnection recipientConnection = gs.getPlayerConnectionByUsername(recipientUsername);
+        if (recipientConnection != null) {
+            Map<String, Object> notificationBody = new HashMap<>();
+            notificationBody.put("initiator", initiator.getUsername());
+            Message<Map<String, Object>> requestMsg = new Message<>(200, "Trade Request", notificationBody, Message.MessageType.RESPONSE);
+            requestMsg.setType("trade-request-received");
+            recipientConnection.send(new Gson().toJson(requestMsg));
+        }
+
+        return Message.OK.setMessage("Trade request sent to " + recipientUsername);
+    }
+
+    public Message<?> respondToTrade(User responder, GameServer gs, Map<String, Object> body) {
+        String initiatorUsername = (String) body.get("initiatorUsername");
+        boolean accepted = (Boolean) body.get("accepted");
+        User initiator = gs.getUserByUsername(initiatorUsername);
+        Game game = gs.getGame();
+
+        if (initiator == null) return Message.NOT_FOUND.setMessage("Initiator not found.");
+
+        PlayerConnection initiatorConnection = gs.getPlayerConnectionByUsername(initiatorUsername);
+        PlayerConnection responderConnection = gs.getPlayerConnectionByUsername(responder.getUsername());
+
+        if (accepted) {
+            String tradeKey = Game.getTradeSessionKey(initiatorUsername, responder.getUsername());
+            Trade newTrade = new Trade(initiator, responder, "request", 0, null, null, 0, 0, false);
+            game.getActiveTrades().put(tradeKey, newTrade);
+
+            Map<String, Object> initiatorBody = Map.of("otherPlayer", responder.getUsername());
+            Message<Map<String, Object>> startMsgToInitiator = new Message<>(200, "Trade started", initiatorBody, Message.MessageType.RESPONSE);
+            startMsgToInitiator.setType("trade-session-started");
+
+            Map<String, Object> responderBody = Map.of("otherPlayer", initiator.getUsername());
+            Message<Map<String, Object>> startMsgToResponder = new Message<>(200, "Trade started", responderBody, Message.MessageType.RESPONSE);
+            startMsgToResponder.setType("trade-session-started");
+
+            if (initiatorConnection != null) initiatorConnection.send(new Gson().toJson(startMsgToInitiator));
+            if (responderConnection != null) responderConnection.send(new Gson().toJson(startMsgToResponder));
+
+        } else {
+            if (initiatorConnection != null) {
+                Message<?> declineMsg = Message.OK.setMessage(responder.getUsername() + " declined your trade request.");
+                declineMsg.setType("trade-cancelled");
+                initiatorConnection.send(new Gson().toJson(declineMsg));
+            }
+        }
+        return Message.OK;
+    }
+
+    public Message<?> confirmTradeOffer(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        boolean isConfirmed = (Boolean) body.get("isConfirmed");
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if (targetConnection != null) {
+            Map<String, Object> confirmBody = new HashMap<>();
+            confirmBody.put("isConfirmed", isConfirmed);
+            Message<Map<String, Object>> confirmMsg = new Message<>(200, "Confirmation status updated", confirmBody, Message.MessageType.RESPONSE);
+            confirmMsg.setType("trade-confirmed-by-other");
+            targetConnection.send(new Gson().toJson(confirmMsg));
+        }
+        return Message.OK;
+    }
+
+    public Message<?> updateTradeOffer(User sender, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        List<Map<String, Object>> offeredItems = (List<Map<String, Object>>) body.get("offeredItems");
+
+        String tradeKey = Game.getTradeSessionKey(sender.getUsername(), targetUsername);
+        Trade activeTrade = gs.getGame().getActiveTrades().get(tradeKey);
+
+        if (activeTrade == null) return Message.NOT_FOUND.setMessage("No active trade found.");
+
+        if (activeTrade.getSender().getUsername().equals(sender.getUsername())) {
+            activeTrade.setSenderOffer(offeredItems);
+        } else {
+            activeTrade.setRecipientOffer(offeredItems);
+        }
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if (targetConnection != null) {
+            Map<String, Object> updateBody = new HashMap<>();
+            updateBody.put("items", offeredItems);
+            Message<Map<String, Object>> updateMsg = new Message<>(200, "Offer Updated", updateBody, Message.MessageType.RESPONSE);
+            updateMsg.setType("trade-offer-updated");
+            targetConnection.send(new Gson().toJson(updateMsg));
+        }
+        return Message.OK;
+    }
+
+    private boolean executeItemSwap(User player1, User player2, Trade trade) {
+        List<Map<String, Object>> offer1 = trade.getSender().getUsername().equals(player1.getUsername()) ? trade.getSenderOffer() : trade.getRecipientOffer();
+        List<Map<String, Object>> offer2 = trade.getSender().getUsername().equals(player2.getUsername()) ? trade.getSenderOffer() : trade.getRecipientOffer();
+
+        if (!canReceiveItems(player1.getBackpack(), offer2) || !canReceiveItems(player2.getBackpack(), offer1)) {
+            return false;
+        }
+
+        if (!hasOfferedItems(player1.getBackpack(), offer1) || !hasOfferedItems(player2.getBackpack(), offer2)) {
+            return false;
+        }
+
+        for (Map<String, Object> itemData : offer1) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            Item item = player1.getBackpack().grabItemAndReturn(name, count);
+            player2.getBackpack().addItem(item, count);
+        }
+
+        for (Map<String, Object> itemData : offer2) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            Item item = player2.getBackpack().grabItemAndReturn(name, count);
+            player1.getBackpack().addItem(item, count);
+        }
+
+        return true;
+    }
+
+    private boolean canReceiveItems(Backpack backpack, List<Map<String, Object>> itemsToReceive) {
+        int freeSlots = backpack.getMaxSize() - backpack.getInventoryItems().size();
+        int slotsNeeded = 0;
+        for (Map<String, Object> itemData : itemsToReceive) {
+            String name = (String) itemData.get("name");
+            if (!backpack.hasItem(name, 1)) {
+                slotsNeeded++;
+            }
+        }
+        return freeSlots >= slotsNeeded;
+    }
+
+    private boolean hasOfferedItems(Backpack backpack, List<Map<String, Object>> offeredItems) {
+        for (Map<String, Object> itemData : offeredItems) {
+            String name = (String) itemData.get("name");
+            int count = ((Number) itemData.get("count")).intValue();
+            if (!backpack.hasItem(name, count)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void broadcastInventoryUpdate(User player, GameServer gs) {
+        PlayerConnection connection = gs.getPlayerConnectionByUsername(player.getUsername());
+        if (connection != null) {
+            Map<String, Object> body = new HashMap<>();
+            Map<String, Integer> serializableInventory = new HashMap<>();
+            for(Map.Entry<Item, Integer> entry : player.getBackpack().getInventoryItems().entrySet()) {
+                serializableInventory.put(entry.getKey().getName(), entry.getValue());
+            }
+            body.put("inventory", serializableInventory);
+
+            Message<Map<String, Object>> invUpdateMsg = new Message<>(200, "Inventory updated", body, Message.MessageType.RESPONSE);
+            invUpdateMsg.setType("inventory-update");
+            connection.send(new Gson().toJson(invUpdateMsg));
+        }
+    }
+
+    public Message<?> finalizeTrade(User finalizer, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        Game game = gs.getGame();
+        String tradeKey = Game.getTradeSessionKey(finalizer.getUsername(), targetUsername);
+        Trade trade = game.getActiveTrades().get(tradeKey);
+
+        if (trade == null) return Message.NOT_FOUND.setMessage("Trade session expired or not found.");
+
+        User targetPlayer = game.getPlayerByUsername(targetUsername);
+        if (targetPlayer == null) return Message.NOT_FOUND.setMessage("Other player not found.");
+
+        boolean swapSuccess = executeItemSwap(trade.getSender(), trade.getRecipient(), trade);
+
+        if (!swapSuccess) {
+            trade.setAccept(false);
+            trade.setHasBeenAnswered(true);
+            trade.getSender().getTradingHistory().add(trade);
+            trade.getRecipient().getTradingHistory().add(trade);
+
+            Message<?> failMsg = Message.BAD_REQUEST.setMessage("Trade failed! An inventory might be full.");
+            failMsg.setType("trade-cancelled");
+            gs.broadcastMessage(failMsg);
+            game.endTradeSession(finalizer.getUsername(), targetUsername);
+            return failMsg;
+        }
+
+        trade.setAccept(true);
+        trade.setHasBeenAnswered(true);
+        trade.getSender().getTradingHistory().add(trade);
+        trade.getRecipient().getTradingHistory().add(trade);
+
+        Message<?> successMsg = Message.OK.setMessage("Trade Successful!");
+        successMsg.setType("trade-finalized");
+        gs.broadcastMessage(successMsg);
+
+        broadcastInventoryUpdate(trade.getSender(), gs);
+        broadcastInventoryUpdate(trade.getRecipient(), gs);
+
+        game.endTradeSession(finalizer.getUsername(), targetUsername);
+        return Message.OK;
+    }
+
+    public Message<?> cancelTrade(User canceller, GameServer gs, Map<String, Object> body) {
+        String targetUsername = (String) body.get("targetUsername");
+        Game game = gs.getGame();
+        String tradeKey = Game.getTradeSessionKey(canceller.getUsername(), targetUsername);
+        Trade trade = game.getActiveTrades().get(tradeKey);
+
+        if (trade != null) {
+            trade.setAccept(false);
+            trade.setHasBeenAnswered(true);
+            trade.getSender().getTradingHistory().add(trade);
+            trade.getRecipient().getTradingHistory().add(trade);
+        }
+
+        Message<?> cancelMsg = Message.OK.setMessage(canceller.getUsername() + " has cancelled the trade.");
+        cancelMsg.setType("trade-cancelled");
+
+        PlayerConnection targetConnection = gs.getPlayerConnectionByUsername(targetUsername);
+        if(targetConnection != null) {
+            targetConnection.send(new Gson().toJson(cancelMsg));
+        }
+
+        game.endTradeSession(canceller.getUsername(), targetUsername);
+        return Message.OK;
+    }
+
+    public Message<?> getTradeHistory(User player, GameServer gs) {
+        List<Trade> history = player.getTradingHistory();
+        if (history == null) {
+            history = new ArrayList<>();
+        }
+
+        // Convert List<Trade> to a serializable format (List<Map>)
+        List<Map<String, Object>> serializableHistory = history.stream().map(trade -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", trade.getId());
+            map.put("sender", trade.getSender().getUsername());
+            map.put("recipient", trade.getRecipient().getUsername());
+
+            map.put("senderOffer", trade.getSenderOffer());
+            map.put("recipientOffer", trade.getRecipientOffer());
+
+            map.put("status", trade.isAccept() ? "Accepted" : "Declined/Cancelled");
+            return map;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("history", serializableHistory);
+
+        Message<Map<String, Object>> response = new Message<>(200, "Trade History", body, Message.MessageType.RESPONSE);
+        response.setType("trade-history-response");
+
+        // Find the specific player's connection and send the message directly
+        PlayerConnection playerConnection = gs.getPlayerConnectionByUsername(player.getUsername());
+        if (playerConnection != null && playerConnection.getWsContext().session.isOpen()) {
+            playerConnection.send(new Gson().toJson(response));
+        }
+
+        return Message.OK.setMessage("History request processed.");
+    }
 
 
 }

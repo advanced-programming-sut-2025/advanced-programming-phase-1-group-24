@@ -2,11 +2,13 @@
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.github.stardew.mini.Model.Friendships.Friendship;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import io.github.stardew.mini.Model.Friendships.Gift;
 import io.github.stardew.mini.Model.Game;
 import io.github.stardew.mini.Model.GameAudioManager;
 import io.github.stardew.mini.Model.Growables.Growable;
@@ -20,6 +22,7 @@ import io.github.stardew.mini.Model.Things.Backpack;
 import io.github.stardew.mini.Model.Things.Item;
 import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
 import io.github.stardew.mini.Model.TimeManagement.Season;
+import io.github.stardew.mini.Model.Skill;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.Model.User;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
@@ -346,14 +349,6 @@ public class NetworkClient extends WebSocketClient {
                         System.err.println("Failed to play audio: " + e.getMessage());
                     }
                 }
-
-
-
-
-
-
-
-
                 if("tile-update".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
                         try {
@@ -514,6 +509,7 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 }  else if (Message.PLAYER_INTERACTION_BROADCAST.equalsIgnoreCase(message.getType())) {
+                    System.out.println("PLAYER INTERACTION BROADCAST called");
                     Map<String, Object> data = (Map<String, Object>) message.getBody();
                     Gdx.app.postRunnable(() -> {
                         if (MainApp.getInstance().getCurrentGameView() != null) {
@@ -521,6 +517,7 @@ public class NetworkClient extends WebSocketClient {
                         }
                     });
                 } else if (Message.MARRIAGE_PROPOSAL.equalsIgnoreCase(message.getType())) {
+                    System.out.println("Debug: MARRIAGE_PROPOSAL received in NetworkClient");
                     Map<String, Object> data = (Map<String, Object>) message.getBody();
                     String proposer = (String) data.get("proposer");
                     Gdx.app.postRunnable(() -> {
@@ -528,43 +525,52 @@ public class NetworkClient extends WebSocketClient {
                             MainApp.getInstance().getCurrentGameView().showMarriageProposalDialog(proposer);
                         }
                     });
-                } else if (Message.MARRIAGE_RESPONSE_UPDATE.equalsIgnoreCase(message.getType())) {
+                } if ("GIFT_SENT_UPDATE".equalsIgnoreCase(message.getType())) {
                     Gdx.app.postRunnable(() -> {
-                        Game game = MainApp.getInstance().getCurrentGame();
-                        if (game == null) return;
-
                         Map<String, Object> data = (Map<String, Object>) message.getBody();
-                        boolean accepted = (Boolean) data.get("accepted");
-                        String proposerName = (String) data.get("proposer");
-                        String responderName = (String) data.get("responder");
+                        String senderUsername = (String) data.get("sender");
+                        String receiverUsername = (String) data.get("receiver");
+                        Item sentItem = GameSaver.convertObject(data.get("item"), Item.class);
+                        int amount = ((Number) data.get("amount")).intValue();
 
-                        User proposer = game.getPlayerByUsername(proposerName);
-                        User responder = game.getPlayerByUsername(responderName);
-                        if (proposer == null || responder == null) return;
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        User sender = game.getPlayerByUsername(senderUsername);
+                        User receiver = game.getPlayerByUsername(receiverUsername);
 
-                        Friendship friendship = game.getFriendship(proposerName, responderName);
-                        if (friendship == null) return;
-
-                        int newLevel = ((Number) data.get("newFriendshipLevel")).intValue();
-                        friendship.setLevel(newLevel);
-
-                        if (accepted) {
-                            int newMoney = ((Number) data.get("newMoney")).intValue();
-                            proposer.setPartner(responder);
-                            responder.setPartner(proposer);
-                            proposer.setMoney(newMoney);
-                            responder.setMoney(newMoney);
-
-                            Item ring = proposer.getBackpack().grabItemAndReturn("Wedding Ring", 1);
-                            if (ring != null) {
-                                responder.getBackpack().addItem(ring, 1);
-                                proposer.getBackpack().removeItem(ring.getName(),1);
+                        if (sender != null && receiver != null && sentItem != null) {
+                            // No need to adjust inventories again, server has authoritative state
+                            // Just update the gift history for UI
+                            Friendship friendship = game.getFriendship(senderUsername, receiverUsername);
+                            if (friendship != null) {
+                                Gift newGift = new Gift(senderUsername, receiverUsername, sentItem, amount);
+                                friendship.addToGifts(newGift);
+                                receiver.addRecievedGift(newGift);
                             }
+                        }
+                    });
+                } else if ("MARRIAGE_RESPONSE_UPDATE".equalsIgnoreCase(message.getType())) {
+                    System.out.println("Debug: MARRIAGE_RESPONSE_UPDATE received in NetworkClient");
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        String proposerUsername = (String) data.get("proposer");
+                        String responderUsername = (String) data.get("responder");
+                        boolean accepted = (Boolean) data.get("accepted");
 
-                        } else {
-                            int newEnergy = ((Number) data.get("proposerNewEnergy")).intValue();
-                            proposer.setEnergy(newEnergy);
-                            proposer.setDaysSinceRejection(7);
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        User proposer = game.getPlayerByUsername(proposerUsername);
+                        User responder = game.getPlayerByUsername(responderUsername);
+
+                        if (proposer != null && responder != null) {
+                            Friendship friendship = game.getFriendship(proposerUsername, responderUsername);
+                            if (accepted) {
+                                friendship.setLevel(4);
+                                proposer.setPartner(responder);
+                                responder.setPartner(proposer);
+                                // The full game state update will handle money and inventory
+                            } else {
+                                friendship.setLevel(0);
+                                proposer.setDaysSinceRejection(7);
+                            }
                         }
                     });
                 } else if (Message.FRIENDSHIP_UPDATED.equalsIgnoreCase(message.getType())) {
@@ -580,6 +586,104 @@ public class NetworkClient extends WebSocketClient {
                             if (f != null) {
                                 f.setLevel(level);
                                 // You might need a setXp method in Friendship if you want to sync it perfectly
+                            }
+                        }
+                    });
+                }    if ("tile-situation-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        Tile updatedTile = GameSaver.convertObject(data.get("tile"), Tile.class);
+                        if (MainApp.getInstance().getCurrentGame() != null) {
+                            MainApp.getInstance().getCurrentGame().getMap().getMap()[updatedTile.getY()][updatedTile.getX()] = updatedTile;
+                        }
+                    });
+                } else if ("skill-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Map<String, Object> data = (Map<String, Object>) message.getBody();
+                        String username = (String) data.get("username");
+                        User player = MainApp.getInstance().getCurrentGame().getPlayerByUsername(username);
+                        if (player != null) {
+                            Map<String, Double> skillsLevelRaw = (Map<String, Double>) data.get("skillsLevel");
+                            Map<Skill, Integer> skillsLevel = new HashMap<>();
+                            for(Map.Entry<String, Double> entry : skillsLevelRaw.entrySet()){
+                                skillsLevel.put(Skill.valueOf(entry.getKey()), entry.getValue().intValue());
+                            }
+
+                            Map<String, Double> skillExperienceRaw = (Map<String, Double>) data.get("skillExperience");
+                            Map<Skill, Integer> skillExperience = new HashMap<>();
+                            for(Map.Entry<String, Double> entry : skillExperienceRaw.entrySet()){
+                                skillExperience.put(Skill.valueOf(entry.getKey()), entry.getValue().intValue());
+                            }
+
+                            player.setSkillsLevel(skillsLevel);
+                            player.setSkillExperience(skillExperience);
+                        }
+                    });
+                } else if ("trade-request-received".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String initiator = (String) data.get("initiator");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().showTradeRequestDialog(initiator);
+                    });
+                } else if ("trade-session-started".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    String otherPlayerUsername = (String) data.get("otherPlayer");
+                    User otherPlayer = MainApp.getInstance().getCurrentGame().getPlayerByUsername(otherPlayerUsername);
+                    if (otherPlayer != null) {
+                        Gdx.app.postRunnable(() -> {
+                            MainApp.getInstance().getCurrentGameView().startTradeSession(otherPlayer);
+                        });
+                    }
+                } else if ("trade-offer-updated".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    List<Map<String, Object>> items = (List<Map<String, Object>>) data.get("items");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().updateRemoteTradeOffer(items);
+                    });
+                } else if ("trade-confirmed-by-other".equalsIgnoreCase(message.getType())) {
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    boolean isConfirmed = (Boolean) data.get("isConfirmed");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().updateRemoteTradeConfirmation(isConfirmed);
+                    });
+                } else if ("trade-finalized".equalsIgnoreCase(message.getType()) || "trade-cancelled".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().endTradeSession(message.getMessage());
+                    });
+                } if ("trade-history-response".equalsIgnoreCase(message.getType())) {
+                    System.out.println("[DEBUG] network client received trade-history-response");
+                    Map<String, Object> data = (Map<String, Object>) message.getBody();
+                    System.out.println("[DEBUG] 1");
+                    List<Map<String, Object>> history = (List<Map<String, Object>>) data.get("history");
+                    System.out.println("[DEBUG]  2");
+                    Gdx.app.postRunnable(() -> {
+                        MainApp.getInstance().getCurrentGameView().showTradeHistoryDialog(history);
+                        System.out.println("[DEBUG] 3");
+                    });
+                }else if ("inventory-update".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        Game game = MainApp.getInstance().getCurrentGame();
+                        if (game != null) {
+                            Map<String, Object> data = (Map<String, Object>) message.getBody();
+                            Map<String, Double> rawInventory = (Map<String, Double>) data.get("inventory");
+
+                            // Convert raw map back to Map<Item, Integer>
+                            Map<Item, Integer> newInventory = new HashMap<>();
+                            for (Map.Entry<String, Double> entry : rawInventory.entrySet()) {
+                                Item item = Item.getRandomItem(entry.getKey());
+                                if (item != null) {
+                                    newInventory.put(item, entry.getValue().intValue());
+                                }
+                            }
+                            // Replace the local player's inventory with the authoritative one from the server
+                            game.getCurrentPlayer().getBackpack().getInventoryItems().clear();
+                            game.getCurrentPlayer().getBackpack().getInventoryItems().putAll(newInventory);
+
+                            // If the trade dialog is open, it should now refresh its inventory view
+                            if (MainApp.getInstance().getCurrentGameView() != null) {
+                                // This is a placeholder; you'd ideally have a direct method
+                                // to refresh the inventory part of the TradeDialog if it's open.
+                                System.out.println("Client inventory updated after trade.");
                             }
                         }
                     });

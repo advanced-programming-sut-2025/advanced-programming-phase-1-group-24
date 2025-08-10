@@ -7,11 +7,13 @@ import java.util.Objects;
 public class Food extends Item {
     @JsonIgnore
     FoodType type;
+    String foodTypeName;
     int energy;
     public Food(FoodType type) {
         super(type.getName(), true, type.getSellPrice(), false, ProductQuality.Normal,true
         );
         this.type = type;
+        this.foodTypeName = type.name();
         this.energy = type.getEnergy();
     }
 
@@ -42,6 +44,8 @@ public class Food extends Item {
     public FoodType getType() {
         return type;
     }
+
+    public String getFoodTypeName() { return foodTypeName; }
 
     public int getEnergy() {
         return energy;

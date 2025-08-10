@@ -254,6 +254,12 @@ public List<Map<String, Object>> buildLeaderboard() {
         players.forEach(pc -> pc.getWsContext().send(j));
     }
 
+    public void broadcastMessage(Message<?> message) {
+        for (PlayerConnection pc : players) {
+            pc.send(new Gson().toJson(message));
+        }
+    }
+
 
 
 }

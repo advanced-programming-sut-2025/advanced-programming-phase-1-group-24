@@ -254,6 +254,28 @@ public class ServerController {
                 return Message.ok(resultttt);
             }
 
+            case "initiateTrade": {
+                return gameController.initiateTrade(player, server, body);
+            }
+            case "respondToTrade": {
+                return gameController.respondToTrade(player, server, body);
+            }
+            case "updateTradeOffer": {
+                return gameController.updateTradeOffer(player, server, body);
+            }
+            case "confirmTradeOffer": {
+                return gameController.confirmTradeOffer(player, server, body);
+            }
+            case "finalizeTrade": {
+                return gameController.finalizeTrade(player, server, body);
+            }
+            case "cancelTrade": {
+                return gameController.cancelTrade(player, server, body);
+            }
+            case "getTradeHistory": {
+                return gameController.getTradeHistory(player, server);
+            }
+
 
             default:
                 return Message.BAD_REQUEST.setMessage("Unknown method: " + methodName);

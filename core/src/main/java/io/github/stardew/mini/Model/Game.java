@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.github.stardew.mini.Model.Animals.Animal;
 import io.github.stardew.mini.Model.Friendships.Friendship;
+import io.github.stardew.mini.Model.Friendships.Trade;
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.Model.MapManagement.MapOfGame;
 import io.github.stardew.mini.Model.NPCManagement.NPC;
@@ -23,6 +24,7 @@ import io.github.stardew.mini.Model.Places.Habitat;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.github.stardew.mini.Model.MapManagement.*;
 import io.github.stardew.mini.client.MainApp;
@@ -54,6 +56,10 @@ public class Game {
     private User playerToVoteOut;
     private Map<User, Boolean> voteOutVotes = new HashMap<>();
 
+    private final Map<String, Trade> activeTrades = new ConcurrentHashMap<>();
+
+    private final List<Point> treePoints = new ArrayList<>();
+    private final List<Point> bushPoints = new ArrayList<>();
 
     private boolean waitingForPlayersToSleep = false;
 
@@ -89,6 +95,7 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+        generateScenery();
         for (User player : players) {
             playerAddedMissions.put(player.getUsername(), new ArrayList<>());
         }
@@ -461,6 +468,57 @@ public class Game {
                 return;
             }
         }
+    }
+
+    public static String getTradeSessionKey(String user1, String user2) {
+        if (user1.compareTo(user2) > 0) {
+            String temp = user1;
+            user1 = user2;
+            user2 = temp;
+        }
+        return user1 + "_" + user2;
+    }
+
+    public Map<String, Trade> getActiveTrades() {
+        return activeTrades;
+    }
+
+    public void endTradeSession(String user1, String user2) {
+        getActiveTrades().remove(getTradeSessionKey(user1, user2));
+    }
+
+    private void generateScenery() {
+        Random random = new Random(this.NetworkId.hashCode()); // Seed with game ID for consistency
+        if (map != null) {
+            int treesToPlace = 300;
+            int bushesToPlace = 200;
+            int sceneryCount = 0;
+
+            while (sceneryCount < treesToPlace + bushesToPlace) {
+                int x = random.nextInt(map.getWidth());
+                int y = random.nextInt(map.getHeight());
+
+                // Check if the point is within any farm or on NPCLAND
+                if (map.isInsideAnyFarm(x, y) != null || map.getMap()[y][x].getType() == TileType.NPCLAND) {
+                    continue; // Skip this point and try another
+                }
+
+                if (sceneryCount < treesToPlace) {
+                    treePoints.add(new Point(x, y));
+                } else {
+                    bushPoints.add(new Point(x, y));
+                }
+                sceneryCount++;
+            }
+        }
+    }
+
+    public List<Point> getTreePoints() {
+        return treePoints;
+    }
+
+    public List<Point> getBushPoints() {
+        return bushPoints;
     }
 
 }
