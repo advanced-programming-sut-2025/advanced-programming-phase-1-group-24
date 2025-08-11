@@ -17,6 +17,9 @@ public class InventoryAssets {
     }
 
     public static Animation<TextureRegion> toolUsageAnimation;
+    public static Animation<TextureRegion> eatingAnimation;
+    public static Animation<TextureRegion> giftGivingAnimation;
+    public static Animation<TextureRegion> goodJobAnimation;
 
     public static final Map<Integer, String> DIRECTION_NAMES = Map.of(
         0, "up",
@@ -147,6 +150,24 @@ public class InventoryAssets {
         Texture toolUsage3 = new Texture(Gdx.files.internal("Tools/use/3.png"));
         toolUsageAnimation = new Animation<>(0.1f, new TextureRegion(toolUsage1), new TextureRegion(toolUsage2), new TextureRegion(toolUsage3));
         toolUsageAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+
+        Texture eat1 = new Texture(Gdx.files.internal("eating/1.png"));
+        Texture eat2 = new Texture(Gdx.files.internal("eating/2.png"));
+        Texture eat3 = new Texture(Gdx.files.internal("eating/3.png"));
+        Texture eat4 = new Texture(Gdx.files.internal("eating/4.png"));
+        eatingAnimation = new Animation<>(0.15f, new TextureRegion(eat1), new TextureRegion(eat2), new TextureRegion(eat3), new TextureRegion(eat4));
+        eatingAnimation.setPlayMode(Animation.PlayMode.NORMAL);
+
+        Texture gift1 = new Texture(Gdx.files.internal("Gifting/1.png"));
+        Texture gift2 = new Texture(Gdx.files.internal("Gifting/2.png"));
+        giftGivingAnimation = new Animation<>(0.5f, new TextureRegion(gift1), new TextureRegion(gift2));
+        giftGivingAnimation.setPlayMode(Animation.PlayMode.LOOP);
+
+        Texture goodjob1 = new Texture(Gdx.files.internal("GoodJobAnimation/1.png"));
+        Texture goodjob2 = new Texture(Gdx.files.internal("GoodJobAnimation/2.png"));
+        Texture goodjob3 = new Texture(Gdx.files.internal("GoodJobAnimation/3.png"));
+        goodJobAnimation = new Animation<>(0.8f, new TextureRegion(goodjob1), new TextureRegion(goodjob2), new TextureRegion(goodjob3));
+        goodJobAnimation.setPlayMode(Animation.PlayMode.NORMAL);
     }
 
     public static void dispose() {
@@ -159,6 +180,24 @@ public class InventoryAssets {
         if (fishingBuff != null) fishingBuff.dispose();
         if (maxEnergyBuff != null) maxEnergyBuff.dispose();
         disposeToolTextures();
+
+        if (eatingAnimation != null) {
+            for (TextureRegion region : eatingAnimation.getKeyFrames()) {
+                region.getTexture().dispose();
+            }
+        }
+
+        if (giftGivingAnimation != null) {
+            for (TextureRegion region : giftGivingAnimation.getKeyFrames()) {
+                region.getTexture().dispose();
+            }
+        }
+
+        if (goodJobAnimation != null) {
+            for (TextureRegion region : goodJobAnimation.getKeyFrames()) {
+                region.getTexture().dispose();
+            }
+        }
     }
 
     public static void disposeToolTextures() {

@@ -17,7 +17,11 @@ import io.github.stardew.mini.Model.TimeManagement.Season;
 import io.github.stardew.mini.Model.TimeManagement.TimeAndDate;
 import io.github.stardew.mini.Model.TimeManagement.WeatherType;
 import io.github.stardew.mini.Model.Places.Habitat;
+
+import java.awt.*;
 import java.util.*;
+import java.util.List;
+
 import io.github.stardew.mini.Model.MapManagement.*;
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 
@@ -39,6 +43,9 @@ public class Game {
 
     private Map<String, List<NPCMission>> playerAddedMissions = new HashMap<>();
 
+    private final List<Point> treePoints = new ArrayList<>();
+    private final List<Point> bushPoints = new ArrayList<>();
+
     public Game(ArrayList<User> players, User mainPlayer, User currentPlayer) {
         this.players = players;
         this.mainPlayer = mainPlayer;
@@ -59,6 +66,7 @@ public class Game {
 
         predictTomorrowWeather();
         generateNPCs();
+        generateScenery();
     }
     public Game() {
     }
@@ -377,5 +385,40 @@ public class Game {
 
     public Map<String, List<NPCMission>> getPlayerAddedMissions() {
         return playerAddedMissions;
+    }
+
+    private void generateScenery() {
+        int seed = 1236548456;
+        Random random = new Random(seed);
+        if (map != null) {
+            int treesToPlace = 300;
+            int bushesToPlace = 200;
+            int sceneryCount = 0;
+
+            while (sceneryCount < treesToPlace + bushesToPlace) {
+                int x = random.nextInt(map.getWidth());
+                int y = random.nextInt(map.getHeight());
+
+                // Check if the point is within any farm or on NPCLAND
+                if (map.isInsideAnyFarm(x, y) != null || map.getMap()[y][x].getType() == TileType.NPCLAND) {
+                    continue; // Skip this point and try another
+                }
+
+                if (sceneryCount < treesToPlace) {
+                    treePoints.add(new Point(x, y));
+                } else {
+                    bushPoints.add(new Point(x, y));
+                }
+                sceneryCount++;
+            }
+        }
+    }
+
+    public List<Point> getTreePoints() {
+        return treePoints;
+    }
+
+    public List<Point> getBushPoints() {
+        return bushPoints;
     }
 }

@@ -217,6 +217,15 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
     private Label fishingLabel;
     private Label energyLabel;
 
+    private boolean isEating = false;
+    private float eatingStateTime = 0f;
+
+    private boolean isGivingGift = false;
+    private float giftGivingStateTime = 0f;
+
+    private boolean isShowingGoodJob = false;
+    private float goodJobStateTime = 0f;
+
     private Dialog socialMenuDialog;
     private Dialog MissionsMenuDialog;
 
@@ -641,8 +650,8 @@ private void updateAnimals(float delta) {
             if (equippedItem != null) {
                 Result eatResult = controller.eat(equippedItem.getName());
                 if (eatResult.isSuccessful()) {
-                    showErrorDialog(stage, eatResult.message());
                     equippedItem = null;
+                    isEating = true;
                     updateEquippedItemSlot();
                 } else {
                     showErrorDialog(stage, eatResult.message());
@@ -1577,6 +1586,8 @@ private void updateAnimals(float delta) {
                 switch (scenario){
                     case "Gift":
                         result=controller.sendGift(giftReciever,equippedItem.getName(),Integer.toString(purchaseQuantity));
+                        isGivingGift = true;
+                        giftGivingStateTime = 0f;
                         break;
                     case "Machine":
 
@@ -2678,6 +2689,8 @@ private void createAnimalDialog() {
                     Result npcResult = selectedNPC.giveGift(equippedItem.getName(),currentPlayer);
                     if (npcResult.isSuccessful()) {
                         currentPlayer.getBackpack().grabItem(equippedItem.getName(), 1);
+                        isGivingGift = true;
+                        giftGivingStateTime = 0f;
                     }
                     showErrorDialog(stage, npcResult.message());
                 }
@@ -3309,6 +3322,7 @@ private void createAnimalDialog() {
         drawTiles(rows, tiles, tileSize);
         drawGreenHouse(tileSize, rows);
         drawHabitats(tileSize, rows);
+        drawScenery(rows, tiles, tileSize);
         drawShops(tileSize, rows);
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -3395,6 +3409,32 @@ private void createAnimalDialog() {
             int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
             int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
             batch.draw(getItemTexture(equippedItem), drawX, drawY, tileSize, tileSize);
+        }
+
+        if (isEating) {
+            eatingStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.eatingAnimation.getKeyFrame(eatingStateTime);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
+            }
+            if (InventoryAssets.eatingAnimation.isAnimationFinished(eatingStateTime)) {
+                isEating = false;
+            }
+        }
+
+        if (isGivingGift) {
+            giftGivingStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.giftGivingAnimation.getKeyFrame(giftGivingStateTime, true);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                batch.draw(currentFrame, drawX, drawY, tileSize, tileSize);
+            }
+            if (giftGivingStateTime > 2.0f) {
+                isGivingGift = false;
+            }
         }
 
 
@@ -3537,6 +3577,20 @@ private void createAnimalDialog() {
             }
         }
 
+        if (isShowingGoodJob) {
+            goodJobStateTime += Gdx.graphics.getDeltaTime();
+            TextureRegion currentFrame = InventoryAssets.goodJobAnimation.getKeyFrame(goodJobStateTime);
+            if (currentFrame != null) {
+                int drawX = currentPlayer.getCurrentTile().getX() * tileSize;
+                int drawY = (MainApp.getInstance().getCurrentGame().getMap().getMap().length - currentPlayer.getCurrentTile().getY() - 1) * tileSize;
+                // Draw animation slightly above the player's head
+                batch.draw(currentFrame, drawX, drawY + tileSize, tileSize, tileSize);
+            }
+            if (InventoryAssets.goodJobAnimation.isAnimationFinished(goodJobStateTime)) {
+                isShowingGoodJob = false;
+            }
+        }
+
         batch.end(); // ✅ this must come BEFORE stage rendering
 
         drawShapeRenderer(tiles, tileSize);
@@ -3580,7 +3634,10 @@ private void createAnimalDialog() {
 
             Result addFishResult = currentPlayer.getBackpack().addItem(finalFish, 1);
             if (addFishResult.isSuccessful()) {
-                if (perfectCatch) showErrorDialog(stage,"Perfect catch!");
+                if (perfectCatch) {
+                    showErrorDialog(stage,"Perfect catch!");
+                    startGoodJobAnimation();
+                }
                 showErrorDialog(stage, "You caught a " + finalQuality.name() + " " + finalFish.getName() + "!");
                 currentPlayer.addSkillExperience(Skill.FISHING);
             } else {
@@ -4819,6 +4876,9 @@ private void createAnimalDialog() {
                     public void clicked(InputEvent event, float x, float y) {
                         Result result = NPCMission.doMission(mission, currentPlayer);
                         showErrorDialog(stage, result.getMessage());
+                        if (result.isSuccessful()) {
+                            startGoodJobAnimation();
+                        }
                         MissionsMenuDialog.hide();
                     }
                 });
@@ -6106,5 +6166,55 @@ public void showTimedErrorLabel(Stage stage, String message, float durationSecon
 
             buildingMenuTable.add(recipeRow).expandX().fillX().row();
         }
+    }
+
+    private void drawScenery(int rows, Tile[][] tiles, int tileSize) {
+        // Draw furniture in each player's house
+        for (User player : MainApp.getInstance().getCurrentGame().getPlayers()) {
+            Farm farm = MainApp.getInstance().getCurrentGame().getMap().getFarmByOwner(player);
+            if (farm != null && farm.getHouse() != null) {
+                House house = farm.getHouse();
+                // Bed on the left
+                batch.draw(GameAssetManager.bedTexture,
+                    (house.getX() + house.getWidth() - 1) * tileSize,
+                    (rows - (house.getY() + 2)) * tileSize,
+                    tileSize, tileSize * 2);
+
+                // Table on the right
+                batch.draw(GameAssetManager.bedsideTableTexture,
+                    (house.getX() + house.getWidth() - 2) * tileSize,
+                    (rows - (house.getY() + 2) + 1) * tileSize,
+                    tileSize, tileSize);
+            }
+        }
+
+        // Draw random trees and bushes from the game state
+        List<Point> treePoints = MainApp.getInstance().getCurrentGame().getTreePoints();
+        for (Point point : treePoints) {
+            Tile tile = tiles[point.y][point.x];
+            if (tile.getType() == TileType.EMPTY) {
+                batch.draw(TreeAssets.oakTextures.get(3),
+                    point.x * tileSize,
+                    (rows - point.y - 1) * tileSize,
+                    tileSize, tileSize * 2);
+            }
+        }
+
+        List<Point> bushPoints = MainApp.getInstance().getCurrentGame().getBushPoints();
+        for (Point point : bushPoints) {
+            Tile tile = tiles[point.y][point.x];
+            if (tile.getType() == TileType.EMPTY) {
+                batch.draw(TreeAssets.oakTextures.get(2),
+                    point.x * tileSize,
+                    (rows - point.y - 1) * tileSize,
+                    tileSize, tileSize);
+            }
+        }
+
+    }
+
+    public void startGoodJobAnimation() {
+        isShowingGoodJob = true;
+        goodJobStateTime = 0f;
     }
 }

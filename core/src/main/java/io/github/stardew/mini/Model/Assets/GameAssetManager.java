@@ -117,6 +117,9 @@ public class GameAssetManager {
     public static Texture abigaillTexture;
     public static Texture haleyyTexture;
     public static Texture shaneeTexture;
+    public static Texture bedTexture;
+    public static Texture bedsideTableTexture;
+    public static Texture bushTexture;
 
     public static Texture SECRET_HEART ;
 
@@ -160,6 +163,9 @@ public class GameAssetManager {
         FlOORING_50 = new Texture(Gdx.files.internal("Flooring/Flooring_50.png"));
         fridgeTexture = new Texture(Gdx.files.internal("Decor/fridgeAsset.png"));
         burntTile = new Texture(Gdx.files.internal("Flooring/Flooring_46.png"));
+        bedTexture = new Texture(Gdx.files.internal("Decor/bed.png"));
+        bedsideTableTexture = new Texture(Gdx.files.internal("Decor/bedsideTable.png"));
+        bushTexture = new Texture(Gdx.files.internal("Decor/bush.png"));
         GREENHOUSE = new Texture(Gdx.files.internal("Greenhouse/greenhouse.png"));
         greenhouseTexture = new TextureRegion(new Texture(Gdx.files.internal("Greenhouse/greenhouse.png")));
         snowOverlay = new Texture(Gdx.files.internal("Weather/Snow.png"));
@@ -368,6 +374,9 @@ public class GameAssetManager {
         if(FlOORING_50 != null) FlOORING_50.dispose();
         if(FLOORING_64 != null) FLOORING_64.dispose();
         if(FLOORING_25 != null) FLOORING_25.dispose();
+        if (bedTexture != null) bedTexture.dispose();
+        if (bedsideTableTexture != null) bedsideTableTexture.dispose();
+        if (bushTexture != null) bushTexture.dispose();
 
         disposeAnimals();
         if (farm1 != null) farm1.dispose();
