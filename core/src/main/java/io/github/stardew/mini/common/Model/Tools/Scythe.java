@@ -1,0 +1,86 @@
+package io.github.stardew.mini.common.Model.Tools;
+
+import io.github.stardew.mini.common.Model.Growables.Growable;
+import io.github.stardew.mini.common.Model.Growables.GrowableType;
+import io.github.stardew.mini.common.Model.MapManagement.MapOfGame;
+import io.github.stardew.mini.common.Model.MapManagement.Tile;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.Skill;
+import io.github.stardew.mini.common.Model.Things.ForagingMineral;
+import io.github.stardew.mini.common.Model.Things.ProductQuality;
+import io.github.stardew.mini.common.Model.Things.ToolMaterial;
+import io.github.stardew.mini.common.Model.User;
+
+public class Scythe extends Tool{
+    public Scythe(ToolType type) {
+        super(type);
+    }
+
+    public Scythe() {}
+
+    @Override
+    public void upgrade(ToolMaterial material) {
+        return;
+    }
+
+    public Result useScythe(int xDirection, int yDirection, Tile currentTile,
+                            MapOfGame map, User currentPlayer, double energyWeatherModifier) {
+        int currentX = currentTile.getX();
+        int currentY = currentTile.getY();
+
+        int energy = 2;
+        energy = (int)(energy * energyWeatherModifier);
+        if (currentPlayer.isBuffFarmingSkill()) energy--;
+        if (!currentPlayer.tryConsumeEnergy(energy)) {
+            return new Result(false, "You don't have enough energy");
+        }
+
+        Tile nextTile = map.getMap()[currentY + yDirection][currentX + xDirection];
+        Growable productOfGrowable = nextTile.getProductOfGrowable();
+        if (nextTile.getContainedGrowable() != null && nextTile.getContainedGrowable().getGrowableType() == GrowableType.Coal) {
+            ForagingMineral coal = (ForagingMineral) nextTile.getContainedItem();
+            currentPlayer.getBackpack().addItem(coal, 1);
+            nextTile.setContainedGrowable(null);
+            nextTile.setContainedItem(null);
+            nextTile.setWalkable(true);
+            //currentPlayer.addSkillExperience(Skill.FARMING);
+            return new Result(true, "Harvested " + coal.getName());
+        }
+        if (productOfGrowable == null)
+            return new Result(false, "Nothing to harvest here.");
+        else {
+            Tile[][] tiles = map.getMap();
+            int farmingSkill = currentPlayer.getSkillsLevel().get(Skill.FARMING);
+            if (farmingSkill == 0) productOfGrowable.setQuality(ProductQuality.Normal);
+            else if (farmingSkill == 1) productOfGrowable.setQuality(ProductQuality.Normal);
+            else if (farmingSkill == 2) productOfGrowable.setQuality(ProductQuality.Silver);
+            else if (farmingSkill == 3) productOfGrowable.setQuality(ProductQuality.Golden);
+            else if (farmingSkill == 4) productOfGrowable.setQuality(ProductQuality.Iridium);
+            if(nextTile.getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                currentPlayer.getBackpack().addItem(productOfGrowable, 10);
+                for(int j = Math.max(0 , nextTile.getY() - 1); j <= Math.min(149, nextTile.getY() + 1); j++){
+                    for(int i = Math.max(0, nextTile.getX() - 1); i <= Math.min(149, nextTile.getX() + 1); i++){
+                        if(tiles[j][i].getProductOfGrowable() != null && tiles[j][i].getProductOfGrowable().getGrowableType() == GrowableType.Giant){
+                            tiles[j][i].setProductOfGrowable(null);
+                        }
+                    }
+                }
+            }
+            else {
+                //if(productOfGrowable.getGrowableType() == GrowableType.Fruit) productOfGrowable.setIsEdible;
+                currentPlayer.getBackpack().addItem(productOfGrowable, 1);
+                nextTile.setProductOfGrowable(null);
+            }
+            currentPlayer.addSkillExperience(Skill.FARMING);
+            nextTile.setWalkable(true);
+            return new Result(true, "Harvested " + productOfGrowable.getName());
+        }
+    }
+    @Override
+    public Scythe copy() {
+        Scythe copy = new Scythe(this.getType());
+        copy.upgrade(this.material); // Copy any relevant fields (like material if applicable)
+        return copy;
+    }
+
+}

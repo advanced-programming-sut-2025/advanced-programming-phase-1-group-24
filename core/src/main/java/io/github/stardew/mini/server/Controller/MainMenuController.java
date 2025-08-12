@@ -3,9 +3,9 @@ package io.github.stardew.mini.server.Controller;
 
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.client.View.MainMenuView;
 import io.github.stardew.mini.client.View.LoginMenuView;
 import io.github.stardew.mini.server.ServerApp;

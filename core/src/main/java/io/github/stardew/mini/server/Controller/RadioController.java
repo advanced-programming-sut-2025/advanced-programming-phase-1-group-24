@@ -1,7 +1,7 @@
 package io.github.stardew.mini.server.Controller;
 
-import io.github.stardew.mini.Model.AudioTrack;
-import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.common.Model.AudioTrack;
+import io.github.stardew.mini.common.Model.Message;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.RadioService;
 import io.github.stardew.mini.server.ServerApp;

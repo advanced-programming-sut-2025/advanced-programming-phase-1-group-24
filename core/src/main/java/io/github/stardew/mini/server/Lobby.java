@@ -1,8 +1,7 @@
 package io.github.stardew.mini.server;
 
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.User;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

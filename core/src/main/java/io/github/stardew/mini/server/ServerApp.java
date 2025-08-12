@@ -1,28 +1,22 @@
 package io.github.stardew.mini.server;
 
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.common.Model.Game;
+import io.github.stardew.mini.common.Model.SaveGame.GameSaver;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
-import io.github.stardew.mini.Model.UserDatabaseSQL;
-import org.redisson.Redisson;
+import io.github.stardew.mini.common.Model.User;
+import io.github.stardew.mini.common.Model.UserDatabase;
+import io.github.stardew.mini.common.Model.UserDatabaseSQL;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
-import org.redisson.config.Config;
 
 import java.io.File;
 import java.util.List;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import java.util.zip.GZIPInputStream;
 
@@ -33,14 +27,10 @@ public class ServerApp {
 
     private final ConcurrentHashMap<String, User> allUsers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Game> allGames = new ConcurrentHashMap<>();
-   // private final CopyOnWriteArrayList<GameServer> allActiveGames = new CopyOnWriteArrayList<>();
    private final RadioService radioService = new RadioService();
 
     private final Gson gson = new Gson();
     private ServerApp() {
-//        Config config = new Config();
-//        config.useSingleServer().setAddress("redis://127.0.0.1:6379"); // change host/port if needed
-//        redissonClient = Redisson.create(config);
         loadAllUsers();
         loadAllGames();
     }
@@ -71,13 +61,13 @@ public class ServerApp {
     public RedissonClient getRedisson() {
         return redissonClient;
     }
-    // Optionally, call this when you want to persist
+
     public void saveUsers() {
 
         UserDatabase.saveUsers(new ArrayList<>(allUsers.values()));
         UserDatabaseSQL.saveUsers(new ArrayList<>(allUsers.values()));
     }
-    // ==== USER MANAGEMENT ====
+
     public void addUser(User user) {
         allUsers.put(user.getUsername(), user);
     }
@@ -94,7 +84,6 @@ public class ServerApp {
         return allUsers;
     }
 
-    // ==== GAME MANAGEMENT ====
 
     public void saveAllGames() {
         try {
@@ -128,21 +117,6 @@ public class ServerApp {
         return allGames.get(gameId);
     }
 
-//    public GameServer getOrStartGameServer(String gameId) {
-//        for (GameServer gs : allActiveGames) {
-//            if (gs.getGame().getNetworkId().equals(gameId)) {
-//                return gs;
-//            }
-//        }
-//
-//        Game game = allGames.get(gameId);
-//        if (game == null) return null;
-//
-//        GameServer newServer = new GameServer(game); // requires constructor: GameServer(Game)
-//        newServer.start();
-//        allActiveGames.add(newServer);
-//        return newServer;
-//    }
 public void addGame(Game game) {
     if (game != null && game.getNetworkId() != null) {
         allGames.put(game.getNetworkId(), game);

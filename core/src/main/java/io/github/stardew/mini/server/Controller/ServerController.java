@@ -1,20 +1,12 @@
 package io.github.stardew.mini.server.Controller;
 
-import io.github.stardew.mini.Model.GameSummary;
-import io.github.stardew.mini.Model.MapManagement.Tile;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.NPCManagement.NPC;
-import io.github.stardew.mini.Model.NPCManagement.NPCMission;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.client.MainApp;
+import io.github.stardew.mini.common.Model.GameSummary;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.server.GameServer;
-import io.github.stardew.mini.server.LobbyManager;
 import io.github.stardew.mini.server.ServerApp;
-import io.javalin.http.Context;
-import org.eclipse.jetty.server.Server;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -147,14 +139,9 @@ public class ServerController {
 
             }
             case "getLeaderboard": {
-                // اینجا game server رو پاس بده
                 return gameController.getLeaderboard(server);
             }
-//            case "getLeaderboard": {
-//                List<Map<String, Object>> lb = server.broadcastLeaderboard();
-//                // مستقیم به کلاینت می‌فرستیم
-//                return Message.ok(lb);
-//            }
+
             case "handleChatMessage": {
                 String senderUsername = fullMessage.getUsername();
                 String gameId = fullMessage.getGameID();
@@ -298,12 +285,10 @@ public class ServerController {
                     }
                 }
 
-                // Optionally add the requesting user if not already present
                 if (!usernames.contains(player.getUsername())) {
                     usernames.add(0, player.getUsername());
                 }
 
-                //return newGameMenuController.createGameOnServer(usernames); // <-- Updated
                 return newGameMenuController.createGameOnServer(usernames, player);
             }
             default:

@@ -1,6 +1,6 @@
 package io.github.stardew.mini.server;
 
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.User;
 import io.javalin.websocket.WsContext;
 
 public class PlayerConnection {

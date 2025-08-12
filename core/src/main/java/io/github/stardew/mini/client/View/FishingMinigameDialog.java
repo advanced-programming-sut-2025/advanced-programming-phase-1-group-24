@@ -16,9 +16,9 @@ import com.badlogic.gdx.math.MathUtils;
 
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.Assets.InventoryAssets;
-import io.github.stardew.mini.Model.Things.FishMovementType;
-import io.github.stardew.mini.Model.Things.Fish;
-import io.github.stardew.mini.Model.Things.FishType.RarenessType;
+import io.github.stardew.mini.common.Model.Things.FishMovementType;
+import io.github.stardew.mini.common.Model.Things.Fish;
+import io.github.stardew.mini.common.Model.Things.FishType.RarenessType;
 
 public class FishingMinigameDialog extends Group {
 

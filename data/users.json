@@ -16,25 +16,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "skillExperience": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
-    },
-    "currentTile": {
-      "type": "HOUSE",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "zahra44",
-      "x": 29,
-      "y": 6,
-      "hasBeenBurt": false
+      "MINING": 0,
+      "FISHING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -83,15 +74,6 @@
       }
     },
     "ownedAnimals": [],
-    "homeTile": {
-      "type": "HOUSE",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "zahra44",
-      "x": 29,
-      "y": 9,
-      "hasBeenBurt": false
-    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -103,7 +85,7 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 3,
+    "movingDirection": 0,
     "avatar": "Alex",
     "isProposing": false,
     "isAccepting": false,
@@ -126,28 +108,19 @@
     "maxEnergyTurn": 50,
     "energy": 200,
     "currentTurnEnergy": 50,
-    "money": 12000,
+    "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "skillExperience": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
-    },
-    "currentTile": {
-      "type": "HOUSE",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "zahra22",
-      "x": 126,
-      "y": 5,
-      "hasBeenBurt": false
+      "MINING": 0,
+      "FISHING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -196,15 +169,6 @@
       }
     },
     "ownedAnimals": [],
-    "homeTile": {
-      "type": "HOUSE",
-      "isWalkable": true,
-      "isPlowed": false,
-      "tileOwner": "zahra22",
-      "x": 126,
-      "y": 8,
-      "hasBeenBurt": false
-    },
     "notifications": [],
     "recievedGift": [],
     "daysSinceRejection": 0,
@@ -216,8 +180,103 @@
     "buffFishingSkill": false,
     "buffMiningSkill": false,
     "hoursLeftForBuff": 0,
-    "movingDirection": 3,
+    "movingDirection": 0,
     "avatar": "Abigail",
+    "isProposing": false,
+    "isAccepting": false,
+    "isRejecting": false,
+    "proposingTimer": 0.0,
+    "acceptingTimer": 0.0,
+    "rejectingTimer": 0.0
+  },
+  {
+    "username": "nikki1",
+    "password": "724f07baf35718d0424073bf85822e0f60004bdeb57ede3ebd532a52c9aa2b0f",
+    "nickname": "n",
+    "email": "n1@gmail.com",
+    "gender": false,
+    "playedGames": 0,
+    "maxMoneyInGames": 0,
+    "securityQuestion": "What is your favorite food?",
+    "securityAnswer": "n",
+    "maxEnergy": 200,
+    "maxEnergyTurn": 50,
+    "energy": 200,
+    "currentTurnEnergy": 50,
+    "money": 0,
+    "fainted": false,
+    "skillsLevel": {
+      "FARMING": 0,
+      "FORAGING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "skillExperience": {
+      "FARMING": 0,
+      "FORAGING": 0,
+      "MINING": 0,
+      "FISHING": 0
+    },
+    "machineRecepies": [],
+    "cookingRecepies": [
+      "Salad",
+      "BakedFish",
+      "FriedEgg"
+    ],
+    "friends": {},
+    "backpack": {
+      "type": "INITIAL",
+      "maxSize": 12,
+      "inventoryItems": {},
+      "tools": [
+        {
+          "name": "hoe",
+          "type": "HOE",
+          "material": "Initial"
+        },
+        {
+          "name": "pick axe",
+          "type": "PICKAXE",
+          "material": "Initial"
+        },
+        {
+          "name": "axe",
+          "type": "AXE",
+          "material": "Initial"
+        },
+        {
+          "maxCapacity": 40,
+          "waterLeft": 0,
+          "name": "watering can",
+          "type": "WATERINGCAN",
+          "material": "Initial"
+        },
+        {
+          "name": "scythe",
+          "type": "SCYTHE",
+          "material": "Initial"
+        }
+      ],
+      "trashcan": {
+        "name": "trash can",
+        "type": "TRASHCAN",
+        "material": "Initial"
+      }
+    },
+    "ownedAnimals": [],
+    "notifications": [],
+    "recievedGift": [],
+    "daysSinceRejection": 0,
+    "tradingHistory": [],
+    "tradeNotifications": [],
+    "buffMaxEnergy": false,
+    "buffForagingSkill": false,
+    "buffFarmingSkill": false,
+    "buffFishingSkill": false,
+    "buffMiningSkill": false,
+    "hoursLeftForBuff": 0,
+    "movingDirection": 0,
+    "avatar": "Alex",
     "isProposing": false,
     "isAccepting": false,
     "isRejecting": false,
@@ -242,16 +301,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "skillExperience": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [
@@ -337,16 +396,16 @@
     "money": 0,
     "fainted": false,
     "skillsLevel": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "skillExperience": {
-      "MINING": 0,
-      "FISHING": 0,
+      "FARMING": 0,
       "FORAGING": 0,
-      "FARMING": 0
+      "MINING": 0,
+      "FISHING": 0
     },
     "machineRecepies": [],
     "cookingRecepies": [

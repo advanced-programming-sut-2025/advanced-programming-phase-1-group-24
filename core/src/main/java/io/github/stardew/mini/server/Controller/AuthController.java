@@ -1,8 +1,7 @@
 package io.github.stardew.mini.server.Controller;
 
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.server.ServerApp;
 import io.github.stardew.mini.server.security.AuthUtil;
 

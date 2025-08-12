@@ -1,16 +1,16 @@
 package io.github.stardew.mini.server.Controller;
 
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.MapManagement.Tile;
-import io.github.stardew.mini.Model.MapManagement.TileType;
-import io.github.stardew.mini.Model.Places.Farm;
-import io.github.stardew.mini.Model.Places.House;
-import io.github.stardew.mini.Model.Reccepies.Machine;
-import io.github.stardew.mini.Model.Reccepies.MachineType;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Things.Backpack;
-import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.MapManagement.Tile;
+import io.github.stardew.mini.common.Model.MapManagement.TileType;
+import io.github.stardew.mini.common.Model.Places.Farm;
+import io.github.stardew.mini.common.Model.Places.House;
+import io.github.stardew.mini.common.Model.Reccepies.Machine;
+import io.github.stardew.mini.common.Model.Reccepies.MachineType;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.Things.Backpack;
+import io.github.stardew.mini.common.Model.Things.Item;
+import io.github.stardew.mini.common.Model.User;
 
 import java.util.ArrayList;
 import java.util.Map;

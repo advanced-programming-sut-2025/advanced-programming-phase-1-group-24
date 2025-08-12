@@ -7,16 +7,14 @@ import com.badlogic.gdx.scenes.scene2d.ui.Stack;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Scaling;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Things.Item;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.Assets.InventoryAssets;
 import io.github.stardew.mini.client.MainApp;
 
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class TradeDialog extends Dialog {
 

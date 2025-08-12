@@ -3,15 +3,14 @@ package io.github.stardew.mini.server.Controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.*;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.common.Model.*;
+import io.github.stardew.mini.common.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.common.Model.ConfigTemplates.FarmTemplateManager;
 import io.github.stardew.mini.client.View.NewGameMenuView;
 import io.github.stardew.mini.server.AppSocket;
 import io.github.stardew.mini.server.GameServer;
 import io.github.stardew.mini.server.PlayerConnection;
-import io.javalin.http.Context;
 
 import java.util.*;
 import java.util.List;
@@ -82,9 +81,9 @@ public class NewGameMenuController implements MenuController {
 
     public Message<?> createGameOnServer(List<String> usernames, User creator) {
         ArrayList<User> players = new ArrayList<>();
-//        if (usernames.size() < 2) {
-//            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
-//        }
+        if (usernames.size() < 2) {
+            return Message.FORBIDDEN.setMessage("You cant start the game with less than 2 players!");
+        }
 
         List<PlayerConnection> connections = new ArrayList<>();
 

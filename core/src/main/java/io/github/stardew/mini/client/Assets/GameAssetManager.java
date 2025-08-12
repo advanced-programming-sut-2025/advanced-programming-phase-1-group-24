@@ -14,7 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import io.github.stardew.mini.Model.Avatar;
+import io.github.stardew.mini.common.Model.Avatar;
 
 import java.util.ArrayList;
 import java.util.HashMap;

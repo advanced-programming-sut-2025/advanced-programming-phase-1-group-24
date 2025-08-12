@@ -2,11 +2,11 @@ package io.github.stardew.mini.server.Controller;
 
 
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Avatar;
-import io.github.stardew.mini.Model.Menus.ProfileMenuCommands;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.common.Model.Avatar;
+import io.github.stardew.mini.common.Model.Menus.ProfileMenuCommands;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.User;
+import io.github.stardew.mini.common.Model.UserDatabase;
 import io.github.stardew.mini.client.View.ProfileMenuView;
 
 public class ProfileMenuController implements MenuController {

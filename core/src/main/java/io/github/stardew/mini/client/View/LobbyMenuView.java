@@ -10,13 +10,13 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.Menus.Menu;
 import io.github.stardew.mini.client.LobbyMenuController;
-import io.github.stardew.mini.Model.LobbyInfo;
+import io.github.stardew.mini.common.Model.LobbyInfo;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.NetworkClient;
-import io.github.stardew.mini.Model.Game;
+import io.github.stardew.mini.common.Model.Game;
 
 import javax.swing.*;
 import java.util.*;

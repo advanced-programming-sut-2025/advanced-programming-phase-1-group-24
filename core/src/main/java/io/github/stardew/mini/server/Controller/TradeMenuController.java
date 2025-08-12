@@ -1,13 +1,13 @@
 package io.github.stardew.mini.server.Controller;
 
-import io.github.stardew.mini.Model.Friendships.FriendshipMessage;
+import io.github.stardew.mini.common.Model.Friendships.FriendshipMessage;
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Friendships.Friendship;
-import io.github.stardew.mini.Model.Friendships.Trade;
-import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.Things.Backpack;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Friendships.Friendship;
+import io.github.stardew.mini.common.Model.Friendships.Trade;
+import io.github.stardew.mini.common.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.Things.Backpack;
+import io.github.stardew.mini.common.Model.User;
 
 import java.util.ArrayList;
 

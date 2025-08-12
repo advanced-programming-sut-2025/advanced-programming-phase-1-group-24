@@ -11,24 +11,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.sun.tools.javac.Main;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.client.NetworkClient;
 import io.github.stardew.mini.server.Controller.NewGameMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
-import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.common.Model.Menus.Menu;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.zip.GZIPInputStream;
 
 public class NewGameMenuView implements AppMenu, Screen {
 

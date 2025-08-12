@@ -1,13 +1,12 @@
 package io.github.stardew.mini.server;
 
 
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.server.Controller.AuthController;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.ServerController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
-import io.github.stardew.mini.server.security.AuthUtil;
 import io.github.stardew.mini.server.security.AuthUtil;
 import io.javalin.Javalin;
 
@@ -15,7 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.common.Model.Message;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -33,7 +32,6 @@ public class AppSocket {
     }
 
     private void broadcastOnlinePlayers() {
-        // جمع‌آوری لیست
         List<Map<String,String>> list = new ArrayList<>();
         for (PlayerConnection pc : connectedPlayers.values()) {
             Map<String,String> entry = new HashMap<>();
@@ -47,7 +45,6 @@ public class AppSocket {
             list.add(entry);
         }
 
-        // می‌سازیم پیام JSON
         Map<String,Object> payload = Map.of("players", list);
         Message<Map<String,Object>> msg = Message.ok(payload);
         msg.setType("online-players");
@@ -75,9 +72,7 @@ public class AppSocket {
                 System.out.println("Received message size (bytes): " + messageSize);
                 //System.out.println("Received message: " + rawMessage);
 
-                // Handle ping messages (e.g., from client keep-alive)
                 if ("ping".equals(rawMessage)) {
-                    // Optionally respond with pong (not required unless client expects it)
                     //ctx.send("pong");
                     ctx.send(gson.toJson(Message.ok("pong")));
                     return;
@@ -120,7 +115,6 @@ public class AppSocket {
                             }
                         }
 
-                        // این ۲ خط اضافه میشن:
                         resp.setUsername(userInBody);
                         resp.setRequestId(message.getRequestId());
 
@@ -129,7 +123,6 @@ public class AppSocket {
                     }
 
                     if ("leaderboard-request".equalsIgnoreCase(message.getType())) {
-                        // ابتدا مطمئن می‌شویم کاربر لاگین کرده
                         String token = message.getToken();
 //                        if (token == null) {
 //                            ctx.send(gson.toJson(Message.UNAUTHORIZED.setMessage("Missing auth token")));
@@ -143,28 +136,24 @@ public class AppSocket {
                             return;
                         }
 
-                        // پیدا کردن سرورِ بازی این کاربر
                         GameServer gs = AppSocket.getGameOfUser(username);
                         if (gs != null) {
                             gs.broadcastLeaderboard();
                         } else {
-                            // اگر توی بازی نیست
                             ctx.send(gson.toJson(Message.NOT_FOUND.setMessage("You are not in any game")));
                         }
-                        return; // بقیه پیام‌ها را انجکت نکن
+                        return;
                     }
 
                     // ─── 1) AUTHENTICATION ENDPOINT ────────────────────────────────
                     if ("AuthController".equals(message.getControllerName())
                         && "login".equals(message.getMethodName())) {
-                        // Extract credentials from the incoming message body
                         @SuppressWarnings("unchecked")
                         Map<String,Object> creds = (Map<String,Object>) message.getBody();
                         String user = (String) creds.get("username");
                         String pass = (String) creds.get("password");
 
                         try {
-                            // Generate the JWT
                             String jwt = new AuthController().login(user, pass);
                             Message<String> resp = Message.ok(jwt);
                             resp.setRequestId(message.getRequestId());
@@ -174,7 +163,7 @@ public class AppSocket {
                             err.setRequestId(message.getRequestId());
                             ctx.send(gson.toJson(err));
                         }
-                        return;  // skip the rest of onMessage
+                        return;
                     }
 
 
@@ -212,7 +201,7 @@ public class AppSocket {
 
                             GameServer game = getGameOfUser(existing.getUsername());
                             if (game != null) {
-                                game.resumeGame(); // متدش رو تو GameServer باید اضافه کنی
+                                game.resumeGame();
                             }
                         }
 
@@ -256,10 +245,8 @@ public class AppSocket {
 
                     if (message.getGameID() == null) {
                         System.out.println("hereeeeeeeeee");
-                        // This method doesn't require a game ID
                         response = serverController.routingTheRequests((Message<Map<String, Object>>) message, null);
                     } else {
-                        // Other messages need a game ID
                         GameServer gameServer = getActiveGameById(message.getGameID());
                         System.out.println("2:" + message.getGameID());
                         if (gameServer == null) {
@@ -271,7 +258,6 @@ public class AppSocket {
 
                     response.setRequestId(message.getRequestId());
                     ctx.send(gson.toJson(response));
-                    // Handle other message types here...
 
                     if ("LobbyController".equals(message.getControllerName())
                         && ("joinLobby".equals(message.getMethodName())
@@ -286,7 +272,6 @@ public class AppSocket {
                 }
             });
 
-            // ✅ WsCloseContext
             ws.onClose(ctx -> {
                 System.out.println("[WS CLOSE] sessionId = " + ctx.sessionId());
                 String sessionId = ctx.sessionId(); // this is the correct method
@@ -296,7 +281,7 @@ public class AppSocket {
                     GameServer game = getGameOfUser(connection.getUsername());
                     if (game != null) {
                         game.getGame().unmarkPlayerLoadingGame(connection.getUsername());
-                        connection.markDisconnected(); // مرحله بعدی تو PlayerConnection می‌سازیم
+                        connection.markDisconnected();
                         game.notifyPlayerDisconnected(connection);
                         new Timer().schedule(new TimerTask() {
                             @Override
@@ -342,7 +327,6 @@ public class AppSocket {
 
 
 
-            // ✅ WsErrorContext
             ws.onError(ctx -> {
                 System.err.println("WebSocket error: " + ctx.error().getMessage());
             });

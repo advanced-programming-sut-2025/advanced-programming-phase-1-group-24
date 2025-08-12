@@ -2,47 +2,31 @@
 package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
-import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.stardew.mini.Model.Friendships.Friendship;
-import com.badlogic.gdx.audio.Sound;
+import io.github.stardew.mini.common.Model.Friendships.Friendship;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.GdxRuntimeException;
-import io.github.stardew.mini.Model.Friendships.Gift;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.GameAudioManager;
-import io.github.stardew.mini.Model.Growables.Growable;
-import io.github.stardew.mini.Model.MapManagement.Tile;
-import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.common.Model.Friendships.Gift;
+import io.github.stardew.mini.common.Model.Game;
+import io.github.stardew.mini.common.Model.GameAudioManager;
+import io.github.stardew.mini.common.Model.Growables.Growable;
+import io.github.stardew.mini.common.Model.MapManagement.Tile;
+import io.github.stardew.mini.common.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.Message;
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.Things.Backpack;
-import io.github.stardew.mini.Model.Things.Item;
-import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
-import io.github.stardew.mini.Model.TimeManagement.Season;
-import io.github.stardew.mini.Model.Skill;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.client.Assets.GameAssetManager;
+import io.github.stardew.mini.common.Model.SaveGame.GameSaver;
+import io.github.stardew.mini.common.Model.Things.Item;
+import io.github.stardew.mini.common.Model.TimeManagement.DayOfWeek;
+import io.github.stardew.mini.common.Model.TimeManagement.Season;
+import io.github.stardew.mini.common.Model.Skill;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.client.View.GameView;
-import io.github.stardew.mini.client.View.MainMenuView;
-import io.github.stardew.mini.server.Controller.MainMenuController;
-import io.github.stardew.mini.server.PlayerConnection;
-import io.github.stardew.mini.client.Assets.GameAssetManager;
-import io.github.stardew.mini.client.View.MainMenuView;
-import io.github.stardew.mini.server.Controller.MainMenuController;
-import io.github.stardew.mini.server.PlayerConnection;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.io.ByteArrayInputStream;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
 
 import java.net.URI;
 import java.util.concurrent.*;
@@ -75,43 +59,6 @@ public class NetworkClient extends WebSocketClient {
         }, 10, 10, TimeUnit.SECONDS);
     }
 
-
-//    @Override
-//    public void onMessage(String messageJson) {
-//        System.out.println("Received: " + messageJson);
-//
-//        // Deserialize incoming message to Message class
-//        Message<?> message = gson.fromJson(messageJson, Message.class);
-//
-//        String requestId = message.getRequestId();
-//        if (requestId != null) {
-//            CompletableFuture<Message<?>> future = pendingRequests.remove(requestId);
-//            if (future != null) {
-//                future.complete(message);
-//            }
-//        } else {
-//                if ("time-update".equalsIgnoreCase(message.getType())) {
-//                    Map<String, Object> data = (Map<String, Object>) message.getBody();
-//                    int hour = ((Double) data.get("hour")).intValue();
-//                    int day = ((Double) data.get("day")).intValue();
-//                    String dayOfWeekString = (String) data.get("dayOfWeek");
-//                    String seasonString = (String) data.get("season");
-//                    DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
-//                    Season season = Season.fromString(seasonString);
-//
-//                    // Optional: store or update this data somewhere globally
-//                    MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
-//
-//                    // Notify your UI or game loop (if any)
-//                    System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
-//                        hour, day, dayOfWeek, seasonString);
-//                }
-//            }
-//
-    ////        } else {
-    ////            // Handle unsolicited messages if any (e.g., broadcasts)
-    ////        }
-//    }
     @Override
     public void onMessage(String messageJson) {
         System.out.println("Received raw JSON: " + messageJson);
@@ -146,7 +93,6 @@ public class NetworkClient extends WebSocketClient {
                     String username = (String) data.get("username");
 
                     Gdx.app.postRunnable(() -> {
-                        // نمایش دیالوگ یا پیام برای DC
                         MainApp.getInstance().showPlayerDisconnectedMessage(username);
                     });
                     return;
@@ -162,10 +108,8 @@ public class NetworkClient extends WebSocketClient {
                     DayOfWeek dayOfWeek = DayOfWeek.fromString(dayOfWeekString);
                     Season season = Season.fromString(seasonString);
 
-                    // Optional: store or update this data somewhere globally
                     MainApp.getInstance().getCurrentGame().getTimeAndDate().updateTime(hour, day, dayOfWeek, season);
 
-                    // Notify your UI or game loop (if any)
                     System.out.printf("[CLIENT] Time updated: %02d:00, Day %d (%s), Season: %s%n",
                         hour, day, dayOfWeek, seasonString);
                 }
@@ -237,7 +181,7 @@ public class NetworkClient extends WebSocketClient {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
-                        MainApp.getInstance().setCurrentMenu(Menu.GameMenu); // Now the menu can read the game safely
+                        MainApp.getInstance().setCurrentMenu(Menu.GameMenu);
                     });
                 }
                 if ("start-map-selection".equalsIgnoreCase(message.getType())) {
@@ -265,7 +209,7 @@ public class NetworkClient extends WebSocketClient {
                             e.printStackTrace();
                             System.err.println("❌ Failed to parse game in start-map-selection");
                         }
-                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu); // Now the menu can read the game safely
+                        MainApp.getInstance().setCurrentMenu(Menu.MapSelectionMenu);
                     });
                 }
                 if ("game-ended".equalsIgnoreCase(message.getType())) {
@@ -323,7 +267,7 @@ public class NetworkClient extends WebSocketClient {
                     @SuppressWarnings("unchecked")
                     Map<String,Object> b = (Map<String,Object>) message.getBody();
                     String trackId = (String) b.get("trackId");
-                    String name    = (String) b.get("name");   // سرور هم اینو می‌فرسته
+                    String name    = (String) b.get("name");
                     String base64  = (String) b.get("data");
 
                     if (base64 == null || base64.isEmpty()) return;
@@ -336,7 +280,6 @@ public class NetworkClient extends WebSocketClient {
                         return;
                     }
 
-                    // sniff header برای تشخیص فرمت
                     String ext = "bin";
                     try {
                         int headerLen = Math.min(decodedBytes.length, 12);
@@ -354,11 +297,10 @@ public class NetworkClient extends WebSocketClient {
                     fh.writeBytes(decodedBytes, false);
                     System.out.println("[RADIO] wrote file: " + fh.file().getAbsolutePath() + " ext=" + ext + " size=" + fh.length());
 
-                    // اگر WAV یا OGG بود، سعی کن پخش کنی (libGDX اغلب WAV/OGG را پشتیبانی می‌کند)
                     if ("wav".equals(ext) || "ogg".equals(ext)) {
                         try {
                             double durationSeconds = fh.length() / 176400.0;
-                            boolean shouldLoop = durationSeconds > 2.0; // اگر کوتاه‌تر از 2 ثانیه، لوپ نکن
+                            boolean shouldLoop = durationSeconds > 2.0;
 
                             System.out.println("[RADIO] estimated duration (s): " + durationSeconds + " -> loop=" + shouldLoop);
 
@@ -369,7 +311,7 @@ public class NetworkClient extends WebSocketClient {
                             e.printStackTrace();
                         }
                     } else if ("mp3".equals(ext)) {
-                        System.err.println("[RADIO] Received MP3. libGDX desktop OpenAL backend ممکن است MP3 را پشتیبانی نکند. بهتر است فایل را به WAV/OGG تبدیل کنید یا آپلود فقط WAV/OGG مجاز باشد.");
+                        System.err.println("[RADIO] Received MP3. libGDX desktop OpenAL backend.");
                     } else {
                         System.err.println("[RADIO] Unknown/unsupported audio format: " + ext);
                     }
@@ -778,7 +720,7 @@ public class NetworkClient extends WebSocketClient {
         String methodName,
         String httpMethod,
         Map<String, Object> params,
-        String username // optionally pass username if you want
+        String username
     ) {
         if (!isOpen()) {
             CompletableFuture<Message<?>> failedFuture = new CompletableFuture<>();
@@ -788,22 +730,16 @@ public class NetworkClient extends WebSocketClient {
 
         String requestId = UUID.randomUUID().toString();
 
-        // Create Message object with all relevant info
         Message<Map<String, Object>> requestMessage = new Message<>(0, "Client Request", params, Message.MessageType.REQUEST);
         requestMessage.setControllerName(controllerName);
         requestMessage.setMethodName(methodName);
         requestMessage.setRequestId(requestId);
-        requestMessage.setType(httpMethod); // "GET" or "POST"
+        requestMessage.setType(httpMethod);
         requestMessage.setUsername(username);
         requestMessage.setMessageType(Message.MessageType.REQUEST);
         requestMessage.setToken(MainApp.getInstance().getJwtToken());
-        // Optionally include gameId in the body or add a field if needed (depends on server design)
-//        if (params != null && gameId != null) {
-//            params.put("gameId", gameId);
-//        }
         requestMessage.setGameID(gameId);
 
-        // Serialize and send
         String json = gson.toJson(requestMessage);
 
         System.out.println("Sending JSON: " + json);
@@ -816,7 +752,6 @@ public class NetworkClient extends WebSocketClient {
         return future;
     }
 
-    // Convenience overloads without username parameter:
 
     public CompletableFuture<Message<?>> sendGet(
         String gameId,
@@ -837,17 +772,12 @@ public class NetworkClient extends WebSocketClient {
     ) {
         return sendRequest(gameId, controllerName, methodName, "POST", params, username);
     }
-    /**
-     * Send an AuthController.login request over WS, returning the server’s Message<String>.
-     */
+
     public CompletableFuture<Message<String>> login(String username, String password) {
-        // Build the credentials payload
         Map<String,Object> params = new HashMap<>();
         params.put("username", username);
         params.put("password", password);
 
-        // controllerName = "AuthController", methodName = "login"
-        // No gameId, no username header needed here
         @SuppressWarnings("unchecked")
         CompletableFuture<Message<String>> future =
             (CompletableFuture<Message<String>>)(CompletableFuture<?>)
@@ -885,9 +815,9 @@ public class NetworkClient extends WebSocketClient {
 
             int amount;
             if (value instanceof Number) {
-                amount = ((Number) value).intValue(); // works for both Integer and Double
+                amount = ((Number) value).intValue();
             } else {
-                continue; // or throw an error/log
+                continue;
             }
 
             Item item = Item.getRandomItem(name);
@@ -901,7 +831,6 @@ public class NetworkClient extends WebSocketClient {
     }
 
     public CompletableFuture<Message<?>> uploadTrack(String gameId, String name, byte[] raw) {
-        // use java.util.Base64 for consistent encoding
         String b64 = java.util.Base64.getEncoder().encodeToString(raw);
 
         System.out.println("[UPLOAD] raw bytes length = " + raw.length);
@@ -915,7 +844,6 @@ public class NetworkClient extends WebSocketClient {
         CompletableFuture<Message<?>> fut =
             sendPost(gameId, "RadioController", "upload", p, MainApp.getInstance().getLoggedInUser().getUsername());
 
-        // optionally log when future completes
         fut.thenAccept(msg -> System.out.println("[UPLOAD] server response: " + msg.getStatus() + " / " + msg.getMessage()));
         return fut;
     }

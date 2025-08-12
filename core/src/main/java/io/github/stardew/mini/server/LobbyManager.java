@@ -1,10 +1,9 @@
 package io.github.stardew.mini.server;
 
-import io.github.stardew.mini.Model.LobbyInfo;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.LobbyInfo;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.User;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,13 +1,9 @@
 package io.github.stardew.mini.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.Game;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.Model.TimeManagement.DayOfWeek;
-import io.github.stardew.mini.Model.TimeManagement.Season;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Game;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.server.Controller.GameController;
 import io.github.stardew.mini.server.Controller.ServerController;
 
@@ -70,7 +66,7 @@ public class GameServer extends Thread {
         while (running) {
             broadcastGameState();
             try {
-                Thread.sleep(100); // e.g., ~10 FPS
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 break;
             }
@@ -78,7 +74,7 @@ public class GameServer extends Thread {
     }
 
     public void startGameTimer() {
-        if (timer != null) return; // Prevent double start
+        if (timer != null) return;
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -124,7 +120,7 @@ public class GameServer extends Thread {
 
     public void stopServer() {
         running = false;
-        if (timer != null) timer.cancel(); // Stop the global timer
+        if (timer != null) timer.cancel();
     }
 
 
@@ -225,7 +221,6 @@ public List<Map<String, Object>> buildLeaderboard() {
     return leaderboard;
 }
 
-    // و متد broadcastLeaderboard را هم می‌توانی بر اساس همین بنویسی:
     public void broadcastLeaderboard() {
         Map<String,Object> body = Map.of("leaderboard", buildLeaderboard());
         Message<Map<String,Object>> msg = new Message<>(200, "LeaderboardUpdate", body, Message.MessageType.RESPONSE);

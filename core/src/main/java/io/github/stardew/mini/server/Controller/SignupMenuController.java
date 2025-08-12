@@ -1,11 +1,10 @@
 package io.github.stardew.mini.server.Controller;
 
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.common.Model.Message;
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.client.View.SignupMenuView;
 import io.github.stardew.mini.server.ServerApp;
 
@@ -17,12 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SignupMenuController implements MenuController {
 SignupMenuView view;

@@ -3,47 +3,29 @@ package io.github.stardew.mini.client;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.google.gson.Gson;
-import io.github.stardew.mini.Model.*;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Things.*;
+import io.github.stardew.mini.common.Model.*;
+import io.github.stardew.mini.common.Model.ConfigTemplates.FarmTemplateManager;
+import io.github.stardew.mini.common.Model.Growables.*;
+import io.github.stardew.mini.common.Model.Things.FishType;
+import io.github.stardew.mini.common.Model.Things.ForagingMineralType;
 import io.github.stardew.mini.server.Controller.*;
-import com.google.gson.JsonObject;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.*;
-import io.github.stardew.mini.server.Controller.*;
-import com.google.gson.JsonObject;
-import io.github.stardew.mini.Model.ConfigTemplates.FarmTemplateManager;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.Things.FoodType;
-import io.github.stardew.mini.server.Controller.*;
-import io.github.stardew.mini.Model.Animals.AnimalProductType;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.Things.FoodType;
+import io.github.stardew.mini.common.Model.Animals.AnimalProductType;
 import io.github.stardew.mini.client.Assets.CropAssets;
-import io.github.stardew.mini.Model.Animals.AnimalType;
+import io.github.stardew.mini.common.Model.Animals.AnimalType;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
 import io.github.stardew.mini.client.Assets.ShopAssets;
 import io.github.stardew.mini.client.Assets.InventoryAssets;
 import io.github.stardew.mini.client.Assets.TreeAssets;
-import io.github.stardew.mini.Model.Growables.*;
-import io.github.stardew.mini.Model.MapManagement.TileType;
-import io.github.stardew.mini.Model.Menus.Menu;
-import io.github.stardew.mini.Model.NPCManagement.NPCtype;
-import io.github.stardew.mini.Model.Places.Habitat;
-import io.github.stardew.mini.Model.Reccepies.MachineType;
-import io.github.stardew.mini.Model.Reccepies.randomStuffType;
-import io.github.stardew.mini.Model.SaveGame.GameSaver;
-import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
-import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
-import io.github.stardew.mini.Model.User;
-import io.github.stardew.mini.Model.UserDatabase;
-import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
-import io.github.stardew.mini.client.View.*;
-import io.github.stardew.mini.server.ServerApp;
+import io.github.stardew.mini.common.Model.MapManagement.TileType;
+import io.github.stardew.mini.common.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.NPCManagement.NPCtype;
+import io.github.stardew.mini.common.Model.Places.Habitat;
+import io.github.stardew.mini.common.Model.Reccepies.MachineType;
+import io.github.stardew.mini.common.Model.Reccepies.randomStuffType;
+import io.github.stardew.mini.common.Model.SaveGame.GameSaver;
 import io.github.stardew.mini.client.View.*;
 
 import java.io.*;
@@ -52,15 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletableFuture;
 
 
 public class MainApp extends com.badlogic.gdx.Game {
     // Game instance (LibGDX-style singleton)
     private static MainApp instance;
     private static SpriteBatch batch;
-    private ArrayList<io.github.stardew.mini.Model.Game> activeGames = new ArrayList<>(); // Instead of new ArrayList<>()
-    private io.github.stardew.mini.Model.Game currentGame;
+    private ArrayList<Game> activeGames = new ArrayList<>(); // Instead of new ArrayList<>()
+    private Game currentGame;
     private GameView currentGameView;
     private ArrayList<User> users;
     //UserDatabase.loadUsers(); // we should delete this
@@ -146,7 +127,7 @@ public class MainApp extends com.badlogic.gdx.Game {
         for (MachineType machineType : MachineType.values()) {
             machineType.initTexture();
         }
-        for (io.github.stardew.mini.Model.Reccepies.randomStuffType randomStuffType : randomStuffType.values()) {
+        for (randomStuffType randomStuffType : randomStuffType.values()) {
             randomStuffType.initTexture();
         }
         for (AnimalProductType animalProductType : AnimalProductType.values()) {
@@ -255,12 +236,12 @@ public class MainApp extends com.badlogic.gdx.Game {
             e.printStackTrace();
         }
     }
-    private ArrayList<io.github.stardew.mini.Model.Game> loadActiveGames() {
+    private ArrayList<Game> loadActiveGames() {
         File file = new File("data/active_games.json.gz");
         if (!file.exists()) return new ArrayList<>();
 
         try {
-            List<io.github.stardew.mini.Model.Game> list = GameSaver.loadGames(file.getPath());
+            List<Game> list = GameSaver.loadGames(file.getPath());
             return new ArrayList<>(list);
         } catch (Exception e) {
             e.printStackTrace();
@@ -333,15 +314,15 @@ public class MainApp extends com.badlogic.gdx.Game {
         this.users = users;
     }
 
-    public io.github.stardew.mini.Model.Game getCurrentGame() {
+    public Game getCurrentGame() {
         return currentGame;
     }
 
-    public ArrayList<io.github.stardew.mini.Model.Game> getActiveGames() {
+    public ArrayList<Game> getActiveGames() {
         return activeGames;
     }
 
-    public void setCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
+    public void setCurrentGame(Game currentGame) {
         this.currentGame = currentGame;
     }
     public void setSecurityQuestions(List<String> securityQuestions) {
@@ -406,7 +387,7 @@ public class MainApp extends com.badlogic.gdx.Game {
 
 
 
-    public void getCurrentGame(io.github.stardew.mini.Model.Game currentGame) {
+    public void getCurrentGame(Game currentGame) {
         currentGame = currentGame;
     }
 
@@ -418,8 +399,8 @@ public class MainApp extends com.badlogic.gdx.Game {
         return securityQuestions;
     }
 
-    public io.github.stardew.mini.Model.Game getGameByUser(User user) {
-        for (io.github.stardew.mini.Model.Game game : activeGames) {
+    public Game getGameByUser(User user) {
+        for (Game game : activeGames) {
             if (game.hasUser(user)) return game;
         }
         return null;

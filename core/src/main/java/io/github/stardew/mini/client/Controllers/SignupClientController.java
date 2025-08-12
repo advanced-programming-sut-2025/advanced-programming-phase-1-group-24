@@ -1,6 +1,6 @@
 package io.github.stardew.mini.client.Controllers;
 
-import io.github.stardew.mini.Model.Message;
+import io.github.stardew.mini.common.Model.Message;
 import io.github.stardew.mini.client.NetworkClient;
 
 import java.util.HashMap;

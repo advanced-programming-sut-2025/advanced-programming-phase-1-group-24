@@ -3,7 +3,7 @@ package io.github.stardew.mini.client;
 import com.badlogic.gdx.Gdx;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import io.github.stardew.mini.Model.LobbyInfo;
+import io.github.stardew.mini.common.Model.LobbyInfo;
 import io.github.stardew.mini.client.View.LobbyMenuView;
 
 import java.lang.reflect.Type;

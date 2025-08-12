@@ -1,7 +1,7 @@
 package io.github.stardew.mini.client.View;
 
 import io.github.stardew.mini.client.MainApp;
-import io.github.stardew.mini.Model.Menus.Menu;
+import io.github.stardew.mini.common.Model.Menus.Menu;
 
 import java.util.Scanner;
 

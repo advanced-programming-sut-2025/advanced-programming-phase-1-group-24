@@ -14,8 +14,8 @@ import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.ProfileMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
-import io.github.stardew.mini.Model.Avatar;
-import io.github.stardew.mini.Model.Result;
+import io.github.stardew.mini.common.Model.Avatar;
+import io.github.stardew.mini.common.Model.Result;
 
 import java.util.Scanner;
 import java.util.function.Consumer;

@@ -2,7 +2,7 @@ package io.github.stardew.mini.client.View;
 
 
 import io.github.stardew.mini.server.Controller.TradeMenuController;
-import io.github.stardew.mini.Model.Menus.TradeMenuCommands;
+import io.github.stardew.mini.common.Model.Menus.TradeMenuCommands;
 
 import java.util.Scanner;
 import java.util.function.Consumer;

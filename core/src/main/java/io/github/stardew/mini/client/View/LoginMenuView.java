@@ -10,14 +10,13 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import io.github.stardew.mini.Model.Message;
 import io.github.stardew.mini.server.Controller.LoginMenuController;
 import io.github.stardew.mini.server.Controller.MainMenuController;
 import io.github.stardew.mini.server.Controller.SignupMenuController;
 import io.github.stardew.mini.client.MainApp;
 import io.github.stardew.mini.client.Assets.GameAssetManager;
-import io.github.stardew.mini.Model.Result;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.Result;
+import io.github.stardew.mini.common.Model.User;
 
 import java.util.Scanner;
 import java.util.function.Consumer;

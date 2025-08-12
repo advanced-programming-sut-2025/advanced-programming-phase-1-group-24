@@ -1,11 +1,10 @@
 package io.github.stardew.mini.server.Controller;
 
-import io.github.stardew.mini.Model.LobbyInfo;
-import io.github.stardew.mini.Model.Message;
-import io.github.stardew.mini.Model.User;
+import io.github.stardew.mini.common.Model.LobbyInfo;
+import io.github.stardew.mini.common.Model.Message;
+import io.github.stardew.mini.common.Model.User;
 import io.github.stardew.mini.server.Lobby;
 import io.github.stardew.mini.server.LobbyManager;
-import io.github.stardew.mini.server.AppSocket;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,7 +45,6 @@ public class LobbyController {
                                 boolean wasCreator = lobby.getCreator().getUsername().equals(user.getUsername());
                                 iterator.remove();
 
-                                // If the creator left and there are still players, assign new creator
                                 if (wasCreator && !lobby.getPlayers().isEmpty()) {
                                     lobby.setCreator(lobby.getPlayers().get(0));
                                 }
