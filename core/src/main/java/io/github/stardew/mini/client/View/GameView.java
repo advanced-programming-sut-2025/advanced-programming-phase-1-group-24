@@ -7050,7 +7050,7 @@ public class GameView implements Screen, InputProcessor, AppMenu, FishingMinigam
         stage.addActor(uploadButton);
     }
 
-    private void refreshTrackList() {
+    public void refreshTrackList() {
         String gameId = MainApp.getInstance().getCurrentGame().getNetworkId();
         MainApp.getInstance().getNetworkClient()
             .listTracks(gameId)

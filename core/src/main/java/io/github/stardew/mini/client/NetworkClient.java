@@ -319,6 +319,17 @@ public class NetworkClient extends WebSocketClient {
                     return;
                 }
 
+                if ("track-uploaded".equalsIgnoreCase(message.getType())) {
+                    Gdx.app.postRunnable(() -> {
+                        GameView view = MainApp.getInstance().getCurrentGameView();
+                        if (view != null) {
+                            view.refreshTrackList();
+                        }
+                    });
+                    return;
+                }
+
+
 
 //                if ("radio-update".equalsIgnoreCase(message.getType())) {
 //                    @SuppressWarnings("unchecked")
